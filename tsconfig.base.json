@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@sudokulab/api-interfaces": ["libs/api-interfaces/src/index.ts"]
+      "@sudokulab/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@sudokulab/model": ["libs/model/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

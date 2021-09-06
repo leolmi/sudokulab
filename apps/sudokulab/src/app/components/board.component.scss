@@ -1,0 +1,18 @@
+::ng-deep {
+  .light-theme {
+    .sudokulab-board-background {
+      background: whitesmoke;
+      color: #333;
+      height: 100%;
+    }
+  }
+}
+
+.sudokulab-board {
+  height: 600px;
+  .sudokulab-board-background {
+    background: #333;
+    color: whitesmoke;
+    height: 100%;
+  }
+}
