@@ -22,7 +22,7 @@ export class Sudoku {
 }
 
 export const consolidate = (sdk: Sudoku) => {
-  sdk.values = sdk.values || _repeat('0', sdk.rank * sdk.rank);
+  sdk.values = sdk.values || sdk.fixed || _repeat('0', sdk.rank * sdk.rank);
   sdk.fixed = sdk.fixed || _repeat('0', sdk.rank * sdk.rank);
   sdk.id = sdk.fixed;
 }

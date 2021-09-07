@@ -6,3 +6,16 @@ export enum SudokuSymmetry {
   doubleDiagonal = 'doubleDiagonal',
   central = 'central'
 }
+
+export enum PlaySudokuGroupType {
+  column = 'column',
+  row = 'row',
+  square = 'square'
+}
+
+export enum Algorithms {
+  oneCellForValue = 'OneCellForValue',
+  oneValueForCell = 'OneValueForCell',
+  tryNumber = 'TryNumber',
+  twins = 'Twins',
+}

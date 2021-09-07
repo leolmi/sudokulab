@@ -1,5 +1,24 @@
 <div class="sudokulab-board">
-  <div class="sudokulab-board-background">
-    {{(sudoku$|async)?.fixed}}
+  <div class="sudokulab-board-background"
+       fxLayout="column">
+    <div class="sudokulab-board-row"
+         *ngFor="let row of rows$|async"
+         fxLayout="row" fxLayoutAlign="start center">
+      <div class="sudokulab-board-cell"
+           *ngFor="let col of cols$|async">
+        <div class="cell-container"
+             [ngStyle]="cellStyle$|async"
+             (click)="select(col, row)"
+             fxLayout="row" fxLayoutAlign="center center"
+             *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
+             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
+          <div class="cell-value">{{cell?.value}}</div>
+          <div class="cell-available-values" *ngIf="!cell?.value && (playSudoku$|async)?.options?.showAvailables">
+            <div class="cell-available-value"
+                 *ngFor="let av of cell?.availables">{{av}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -12,9 +12,11 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^12.1.0",
+    "@angular/cdk": "^12.2.4",
     "@angular/common": "^12.1.0",
     "@angular/compiler": "^12.1.0",
     "@angular/core": "^12.1.0",
+    "@angular/flex-layout": "^12.0.0-beta.34",
     "@angular/forms": "^12.1.0",
     "@angular/platform-browser": "^12.1.0",
     "@angular/platform-browser-dynamic": "^12.1.0",
@@ -22,6 +24,9 @@
     "@nestjs/common": "^7.0.0",
     "@nestjs/core": "^7.0.0",
     "@nestjs/platform-express": "^7.0.0",
+    "@ngrx/effects": "^12.4.0",
+    "@ngrx/entity": "^12.4.0",
+    "@ngrx/store": "^12.4.0",
     "@nrwl/angular": "12.8.0",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
@@ -61,6 +66,7 @@
     "jest-preset-angular": "9.0.4",
     "prettier": "^2.3.1",
     "ts-jest": "27.0.3",
-    "typescript": "~4.3.5"
+    "typescript": "~4.3.5",
+    "eslint-plugin-ngrx": "^1.0.0"
   }
 }

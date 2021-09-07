@@ -36,6 +36,9 @@
     "model": {
       "tags": []
     },
+    "store": {
+      "tags": []
+    },
     "sudokulab": {
       "tags": []
     },

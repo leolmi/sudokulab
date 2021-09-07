@@ -1,4 +1,8 @@
 <div class='board-container'>
-  <sudokulab-board [sudoku]="sudoku"></sudokulab-board>
+  <sudokulab-board></sudokulab-board>
 </div>
-
+<div class="toolbar">
+  <button (click)='test()'>Test</button>
+  <button (click)='algorithm(ALGORITHMS.oneCellForValue)'>ALg 1</button>
+  <button (click)='algorithm(ALGORITHMS.oneValueForCell)'>ALg 2</button>
+</div>
