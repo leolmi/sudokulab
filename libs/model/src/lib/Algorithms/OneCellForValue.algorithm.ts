@@ -1,12 +1,17 @@
 import { Algorithm, PlayAlgorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
-import { find as _find } from 'lodash';
-import { Dictionary } from '@ngrx/entity';
+import { find as _find, keys as _keys } from 'lodash';
 import { checkAvailables } from '../../sudoku-helper';
 
 export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
 
+/**
+ * ALGORITMO
+ * Unica cella per valore
+ *
+ * all'interno di un gruppo esiste solo una cella per il valore
+ */
 export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm {
   constructor(a?: Partial<OneCellForValueAlgorithm>) {
     super(a);
@@ -20,25 +25,17 @@ export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm
     let ocid: string = '';
     let ocvl: string = '';
     const xg = _find(sdk.groups, (g) => {
-      const gks: Dictionary<string[]> = {};
-      g.cells.forEach(c => {
-        c.availables.forEach(av => {
-          const avs = `${av}`;
-          gks[avs] = gks[avs] || [];
-          (gks[avs] || []).push(c.id);
-        });
-      });
-
-      const ov = _find(gks, (vls, v) => {
+      const ov = _find(g?.availableOnCells||{}, (vls, v) => {
         ocvl = v;
-        return (vls || []).length === 1;
+        return _keys(vls || {}).length === 1;
       });
-      if (!!ov) ocid = ov[0]
+      if (!!ov) ocid = _keys(ov)[0];
       return !!ov
     });
 
     if (!!xg) {
-      sdk.cells[ocid].value = ocvl;
+      const cell = sdk.cells[ocid];
+      if (cell) cell.value = ocvl;
       checkAvailables(sdk);
     }
 

@@ -6,6 +6,12 @@ import { checkAvailables } from '../../sudoku-helper';
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
 
+/**
+ * ALGORITMO
+ * Unico valore per la cella
+ *
+ * all'interno di un gruppo la cella può contenere solo un valore
+ */
 export class OneValueForCellAlgorithm extends Algorithm implements PlayAlgorithm {
   constructor(a?: Partial<OneValueForCellAlgorithm>) {
     super(a);
@@ -16,7 +22,7 @@ export class OneValueForCellAlgorithm extends Algorithm implements PlayAlgorithm
   id: string;
   name: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    const cell = _find(sdk.cells, c => (c.availables||[]).length === 1);
+    const cell = _find(sdk.cells, c => (c?.availables || []).length === 1);
 
     if (!!cell) {
       cell.value = cell.availables[0];

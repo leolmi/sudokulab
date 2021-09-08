@@ -38,6 +38,8 @@
   &.fixed {
     font-weight: bold;
     color: yellowgreen;
+    user-select: none;
+    cursor: not-allowed;
   }
   &.selected {
     // outline: orangered;

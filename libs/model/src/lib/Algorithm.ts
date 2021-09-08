@@ -2,6 +2,8 @@ import { PlaySudoku } from './PlaySudoku';
 import { AlgorithmResult } from './AlgorithmResult';
 
 export interface PlayAlgorithm {
+  id: string;
+  name: string;
   apply: (sdk: PlaySudoku) => AlgorithmResult;
 }
 

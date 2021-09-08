@@ -21,6 +21,9 @@ export const applyAlgorithm = createAction(
   props<{ algorithm: string }>()
 );
 
+export const solveStep = createAction(
+  '[SudokuPlay] try do a new solve step'
+);
 
 
 

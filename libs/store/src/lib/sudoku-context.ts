@@ -18,6 +18,9 @@ export class SudokuContext extends SudokuFacade {
   applyAlgorithm(algorithm: string) {
     this._store.dispatch(SudokuActions.applyAlgorithm({ algorithm }));
   }
+  solveStep() {
+    this._store.dispatch(SudokuActions.solveStep());
+  }
 
   test() {
     this._store.dispatch(SudokuActions.test());

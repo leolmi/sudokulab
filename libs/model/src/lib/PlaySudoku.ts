@@ -3,6 +3,7 @@ import { PlaySudokuCell } from './PlaySudokuCell';
 import { PlaySudokuGroup } from './PlaySudokuGroup';
 import { PlaySudokuGroupType } from './enums';
 import { PlaySudokuOptions } from './PlaySudokuOptions';
+import { Dictionary } from '@ngrx/entity';
 
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
@@ -10,6 +11,7 @@ export class PlaySudoku {
     this.sudoku = undefined;
     this.cells = {};
     this.groups = {};
+    this.groupsForCell = {};
     Object.assign(this, ps || {});
     this.options = new PlaySudokuOptions(ps?.options);
     _loadSudoku(this);
@@ -17,8 +19,9 @@ export class PlaySudoku {
   id: string;
   options: PlaySudokuOptions;
   sudoku: Sudoku|undefined;
-  cells: { [id: string]: PlaySudokuCell };
-  groups: { [id: string]: PlaySudokuGroup };
+  cells: Dictionary<PlaySudokuCell>;
+  groups: Dictionary<PlaySudokuGroup>;
+  groupsForCell: Dictionary<(PlaySudokuGroup|undefined)[]>;
 }
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -62,10 +65,13 @@ const _loadSudoku = (ps: PlaySudoku) => {
       });
       ps.cells[cid] = cell;
       const gpos = Math.floor(r / grank) * grank + Math.floor(c / grank);
-      //const spos = ((r%grank) * grank) + c%grank;
-      ps.groups[groupId(PlaySudokuGroupType.row, r)].cells.push(cell);
-      ps.groups[groupId(PlaySudokuGroupType.column, c)].cells.push(cell);
-      ps.groups[groupId(PlaySudokuGroupType.square, gpos)].cells.push(cell);
+      ps.groupsForCell[cell.id] = [
+        ps.groups[groupId(PlaySudokuGroupType.row, r)],
+        ps.groups[groupId(PlaySudokuGroupType.column, c)],
+        ps.groups[groupId(PlaySudokuGroupType.square, gpos)]
+      ];
+      ps.groupsForCell[cell.id]?.forEach(g => g?.cells.push(cell));
     }
   }
+  console.log('PLAY SUDOKU', ps);
 }

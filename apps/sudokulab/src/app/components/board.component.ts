@@ -21,10 +21,7 @@ export class BoardComponent implements OnDestroy {
   constructor(private ele: ElementRef,
               private _sudoku: SudokuFacade) {
     this._destroy$ = new Subject<boolean>();
-    this.playSudoku$ = _sudoku.selectActiveSudoku$.pipe(
-      // tap(s => console.log('ACTIVE SUDOKU:', s)),
-      takeUntil(this._destroy$)
-    );
+    this.playSudoku$ = _sudoku.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
 
     this.rows$ = this.playSudoku$.pipe(map(s => Array(s?.sudoku?.rank||9).fill(0).map((x, i)=>i)));
     this.cols$ = this.playSudoku$.pipe(map(s => Array(s?.sudoku?.rank||9).fill(0).map((x, i)=>i)));

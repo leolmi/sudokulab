@@ -1,8 +1,13 @@
-<div class='board-container'>
+<div class="board-container">
   <sudokulab-board></sudokulab-board>
 </div>
 <div class="toolbar">
-  <button (click)='test()'>Test</button>
-  <button (click)='algorithm(ALGORITHMS.oneCellForValue)'>ALg 1</button>
-  <button (click)='algorithm(ALGORITHMS.oneValueForCell)'>ALg 2</button>
+  <button (click)="test()">Test</button>
+  <button (click)="step()">Solve step</button>
+  <div class="space"></div>
+  <button (click)="algorithm(ALGORITHMS.oneCellForValue)">1 cell x val</button>
+  <button (click)="algorithm(ALGORITHMS.oneValueForCell)">1 val x cell</button>
+  <button (click)="algorithm(ALGORITHMS.alignmentOnGroup)">alignment</button>
+  <button (click)="algorithm(ALGORITHMS.twins)">twins</button>
+  <button (click)="algorithm(ALGORITHMS.tryNumber)">try</button>
 </div>

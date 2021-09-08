@@ -7,5 +7,6 @@ export abstract class SudokuFacade {
   abstract loadSudoku(sudoku: Sudoku): void;
   abstract setActiveSudoku(id: string): void;
   abstract applyAlgorithm(algorithm: string): void;
+  abstract solveStep(): void;
   abstract test(): void;
 }

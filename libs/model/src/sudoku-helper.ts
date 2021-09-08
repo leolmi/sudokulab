@@ -1,10 +1,11 @@
 import { Sudoku } from './lib/Sudoku';
 import { ElementRef } from '@angular/core';
 import { getGroupRank, PlaySudoku } from './lib/PlaySudoku';
-import { forEach as _forEach, remove as _remove, values as _values, isEmpty as _isEmpty } from 'lodash';
+import { forEach as _forEach, isEmpty as _isEmpty, remove as _remove, values as _values, reduce as _reduce } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
-import { Algorithms } from './lib/enums';
+import { Algorithms, PlaySudokuCellAlignment } from './lib/enums';
 import {
+  AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
   OneValueForCellAlgorithm,
   TryNumberAlgorithm,
@@ -37,27 +38,54 @@ const _isValue = (v: string): boolean => (v||'')!=='';
 
 export const checkAvailables = (ps: PlaySudoku|undefined) => {
   _forEach(ps?.groups||{}, (g) => {
+    if (!g) return;
     const values: Dictionary<boolean> = {};
     g.cells.forEach(c => _isValue(c.value) ? values[c.value] = true : null);
     g.cells.forEach(c => _remove(c.availables, av => values[av] || _isValue(c.value)));
   });
+  _forEach(ps?.groups||{}, (g) => {
+    if (!g) return;
+    g.availableOnCells = {};
+    g.couples = [];
+    g.cells.forEach(c => {
+      c.availables.forEach(av => {
+        const avs = `${av}`;
+        g.availableOnCells[avs] = g.availableOnCells[avs] || {};
+        (g.availableOnCells[avs] || {})[c.id] = true;
+      });
+      if (c.availables.length === 2) g.couples.push(c);
+    });
+  });
 }
 
-const _algorithms: Dictionary<PlayAlgorithm> = {};
 
-const _getAlgorithmInstance = (alg: string): PlayAlgorithm|undefined => {
-  switch (alg) {
-    case Algorithms.oneCellForValue: return new OneCellForValueAlgorithm();
-    case Algorithms.oneValueForCell: return new OneValueForCellAlgorithm();
-    case Algorithms.tryNumber: return new TryNumberAlgorithm();
-    case Algorithms.twins: return new TwinsAlgorithm();
-    default: return undefined;
+const _algorithms: PlayAlgorithm[] = [];
+
+const _checkAlgorithms = () => {
+  if (_algorithms.length<1) {
+    _algorithms.push(
+      new OneCellForValueAlgorithm(),
+      new OneValueForCellAlgorithm(),
+      new AlignmentOnGroupAlgorithm(),
+      new TwinsAlgorithm(),
+      new TryNumberAlgorithm());
   }
 }
 
 export const getAlgorithms = () => {
-  if (_isEmpty(_algorithms)) {
-    _values(Algorithms).forEach(alg => _algorithms[alg] = _getAlgorithmInstance(alg))
-  }
+  _checkAlgorithms();
   return _algorithms;
+};
+
+export const getAlgorithm = (code: string): PlayAlgorithm|undefined => {
+  _checkAlgorithms();
+  return _algorithms.find(a => a.id === code);
+}
+
+export const getAlignment = (cid1: string, cid2: string): PlaySudokuCellAlignment => {
+  const id1 = cid1.split('.');
+  const id2 = cid2.split('.');
+  if (id1[0] === id2[0]) return PlaySudokuCellAlignment.vertical;
+  if (id1[1] === id2[1]) return PlaySudokuCellAlignment.horizontal;
+  return PlaySudokuCellAlignment.none;
 }
