@@ -43,6 +43,10 @@ export const setValue = createAction(
   props<{ value: string }>()
 )
 
+export const move = createAction(
+  '[SudokuPlay] move selection on direction',
+  props<{ direction: string }>()
+)
 
 
 export const test = createAction(

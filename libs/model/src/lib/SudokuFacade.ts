@@ -11,5 +11,6 @@ export abstract class SudokuFacade {
   abstract applyAlgorithm(algorithm: string): void;
   abstract solveStep(): void;
   abstract setValue(value: string): void;
+  abstract move(direction: string): void;
   abstract clear(): void;
 }

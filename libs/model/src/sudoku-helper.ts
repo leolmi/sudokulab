@@ -132,3 +132,7 @@ export const resetAvailables = (sdk: PlaySudoku|undefined) => {
     if (!!c) c.availables = c.value ? [] : getAvailables(sdk);
   });
 }
+
+export const isDirectionKey = (direction: string): boolean => {
+  return ['ArrowDown','ArrowUp','ArrowRight','ArrowLeft','Enter'].indexOf(direction)>-1;
+}

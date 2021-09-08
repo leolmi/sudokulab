@@ -39,6 +39,10 @@ export class SudokuContext extends SudokuFacade {
     this._store.dispatch(SudokuActions.clear());
   }
 
+  move(direction: string) {
+    this._store.dispatch(SudokuActions.move({ direction }));
+  }
+
   constructor(private _store: Store<SudokuStore>) {
     super();
   }

@@ -116,6 +116,18 @@ export class SudokuEffects {
     })
   ));
 
+  move$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.move),
+    switchMap((a) => {
+      if (!a?.direction) return [];
+      return [];
+
+      // TODO: determina l'id della cella destinazione dello spostamento
+      const id = '';
+      return [SudokuActions.setActiveCell({ id })];
+    })
+  ));
+
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>) {
   }
