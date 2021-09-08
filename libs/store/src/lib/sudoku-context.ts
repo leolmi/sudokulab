@@ -22,8 +22,8 @@ export class SudokuContext extends SudokuFacade {
     this._store.dispatch(SudokuActions.solveStep());
   }
 
-  test() {
-    this._store.dispatch(SudokuActions.test());
+  clear() {
+    this._store.dispatch(SudokuActions.clear());
   }
 
   constructor(private _store: Store<SudokuStore>) {

@@ -1,9 +1,9 @@
 import { Sudoku } from './lib/Sudoku';
 import { ElementRef } from '@angular/core';
-import { getGroupRank, PlaySudoku } from './lib/PlaySudoku';
-import { forEach as _forEach, isEmpty as _isEmpty, remove as _remove, values as _values, reduce as _reduce } from 'lodash';
+import { cellId, getGroupRank, PlaySudoku } from './lib/PlaySudoku';
+import { forEach as _forEach, remove as _remove } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
-import { Algorithms, PlaySudokuCellAlignment } from './lib/enums';
+import { PlaySudokuCellAlignment } from './lib/enums';
 import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
@@ -12,6 +12,10 @@ import {
   TwinsAlgorithm
 } from './lib/Algorithms';
 import { PlayAlgorithm } from './lib/Algorithm';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+
+export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
 export const getCellStyle = (sdk: Sudoku|undefined, ele: ElementRef): any => {
   const pxlw = sdk ? Math.floor(ele.nativeElement.parentElement.clientWidth / sdk.rank) : 40;
@@ -37,25 +41,40 @@ export const getLinesGroups = (sdk: Sudoku|undefined): {[id: number]: boolean} =
 const _isValue = (v: string): boolean => (v||'')!=='';
 
 export const checkAvailables = (ps: PlaySudoku|undefined) => {
-  _forEach(ps?.groups||{}, (g) => {
+  if (!ps) return;
+  _forEach(ps.groups || {}, (g) => {
     if (!g) return;
     const values: Dictionary<boolean> = {};
     g.cells.forEach(c => _isValue(c.value) ? values[c.value] = true : null);
     g.cells.forEach(c => _remove(c.availables, av => values[av] || _isValue(c.value)));
   });
-  _forEach(ps?.groups||{}, (g) => {
+  _forEach(ps.groups || {}, (g) => {
     if (!g) return;
     g.availableOnCells = {};
-    g.couples = [];
     g.cells.forEach(c => {
       c.availables.forEach(av => {
         const avs = `${av}`;
         g.availableOnCells[avs] = g.availableOnCells[avs] || {};
         (g.availableOnCells[avs] || {})[c.id] = true;
       });
-      if (c.availables.length === 2) g.couples.push(c);
     });
   });
+  ps.couples = {};
+  ps.state.valuesCount = 0;
+  ps.state.error = false;
+  _forEach(ps.cells || {}, (c) => {
+    if (!!c && c.availables.length === 2) {
+      const cpid = c.availables.join('|');
+      ps.couples[cpid] = ps.couples[cpid] || [];
+      (ps.couples[cpid] || []).push(c);
+    }
+    if (!!c?.value) ps.state.valuesCount++;
+    if (!!c) {
+      c.error = (c.availables.length < 1 && !c.value);
+      if (!!c.error) ps.state.error = true;
+    }
+  });
+  ps.state.percent = ((ps.state.valuesCount - ps.state.fixedCount) / (81 - ps.state.fixedCount)) * 100;
 }
 
 
@@ -88,4 +107,19 @@ export const getAlignment = (cid1: string, cid2: string): PlaySudokuCellAlignmen
   if (id1[0] === id2[0]) return PlaySudokuCellAlignment.vertical;
   if (id1[1] === id2[1]) return PlaySudokuCellAlignment.horizontal;
   return PlaySudokuCellAlignment.none;
+}
+
+export const getValues = (sdk: PlaySudoku|undefined): string => {
+  const rank = sdk?.sudoku?.rank||81;
+  let values = '';
+  for (let r = 0; r < rank; r++) {
+    for (let c = 0; c < rank; c++) {
+      values = `${values}${sdk?.cells[cellId(c, r)]?.value||'0'}`
+    }
+  }
+  return values;
+}
+
+export const getAvailables = (sdk: PlaySudoku|undefined): string[] => {
+  return Array(sdk?.sudoku?.rank||9).fill(0).map((x, i)=>`${(i+1)}`)
 }

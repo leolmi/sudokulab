@@ -11,6 +11,10 @@ export const loadSudoku = createAction(
   props<{ sudoku: Sudoku }>()
 );
 
+export const clear = createAction(
+  '[SudokuPlay] clear the sudoku'
+);
+
 export const updateSudoku = createAction(
   '[SudokuPlay] update active sudoku',
   props<{ changes: Partial<PlaySudoku> }>()
@@ -25,7 +29,9 @@ export const solveStep = createAction(
   '[SudokuPlay] try do a new solve step'
 );
 
-
+export const solve = createAction(
+  '[SudokuPlay] try solve sudoku'
+);
 
 
 

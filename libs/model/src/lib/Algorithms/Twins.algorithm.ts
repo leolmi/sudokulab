@@ -25,6 +25,9 @@ export class TwinsAlgorithm extends Algorithm implements PlayAlgorithm {
   id: string;
   name: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
+
+    sdk.couples
+
     // _forEach(sdk.groups, (g) => {
     //   const twins: Dictionary<PlaySudokuCell[]> = {};
     //   if ((g?.couples || []).length > 0) {

@@ -2,7 +2,7 @@ import { SudokuSymmetry } from './enums';
 import { SudokuSolution } from './SudokuSolution';
 
 export class SudokuInfo {
-  constructor(s?: SudokuInfo) {
+  constructor(s?: Partial<SudokuInfo>) {
     this.symmetry = SudokuSymmetry.central;
     this.difficulty = 0;
     this.solutions = [];

@@ -4,6 +4,8 @@ import { PlaySudokuGroup } from './PlaySudokuGroup';
 import { PlaySudokuGroupType } from './enums';
 import { PlaySudokuOptions } from './PlaySudokuOptions';
 import { Dictionary } from '@ngrx/entity';
+import { PlaySudokuState } from './PlaySudokuState';
+import { getAvailables } from '../sudoku-helper';
 
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
@@ -12,8 +14,10 @@ export class PlaySudoku {
     this.cells = {};
     this.groups = {};
     this.groupsForCell = {};
+    this.couples = {};
     Object.assign(this, ps || {});
     this.options = new PlaySudokuOptions(ps?.options);
+    this.state = new PlaySudokuState(ps?.state);
     _loadSudoku(this);
   }
   id: string;
@@ -22,6 +26,8 @@ export class PlaySudoku {
   cells: Dictionary<PlaySudokuCell>;
   groups: Dictionary<PlaySudokuGroup>;
   groupsForCell: Dictionary<(PlaySudokuGroup|undefined)[]>;
+  couples: Dictionary<PlaySudokuCell[]>;
+  state: PlaySudokuState;
 }
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -41,6 +47,8 @@ const _loadSudoku = (ps: PlaySudoku) => {
   if (!ps?.sudoku) return;
   ps.groups = {};
   ps.cells = {};
+  ps.state.fixedCount = 0;
+  ps.state.valuesCount = 0;
   // group rank (9 => 3)
   const grank = getGroupRank(ps.sudoku);
   // genera i gruppi
@@ -59,10 +67,13 @@ const _loadSudoku = (ps: PlaySudoku) => {
       const empty = !((fv || '0') !== '0' || (cv || '0') !== '0');
       const cell = new PlaySudokuCell({
         id: cid,
+        position: x,
         value: _getValue(cv),
         fixed: (fv || '0') !== '0',
-        availables: empty ? Array(ps.sudoku.rank||9).fill(0).map((x, i)=>`${(i+1)}`) : []
+        availables: empty ? getAvailables(ps) : []
       });
+      if (cell.fixed) ps.state.fixedCount++;
+      if (!!cell.value) ps.state.valuesCount++;
       ps.cells[cid] = cell;
       const gpos = Math.floor(r / grank) * grank + Math.floor(c / grank);
       ps.groupsForCell[cell.id] = [
@@ -73,5 +84,6 @@ const _loadSudoku = (ps: PlaySudoku) => {
       ps.groupsForCell[cell.id]?.forEach(g => g?.cells.push(cell));
     }
   }
+
   console.log('PLAY SUDOKU', ps);
 }

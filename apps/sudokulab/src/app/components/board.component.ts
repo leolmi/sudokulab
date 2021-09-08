@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy } from '@angular/core';
-import { cellId, getCellStyle, getLinesGroups, PlaySudoku, SudokuFacade } from '@sudokulab/model';
+import { cellId, getCellStyle, getLinesGroups, PlaySudoku, SudokuFacade, use } from '@sudokulab/model';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, takeUntil, tap } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'sudokulab-board',
@@ -32,6 +32,13 @@ export class BoardComponent implements OnDestroy {
 
   select(col: number, row: number) {
     this.selected$.next(cellId(col, row));
+  }
+
+  inputValue(e: any) {
+    use(this.selected$, sel => {
+      if (!sel) return;
+      console.log('VALUE', e);
+    });
   }
 
   ngOnDestroy() {

@@ -58,6 +58,9 @@
   &.right-line {
     border-right: 2px solid whitesmoke;
   }
+  &.error {
+    background-color: orangered !important;
+  }
 }
 
 .cell-available-values {

@@ -1,4 +1,4 @@
-<div class="sudokulab-board">
+<div class="sudokulab-board" (keyup)="inputValue($event)">
   <div class="sudokulab-board-background"
        fxLayout="column">
     <div class="sudokulab-board-row"
@@ -11,7 +11,7 @@
              (click)="select(col, row)"
              fxLayout="row" fxLayoutAlign="center center"
              *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
-             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
+             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row], 'error': cell.error}">
           <div class="cell-value">{{cell?.value}}</div>
           <div class="cell-available-values" *ngIf="!cell?.value && (playSudoku$|async)?.options?.showAvailables">
             <div class="cell-available-value"
