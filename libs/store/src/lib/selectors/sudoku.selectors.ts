@@ -26,3 +26,8 @@ export const selectActiveSudoku = createSelector(
   selectEntities,
   (state, entities): PlaySudoku|undefined => (entities||{})[state.active||'']
 )
+
+export const selectActiveCell = createSelector(
+  selectSudokus,
+  (state): string => state.activeCell
+)

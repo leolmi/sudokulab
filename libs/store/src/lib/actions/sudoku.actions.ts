@@ -6,6 +6,11 @@ export const setActiveSudoku = createAction(
   props<{ active: string }>()
 );
 
+export const setActiveCell = createAction(
+  '[SudokuPlay] set the active cell',
+  props<{ id: string }>()
+);
+
 export const loadSudoku = createAction(
   '[SudokuPlay] load a sudoku',
   props<{ sudoku: Sudoku }>()
@@ -33,6 +38,10 @@ export const solve = createAction(
   '[SudokuPlay] try solve sudoku'
 );
 
+export const setValue = createAction(
+  '[SudokuPlay] set value into cell',
+  props<{ value: string }>()
+)
 
 
 

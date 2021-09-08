@@ -9,17 +9,30 @@ import * as SudokuSelectors from './selectors';
 @Injectable()
 export class SudokuContext extends SudokuFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
+  selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
+
   setActiveSudoku(active: string) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
   }
+
+  setActiveCell(id: string) {
+    this._store.dispatch(SudokuActions.setActiveCell({ id }));
+  }
+
   loadSudoku(sudoku: Sudoku) {
     this._store.dispatch(SudokuActions.loadSudoku({ sudoku }));
   }
+
   applyAlgorithm(algorithm: string) {
     this._store.dispatch(SudokuActions.applyAlgorithm({ algorithm }));
   }
+
   solveStep() {
     this._store.dispatch(SudokuActions.solveStep());
+  }
+
+  setValue(value: string) {
+    this._store.dispatch(SudokuActions.setValue({ value }));
   }
 
   clear() {

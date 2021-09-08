@@ -8,8 +8,7 @@ import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
   OneValueForCellAlgorithm,
-  TryNumberAlgorithm,
-  TwinsAlgorithm
+  TryNumberAlgorithm
 } from './lib/Algorithms';
 import { PlayAlgorithm } from './lib/Algorithm';
 import { Observable } from 'rxjs';
@@ -86,7 +85,6 @@ const _checkAlgorithms = () => {
       new OneCellForValueAlgorithm(),
       new OneValueForCellAlgorithm(),
       new AlignmentOnGroupAlgorithm(),
-      new TwinsAlgorithm(),
       new TryNumberAlgorithm());
   }
 }
@@ -122,4 +120,15 @@ export const getValues = (sdk: PlaySudoku|undefined): string => {
 
 export const getAvailables = (sdk: PlaySudoku|undefined): string[] => {
   return Array(sdk?.sudoku?.rank||9).fill(0).map((x, i)=>`${(i+1)}`)
+}
+
+export const isValidValue = (sdk: PlaySudoku|undefined, value: string): boolean => {
+  console.log('VALID VALUE', value);
+  return (value.length === 1 && /[1-9a-fA-F]/g.test(value)) || ['Delete', ' '].indexOf(value)>-1;
+}
+
+export const resetAvailables = (sdk: PlaySudoku|undefined) => {
+  _forEach(sdk?.cells||{}, (c) => {
+    if (!!c) c.availables = c.value ? [] : getAvailables(sdk);
+  });
 }

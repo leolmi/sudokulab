@@ -5,12 +5,14 @@ import * as SudokuActions from '../actions';
 
 export interface SudokuState extends EntityState<PlaySudoku> {
   active: string;
+  activeCell: string;
 }
 
 export const adapter: EntityAdapter<PlaySudoku> = createEntityAdapter<PlaySudoku>();
 
 export const initialState: SudokuState = adapter.getInitialState({
-  active: ''
+  active: '',
+  activeCell: ''
 });
 
 const sudokuReducers = createReducer(
@@ -21,7 +23,8 @@ const sudokuReducers = createReducer(
     return adapter.upsertOne(psdk, state);
   }),
   on(SudokuActions.updateSudoku, (state, { changes }) => adapter.updateOne({ id: changes.id||'', changes }, state)),
-  on(SudokuActions.setActiveSudoku, (state, { active }) => ({ ...state, active }))
+  on(SudokuActions.setActiveSudoku, (state, { active }) => ({ ...state, active, activeCell:'' })),
+  on(SudokuActions.setActiveCell, (state, { id }) => ({ ...state, activeCell: id })),
 );
 
 export function reducer(state: SudokuState | undefined, action: Action) {

@@ -23,6 +23,5 @@ export enum Algorithms {
   oneCellForValue = 'OneCellForValue',
   oneValueForCell = 'OneValueForCell',
   alignmentOnGroup = 'AlignmentOnGroup',
-  tryNumber = 'TryNumber',
-  twins = 'Twins',
+  tryNumber = 'TryNumber'
 }

@@ -8,7 +8,7 @@ import { PlaySudokuCell } from '../PlaySudokuCell';
 export const TWINS_ALGORITHM = 'Twins';
 
 /**
- * ALGORITMO
+ * ALGORITMO (OBSOLETO)
  * Gemelli
  *
  * se all'interno di un gruppo due celle possono contenere la stessa coppia di valori

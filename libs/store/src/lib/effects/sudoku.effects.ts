@@ -11,8 +11,8 @@ import {
   checkAvailables,
   getAlgorithm,
   getAlgorithms,
-  getAvailables,
-  PlaySudoku
+  getAvailables, isValidValue,
+  PlaySudoku, resetAvailables
 } from '@sudokulab/model';
 
 
@@ -91,7 +91,30 @@ export class SudokuEffects {
 
       return [SudokuActions.updateSudoku({ changes })];
     })
-  ))
+  ));
+
+  setValue$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setValue),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku),
+      this._store.select(SudokuSelectors.selectActiveCell)),
+    filter(([a, sdk, cid]) => !!sdk && isValidValue(sdk, a.value)),
+    switchMap(([a, sdk, cid]) => {
+      const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
+      const cell = changes.cells[cid];
+      if (!cell || cell.fixed) return [];
+      let value = a.value;
+      if (value === 'Delete') value = '';
+      cell.value = (value||'').trim();
+      if (!cell.value) {
+        resetAvailables(changes);
+      } else {
+        cell.availables = [];
+      }
+      checkAvailables(changes);
+      return [SudokuActions.updateSudoku({ changes })];
+    })
+  ));
 
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>) {
