@@ -1,14 +1,22 @@
-<div class="board-container">
-  <sudokulab-board></sudokulab-board>
+<div class="container" fxLayout="column">
+  <div class="top-toolbar"></div>
+  <div class="central-container" fxLayout="row" fxFlex>
+    <div class="tools tools-left" fxFlex>
+      <sudokulab-info></sudokulab-info>
+    </div>
+    <div class="board-container" fxLayout="column">
+      <div class="board">
+        <sudokulab-board></sudokulab-board>
+      </div>
+      <div class="bottom-board" fxFlex></div>
+    </div>
+    <div class="tools tools-right" fxFlex>
+      <sudokulab-schemas></sudokulab-schemas>
+    </div>
+  </div>
+  <div class="bottom-toolbar" fxLayout="row" fxLayoutAlign="start center">
+    <button mat-raised-button (click)="clear()">Clear</button>
+    <button mat-raised-button (click)="step()">Solve step</button>
+    <button mat-raised-button (click)="solve()">Solve all</button>
+  </div>
 </div>
-<div class="toolbar">
-  <button mat-raised-button (click)="clear()">Clear</button>
-  <button mat-raised-button (click)="step()">Solve step</button>
-  <button mat-raised-button (click)="solve()">Solve all</button>
-<!--  <div class="space"></div>-->
-<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.oneCellForValue)">1 cell x val</button>-->
-<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.oneValueForCell)">1 val x cell</button>-->
-<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.alignmentOnGroup)">alignment</button>-->
-<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.tryNumber)">try</button>-->
-</div>
-<div class="sudoku-state">completition: {{state$|async}}</div>

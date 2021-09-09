@@ -1,0 +1,8 @@
+<div class="schemalab-tool" fxLayout="column">
+  <div class="schema-item"
+       (click)="select(schema)"
+       *ngFor="let schema of schemas$|async"
+       fxLayout="row" fxLayoutAlign="start center">
+    <div class="schema">{{schema.fixed}}</div>
+  </div>
+</div>

@@ -144,3 +144,8 @@ export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): So
     return new SolveStepResult(ps, result);
   });
 }
+
+export const getDifficulty = (algs: AlgorithmResult[]): string => {
+
+  return 'HIGH';
+}

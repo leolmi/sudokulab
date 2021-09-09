@@ -1,21 +1,34 @@
-:host {
-  display: block;
-  font-family: sans-serif;
-  min-width: 300px;
-  max-width: 600px;
-  margin: 50px auto;
+.container {
+  width: 100%;
+  height: 100%;
 }
 
-.space {
-  display: inline-block;
-  width: 20px;
+.top-toolbar {
+  // background-color: yellowgreen;
+  height: 60px;
 }
 
-.toolbar {
-  margin-top: 10px;
+.tools {
+  // background-color: bisque;
+  //min-width: 400px;
 }
 
-.sudoku-state {
-  padding: 8px 0;
-  font-weight: bold;
+.board {
+  width: 600px;
+  height: 600px;
+  position: relative;
+}
+
+.bottom-toolbar {
+  height: 60px;
+}
+
+::ng-deep {
+  .sudokulab-board {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+  }
 }

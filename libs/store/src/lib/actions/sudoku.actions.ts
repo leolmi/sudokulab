@@ -43,6 +43,11 @@ export const solve = createAction(
   '[SudokuPlay] try solve sudoku'
 );
 
+export const analyze = createAction(
+  '[SudokuPlay] analyze sudoku'
+);
+
+
 export const setValue = createAction(
   '[SudokuPlay] set value into cell',
   props<{ value: string }>()

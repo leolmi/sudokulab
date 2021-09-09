@@ -1,0 +1,6 @@
+<div class="schemalab-tool sudoku-info">
+  <div *ngIf="!!(info$|async)" fxLayout="column">
+    <div class="info-property" fxLayout="row">unique: {{(info$|async)?.unique}}</div>
+    <div class="info-property" fxLayout="row">difficulty: {{(difficulty$|async)}}</div>
+  </div>
+</div>

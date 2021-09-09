@@ -1,16 +1,16 @@
 import { SudokuSymmetry } from './enums';
-import { SudokuSolution } from './SudokuSolution';
+import { AlgorithmResult } from './AlgorithmResult';
 
 export class SudokuInfo {
   constructor(s?: Partial<SudokuInfo>) {
-    this.symmetry = SudokuSymmetry.central;
+    this.symmetry = SudokuSymmetry.none;
     this.unique = false;
-    this.difficulty = 0;
-    this.solutions = [];
+    this.difficulty = '';
+    this.algorithms = [];
     Object.assign(this, s || {});
   }
   symmetry: SudokuSymmetry;
-  difficulty: number;
+  difficulty: string;
   unique: boolean;
-  solutions: SudokuSolution[];
+  algorithms: AlgorithmResult[];
 }

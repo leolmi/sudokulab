@@ -20,9 +20,11 @@ import {
   PlaySudoku,
   resetAvailables,
   Solver,
-  solveStep,
+  solveStep, Sudoku, SudokuInfo,
   SudokuMessage
 } from '@sudokulab/model';
+import { analyze } from '../actions';
+import { SudokuSolution } from '../../../../model/src/lib/SudokuSolution';
 
 
 @Injectable()
@@ -59,6 +61,30 @@ export class SudokuEffects {
     })
   ));
 
+  analyze$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.analyze),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    switchMap(([a, sdk]) => {
+      if (!sdk) return [];
+      const solver = new Solver(sdk);
+      const result = solver.solve();
+      const info = new SudokuInfo();
+      if (result.unique) {
+        info.unique = true;
+        info.algorithms = result.unique.algorithms;
+        const sudoku: Sudoku = <Sudoku>_clone(result.unique.sdk.sudoku);
+        sudoku.info = info;
+        return [SudokuActions.updateSudoku({ changes: { sudoku } })];
+      } else if (result.multiple) {
+        const sudoku: Sudoku = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
+        sudoku.info = info;
+        return [SudokuActions.updateSudoku({ changes: { sudoku } })];
+      } else {
+        return [];
+      }
+    })
+  ));
+
   solve$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.solve),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
@@ -66,17 +92,20 @@ export class SudokuEffects {
       if (!sdk) return [];
       const solver = new Solver(sdk);
       let message: SudokuMessage;
+      const info = new SudokuInfo();
       const result = solver.solve();
       if (result.unique) {
         message = new SudokuMessage({
           message: 'Sudoku successfully solved!',
           type: MessageType.success
         });
+        info.unique = true;
+        info.algorithms = result.unique.algorithms;
+        if (!!result.unique.sdk.sudoku) result.unique.sdk.sudoku.info = info;
         return [
           SudokuActions.updateSudoku({ changes: result.unique.sdk }),
           SudokuActions.setActiveMessage({ message })];
-      }
-      if (result.multiple) {
+      } else if (result.multiple) {
         message = new SudokuMessage({
           message: 'Sudoku has multiple results!',
           type: MessageType.warning

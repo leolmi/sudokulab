@@ -1,8 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
-
-import { Message } from '@sudokulab/api-interfaces';
-
+import { Message, Schema } from '@sudokulab/api-interfaces';
 import { AppService } from './app.service';
+
 
 @Controller()
 export class AppController {
@@ -11,5 +10,10 @@ export class AppController {
   @Get('hello')
   getData(): Message {
     return this.appService.getData();
+  }
+
+  @Get('schemas')
+  getSchemas(): Schema[] {
+    return this.appService.getSchemas();
   }
 }
