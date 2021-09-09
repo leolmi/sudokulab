@@ -5,7 +5,7 @@ import { PlaySudokuGroupType } from './enums';
 import { PlaySudokuOptions } from './PlaySudokuOptions';
 import { Dictionary } from '@ngrx/entity';
 import { PlaySudokuState } from './PlaySudokuState';
-import { getAvailables } from '../sudoku-helper';
+import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku-helper';
 
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
@@ -29,12 +29,6 @@ export class PlaySudoku {
   couples: Dictionary<PlaySudokuCell[]>;
   state: PlaySudokuState;
 }
-
-export const cellId = (column: number, row: number) => `${column}.${row}`;
-
-export const groupId = (type: PlaySudokuGroupType, pos: number) => `${type}.${pos}`;
-
-export const getGroupRank = (sdk: Sudoku|undefined): number => Math.sqrt(sdk?.rank||9);
 
 const _addGroup = (ps: PlaySudoku, type: PlaySudokuGroupType, pos: number) => {
   const gid = groupId(type, pos);

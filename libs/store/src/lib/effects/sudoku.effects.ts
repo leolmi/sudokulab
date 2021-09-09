@@ -5,14 +5,23 @@ import { SudokuStore } from '../sudoku-store';
 import * as SudokuActions from '../actions';
 import * as SudokuSelectors from '../selectors';
 import { filter, switchMap, withLatestFrom } from 'rxjs/operators';
-import { cloneDeep as _clone, forEach as _forEach } from 'lodash';
+import { cloneDeep as _clone } from 'lodash';
 import {
-  AlgorithmResult,
+  Algorithms,
+  applyAlgorithm,
+  AVAILABLE_DIRECTIONS,
+  cellId,
   checkAvailables,
-  getAlgorithm,
-  getAlgorithms,
-  getAvailables, isValidValue,
-  PlaySudoku, resetAvailables
+  clear,
+  decodeCellId,
+  isValidValue,
+  MessageType,
+  MoveDirection,
+  PlaySudoku,
+  resetAvailables,
+  Solver,
+  solveStep,
+  SudokuMessage
 } from '@sudokulab/model';
 
 
@@ -22,16 +31,10 @@ export class SudokuEffects {
   applyAlgorithm$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.applyAlgorithm),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
-    filter(([a, sdk]) => !!sdk),
     switchMap(([a, sdk]) => {
-      const changes = _clone(sdk||{});
-      const alg = getAlgorithm(a.algorithm);
-      if (!alg) {
-        console.warn(`Algorithm "${a.algorithm}" not found!`)
-        return [];
-      }
-      const result = alg.apply(<PlaySudoku>changes);
-      if (!result.applied) return [];
+      if (!sdk) return [];
+      const changes = applyAlgorithm(sdk, a.algorithm);
+      if (!changes) return [];
       return [SudokuActions.updateSudoku({ changes })];
     })
   ));
@@ -39,16 +42,9 @@ export class SudokuEffects {
   clear$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.clear),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
-    filter(([a, sdk]) => !!sdk),
     switchMap(([a, sdk]) => {
-      const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
-      _forEach(changes?.cells || {}, (c) => {
-        if (!!c) {
-          c.value = (c.fixed ? c.value : '');
-          if (!c.fixed) c.availables = getAvailables(changes);
-        }
-      });
-      checkAvailables(changes);
+      if (!sdk) return [];
+      const changes = clear(sdk);
       return [SudokuActions.updateSudoku({ changes })];
     })
   ));
@@ -56,40 +52,45 @@ export class SudokuEffects {
   solveStep$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.solveStep),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
-    filter(([a, sdk]) => !!sdk),
     switchMap(([a, sdk]) => {
-      if (sdk?.state.error) {
-        console.warn('No algorithm can be applied!');
-        return [];
-      }
-      const changes = _clone(sdk||{});
-      let result: AlgorithmResult|undefined = undefined;
-      const algorithm = getAlgorithms().find(alg => {
-        result = alg?.apply(<PlaySudoku>changes);
-        return result?.applied;
-      });
-      if (!algorithm) {
-        console.warn('No algorithm has been applied!');
-        return [];
-      } else {
-        console.log(`Algorithm "${algorithm.name}" successfully applied`, result);
-      }
-      return [SudokuActions.updateSudoku({ changes })];
+      const result = solveStep(sdk, [Algorithms.tryNumber]);
+      if (!result) return [];
+      return [SudokuActions.updateSudoku({ changes: result.sdk })];
     })
   ));
 
   solve$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.solve),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
-    filter(([a, sdk]) => !!sdk),
     switchMap(([a, sdk]) => {
-      console.log('SOLVE SUDOKU', sdk);
-      const changes = _clone(sdk||{});
-
-      // TODO......
-      if (true) return [];
-
-      return [SudokuActions.updateSudoku({ changes })];
+      if (!sdk) return [];
+      const solver = new Solver(sdk);
+      let message: SudokuMessage;
+      const result = solver.solve();
+      if (result.unique) {
+        message = new SudokuMessage({
+          message: 'Sudoku successfully solved!',
+          type: MessageType.success
+        });
+        return [
+          SudokuActions.updateSudoku({ changes: result.unique.sdk }),
+          SudokuActions.setActiveMessage({ message })];
+      }
+      if (result.multiple) {
+        message = new SudokuMessage({
+          message: 'Sudoku has multiple results!',
+          type: MessageType.warning
+        });
+        console.warn(message.message, result.multiple);
+        return [
+          SudokuActions.updateSudoku({ changes: result.multiple[0].sdk }),
+          SudokuActions.setActiveMessage({ message })];
+      }
+      message = new SudokuMessage({
+        message: 'Sudoku has no valid result!',
+        type: MessageType.error
+      });
+      return [SudokuActions.setActiveMessage({ message })];
     })
   ));
 
@@ -118,13 +119,47 @@ export class SudokuEffects {
 
   move$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.move),
-    switchMap((a) => {
-      if (!a?.direction) return [];
-      return [];
-
-      // TODO: determina l'id della cella destinazione dello spostamento
-      const id = '';
-      return [SudokuActions.setActiveCell({ id })];
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku),
+      this._store.select(SudokuSelectors.selectActiveCell)),
+    switchMap(([a, sdk, cell]) => {
+      if (!a?.direction || !cell || !sdk) return [];
+      const info = decodeCellId(cell);
+      if (info.row < 0 || info.col < 0) return [];
+      const rank = sdk?.sudoku?.rank||9;
+      switch (AVAILABLE_DIRECTIONS[a.direction]||MoveDirection.next) {
+        case MoveDirection.up:
+          if (info.row <= 0) return [];
+          info.row--;
+          break;
+        case MoveDirection.down:
+          if (info.row >= rank - 1) return [];
+          info.row++;
+          break;
+        case MoveDirection.left:
+          if (info.col <= 0) return [];
+          info.col--;
+          break;
+        case MoveDirection.right:
+          if (info.col >= rank - 1) return [];
+          info.col++;
+          break;
+        case MoveDirection.next:
+        default:
+          if (info.col === rank - 1) {
+            if (info.row === rank - 1) {
+              info.col = 0;
+              info.row = 0;
+            } else {
+              info.row++;
+              info.col = 0;
+            }
+          } else {
+            info.col ++;
+          }
+          break;
+      }
+      return [SudokuActions.setActiveCell({ id: cellId(info.col, info.row) })];
     })
   ));
 

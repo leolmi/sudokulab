@@ -1,9 +1,10 @@
 import { Algorithm, PlayAlgorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
-import { head as _head, values as _values, minBy as _minBy } from 'lodash';
+import { head as _head, values as _values, minBy as _minBy, cloneDeep as _clone } from 'lodash';
 import { Sudoku } from '../Sudoku';
-import { checkAvailables, getValues } from '../../sudoku-helper';
+import { checkAvailables } from '../logic';
+import { getValues } from '../../sudoku-helper';
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 
@@ -29,15 +30,15 @@ export class TryNumberAlgorithm extends Algorithm implements PlayAlgorithm {
     const minc = _minBy(_values(sdk.cells), (c) => c?.availables.length||100);
     const cases: Sudoku[] = [];
     if (minc) {
-      minc.availables.forEach((av, index) => {
+      const minvalues = _clone(minc.availables);
+      const values = getValues(sdk);
+      minvalues.forEach((av, index) => {
         if (index===0) {
           minc.value = av;
           checkAvailables(sdk);
         } else {
-          let values = getValues(sdk);
-          values = values.substr(0, minc.position) + av + values.substr(minc.position + 1);
           cases.push(new Sudoku({
-            values,
+            values: values.substr(0, minc.position) + av + values.substr(minc.position + 1),
             rank: sdk.sudoku?.rank,
             fixed: sdk.sudoku?.fixed
           }))

@@ -1,9 +1,8 @@
 import { Sudoku } from './lib/Sudoku';
 import { ElementRef } from '@angular/core';
-import { cellId, getGroupRank, PlaySudoku } from './lib/PlaySudoku';
-import { forEach as _forEach, remove as _remove } from 'lodash';
-import { Dictionary } from '@ngrx/entity';
-import { PlaySudokuCellAlignment } from './lib/enums';
+import { PlaySudoku } from './lib/PlaySudoku';
+import { forEach as _forEach, keys as _keys, includes as _includes } from 'lodash';
+import { PlaySudokuCellAlignment, PlaySudokuGroupType } from './lib/enums';
 import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
@@ -13,8 +12,21 @@ import {
 import { PlayAlgorithm } from './lib/Algorithm';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { CellInfo } from './lib/CellInfo';
+import { AVAILABLE_DIRECTIONS } from './lib/consts';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
+
+export const cellId = (column: number, row: number) => `${column}.${row}`;
+
+export const decodeCellId = (id: string): CellInfo => {
+  const parts = (id || '').split('.');
+  return new CellInfo(parseInt(parts[0] || '-1', 10), parseInt(parts[1] || '-1'));
+}
+
+export const groupId = (type: PlaySudokuGroupType, pos: number) => `${type}.${pos}`;
+
+export const getGroupRank = (sdk: Sudoku|undefined): number => Math.sqrt(sdk?.rank||9);
 
 export const getCellStyle = (sdk: Sudoku|undefined, ele: ElementRef): any => {
   const pxlw = sdk ? Math.floor(ele.nativeElement.parentElement.clientWidth / sdk.rank) : 40;
@@ -37,46 +49,6 @@ export const getLinesGroups = (sdk: Sudoku|undefined): {[id: number]: boolean} =
   return res;
 }
 
-const _isValue = (v: string): boolean => (v||'')!=='';
-
-export const checkAvailables = (ps: PlaySudoku|undefined) => {
-  if (!ps) return;
-  _forEach(ps.groups || {}, (g) => {
-    if (!g) return;
-    const values: Dictionary<boolean> = {};
-    g.cells.forEach(c => _isValue(c.value) ? values[c.value] = true : null);
-    g.cells.forEach(c => _remove(c.availables, av => values[av] || _isValue(c.value)));
-  });
-  _forEach(ps.groups || {}, (g) => {
-    if (!g) return;
-    g.availableOnCells = {};
-    g.cells.forEach(c => {
-      c.availables.forEach(av => {
-        const avs = `${av}`;
-        g.availableOnCells[avs] = g.availableOnCells[avs] || {};
-        (g.availableOnCells[avs] || {})[c.id] = true;
-      });
-    });
-  });
-  ps.couples = {};
-  ps.state.valuesCount = 0;
-  ps.state.error = false;
-  _forEach(ps.cells || {}, (c) => {
-    if (!!c && c.availables.length === 2) {
-      const cpid = c.availables.join('|');
-      ps.couples[cpid] = ps.couples[cpid] || [];
-      (ps.couples[cpid] || []).push(c);
-    }
-    if (!!c?.value) ps.state.valuesCount++;
-    if (!!c) {
-      c.error = (c.availables.length < 1 && !c.value);
-      if (!!c.error) ps.state.error = true;
-    }
-  });
-  ps.state.percent = ((ps.state.valuesCount - ps.state.fixedCount) / (81 - ps.state.fixedCount)) * 100;
-}
-
-
 const _algorithms: PlayAlgorithm[] = [];
 
 const _checkAlgorithms = () => {
@@ -89,9 +61,9 @@ const _checkAlgorithms = () => {
   }
 }
 
-export const getAlgorithms = () => {
+export const getAlgorithms = (exclude: string[] = []) => {
   _checkAlgorithms();
-  return _algorithms;
+  return _algorithms.filter(a => !_includes(exclude, a.id));
 };
 
 export const getAlgorithm = (code: string): PlayAlgorithm|undefined => {
@@ -134,5 +106,5 @@ export const resetAvailables = (sdk: PlaySudoku|undefined) => {
 }
 
 export const isDirectionKey = (direction: string): boolean => {
-  return ['ArrowDown','ArrowUp','ArrowRight','ArrowLeft','Enter'].indexOf(direction)>-1;
+  return _keys(AVAILABLE_DIRECTIONS).indexOf(direction)>-1;
 }

@@ -1,6 +1,8 @@
 export * from './lib/enums';
 export * from './lib/consts';
+export * from './lib/CellInfo';
 export * from './lib/Sudoku';
+export * from './lib/SudokuMessage';
 export * from './lib/SudokuOptions';
 export * from './lib/SudokuInfo';
 export * from './lib/Algorithm';
@@ -14,4 +16,5 @@ export * from './lib/PlaySudokuOptions';
 
 
 export * from './sudoku-helper';
+export * from './lib/logic';
 export * from './lib/SudokuFacade';

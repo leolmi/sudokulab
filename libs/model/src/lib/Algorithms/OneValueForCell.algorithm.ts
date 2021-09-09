@@ -2,7 +2,7 @@ import { Algorithm, PlayAlgorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { find as _find } from 'lodash';
-import { checkAvailables } from '../../sudoku-helper';
+import { checkAvailables } from '../logic';
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
 

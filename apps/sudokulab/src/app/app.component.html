@@ -2,12 +2,13 @@
   <sudokulab-board></sudokulab-board>
 </div>
 <div class="toolbar">
-  <button (click)="clear()">Clear</button>
-  <button (click)="step()">Solve step</button>
-  <div class="space"></div>
-  <button (click)="algorithm(ALGORITHMS.oneCellForValue)">1 cell x val</button>
-  <button (click)="algorithm(ALGORITHMS.oneValueForCell)">1 val x cell</button>
-  <button (click)="algorithm(ALGORITHMS.alignmentOnGroup)">alignment</button>
-  <button (click)="algorithm(ALGORITHMS.tryNumber)">try</button>
+  <button mat-raised-button (click)="clear()">Clear</button>
+  <button mat-raised-button (click)="step()">Solve step</button>
+  <button mat-raised-button (click)="solve()">Solve all</button>
+<!--  <div class="space"></div>-->
+<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.oneCellForValue)">1 cell x val</button>-->
+<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.oneValueForCell)">1 val x cell</button>-->
+<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.alignmentOnGroup)">alignment</button>-->
+<!--  <button mat-raised-button (click)="algorithm(ALGORITHMS.tryNumber)">try</button>-->
 </div>
 <div class="sudoku-state">completition: {{state$|async}}</div>

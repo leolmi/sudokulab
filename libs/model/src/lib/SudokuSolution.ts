@@ -1,9 +1,9 @@
-import { Algorithm } from './Algorithm';
+import { AlgorithmResult } from './AlgorithmResult';
+import { PlaySudoku } from './PlaySudoku';
 
 export class SudokuSolution {
-  constructor(s?: Partial<SudokuSolution>) {
+  constructor(public sdk: PlaySudoku) {
     this.algorithms = [];
-    Object.assign(this, s || {});
   }
-  algorithms: Algorithm[];
+  algorithms: AlgorithmResult[];
 }

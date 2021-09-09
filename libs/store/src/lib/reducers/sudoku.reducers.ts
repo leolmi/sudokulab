@@ -1,4 +1,4 @@
-import { checkAvailables, PlaySudoku } from '@sudokulab/model';
+import { checkAvailables, PlaySudoku, SudokuMessage } from '@sudokulab/model';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { Action, createReducer, on } from '@ngrx/store';
 import * as SudokuActions from '../actions';
@@ -6,13 +6,15 @@ import * as SudokuActions from '../actions';
 export interface SudokuState extends EntityState<PlaySudoku> {
   active: string;
   activeCell: string;
+  message?: SudokuMessage;
 }
 
 export const adapter: EntityAdapter<PlaySudoku> = createEntityAdapter<PlaySudoku>();
 
 export const initialState: SudokuState = adapter.getInitialState({
   active: '',
-  activeCell: ''
+  activeCell: '',
+  message: undefined
 });
 
 const sudokuReducers = createReducer(
@@ -25,6 +27,7 @@ const sudokuReducers = createReducer(
   on(SudokuActions.updateSudoku, (state, { changes }) => adapter.updateOne({ id: changes.id||'', changes }, state)),
   on(SudokuActions.setActiveSudoku, (state, { active }) => ({ ...state, active, activeCell:'' })),
   on(SudokuActions.setActiveCell, (state, { id }) => ({ ...state, activeCell: id })),
+  on(SudokuActions.setActiveMessage, (state, { message }) => ({ ...state, message }))
 );
 
 export function reducer(state: SudokuState | undefined, action: Action) {

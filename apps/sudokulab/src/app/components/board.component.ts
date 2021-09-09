@@ -1,5 +1,12 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
-import { cellId, getCellStyle, getLinesGroups, isDirectionKey, PlaySudoku, SudokuFacade } from '@sudokulab/model';
+import {
+  cellId,
+  getCellStyle,
+  getLinesGroups,
+  isDirectionKey,
+  PlaySudoku,
+  SudokuFacade
+} from '@sudokulab/model';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
@@ -36,6 +43,8 @@ export class BoardComponent implements OnDestroy {
   keyEvent(e: KeyboardEvent) {
     if (isDirectionKey(e?.key)) {
       this._sudoku.move(e?.key);
+      e.stopPropagation();
+      e.preventDefault();
     } else {
       this._sudoku.setValue(e?.key);
     }

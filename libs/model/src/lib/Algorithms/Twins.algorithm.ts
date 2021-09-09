@@ -1,9 +1,6 @@
 import { Algorithm, PlayAlgorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
-import { forEach as _forEach, isEqual as _isEqual } from 'lodash';
-import { Dictionary } from '@ngrx/entity';
-import { PlaySudokuCell } from '../PlaySudokuCell';
 
 export const TWINS_ALGORITHM = 'Twins';
 

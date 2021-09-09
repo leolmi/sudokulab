@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PlaySudoku, Sudoku, SudokuFacade } from '@sudokulab/model';
+import { PlaySudoku, Sudoku, SudokuFacade, SudokuMessage } from '@sudokulab/model';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
 import { Observable } from 'rxjs';
@@ -10,6 +10,7 @@ import * as SudokuSelectors from './selectors';
 export class SudokuContext extends SudokuFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
+  selectActiveMessage$: Observable<SudokuMessage|undefined> = this._store.select(SudokuSelectors.selectActiveMessage);
 
   setActiveSudoku(active: string) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
@@ -31,6 +32,10 @@ export class SudokuContext extends SudokuFacade {
     this._store.dispatch(SudokuActions.solveStep());
   }
 
+  solve() {
+    this._store.dispatch(SudokuActions.solve());
+  }
+
   setValue(value: string) {
     this._store.dispatch(SudokuActions.setValue({ value }));
   }
@@ -41,6 +46,10 @@ export class SudokuContext extends SudokuFacade {
 
   move(direction: string) {
     this._store.dispatch(SudokuActions.move({ direction }));
+  }
+
+  raiseMessage(message: SudokuMessage) {
+    this._store.dispatch(SudokuActions.setActiveMessage({ message }));
   }
 
   constructor(private _store: Store<SudokuStore>) {

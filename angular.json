@@ -134,7 +134,7 @@
               "apps/sudokulab/src/favicon.ico",
               "apps/sudokulab/src/assets"
             ],
-            "styles": ["apps/sudokulab/src/styles.scss"],
+            "styles": ["./node_modules/@angular/material/prebuilt-themes/indigo-pink.css", "apps/sudokulab/src/styles.scss"],
             "scripts": []
           },
           "configurations": {

@@ -25,3 +25,18 @@ export enum Algorithms {
   alignmentOnGroup = 'AlignmentOnGroup',
   tryNumber = 'TryNumber'
 }
+
+export enum MoveDirection {
+  up = 'up',
+  down = 'down',
+  right = 'right',
+  left = 'left',
+  next = 'next'
+}
+
+export enum MessageType {
+  info = 'info',
+  success = 'success',
+  warning = 'warning',
+  error = 'error'
+}
