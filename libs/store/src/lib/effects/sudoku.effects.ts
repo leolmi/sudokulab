@@ -68,6 +68,11 @@ export class SudokuEffects {
     switchMap(([a, sdk]) => {
       if (!sdk) return [];
       const solver = new Solver(sdk);
+      const message = solver.check();
+      if (!!message)
+        return [SudokuActions.setActiveMessage({
+          message: new SudokuMessage({message, type: MessageType.warning
+        })})];
       const result = solver.solve();
       const info = new SudokuInfo();
       if (result.unique) {
@@ -193,6 +198,16 @@ export class SudokuEffects {
       }
       return [SudokuActions.setActiveCell({ id: cellId(info.col, info.row) })];
     })
+  ));
+
+  loadSudoku$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.loadSudoku),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    filter(([a, sdk]) => !!sdk && !sdk.sudoku?.info?.compiled),
+    concatMap(([a, sdk]) =>
+      // TODO: verificare nelle opzioni se questa funzionalità è prevista
+      [SudokuActions.analyze()])
   ));
 
   activePage$ = createEffect(() => this._actions$.pipe(

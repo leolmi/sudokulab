@@ -42,6 +42,13 @@ export class Solver {
     } while (_canSolve(this._sdks));
     return new SolveAllResult(this._sdks);
   }
+
+  check(): string {
+    const schema = this._sdks[0]?.sdk?.sudoku;
+    if (!schema) return 'Undefined schema';
+    if (this._sdks[0]?.sdk.state.fixedCount<11) return 'Too few fixed number to try solve it!';
+    return '';
+  }
 }
 
 const _canSolveOne = (sdk: PlaySudoku): boolean => {
