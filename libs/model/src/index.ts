@@ -14,6 +14,8 @@ export * from './lib/PlaySudoku';
 export * from './lib/PlaySudokuState';
 export * from './lib/PlaySudokuOptions';
 
+export * from './lib/MenuButton';
+export * from './lib/SudokulabPage';
 
 export * from './sudoku-helper';
 export * from './lib/logic';

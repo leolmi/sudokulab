@@ -4,6 +4,7 @@ export class PlaySudokuCell {
     this.position = 0;
     this.value = '';
     this.availables = [];
+    this.pencil = [];
     this.fixed = false;
     this.error = false;
     Object.assign(this, c || {});
@@ -14,4 +15,5 @@ export class PlaySudokuCell {
   value: string;
   error: boolean;
   availables: string[];
+  pencil: string[];
 }

@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Schema } from '@sudokulab/api-interfaces';
 import { Sudoku, SudokuFacade } from '@sudokulab/model';
-import { Subject } from 'rxjs';
+import {Observable, Subject} from 'rxjs';
+import {map, takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'sudokulab-schemas',
@@ -13,10 +14,14 @@ import { Subject } from 'rxjs';
 export class SchemasComponent implements OnDestroy {
   protected readonly _destroy$: Subject<boolean>;
   schemas$ = this._http.get<Schema[]>('/api/schemas');
+  activeId$: Observable<string>;
 
   constructor(private _http: HttpClient,
               private _sudoku: SudokuFacade) {
     this._destroy$ = new Subject<boolean>();
+    this.activeId$ = _sudoku.selectActiveSudoku$.pipe(
+      takeUntil(this._destroy$),
+      map(s => s?.id||''));
   }
 
   ngOnDestroy() {

@@ -2,17 +2,18 @@ import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { SolveStepResult } from './SolveStepResult';
 import { getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku-helper';
-import { cloneDeep as _clone, forEach as _forEach, remove as _remove, extend as _extend } from 'lodash';
+import { cloneDeep as _clone, forEach as _forEach, remove as _remove, extend as _extend, reduce as _reduce, isNumber as _isNumber } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';
 import { SudokuSolution } from '../SudokuSolution';
+import {SudokuInfo} from "../SudokuInfo";
+import {ALGORITHMS_FACTORS, DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM} from "../Algorithms";
 
 export class Solver {
   private _sdks: SudokuSolution[];
 
   constructor(sdk: PlaySudoku) {
-    const csdk = _clone(sdk);
-    clear(csdk);
+    const csdk = clear(sdk);
     this._sdks = [new SudokuSolution(csdk)];
   }
 
@@ -30,6 +31,7 @@ export class Solver {
                   const ps = new PlaySudoku({ sudoku: c });
                   checkAvailables(ps);
                   const ss = new SudokuSolution(ps);
+                  ss.algorithms = _clone(sol.algorithms)||[];
                   this._sdks.push(ss);
                 });
               }
@@ -105,6 +107,9 @@ export const clear = (sdk: PlaySudoku): PlaySudoku => {
         if (!c.fixed) c.availables = getAvailables(ps);
       }
     });
+    ps.state.complete = false;
+    ps.state.error = false;
+    ps.state.percent = 0;
     checkAvailables(ps);
     return ps;
   });
@@ -139,13 +144,53 @@ export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): So
       console.warn('No algorithm has been applied!');
       return;
     } else {
-      console.log(`Algorithm "${algorithm.name}" successfully applied`, result);
+      // console.log(`Algorithm "${algorithm.name}" successfully applied`, result);
     }
     return new SolveStepResult(ps, result);
   });
 }
 
-export const getDifficulty = (algs: AlgorithmResult[]): string => {
+export const buildDifficultyMap = (algs: AlgorithmResult[]): Dictionary<number> => {
+  return _reduce(algs || [], (m, alg) => {
+    m[alg.algorithm] = (m[alg.algorithm] || 0) + 1;
+    return m;
+  }, <Dictionary<number>>{});
+}
 
-  return 'HIGH';
+export const calcDifficultyValue = (diffMap: Dictionary<number>): number => {
+  let diff = 0;
+  getAlgorithms().forEach(a => {
+    const cycles = diffMap[a.id] || 0;
+    const factor = ALGORITHMS_FACTORS[a.id] || '';
+    const sign = factor[0] || '+';
+    const increment = parseFloat(factor.substring(1));
+    if (cycles > 0) {
+      switch (sign) {
+        case '+':
+          diff = diff + (increment * cycles);
+          break;
+        case 'x':
+          for (let i = 0; i < cycles; i++) {
+            diff = (diff || 1) * parseFloat(factor.substring(1));
+          }
+          break;
+      }
+    }
+  })
+  return Math.floor(diff);
+}
+
+export const calcDifficultyLabel = (value: number): string => {
+  return DIFFICULTY_RANGES.find(r => r.value > value)?.label || DIFFICULTY_MAX;
+}
+
+export const calcDifficulty = (info: SudokuInfo): void => {
+  info.difficultyMap = buildDifficultyMap(info.algorithms);
+  console.log('DIFFICULTY MAP:', info.difficultyMap);
+  info.difficultyValue = calcDifficultyValue(info.difficultyMap);
+  console.log('DIFFICULTY VAL:', info.difficultyValue);
+  info.difficulty = calcDifficultyLabel(info.difficultyValue);
+  console.log('DIFFICULTY LAB:', info.difficulty);
+  info.useTryAlgorithm = (info.difficultyMap[TRY_NUMBER_ALGORITHM] || 0) > 0;
+  info.compiled = true;
 }

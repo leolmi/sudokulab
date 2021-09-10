@@ -1,22 +1,32 @@
 <div class="container" fxLayout="column">
-  <div class="top-toolbar"></div>
-  <div class="central-container" fxLayout="row" fxFlex>
-    <div class="tools tools-left" fxFlex>
-      <sudokulab-info></sudokulab-info>
-    </div>
-    <div class="board-container" fxLayout="column">
-      <div class="board">
-        <sudokulab-board></sudokulab-board>
-      </div>
-      <div class="bottom-board" fxFlex></div>
-    </div>
-    <div class="tools tools-right" fxFlex>
-      <sudokulab-schemas></sudokulab-schemas>
-    </div>
-  </div>
-  <div class="bottom-toolbar" fxLayout="row" fxLayoutAlign="start center">
-    <button mat-raised-button (click)="clear()">Clear</button>
-    <button mat-raised-button (click)="step()">Solve step</button>
-    <button mat-raised-button (click)="solve()">Solve all</button>
+<!--  <div class="top-toolbar"></div>-->
+  <mat-toolbar class="sudokulab-toolbar" color="primary">
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="page menu">
+      <mat-icon>{{(page$|async)?.icon}}</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button *ngFor="let pag of (pages$|async)||[]"
+              [ngClass]="{'selected': pag.code === (page$|async)?.code}"
+              (click)="openPage(pag)"
+              mat-menu-item>
+        <mat-icon>{{pag.icon}}</mat-icon>
+        <span>{{pag.title}}</span>
+      </button>
+    </mat-menu>
+    <span class="title" fxFlex>{{(page$|async)?.title}}</span>
+    <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
+      <div class="button-separator" *ngIf="pgbtn.separator"></div>
+      <button mat-icon-button
+              *ngIf="!pgbtn.separator"
+              [matTooltip]="pgbtn.tooltip||''"
+              [matTooltipDisabled]="!pgbtn.tooltip"
+              (click)="execute(pgbtn.code||'')">
+        <mat-icon>{{pgbtn.icon}}</mat-icon>
+      </button>
+    </ng-container>
+
+  </mat-toolbar>
+  <div class="central-container" fxFlex>
+    <router-outlet></router-outlet>
   </div>
 </div>

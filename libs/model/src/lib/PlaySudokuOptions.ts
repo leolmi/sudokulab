@@ -1,7 +1,7 @@
 export class PlaySudokuOptions {
   constructor(o?: Partial<PlaySudokuOptions>) {
-    this.showAvailables = true;
+    this.usePencil = true;
     Object.assign(this, o || {});
   }
-  showAvailables: boolean;
+  usePencil: boolean;
 }

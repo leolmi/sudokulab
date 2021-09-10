@@ -5,6 +5,9 @@
   &:hover {
     background-color: rgba(10,10,10,.1);
   }
+  &.active {
+    background: yellowgreen;
+  }
   .schema {
     position: absolute;
     width: calc(100% - 20px);

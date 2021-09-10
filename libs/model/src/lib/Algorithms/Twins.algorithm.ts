@@ -17,7 +17,6 @@ export class TwinsAlgorithm extends Algorithm implements PlayAlgorithm {
     super(a);
     this.name = 'Twins in group';
     this.id = TWINS_ALGORITHM;
-    this.factor = 1.3;
   }
   id: string;
   name: string;
@@ -35,6 +34,8 @@ export class TwinsAlgorithm extends Algorithm implements PlayAlgorithm {
     //   }
     // });
 
-    return new AlgorithmResult();
+    return new AlgorithmResult({
+      algorithm: this.id
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { selectFeature } from '../common';
 import { adapter } from '../reducers/sudoku.reducers';
-import { PlaySudoku, SudokuMessage } from '@sudokulab/model';
+import {PlaySudoku, SudokulabPage, SudokuMessage} from '@sudokulab/model';
 
 export const selectSudokus = createSelector(
   selectFeature,
@@ -35,4 +35,9 @@ export const selectActiveCell = createSelector(
 export const selectActiveMessage= createSelector(
   selectSudokus,
   (state): SudokuMessage|undefined => state.message
+)
+
+export const selectActivePage= createSelector(
+  selectSudokus,
+  (state): SudokulabPage|undefined => state.activePage
 )

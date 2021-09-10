@@ -17,7 +17,6 @@ export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm
     super(a);
     this.name = 'One cell for value';
     this.id = ONE_CELL_FOR_VALUE_ALGORITHM;
-    this.factor = 1.1;
   }
   id: string;
   name: string;
@@ -40,6 +39,7 @@ export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm
     }
 
     return new AlgorithmResult({
+      algorithm: this.id,
       applied: !!xg,
       cells: [ocid]
     });

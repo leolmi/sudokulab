@@ -30,7 +30,6 @@ export class AlignmentOnGroupAlgorithm extends Algorithm implements PlayAlgorith
     super(a);
     this.name = 'Alignment on group';
     this.id = ALIGNMENT_ON_GROUP_ALGORITHM;
-    this.factor = 1.5;
   }
 
   id: string;
@@ -59,6 +58,10 @@ export class AlignmentOnGroupAlgorithm extends Algorithm implements PlayAlgorith
       });
     });
 
-    return new AlgorithmResult({ applied, cells: _keys(cells) });
+    return new AlgorithmResult({
+      algorithm: this.id,
+      applied,
+      cells: _keys(cells)
+    });
   }
 }

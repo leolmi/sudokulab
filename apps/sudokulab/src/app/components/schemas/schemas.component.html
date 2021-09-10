@@ -2,6 +2,7 @@
   <div class="schema-item"
        (click)="select(schema)"
        *ngFor="let schema of schemas$|async"
+       [ngClass]="{'active': (activeId$|async) === schema.fixed}"
        fxLayout="row" fxLayoutAlign="start center">
     <div class="schema">{{schema.fixed}}</div>
   </div>

@@ -1,5 +1,10 @@
 import { createAction, props } from '@ngrx/store';
-import { PlaySudoku, Sudoku, SudokuMessage } from '@sudokulab/model';
+import {PlaySudoku, Sudoku, SudokulabPage, SudokuMessage} from '@sudokulab/model';
+
+export const setActivePage = createAction(
+  '[SudokuPlay] set the active page',
+  props<{ page: SudokulabPage }>()
+);
 
 export const setActiveSudoku = createAction(
   '[SudokuPlay] set the active sudoku',

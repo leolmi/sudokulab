@@ -4,12 +4,12 @@ import { Store } from '@ngrx/store';
 import { SudokuStore } from '../sudoku-store';
 import * as SudokuActions from '../actions';
 import * as SudokuSelectors from '../selectors';
-import { filter, switchMap, withLatestFrom } from 'rxjs/operators';
+import {concatMap, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import { cloneDeep as _clone } from 'lodash';
 import {
   Algorithms,
   applyAlgorithm,
-  AVAILABLE_DIRECTIONS,
+  AVAILABLE_DIRECTIONS, buildDifficultyMap, calcDifficulty,
   cellId,
   checkAvailables,
   clear,
@@ -25,6 +25,7 @@ import {
 } from '@sudokulab/model';
 import { analyze } from '../actions';
 import { SudokuSolution } from '../../../../model/src/lib/SudokuSolution';
+import {Router} from "@angular/router";
 
 
 @Injectable()
@@ -72,9 +73,10 @@ export class SudokuEffects {
       if (result.unique) {
         info.unique = true;
         info.algorithms = result.unique.algorithms;
+        calcDifficulty(info);
         const sudoku: Sudoku = <Sudoku>_clone(result.unique.sdk.sudoku);
         sudoku.info = info;
-        return [SudokuActions.updateSudoku({ changes: { sudoku } })];
+        return [SudokuActions.updateSudoku({ changes: { id: result.unique.sdk.id, sudoku } })];
       } else if (result.multiple) {
         const sudoku: Sudoku = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
         sudoku.info = info;
@@ -101,6 +103,7 @@ export class SudokuEffects {
         });
         info.unique = true;
         info.algorithms = result.unique.algorithms;
+        calcDifficulty(info);
         if (!!result.unique.sdk.sudoku) result.unique.sdk.sudoku.info = info;
         return [
           SudokuActions.updateSudoku({ changes: result.unique.sdk }),
@@ -110,7 +113,7 @@ export class SudokuEffects {
           message: 'Sudoku has multiple results!',
           type: MessageType.warning
         });
-        console.warn(message.message, result.multiple);
+        info.solutions = _clone(result.multiple.filter(s => s.sdk.state.complete));
         return [
           SudokuActions.updateSudoku({ changes: result.multiple[0].sdk }),
           SudokuActions.setActiveMessage({ message })];
@@ -192,7 +195,13 @@ export class SudokuEffects {
     })
   ));
 
+  activePage$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setActivePage),
+    map(a => this._router.navigate([`${a.page?.code}`]))
+  ), { dispatch: false });
+
   constructor(private _actions$: Actions,
-              private _store: Store<SudokuStore>) {
+              private _store: Store<SudokuStore>,
+              private _router: Router) {
   }
 }

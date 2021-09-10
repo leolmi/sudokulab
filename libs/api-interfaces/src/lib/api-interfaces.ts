@@ -4,6 +4,6 @@ export interface Message {
 
 export interface Schema {
   fixed: string;
-  algorithms?: string[];
+  algorithmsMap?: any;
   name?: string;
 }

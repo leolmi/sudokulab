@@ -9,11 +9,9 @@ export interface PlayAlgorithm {
 
 export class Algorithm {
   constructor(a?: Partial<Algorithm>) {
-    this.factor = 1;
     this.cell = -1;
     Object.assign(this, a || {});
   }
-  factor: number;
   cell: number;
 }
 

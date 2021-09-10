@@ -20,7 +20,6 @@ export class TryNumberAlgorithm extends Algorithm implements PlayAlgorithm {
     super(a);
     this.name = 'Try number in cell';
     this.id = TRY_NUMBER_ALGORITHM;
-    this.factor = 1.9;
   }
   id: string;
   name: string;
@@ -47,6 +46,7 @@ export class TryNumberAlgorithm extends Algorithm implements PlayAlgorithm {
     }
 
     return new AlgorithmResult({
+      algorithm: this.id,
       applied: !!minc,
       cells: !!minc ? [minc.id] : [],
       cases

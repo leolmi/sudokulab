@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PlaySudoku, Sudoku, SudokuFacade, SudokuMessage } from '@sudokulab/model';
+import {PlaySudoku, Sudoku, SudokuFacade, SudokulabPage, SudokuMessage} from '@sudokulab/model';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
 import { Observable } from 'rxjs';
@@ -11,6 +11,11 @@ export class SudokuContext extends SudokuFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
   selectActiveMessage$: Observable<SudokuMessage|undefined> = this._store.select(SudokuSelectors.selectActiveMessage);
+  selectActivePage$: Observable<SudokulabPage|undefined> = this._store.select(SudokuSelectors.selectActivePage);
+
+  setActivePage(page: SudokulabPage|undefined) {
+    if (!!page) this._store.dispatch(SudokuActions.setActivePage({ page }));
+  }
 
   setActiveSudoku(active: string) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
@@ -34,6 +39,10 @@ export class SudokuContext extends SudokuFacade {
 
   solve() {
     this._store.dispatch(SudokuActions.solve());
+  }
+
+  analyze() {
+    this._store.dispatch(SudokuActions.analyze());
   }
 
   setValue(value: string) {

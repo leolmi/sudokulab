@@ -1,6 +1,14 @@
 <div class="schemalab-tool sudoku-info">
-  <div *ngIf="!!(info$|async)" fxLayout="column">
+  <div *ngIf="!!(info$|async)?.compiled" fxLayout="column">
     <div class="info-property" fxLayout="row">unique: {{(info$|async)?.unique}}</div>
+    <div class="info-property" fxLayout="row">use try: {{useTry$|async}}</div>
     <div class="info-property" fxLayout="row">difficulty: {{(difficulty$|async)}}</div>
+    <div class="info-property" fxLayout="row">difficulty value: {{(difficultyValue$|async)}}</div>
+  </div>
+  <div *ngIf="((info$|async)?.solutions||[]).length>0" fxLayout="column">
+    <div class="solution-item"
+         *ngFor="let sol of (info$|async)?.solutions||[]">
+      <div calss="solution-content">{{sol.sdk?.sudoku?.values||''}}</div>
+    </div>
   </div>
 </div>
