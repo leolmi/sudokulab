@@ -17,6 +17,18 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   overflow: hidden;
 }
 
+.page-button {
+  height: 65px !important;
+  width: 65px !important;
+  margin-top: -2px !important;
+  margin-left: -16px !important;
+  border-radius: 0 !important;
+  border-right: rgba(200,200,200,.5) 1px solid !important;
+  &:hover {
+    background-color: yellowgreen;
+  }
+}
+
 .schemalab-tool {
   padding: 0 10px;
 }

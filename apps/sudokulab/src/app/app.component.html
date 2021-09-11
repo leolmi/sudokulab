@@ -1,7 +1,7 @@
 <div class="container" fxLayout="column">
 <!--  <div class="top-toolbar"></div>-->
   <mat-toolbar class="sudokulab-toolbar" color="primary">
-    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="page menu">
+    <button class="page-button" mat-icon-button [matMenuTriggerFor]="menu" aria-label="page menu">
       <mat-icon>{{(page$|async)?.icon}}</mat-icon>
     </button>
     <mat-menu #menu="matMenu">

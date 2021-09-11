@@ -6,13 +6,18 @@ import * as SudokuActions from "../actions";
 import {concatMap, filter, switchMap, withLatestFrom} from "rxjs/operators";
 import * as SudokuSelectors from "../selectors";
 import {
-  Algorithms, AVAILABLE_DIRECTIONS, cellId,
+  Algorithms,
+  AVAILABLE_DIRECTIONS,
+  cellId,
   checkAvailables,
   decodeCellId,
-  isValidValue, MoveDirection,
+  isValidValue,
+  MessageType,
+  MoveDirection,
   PlaySudoku,
   resetAvailables,
-  solveStep
+  solveStep,
+  SudokuMessage
 } from "@sudokulab/model";
 import {cloneDeep as _clone} from 'lodash';
 
@@ -35,7 +40,9 @@ export class LabEffects {
     switchMap(([a, sdk]) => {
       const result = solveStep(sdk, [Algorithms.tryNumber]);
       if (!result) return [];
-      return [SudokuActions.updateSudoku({ changes: result.sdk })];
+      return [
+        SudokuActions.updateSudoku({ changes: result.sdk }),
+        SudokuActions.checkState()];
     })
   ));
 
@@ -58,7 +65,9 @@ export class LabEffects {
         cell.availables = [];
       }
       checkAvailables(changes);
-      return [SudokuActions.updateSudoku({ changes })];
+      return [
+        SudokuActions.updateSudoku({ changes }),
+        SudokuActions.checkState()];
     })
   ));
 
@@ -106,6 +115,29 @@ export class LabEffects {
           break;
       }
       return [SudokuActions.setActiveCell({ id: cellId(info.col, info.row) })];
+    })
+  ));
+
+  checkState$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.checkState),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    switchMap(([a, sdk]) => {
+
+      if (sdk?.state.error) return [SudokuActions.setActiveMessage({
+        message: new SudokuMessage({
+          message: 'Schema has no available result!',
+          type: MessageType.warning
+        })
+      })];
+
+      if (sdk?.state.complete) return [SudokuActions.setActiveMessage({
+        message: new SudokuMessage({
+          message: 'Schema successfully completed!',
+          type: MessageType.success
+        })
+      })];
+
+      return [];
     })
   ));
 

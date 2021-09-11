@@ -6,15 +6,15 @@ import {TRY_NUMBER_ALGORITHM} from "./TryNumber.algorithm";
 
 export const ALGORITHMS_FACTORS: Dictionary<string> = {
   [ONE_CELL_FOR_VALUE_ALGORITHM]: '+10',
-  [ALIGNMENT_ON_GROUP_ALGORITHM]: '+12',
-  [ONE_VALUE_FOR_CELL_ALGORITHM]: '+15',
-  [TRY_NUMBER_ALGORITHM]: 'x1.2'
+  [ALIGNMENT_ON_GROUP_ALGORITHM]: '+15',
+  [ONE_VALUE_FOR_CELL_ALGORITHM]: '+25',
+  [TRY_NUMBER_ALGORITHM]: 'x1.4'
 }
 
 export const DIFFICULTY_MAX = 'EXTREME';
 export const DIFFICULTY_RANGES = [
-  {value: 300, label: 'EASY'},
-  {value: 600, label: 'MEDIUM'},
-  {value: 900, label: 'HARD'},
-  {value: 1000, label: 'VERYHARD'}
+  {value: 600, label: 'EASY'},
+  {value: 800, label: 'MEDIUM'},
+  {value: 1000, label: 'HARD'},
+  {value: 1600, label: 'VERYHARD'}
 ]

@@ -2,6 +2,12 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import {SudokuFacade, SudokuInfo, TRY_NUMBER_ALGORITHM} from '@sudokulab/model';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
+import { keys as _keys } from 'lodash';
+
+interface MapItem {
+  name: string;
+  value: number;
+}
 
 @Component({
   selector: 'sudokulab-info',
@@ -12,19 +18,23 @@ import { Observable, Subject } from 'rxjs';
 export class InfoComponent implements OnDestroy {
   protected readonly _destroy$: Subject<boolean>;
   info$: Observable<SudokuInfo|undefined>;
+  percent$: Observable<string>;
   useTry$: Observable<string>;
   difficulty$: Observable<string>;
   difficultyValue$: Observable<number>;
+  difficultyMap$: Observable<MapItem[]>;
 
   constructor(private _sudoku: SudokuFacade) {
     this._destroy$ = new Subject<boolean>();
-    this.info$ = _sudoku.selectActiveSudoku$.pipe(
-      takeUntil(this._destroy$),
-      map(s => s?.sudoku?.info));
+    const sdk$ = _sudoku.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
+    this.info$ = sdk$.pipe(map(s => s?.sudoku?.info));
+    this.percent$ = sdk$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));
 
     this.difficulty$ = this.info$.pipe(map(info => info?.difficulty||'unknown'));
     this.difficultyValue$ = this.info$.pipe(map(info => info?.difficultyValue||0));
     this.useTry$ = this.info$.pipe(map(info => info?.useTryAlgorithm ? `true (${info.difficultyMap[TRY_NUMBER_ALGORITHM]})` : 'false'));
+    this.difficultyMap$ = this.info$.pipe(map(info => _keys(info?.difficultyMap||[])
+      .map(k => ({ name: k, value: (info?.difficultyMap||{})[k]||0 }))));
   }
 
   ngOnDestroy() {

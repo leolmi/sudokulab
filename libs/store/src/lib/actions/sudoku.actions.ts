@@ -35,6 +35,10 @@ export const updateSudoku = createAction(
   props<{ changes: Partial<PlaySudoku> }>()
 );
 
+export const checkState = createAction(
+  '[SudokuPlay] check the schema state'
+);
+
 export const applyAlgorithm = createAction(
   '[SudokuPlay] apply algorithm to active sudoku',
   props<{ algorithm: string }>()
