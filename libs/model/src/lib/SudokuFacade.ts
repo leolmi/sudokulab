@@ -1,23 +1,14 @@
 import { Observable } from 'rxjs';
-import {PlaySudoku, Sudoku, SudokulabPage, SudokuMessage} from '@sudokulab/model';
+import {Facade} from "./Facade";
+import {SudokuMessage} from "./SudokuMessage";
+import {SudokulabPage} from "./SudokulabPage";
 
-export abstract class SudokuFacade {
-  abstract selectActiveSudoku$: Observable<PlaySudoku|undefined>;
-  abstract selectActiveCell$: Observable<string>;
+
+export abstract class SudokuFacade implements Facade {
+  name = 'sudoku';
   abstract selectActiveMessage$: Observable<SudokuMessage|undefined>;
   abstract selectActivePage$: Observable<SudokulabPage|undefined>;
 
   abstract setActivePage(page: SudokulabPage|undefined): void;
-  abstract loadSudoku(sudoku: Sudoku): void;
-  abstract setActiveSudoku(id: string): void;
-  abstract setActiveCell(id: string): void;
-  abstract applyAlgorithm(algorithm: string): void;
-  abstract solveStep(): void;
-  abstract solve(): void;
-  abstract analyze(): void;
-  abstract setValue(value: string): void;
-  abstract move(direction: string): void;
   abstract raiseMessage(message: SudokuMessage): void;
-  abstract clear(): void;
-  abstract download(): void;
 }

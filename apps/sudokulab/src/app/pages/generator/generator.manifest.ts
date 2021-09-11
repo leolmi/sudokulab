@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {SudokuFacade, SudokulabPage} from "@sudokulab/model";
+import {GeneratorFacade, SudokuFacade, SudokulabPage} from "@sudokulab/model";
 import {AvailablePages} from "../../model";
 
 @Injectable()
@@ -8,7 +8,7 @@ export class GeneratorManifest extends SudokulabPage {
   icon = 'settings';
   buttons = [];
   title = 'Generator';
-  execute = (facade: SudokuFacade, code: string) => {
+  execute = (facade: GeneratorFacade, code: string) => {
 
   }
 }

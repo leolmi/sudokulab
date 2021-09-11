@@ -13,7 +13,6 @@ import {Router} from "@angular/router";
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements AfterViewInit {
-  state$: Observable<string>;
   page$: Observable<SudokulabPage|undefined>;
   pages$: BehaviorSubject<SudokulabPage[]>;
 
@@ -22,15 +21,14 @@ export class AppComponent implements AfterViewInit {
               private _router: Router,
               private _snack: MatSnackBar,
               private _sudoku: SudokuFacade) {
-    this.state$ = _sudoku.selectActiveSudoku$.pipe(map(s => s ? `${s.state.percent.toFixed(0)}%` : '0%'));
     this.pages$ = new BehaviorSubject<SudokulabPage[]>(_pagesProvider.pages);
     this.page$ = _sudoku.selectActivePage$;
-    const sudoku = new Sudoku({
-      values: '',
-      rank: 9,
-      fixed: '824070060560002000090000000019800020000000070206500000000005002000081009032000100'
-    });
-    _sudoku.loadSudoku(sudoku);
+    // const sudoku = new Sudoku({
+    //   values: '',
+    //   rank: 9,
+    //   fixed: '824070060560002000090000000019800020000000070206500000000005002000081009032000100'
+    // });
+    // _sudoku.loadSudoku(sudoku);
 
     _sudoku.selectActiveMessage$
       .pipe(filter(a => !!a?.message))

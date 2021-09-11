@@ -8,6 +8,14 @@ html, body {
 }
 body { font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+.sudokulab-board {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}
+
 .sudokulab-page {
   position: absolute;
   left: 0;

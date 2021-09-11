@@ -20,3 +20,5 @@ export * from './lib/SudokulabPage';
 export * from './sudoku-helper';
 export * from './lib/logic';
 export * from './lib/SudokuFacade';
+export * from './lib/LabFacade';
+export * from './lib/GeneratorFacade';

@@ -1,5 +1,6 @@
 import {MenuButton} from "./MenuButton";
 import {SudokuFacade} from "./SudokuFacade";
+import {Facade} from "./Facade";
 
 export abstract class SudokulabPage {
   default?: boolean;
@@ -7,5 +8,5 @@ export abstract class SudokulabPage {
   abstract code: string;
   abstract icon: string;
   abstract buttons: MenuButton[];
-  abstract execute(facade: SudokuFacade, code: string): void;
+  abstract execute(facade: Facade, code: string): void;
 }

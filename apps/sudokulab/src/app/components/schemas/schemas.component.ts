@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Schema} from '@sudokulab/api-interfaces';
-import {Sudoku, SudokuFacade, SudokuInfo} from '@sudokulab/model';
+import {LabFacade, Sudoku, SudokuFacade, SudokuInfo} from '@sudokulab/model';
 import {Observable, Subject} from 'rxjs';
 import {map, takeUntil} from "rxjs/operators";
 
@@ -17,9 +17,9 @@ export class SchemasComponent implements OnDestroy {
   activeId$: Observable<string>;
 
   constructor(private _http: HttpClient,
-              private _sudoku: SudokuFacade) {
+              private _lab: LabFacade) {
     this._destroy$ = new Subject<boolean>();
-    this.activeId$ = _sudoku.selectActiveSudoku$.pipe(
+    this.activeId$ = _lab.selectActiveSudoku$.pipe(
       takeUntil(this._destroy$),
       map(s => s?.id||''));
   }
@@ -30,7 +30,7 @@ export class SchemasComponent implements OnDestroy {
   }
 
   select(schema: Schema) {
-    this._sudoku.loadSudoku(new Sudoku({
+    this._lab.loadSudoku(new Sudoku({
       fixed: schema.fixed,
       info: new SudokuInfo(schema.info)
     }));

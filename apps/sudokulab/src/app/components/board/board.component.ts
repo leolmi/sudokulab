@@ -1,14 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
-import {
-  cellId,
-  getCellStyle,
-  getLinesGroups,
-  isDirectionKey,
-  PlaySudoku,
-  SudokuFacade
-} from '@sudokulab/model';
-import { Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy} from '@angular/core';
+import {cellId, getCellStyle, getLinesGroups, isDirectionKey, LabFacade, PlaySudoku} from '@sudokulab/model';
+import {Observable, Subject} from 'rxjs';
+import {map, takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'sudokulab-board',
@@ -27,10 +20,10 @@ export class BoardComponent implements OnDestroy {
 
 
   constructor(private ele: ElementRef,
-              private _sudoku: SudokuFacade) {
+              private _lab: LabFacade) {
     this._destroy$ = new Subject<boolean>();
-    this.playSudoku$ = _sudoku.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
-    this.selected$ = _sudoku.selectActiveCell$.pipe(takeUntil(this._destroy$));
+    this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
+    this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
 
     this.rows$ = this.playSudoku$.pipe(map(s => Array(s?.sudoku?.rank||9).fill(0).map((x, i)=>i)));
     this.cols$ = this.playSudoku$.pipe(map(s => Array(s?.sudoku?.rank||9).fill(0).map((x, i)=>i)));
@@ -42,16 +35,16 @@ export class BoardComponent implements OnDestroy {
   @HostListener('window:keyup', ['$event'])
   keyEvent(e: KeyboardEvent) {
     if (isDirectionKey(e?.key)) {
-      this._sudoku.move(e?.key);
+      this._lab.move(e?.key);
       e.stopPropagation();
       e.preventDefault();
     } else {
-      this._sudoku.setValue(e?.key);
+      this._lab.setValue(e?.key);
     }
   }
 
   select(col: number, row: number) {
-    this._sudoku.setActiveCell(cellId(col, row));
+    this._lab.setActiveCell(cellId(col, row));
   }
 
   ngOnDestroy() {

@@ -5,8 +5,8 @@ import {AppComponent} from './app.component';
 import {HttpClientModule} from '@angular/common/http';
 import {BoardComponent} from './components/board/board.component';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {SudokuFacade, SudokulabPage} from '@sudokulab/model';
-import {SudokuContext, SudokuStoreModule} from '@sudokulab/store';
+import {GeneratorFacade, LabFacade, SudokuFacade, SudokulabPage} from '@sudokulab/model';
+import {GeneratorContext, LabContext, SudokuContext, SudokuStoreModule} from '@sudokulab/store';
 import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -27,12 +27,14 @@ import {LabManifest} from "./pages/lab/lab.manifest";
 import {GeneratorManifest} from "./pages/generator/generator.manifest";
 import {OptionsManifest} from "./pages/options/options.manifest";
 import {SudokulabPagesService} from "./services/sudokulab-pages.service";
+import {GeneratorBoardComponent} from "./components/generator-board/generator-board.component";
 
 
 @NgModule({
   declarations: [
     AppComponent,
     BoardComponent,
+    GeneratorBoardComponent,
     SchemasComponent,
     InfoComponent,
     LabComponent,
@@ -72,6 +74,8 @@ import {SudokulabPagesService} from "./services/sudokulab-pages.service";
   providers: [
     SudokulabPagesService,
     { provide: SudokuFacade, useClass: SudokuContext },
+    { provide: LabFacade, useClass: LabContext },
+    { provide: GeneratorFacade, useClass: GeneratorContext },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
     { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
     { provide: SudokulabPage, useClass: OptionsManifest, multi: true }

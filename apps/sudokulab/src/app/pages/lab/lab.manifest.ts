@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {SudokuFacade, SudokulabPage} from "@sudokulab/model";
+import {LabFacade, SudokuFacade, SudokulabPage} from "@sudokulab/model";
 import {AvailablePages} from "../../model";
 
 @Injectable()
@@ -16,7 +16,7 @@ export class LabManifest extends SudokulabPage {
     {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema'}
   ];
   title = 'Lab';
-  execute = (facade: SudokuFacade, code: string) => {
+  execute = (facade: LabFacade, code: string) => {
     switch (code) {
       case 'step': return facade.solveStep();
       case 'clear': return facade.clear();
