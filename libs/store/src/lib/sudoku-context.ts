@@ -61,6 +61,10 @@ export class SudokuContext extends SudokuFacade {
     this._store.dispatch(SudokuActions.setActiveMessage({ message }));
   }
 
+  download() {
+    this._store.dispatch(SudokuActions.dowloadSchema());
+  }
+
   constructor(private _store: Store<SudokuStore>) {
     super();
   }

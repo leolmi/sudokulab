@@ -4,6 +4,6 @@
        *ngFor="let schema of schemas$|async"
        [ngClass]="{'active': (activeId$|async) === schema.fixed}"
        fxLayout="row" fxLayoutAlign="start center">
-    <div class="schema">{{schema.fixed}}</div>
+    <div class="schema">{{schema.name||schema.fixed}}</div>
   </div>
 </div>

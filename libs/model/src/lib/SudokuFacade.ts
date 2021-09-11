@@ -19,4 +19,5 @@ export abstract class SudokuFacade {
   abstract move(direction: string): void;
   abstract raiseMessage(message: SudokuMessage): void;
   abstract clear(): void;
+  abstract download(): void;
 }

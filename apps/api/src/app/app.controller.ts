@@ -13,7 +13,7 @@ export class AppController {
   }
 
   @Get('schemas')
-  getSchemas(): Schema[] {
+  async getSchemas(): Promise<Schema[]> {
     return this.appService.getSchemas();
   }
 }

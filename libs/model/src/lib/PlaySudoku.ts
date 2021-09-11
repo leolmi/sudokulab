@@ -10,7 +10,6 @@ import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku-helper';
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
     this.id = ps?.sudoku?.id || `${performance.now()}`;
-    this.sudoku = undefined;
     this.cells = {};
     this.groups = {};
     this.groupsForCell = {};
@@ -22,7 +21,7 @@ export class PlaySudoku {
   }
   id: string;
   options: PlaySudokuOptions;
-  sudoku: Sudoku|undefined;
+  sudoku?: Sudoku;
   cells: Dictionary<PlaySudokuCell>;
   groups: Dictionary<PlaySudokuGroup>;
   groupsForCell: Dictionary<(PlaySudokuGroup|undefined)[]>;

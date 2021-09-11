@@ -1,0 +1,490 @@
+{
+  "fixed": "000000600000940000038100004067000000050800010000030900200000081003080006040000720",
+  "info": {
+    "symmetry": "none",
+    "compiled": true,
+    "unique": true,
+    "useTryAlgorithm": false,
+    "algorithms": [
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.8"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "AlignmentOnGroup",
+        "cases": [],
+        "cells": [],
+        "applied": true
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "2.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.7"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "6.7"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "7.7"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.2"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.6"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.7"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.4"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.8"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.6"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.2"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.8"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.4"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.8"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.7"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.4"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.3"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.4"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.2"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.4"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.4"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.0"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.1"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.2"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.2"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.7"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.6"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.6"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.5"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.6"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.8"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.6"
+        ],
+        "applied": true
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.8"
+        ],
+        "applied": true
+      }
+    ],
+    "difficultyMap": {
+      "OneCellForValue": 55,
+      "AlignmentOnGroup": 1,
+      "OneValueForCell": 3
+    },
+    "difficultyValue": 607,
+    "solutions": [],
+    "difficulty": "HARD"
+  },
+  "name": "9x9_23num_HARD_(1744670931)"
+}

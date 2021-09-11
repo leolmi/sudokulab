@@ -9,20 +9,19 @@ export class SudokuInfo {
     this.compiled = false;
     this.unique = false;
     this.useTryAlgorithm = false;
-    this.difficulty = '';
     this.algorithms = [];
     this.difficultyMap = {};
     this.difficultyValue = 0;
     this.solutions = [];
     Object.assign(this, s || {});
   }
-  symmetry: SudokuSymmetry;
-  difficulty: string;
+  symmetry?: SudokuSymmetry;
+  difficulty?: string;
   compiled: boolean;
   unique: boolean;
   useTryAlgorithm: boolean;
   algorithms: AlgorithmResult[];
   difficultyMap: Dictionary<number>;
   difficultyValue: number;
-  solutions: SudokuSolution[];
+  solutions?: SudokuSolution[];
 }

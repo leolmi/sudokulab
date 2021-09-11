@@ -1,12 +1,12 @@
 import { Sudoku } from './lib/Sudoku';
 import { ElementRef } from '@angular/core';
 import { PlaySudoku } from './lib/PlaySudoku';
-import { forEach as _forEach, keys as _keys, includes as _includes } from 'lodash';
+import { forEach as _forEach, keys as _keys, includes as _includes, isString as _isString } from 'lodash';
 import { PlaySudokuCellAlignment, PlaySudokuGroupType } from './lib/enums';
 import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
-  OneValueForCellAlgorithm,
+  OneValueForCellAlgorithm, TRY_NUMBER_ALGORITHM,
   TryNumberAlgorithm
 } from './lib/Algorithms';
 import { PlayAlgorithm } from './lib/Algorithm';
@@ -16,6 +16,23 @@ import { CellInfo } from './lib/CellInfo';
 import { AVAILABLE_DIRECTIONS } from './lib/consts';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
+
+export const getHash = (o: any): number => {
+  o = o || '';
+  if (!_isString(o)) {
+    o = JSON.stringify(o);
+  }
+  let hash = 0, i, chr;
+  if (o.length === 0) {
+    return hash;
+  }
+  for (i = 0; i < o.length; i++) {
+    chr = o.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash;
+}
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
 
@@ -107,4 +124,14 @@ export const resetAvailables = (sdk: PlaySudoku|undefined) => {
 
 export const isDirectionKey = (direction: string): boolean => {
   return _keys(AVAILABLE_DIRECTIONS).indexOf(direction)>-1;
+}
+
+export const getSchemaName = (sdk: PlaySudoku|undefined): string => {
+  const rank = sdk?.sudoku?.rank||9;
+  const fixc = sdk?.state.fixedCount||0;
+  const hash = getHash(sdk?.sudoku?.fixed||'');
+  const diff = sdk?.sudoku?.info?.difficulty||'unknown';
+  const tryN = (sdk?.sudoku?.info?.difficultyMap||{})[TRY_NUMBER_ALGORITHM];
+  const tryd = !!tryN ? `_T${tryN}` : '';
+  return `${rank}x${rank}_${fixc}num_${diff}${tryd}(${hash})`;
 }

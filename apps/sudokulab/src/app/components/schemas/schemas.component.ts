@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Schema } from '@sudokulab/api-interfaces';
-import { Sudoku, SudokuFacade } from '@sudokulab/model';
+import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Schema} from '@sudokulab/api-interfaces';
+import {Sudoku, SudokuFacade, SudokuInfo} from '@sudokulab/model';
 import {Observable, Subject} from 'rxjs';
 import {map, takeUntil} from "rxjs/operators";
 
@@ -30,6 +30,9 @@ export class SchemasComponent implements OnDestroy {
   }
 
   select(schema: Schema) {
-    this._sudoku.loadSudoku(new Sudoku({ fixed: schema.fixed }));
+    this._sudoku.loadSudoku(new Sudoku({
+      fixed: schema.fixed,
+      info: new SudokuInfo(schema.info)
+    }));
   }
 }

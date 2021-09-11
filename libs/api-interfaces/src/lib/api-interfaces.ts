@@ -1,9 +1,11 @@
+import {SudokuInfo} from "@sudokulab/model";
+
 export interface Message {
   message: string;
 }
 
 export interface Schema {
   fixed: string;
-  algorithmsMap?: any;
+  info?: SudokuInfo;
   name?: string;
 }

@@ -63,6 +63,12 @@ export const move = createAction(
   props<{ direction: string }>()
 )
 
+export const dowloadSchema = createAction(
+  '[SudokuPlay] download current schema'
+);
+
+
+
 
 export const test = createAction(
   '[SudokuPlay] test sudoku action'
