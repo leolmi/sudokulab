@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Generate schema</h1>
+<div mat-dialog-content fxLayout="column">
+  <div>UPLOAD SCHEMA...</div>
+
+</div>
+<mat-dialog-actions>
+  <div fxFlex></div>
+  <button mat-stroked-button (click)="generate()" [disabled]="(isNotValid$|async)" mat-dialog-close>Generate</button>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

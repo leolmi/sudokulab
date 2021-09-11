@@ -13,6 +13,7 @@ export class LabManifest extends SudokulabPage {
     {icon: 'play_circle_outline', code: 'analyze', tooltip: 'Analyze schema'},
     {separator: true},
     {icon: 'download', code: 'download', tooltip: 'Download current schema'},
+    {icon: 'downloading', code: 'upload', tooltip: 'Generate schema'},
     {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema'}
   ];
   title = 'Lab';
@@ -23,6 +24,7 @@ export class LabManifest extends SudokulabPage {
       case 'solve': return facade.solve();
       case 'analyze': return facade.analyze();
       case 'download': return facade.download();
+      case 'upload': return facade.upload();
     }
   }
 }

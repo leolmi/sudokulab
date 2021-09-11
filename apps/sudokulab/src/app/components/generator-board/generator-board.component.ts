@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy} from "@angula
 import {Observable, Subject} from "rxjs";
 import {cellId, getCellStyle, getLinesGroups, PlaySudoku, GeneratorFacade} from "@sudokulab/model";
 import {map, takeUntil} from "rxjs/operators";
+import {DestroyComponent} from "../DestroyComponent";
 
 @Component({
   selector: 'sudokulab-generator-board',
@@ -9,8 +10,7 @@ import {map, takeUntil} from "rxjs/operators";
   styleUrls: ['./generator-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GeneratorBoardComponent implements OnDestroy {
-  protected readonly _destroy$: Subject<boolean>;
+export class GeneratorBoardComponent extends DestroyComponent implements OnDestroy {
   playSudoku$: Observable<PlaySudoku|undefined>;
   selected$: Observable<string>;
   cellStyle$: Observable<any>;
@@ -20,7 +20,7 @@ export class GeneratorBoardComponent implements OnDestroy {
 
   constructor(private ele: ElementRef,
               private _generator: GeneratorFacade) {
-    this._destroy$ = new Subject<boolean>();
+    super();
     this.playSudoku$ = _generator.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _generator.selectActiveCell$.pipe(takeUntil(this._destroy$));
 
@@ -33,10 +33,5 @@ export class GeneratorBoardComponent implements OnDestroy {
 
   select(col: number, row: number) {
     //this._generator.setActiveCell(cellId(col, row));
-  }
-
-  ngOnDestroy() {
-    this._destroy$.next(true);
-    this._destroy$.unsubscribe();
   }
 }

@@ -28,10 +28,14 @@ import {GeneratorManifest} from "./pages/generator/generator.manifest";
 import {OptionsManifest} from "./pages/options/options.manifest";
 import {SudokulabPagesService} from "./services/sudokulab-pages.service";
 import {GeneratorBoardComponent} from "./components/generator-board/generator-board.component";
+import {DestroyComponent} from "./components/DestroyComponent";
+import {MatDialogModule} from "@angular/material/dialog";
+import {UploadDialogComponent} from "./components/upload-dialog/upload-dialog.component";
 
 
 @NgModule({
   declarations: [
+    DestroyComponent,
     AppComponent,
     BoardComponent,
     GeneratorBoardComponent,
@@ -39,7 +43,8 @@ import {GeneratorBoardComponent} from "./components/generator-board/generator-bo
     InfoComponent,
     LabComponent,
     OptionsComponent,
-    GeneratorComponent
+    GeneratorComponent,
+    UploadDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -52,6 +57,7 @@ import {GeneratorBoardComponent} from "./components/generator-board/generator-bo
     MatIconModule,
     MatMenuModule,
     MatTooltipModule,
+    MatDialogModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     BrowserAnimationsModule,

@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy}
 import {cellId, getCellStyle, getLinesGroups, isDirectionKey, LabFacade, PlaySudoku} from '@sudokulab/model';
 import {Observable, Subject} from 'rxjs';
 import {map, takeUntil} from 'rxjs/operators';
+import {DestroyComponent} from "../DestroyComponent";
 
 @Component({
   selector: 'sudokulab-board',
@@ -9,8 +10,7 @@ import {map, takeUntil} from 'rxjs/operators';
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BoardComponent implements OnDestroy {
-  protected readonly _destroy$: Subject<boolean>;
+export class BoardComponent extends DestroyComponent implements OnDestroy {
   playSudoku$: Observable<PlaySudoku|undefined>;
   selected$: Observable<string>;
   cellStyle$: Observable<any>;
@@ -21,7 +21,7 @@ export class BoardComponent implements OnDestroy {
 
   constructor(private ele: ElementRef,
               private _lab: LabFacade) {
-    this._destroy$ = new Subject<boolean>();
+    super();
     this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
 
@@ -45,10 +45,5 @@ export class BoardComponent implements OnDestroy {
 
   select(col: number, row: number) {
     this._lab.setActiveCell(cellId(col, row));
-  }
-
-  ngOnDestroy() {
-    this._destroy$.next(true);
-    this._destroy$.unsubscribe();
   }
 }

@@ -4,6 +4,7 @@ import {Schema} from '@sudokulab/api-interfaces';
 import {LabFacade, Sudoku, SudokuFacade, SudokuInfo} from '@sudokulab/model';
 import {Observable, Subject} from 'rxjs';
 import {map, takeUntil} from "rxjs/operators";
+import {DestroyComponent} from "../DestroyComponent";
 
 @Component({
   selector: 'sudokulab-schemas',
@@ -11,22 +12,16 @@ import {map, takeUntil} from "rxjs/operators";
   styleUrls: ['./schemas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SchemasComponent implements OnDestroy {
-  protected readonly _destroy$: Subject<boolean>;
+export class SchemasComponent extends DestroyComponent implements OnDestroy {
   schemas$ = this._http.get<Schema[]>('/api/schemas');
   activeId$: Observable<string>;
 
   constructor(private _http: HttpClient,
               private _lab: LabFacade) {
-    this._destroy$ = new Subject<boolean>();
+    super();
     this.activeId$ = _lab.selectActiveSudoku$.pipe(
       takeUntil(this._destroy$),
       map(s => s?.id||''));
-  }
-
-  ngOnDestroy() {
-    this._destroy$.next(true);
-    this._destroy$.unsubscribe();
   }
 
   select(schema: Schema) {

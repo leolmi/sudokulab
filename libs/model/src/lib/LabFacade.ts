@@ -1,4 +1,4 @@
-import {Observable} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {PlaySudoku, Sudoku, SudokulabPage, SudokuMessage} from "@sudokulab/model";
 import {Facade} from "./Facade";
 
@@ -6,6 +6,7 @@ export abstract class LabFacade implements Facade {
   name = 'lab';
   abstract selectActiveSudoku$: Observable<PlaySudoku|undefined>;
   abstract selectActiveCell$: Observable<string>;
+  abstract onUpload$: BehaviorSubject<any>;
 
   abstract loadSudoku(sudoku: Sudoku): void;
   abstract setActiveSudoku(id: string): void;
@@ -18,4 +19,5 @@ export abstract class LabFacade implements Facade {
   abstract move(direction: string): void;
   abstract clear(): void;
   abstract download(): void;
+  abstract upload(): void;
 }
