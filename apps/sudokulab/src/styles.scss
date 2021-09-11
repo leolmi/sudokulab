@@ -16,6 +16,15 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   top: 0;
 }
 
+.lines {
+  background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 6px,
+      rgba(10,10,10,.1) 1px,
+      rgba(10,10,10,.1) 8px);
+}
+
 .sudokulab-page {
   position: absolute;
   left: 0;

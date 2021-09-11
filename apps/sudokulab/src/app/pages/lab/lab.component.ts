@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
+import {ChangeDetectionStrategy, Component} from "@angular/core";
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -6,9 +6,7 @@ import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
   styleUrls: ['./lab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LabComponent implements OnDestroy {
+export class LabComponent {
   constructor() {
-  }
-  ngOnDestroy() {
   }
 }
