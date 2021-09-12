@@ -2,7 +2,7 @@ import { Sudoku } from './lib/Sudoku';
 import { ElementRef } from '@angular/core';
 import { PlaySudoku } from './lib/PlaySudoku';
 import { forEach as _forEach, keys as _keys, includes as _includes, isString as _isString } from 'lodash';
-import { PlaySudokuCellAlignment, PlaySudokuGroupType } from './lib/enums';
+import { PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
 import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
@@ -41,9 +41,9 @@ export const decodeCellId = (id: string): CellInfo => {
   return new CellInfo(parseInt(parts[0] || '-1', 10), parseInt(parts[1] || '-1'));
 }
 
-export const groupId = (type: PlaySudokuGroupType, pos: number) => `${type}.${pos}`;
+export const groupId = (type: SudokuGroupType, pos: number) => `${type}.${pos}`;
 
-export const getGroupRank = (sdk: Sudoku|undefined): number => Math.sqrt(sdk?.rank||9);
+export const getGroupRank = (rank: number): number => Math.sqrt(rank||9);
 
 export const getCellStyle = (sdk: Sudoku|undefined, ele: ElementRef): any => {
   const pxlw = sdk ? Math.floor(ele.nativeElement.parentElement.clientWidth / sdk.rank) : 40;
@@ -59,7 +59,7 @@ export const getCellStyle = (sdk: Sudoku|undefined, ele: ElementRef): any => {
 
 export const getLinesGroups = (sdk: Sudoku|undefined): {[id: number]: boolean} => {
   const res: {[id: number]: boolean} = {};
-  const grank = getGroupRank(sdk);
+  const grank = getGroupRank(sdk?.rank||9);
   for(let g = 0; g < (sdk?.rank||9)-1; g++) {
     res[g] = ((g+1)%grank === 0);
   }

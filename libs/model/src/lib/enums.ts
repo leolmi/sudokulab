@@ -7,7 +7,7 @@ export enum SudokuSymmetry {
   central = 'central'
 }
 
-export enum PlaySudokuGroupType {
+export enum SudokuGroupType {
   column = 'column',
   row = 'row',
   square = 'square'
@@ -39,4 +39,10 @@ export enum MessageType {
   success = 'success',
   warning = 'warning',
   error = 'error'
+}
+
+export enum EditSudokuEndGenerationMode {
+  manual = 'manual',
+  afterN = 'afterN',
+  afterTime = 'afterTime'
 }

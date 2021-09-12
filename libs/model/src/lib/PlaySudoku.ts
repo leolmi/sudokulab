@@ -1,7 +1,7 @@
 import { Sudoku } from './Sudoku';
 import { PlaySudokuCell } from './PlaySudokuCell';
 import { PlaySudokuGroup } from './PlaySudokuGroup';
-import { PlaySudokuGroupType } from './enums';
+import { SudokuGroupType } from './enums';
 import { PlaySudokuOptions } from './PlaySudokuOptions';
 import { Dictionary } from '@ngrx/entity';
 import { PlaySudokuState } from './PlaySudokuState';
@@ -29,7 +29,7 @@ export class PlaySudoku {
   state: PlaySudokuState;
 }
 
-const _addGroup = (ps: PlaySudoku, type: PlaySudokuGroupType, pos: number) => {
+const _addGroup = (ps: PlaySudoku, type: SudokuGroupType, pos: number) => {
   const gid = groupId(type, pos);
   ps.groups[gid] = new PlaySudokuGroup({ id: gid });
 }
@@ -43,12 +43,12 @@ const _loadSudoku = (ps: PlaySudoku) => {
   ps.state.fixedCount = 0;
   ps.state.valuesCount = 0;
   // group rank (9 => 3)
-  const grank = getGroupRank(ps.sudoku);
+  const grank = getGroupRank(ps.sudoku.rank);
   // genera i gruppi
   for(let g = 0; g < ps.sudoku.rank; g++) {
-    _addGroup(ps, PlaySudokuGroupType.row, g);
-    _addGroup(ps, PlaySudokuGroupType.column, g);
-    _addGroup(ps, PlaySudokuGroupType.square, g);
+    _addGroup(ps, SudokuGroupType.row, g);
+    _addGroup(ps, SudokuGroupType.column, g);
+    _addGroup(ps, SudokuGroupType.square, g);
   }
   // genera le celle & popola i gruppi
   for(let r = 0; r < ps.sudoku.rank; r++) {
@@ -70,9 +70,9 @@ const _loadSudoku = (ps: PlaySudoku) => {
       ps.cells[cid] = cell;
       const gpos = Math.floor(r / grank) * grank + Math.floor(c / grank);
       ps.groupsForCell[cell.id] = [
-        ps.groups[groupId(PlaySudokuGroupType.row, r)],
-        ps.groups[groupId(PlaySudokuGroupType.column, c)],
-        ps.groups[groupId(PlaySudokuGroupType.square, gpos)]
+        ps.groups[groupId(SudokuGroupType.row, r)],
+        ps.groups[groupId(SudokuGroupType.column, c)],
+        ps.groups[groupId(SudokuGroupType.square, gpos)]
       ];
       ps.groupsForCell[cell.id]?.forEach(g => g?.cells.push(cell));
     }

@@ -8,6 +8,13 @@ export * from './lib/SudokuInfo';
 export * from './lib/Algorithm';
 export * from './lib/AlgorithmResult';
 export * from './lib/Algorithms';
+
+export * from './lib/EditSudokuCell';
+export * from './lib/EditSudokuGroup';
+export * from './lib/EditSudoku';
+export * from './lib/EditSudokuOptions';
+
+
 export * from './lib/PlaySudokuCell';
 export * from './lib/PlaySudokuGroup';
 export * from './lib/PlaySudoku';
