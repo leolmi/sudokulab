@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CellInfo } from './lib/CellInfo';
 import { AVAILABLE_DIRECTIONS } from './lib/consts';
+import { EditSudokuOptions } from '.';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
@@ -57,7 +58,7 @@ export const getCellStyle = (sdk: Sudoku|undefined, ele: ElementRef): any => {
   }
 }
 
-export const getLinesGroups = (sdk: Sudoku|undefined): {[id: number]: boolean} => {
+export const getLinesGroups = (sdk: Sudoku|EditSudokuOptions|undefined): {[id: number]: boolean} => {
   const res: {[id: number]: boolean} = {};
   const grank = getGroupRank(sdk?.rank||9);
   for(let g = 0; g < (sdk?.rank||9)-1; g++) {

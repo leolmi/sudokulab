@@ -10,8 +10,8 @@
              [ngStyle]="cellStyle$|async"
              (click)="select(col, row)"
              fxLayout="row" fxLayoutAlign="center center"
-             *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
-             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row], 'error': cell.error}">
+             *ngIf="((editSudoku$|async)?.cells||{})[col+'.'+row] as cell"
+             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
           <div class="cell-value">{{cell?.value}}</div>
         </div>
       </div>

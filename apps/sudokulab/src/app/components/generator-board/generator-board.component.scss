@@ -1,0 +1,66 @@
+::ng-deep {
+    .light-theme {
+      .cell-container {
+        background: whitesmoke !important;
+        color: #333 !important;
+        border: 1px solid rgba(10,10,10,.1) !important;
+        &.fixed {
+          color: lightgreen !important;
+        }
+        &:not(.fixed) {
+          &:hover {
+            background-color: lightgreen !important;
+          }
+        }
+        &.bottom-line {
+          border-bottom: 2px solid #333 !important;
+        }
+        &.right-line {
+          border-right: 2px solid #333 !important;
+        }
+      }
+    }
+  }
+  
+  .sudokulab-board {
+    height: 600px;
+    .sudokulab-board-background {
+      height: 100%;
+    }
+  }
+  
+  
+  .cell-container {
+    position: relative;
+    background: #333;
+    color: whitesmoke;
+    border: 1px solid rgba(200,200,200,.1);
+    &.fixed {
+      font-weight: bold;
+      color: yellowgreen;
+      user-select: none;
+      cursor: not-allowed;
+    }
+    &.selected {
+      // outline: orangered;
+      outline-style: dashed;
+      outline-offset: -4px;
+      outline-width: 1px;
+    }
+    &:not(.fixed) {
+      &:hover {
+        background-color: yellowgreen;
+      }
+    }
+    &.bottom-line {
+      border-bottom: 2px solid whitesmoke;
+    }
+    &.right-line {
+      border-right: 2px solid whitesmoke;
+    }
+    &.error {
+      background-color: orangered !important;
+    }
+  }
+
+  
