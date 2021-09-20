@@ -1,0 +1,33 @@
+.sudoku-thumbnail {
+  user-select: none;
+  height: 100px;
+  width: 100px;
+  .thumbnail-schema-container {
+    .thumbnail-row {
+      .thumbnail-cell {
+        .thumbnail-cell-value-container {
+          position: relative;
+          border: 1px solid rgba(200,200,200,.1);
+          &.bottom-line {
+            border-bottom: 1px solid whitesmoke;
+          }
+          &.right-line {
+            border-right: 1px solid whitesmoke;
+          }
+          &.fixed {
+            font-weight: bold;
+            color: whitesmoke;
+            background-color: #333;
+          }
+          .cell-value {
+
+          }
+        }
+      }
+    }
+  }
+  .thumbnail-description {
+    opacity: .6;
+    font-size: .8em;
+  }
+}

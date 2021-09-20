@@ -31,6 +31,15 @@ import {GeneratorBoardComponent} from "./components/generator-board/generator-bo
 import {DestroyComponent} from "./components/DestroyComponent";
 import {MatDialogModule} from "@angular/material/dialog";
 import {UploadDialogComponent} from "./components/upload-dialog/upload-dialog.component";
+import { GeneratorOptionsComponent } from './components/generator-options/generator-options.component';
+import { GeneratorStateComponent } from './components/generator-state/generator-state.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatInputModule } from '@angular/material/input';
+import { ThumbnailComponent } from './components/thumbnail/thumbnail.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSliderModule } from '@angular/material/slider';
 
 
 @NgModule({
@@ -44,7 +53,10 @@ import {UploadDialogComponent} from "./components/upload-dialog/upload-dialog.co
     LabComponent,
     OptionsComponent,
     GeneratorComponent,
-    UploadDialogComponent
+    UploadDialogComponent,
+    GeneratorOptionsComponent,
+    GeneratorStateComponent,
+    ThumbnailComponent
   ],
   imports: [
     BrowserModule,
@@ -58,6 +70,12 @@ import {UploadDialogComponent} from "./components/upload-dialog/upload-dialog.co
     MatMenuModule,
     MatTooltipModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatInputModule,
+    MatProgressBarModule,
+    MatSliderModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     BrowserAnimationsModule,

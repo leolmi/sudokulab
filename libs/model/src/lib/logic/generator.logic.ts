@@ -1,85 +1,73 @@
-import {EditSudoku} from "../EditSudoku";
-import {cellId} from "../../sudoku-helper";
-import {EditSudokuCell} from "../EditSudokuCell";
-import {EditSudokuEndGenerationMode} from "../enums";
-import {Sudoku} from "../Sudoku";
+import { EditSudoku } from '../EditSudoku';
+import { Sudoku } from '../Sudoku';
+import { GeneratorFacade } from '../GeneratorFacade';
+import { cloneDeep as _clone } from 'lodash';
+import { checkNumbers, checkValues, initSchema, isOnEnd, resetSchema, solveSchema } from './generator.helper';
+import { SudokuSolution } from '../SudokuSolution';
+import { BehaviorSubject } from 'rxjs';
+import { updateBehaviorSubject, use } from '../../sudoku-helper';
+
 
 export class Generator {
   generating: number;
-  schemas: Sudoku[];
-  stopped: boolean;
-  constructor(public sdk: EditSudoku) {
+  schemas$: BehaviorSubject<Sudoku[]>;
+  private _workSdk: EditSudoku;
+  constructor(private _sdk: EditSudoku, private _facade: GeneratorFacade) {
     this.generating = 0;
-    this.stopped = false;
-    this.schemas = [];
+    this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
+    this._workSdk = _clone(this._sdk);
   }
 
   private _end() {
     this.generating = 0;
   }
 
+  get facade() { return this._facade; }
+
+  get sdk() { return this._sdk; }
+
+  private _isRightSolution(solution: SudokuSolution): boolean {
+    const info = solution.sdk.sudoku?.info;
+    if (!info) return false;
+    // verifica l'utilizzo del try-algorithm
+    if (this._workSdk.options.excludeTryAlgorithm && info.useTryAlgorithm) return false;
+    // verifica del livello di difficoltà
+    const minDiff = Math.min(this._workSdk.options.minDiff, this._workSdk.options.maxDiff);
+    const maxDiff = Math.max(this._workSdk.options.minDiff, this._workSdk.options.maxDiff);
+    if (info.difficultyValue > maxDiff || info.difficultyValue < minDiff) return false;
+    return true;
+  }
+
   private _generate() {
-    // 1. valorizzazione dei fixed vuoti
-    // 2.  soluzione > se unica salva schema altrimenti skippa
+    // 1. inizializza lo schema
+    initSchema(this._workSdk);
+    // 2. aggiunge nuovi fixed se il numero di quelli inseriti è minore dell numero previsto
+    checkNumbers(this._workSdk);
+    // 3. valorizzazione dei fixed vuoti (sequenziale)
+    if (checkValues(this._workSdk)) {
+      // 4. soluzione
+      const sol = solveSchema(this._workSdk);
+      // 5. se unica salva schema altrimenti skippa
+      if (!!sol.unique) {
+        const schema = sol.unique.sdk.sudoku;
+        if (!!schema && this._isRightSolution(sol.unique)) {
+          updateBehaviorSubject(this.schemas$, sch => !!sch.push(schema));
+        }
+      }
+      resetSchema(this._workSdk);
+    }
 
-
-
-    if (_isOnEnd(this)) return this._end();
-    setTimeout(() => this._generate());
+    isOnEnd(this, ended => {
+      if (ended) return this._end();
+      setTimeout(() => this._generate(), 250);
+    });
   }
 
   generate() {
     this.generating = performance.now();
-    this.stopped = false;
-    // 1. aggiunge nuovi fixed se il numero di quelli inseriti è minore dell numero previsto
-    //    - rispetta la simmetria se specificata
-    const fixed = _getFixed(this.sdk);
-    const diff = this.sdk.options.fixedCount - fixed.length;
-    if (diff > 0) {
-      for (let i = 0; i < diff; i++) {
-        const fxcell = _addFixed(this.sdk);
-        if (!!fxcell) fixed.push(fxcell);
-      }
-    }
-
-    // 3 avvia il ciclo:
-    //    - valorizzazione dei fixed vuoti
-    //    - soluzione > se unica salva schema altrimenti skippa
+    this._workSdk = _clone(this._sdk);
     this._generate();
   }
 }
 
-const _getFixed = (sdk: EditSudoku): EditSudokuCell[] => {
-  const fixed: EditSudokuCell[] = [];
-  for(let col = 0; col<sdk.options.rank; col++) {
-    for(let row = 0; row<sdk.options.rank; row++) {
-      const cell = sdk.cells[cellId(col, row)];
-      if (cell?.fixed) fixed.push(cell);
-    }
-  }
-  return fixed;
-}
 
-const _addFixed = (sdk: EditSudoku): EditSudokuCell|undefined => {
-  const id = '';
-
-  return sdk.cells[id];
-}
-
-const _valorize = (sdk: EditSudoku): void => {
-
-}
-
-const _isOnEnd = (G: Generator): boolean => {
-  switch (G.sdk.options.generationEndMode) {
-    case EditSudokuEndGenerationMode.afterN:
-      return G.schemas.length >= (G.sdk.options.generationEndValue || 1);
-    case EditSudokuEndGenerationMode.afterTime:
-      const elapsed = performance.now() - G.generating;
-      return elapsed >= (G.sdk.options.generationEndValue || 60000);
-    case EditSudokuEndGenerationMode.manual:
-      return G.stopped;
-  }
-
-  return false;
-}

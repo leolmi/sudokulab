@@ -17,7 +17,7 @@ import {
   getSchemaName,
   isValidValue,
   MessageType,
-  MoveDirection,
+  MoveDirection, moveOnDirection,
   PlaySudoku,
   resetAvailables,
   Solver,
@@ -25,7 +25,7 @@ import {
   Sudoku,
   SudokuInfo,
   SudokuMessage
-} from "@sudokulab/model";
+} from '@sudokulab/model';
 import {cloneDeep as _clone} from 'lodash';
 import {Schema} from "@sudokulab/api-interfaces";
 import {saveAs} from "file-saver";
@@ -109,42 +109,8 @@ export class LabEffects {
       this._store.select(SudokuSelectors.selectActiveCell)),
     switchMap(([a, sdk, cell]) => {
       if (!a?.direction || !cell || !sdk) return [];
-      const info = decodeCellId(cell);
-      if (info.row < 0 || info.col < 0) return [];
-      const rank = sdk?.sudoku?.rank||9;
-      switch (AVAILABLE_DIRECTIONS[a.direction]||MoveDirection.next) {
-        case MoveDirection.up:
-          if (info.row <= 0) return [];
-          info.row--;
-          break;
-        case MoveDirection.down:
-          if (info.row >= rank - 1) return [];
-          info.row++;
-          break;
-        case MoveDirection.left:
-          if (info.col <= 0) return [];
-          info.col--;
-          break;
-        case MoveDirection.right:
-          if (info.col >= rank - 1) return [];
-          info.col++;
-          break;
-        case MoveDirection.next:
-        default:
-          if (info.col === rank - 1) {
-            if (info.row === rank - 1) {
-              info.col = 0;
-              info.row = 0;
-            } else {
-              info.row++;
-              info.col = 0;
-            }
-          } else {
-            info.col ++;
-          }
-          break;
-      }
-      return [SudokuActions.setActiveCell({ id: cellId(info.col, info.row) })];
+      const info = moveOnDirection(cell, sdk?.sudoku, a.direction);
+      return !!info ? [SudokuActions.setActiveCell({ id: cellId(info.col, info.row) })] : [];
     })
   ));
 

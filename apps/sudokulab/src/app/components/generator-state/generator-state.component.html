@@ -1,0 +1,10 @@
+<div class="schemalab-tool options-tool" fxLayout="column">
+  <div class="output-schemas">
+    <sudokulab-thumbnail *ngFor="let sch of schemas$|async"></sudokulab-thumbnail>
+  </div>
+  <div class="empty-space" fxFlex></div>
+  <div class="toolbar" fxLayout="row">
+    <button mat-raised-button color="accent" *ngIf="!!!(running$|async)" (click)="run()">RUN</button>
+    <button mat-raised-button color="warn" *ngIf="!!(running$|async)" (click)="stop()">STOP</button>
+  </div>
+</div>

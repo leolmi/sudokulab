@@ -1,5 +1,13 @@
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy} from '@angular/core';
-import {cellId, getCellStyle, getLinesGroups, isDirectionKey, LabFacade, PlaySudoku} from '@sudokulab/model';
+import {
+  cellId,
+  getCellStyle,
+  getDimension,
+  getLinesGroups,
+  isDirectionKey,
+  LabFacade,
+  PlaySudoku
+} from '@sudokulab/model';
 import {Observable, Subject} from 'rxjs';
 import {map, takeUntil} from 'rxjs/operators';
 import {DestroyComponent} from "../DestroyComponent";
@@ -25,8 +33,8 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
     this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
 
-    this.rows$ = this.playSudoku$.pipe(map(s => Array(s?.sudoku?.rank||9).fill(0).map((x, i)=>i)));
-    this.cols$ = this.playSudoku$.pipe(map(s => Array(s?.sudoku?.rank||9).fill(0).map((x, i)=>i)));
+    this.rows$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
+    this.cols$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
     this.cellStyle$ = this.playSudoku$.pipe(map(s => getCellStyle(s?.sudoku, ele)));
     this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku)));
 

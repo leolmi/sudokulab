@@ -2,7 +2,9 @@ export enum SudokuSymmetry {
   none = 'none',
   vertical = 'vertical',
   horizontal = 'horizontal',
-  diagonal = 'diagonal',
+  doubleMedian = 'doubleMedian',
+  diagonalNWSE = 'diagonalNWSE',
+  diagonalNESW = 'diagonalNESW',
   doubleDiagonal = 'doubleDiagonal',
   central = 'central'
 }
@@ -31,7 +33,8 @@ export enum MoveDirection {
   down = 'down',
   right = 'right',
   left = 'left',
-  next = 'next'
+  next = 'next',
+  prev = 'prev'
 }
 
 export enum MessageType {

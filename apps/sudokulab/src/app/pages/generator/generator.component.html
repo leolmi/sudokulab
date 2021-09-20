@@ -1,6 +1,10 @@
+<mat-progress-bar *ngIf="!!(running$|async)"
+                  class="progress-bar"
+                  color="accent"
+                  mode="indeterminate"></mat-progress-bar>
 <div class="sudokulab-page" fxLayout="row">
   <div class="tools tools-left" fxFlex>
-
+    <sudokulab-generator-options></sudokulab-generator-options>
   </div>
   <div class="board-container" fxLayout="column">
     <div class="board">
@@ -9,7 +13,7 @@
     <div class="bottom-board" fxFlex></div>
   </div>
   <div class="tools tools-right" fxFlex>
-
+    <sudokulab-generator-state></sudokulab-generator-state>
   </div>
 </div>
 

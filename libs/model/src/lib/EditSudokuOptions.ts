@@ -9,6 +9,9 @@ export class EditSudokuOptions {
   simmetry = SudokuSymmetry.none;
   fixedCount = 24;
   updateGeometry = true;
+  excludeTryAlgorithm = true;
   generationEndMode = EditSudokuEndGenerationMode.afterN;
   generationEndValue = 1;
+  minDiff = 0;
+  maxDiff = 1000000;
 }

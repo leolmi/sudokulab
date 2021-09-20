@@ -49,7 +49,7 @@
   }
   &:not(.fixed) {
     &:hover {
-      background-color: yellowgreen;
+      background-color: rgba(10,10,10, .7);
     }
   }
   &.bottom-line {

@@ -63,7 +63,7 @@ const _loadSudoku = (ps: PlaySudoku) => {
         position: x,
         value: _getValue(cv),
         fixed: (fv || '0') !== '0',
-        availables: empty ? getAvailables(ps) : []
+        availables: empty ? getAvailables(ps.sudoku?.rank) : []
       });
       if (cell.fixed) ps.state.fixedCount++;
       if (!!cell.value) ps.state.valuesCount++;

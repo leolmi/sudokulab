@@ -1,16 +1,16 @@
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { SolveStepResult } from './SolveStepResult';
-import { getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku-helper';
-import { cloneDeep as _clone, forEach as _forEach, remove as _remove, extend as _extend, reduce as _reduce, isNumber as _isNumber } from 'lodash';
+import { applySudokuRules, getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku-helper';
+import { cloneDeep as _clone, extend as _extend, forEach as _forEach, reduce as _reduce } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';
 import { SudokuSolution } from '../SudokuSolution';
-import {SudokuInfo} from "../SudokuInfo";
-import {ALGORITHMS_FACTORS, DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM} from "../Algorithms";
+import { SudokuInfo } from '../SudokuInfo';
+import { ALGORITHMS_FACTORS, DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM } from '../Algorithms';
 
 export class Solver {
-  private _sdks: SudokuSolution[];
+  private readonly _sdks: SudokuSolution[];
 
   constructor(sdk: PlaySudoku) {
     const csdk = clear(sdk);
@@ -64,16 +64,11 @@ const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
   return handler(changes);
 }
 
-const _isValue = (v: string): boolean => (v||'')!=='';
-
 export const checkAvailables = (ps: PlaySudoku|undefined) => {
   if (!ps) return;
-  _forEach(ps.groups || {}, (g) => {
-    if (!g) return;
-    const values: Dictionary<boolean> = {};
-    g.cells.forEach(c => _isValue(c.value) ? values[c.value] = true : null);
-    g.cells.forEach(c => _remove(c.availables, av => values[av] || _isValue(c.value)));
-  });
+  // aaplica le regole base del sudoku
+  applySudokuRules(ps);
+  // for Algorithm OneCellFOrValue
   _forEach(ps.groups || {}, (g) => {
     if (!g) return;
     g.availableOnCells = {};
@@ -85,6 +80,7 @@ export const checkAvailables = (ps: PlaySudoku|undefined) => {
       });
     });
   });
+  // calcolo dello state, ricerca errori, ricerca coppie
   ps.couples = {};
   ps.state.valuesCount = 0;
   ps.state.error = false;
@@ -102,6 +98,7 @@ export const checkAvailables = (ps: PlaySudoku|undefined) => {
       if (!c.value) ps.state.complete = false;
     }
   });
+  // percentuale di riempimento calcolata sul numero di valori da inserirre
   ps.state.percent = ((ps.state.valuesCount - ps.state.fixedCount) / (81 - ps.state.fixedCount)) * 100;
 }
 
@@ -111,7 +108,7 @@ export const clear = (sdk: PlaySudoku): PlaySudoku => {
     _forEach(ps?.cells || {}, (c) => {
       if (!!c) {
         c.value = (c.fixed ? c.value : '');
-        if (!c.fixed) c.availables = getAvailables(ps);
+        if (!c.fixed) c.availables = getAvailables(ps.sudoku?.rank);
       }
     });
     ps.state.complete = false;

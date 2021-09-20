@@ -1,20 +1,30 @@
 import { Sudoku } from './lib/Sudoku';
 import { ElementRef } from '@angular/core';
 import { PlaySudoku } from './lib/PlaySudoku';
-import { forEach as _forEach, keys as _keys, includes as _includes, isString as _isString } from 'lodash';
-import { PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
+import {
+  cloneDeep as _clone,
+  extend as _extend,
+  forEach as _forEach,
+  includes as _includes,
+  isString as _isString,
+  keys as _keys,
+  remove as _remove
+} from 'lodash';
+import { EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
 import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
-  OneValueForCellAlgorithm, TRY_NUMBER_ALGORITHM,
+  OneValueForCellAlgorithm,
+  TRY_NUMBER_ALGORITHM,
   TryNumberAlgorithm
 } from './lib/Algorithms';
 import { PlayAlgorithm } from './lib/Algorithm';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CellInfo } from './lib/CellInfo';
-import { AVAILABLE_DIRECTIONS } from './lib/consts';
-import { EditSudokuOptions } from '.';
+import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE } from './lib/consts';
+import { EditSudoku, EditSudokuOptions } from '.';
+import { Dictionary } from '@ngrx/entity';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
@@ -35,7 +45,40 @@ export const getHash = (o: any): number => {
   return hash;
 }
 
+export const update = <T>(o: T, chs?: Partial<T>, handler?: (c:T) => void): T => {
+  const co = <T>_clone(o||{});
+  if (!!chs) _extend(co, chs||{});
+  if (!!handler) handler(co);
+  return co;
+}
+
+export const updateBehaviorSubject = <T>(bs$: BehaviorSubject<T>, handler: (c: T) => boolean): void =>
+  use(bs$, o => {
+    const co = _clone(o);
+    if (handler(co)) bs$.next(co);
+  });
+
 export const cellId = (column: number, row: number) => `${column}.${row}`;
+
+export const isValue = (v: string): boolean => (v || '') !== '' && v !== SUDOKU_DYNAMIC_VALUE;
+
+/**
+ * aaplica la regola base del sudoku:
+ * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
+ * @param sdk
+ */
+export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined) => {
+  if (!sdk) return;
+  _forEach(sdk.groups || {}, (g) => {
+    if (!g) return;
+    // vettore valori di gruppo
+    const values: Dictionary<boolean> = {};
+    g.cells.forEach(c => isValue(c.value) ? values[c.value] = true : null);
+    // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
+    g.cells.forEach(c => _remove(c.availables, av => values[av] || isValue(c.value)));
+  });
+
+}
 
 export const decodeCellId = (id: string): CellInfo => {
   const parts = (id || '').split('.');
@@ -46,11 +89,11 @@ export const groupId = (type: SudokuGroupType, pos: number) => `${type}.${pos}`;
 
 export const getGroupRank = (rank: number): number => Math.sqrt(rank||9);
 
-export const getCellStyle = (sdk: Sudoku|undefined, ele: ElementRef): any => {
-  const pxlw = sdk ? Math.floor(ele.nativeElement.parentElement.clientWidth / sdk.rank) : 40;
-  const pxlh = sdk ? Math.floor(ele.nativeElement.parentElement.clientHeight / sdk.rank) : 40;
+export const getCellStyle = (sdk: Sudoku|EditSudokuOptions|undefined, ele: ElementRef, size = 40): any => {
+  const pxlw = sdk ? Math.floor(ele.nativeElement.parentElement.clientWidth / sdk.rank) : size;
+  const pxlh = sdk ? Math.floor(ele.nativeElement.parentElement.clientHeight / sdk.rank) : size;
   const mindim = Math.min(pxlw, pxlh);
-  const fnts = sdk ? Math.floor( mindim / 2) : 20;
+  const fnts = sdk ? Math.floor(mindim / 2) : (size / 2);
   return {
     width: `${pxlw}px`,
     height: `${pxlh}px`,
@@ -97,29 +140,51 @@ export const getAlignment = (cid1: string, cid2: string): PlaySudokuCellAlignmen
   return PlaySudokuCellAlignment.none;
 }
 
-export const getValues = (sdk: PlaySudoku|undefined): string => {
-  const rank = sdk?.sudoku?.rank||81;
-  let values = '';
+export const getRank = (sdk: PlaySudoku|EditSudoku|undefined): number => {
+  if (sdk instanceof PlaySudoku) return (<PlaySudoku>sdk).sudoku?.rank || 9;
+  return sdk?.options.rank || 9;
+}
+
+export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined, handler: (cid: string) => any) => {
+  const rank = getRank(sdk);
   for (let r = 0; r < rank; r++) {
     for (let c = 0; c < rank; c++) {
-      values = `${values}${sdk?.cells[cellId(c, r)]?.value||'0'}`
+      handler(cellId(c, r));
     }
   }
+}
+
+export const getValues = (sdk: PlaySudoku|undefined): string => {
+  let values = '';
+  traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || '0'}`)
   return values;
 }
 
-export const getAvailables = (sdk: PlaySudoku|undefined): string[] => {
-  return Array(sdk?.sudoku?.rank||9).fill(0).map((x, i)=>`${(i+1)}`)
-}
+export const getAvailables = (rank: number|undefined) =>
+  Array(rank || 9).fill(0).map((x, i) => `${(i+1)}`);
+
+export const getDimension = (rank: number|undefined) =>
+  Array(rank || 9).fill(0).map((x, i) => i)
 
 export const isValidValue = (sdk: PlaySudoku|undefined, value: string): boolean => {
   console.log('VALID VALUE', value);
-  return (value.length === 1 && /[1-9a-fA-F]/g.test(value)) || ['Delete', ' '].indexOf(value)>-1;
+  const mvalue = (value || '').toLowerCase();
+  const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
+  const isvalue = available_pos > -1 && available_pos < (sdk?.sudoku?.rank || 9);
+  return (value.length === 1 && isvalue) || ['Delete', ' '].indexOf(value)>-1;
+}
+
+export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
+  console.log('VALID VALUE', value);
+  const mvalue = (value || '').toLowerCase();
+  const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
+  const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || 9);
+  return (value.length === 1 && isvalue) || ['Delete', SUDOKU_DYNAMIC_VALUE, ' ', '?'].indexOf(value) > -1;
 }
 
 export const resetAvailables = (sdk: PlaySudoku|undefined) => {
   _forEach(sdk?.cells||{}, (c) => {
-    if (!!c) c.availables = c.value ? [] : getAvailables(sdk);
+    if (!!c) c.availables = c.value ? [] : getAvailables(sdk?.sudoku?.rank);
   });
 }
 
@@ -127,12 +192,91 @@ export const isDirectionKey = (direction: string): boolean => {
   return _keys(AVAILABLE_DIRECTIONS).indexOf(direction)>-1;
 }
 
-export const getSchemaName = (sdk: PlaySudoku|undefined): string => {
-  const rank = sdk?.sudoku?.rank||9;
-  const fixc = sdk?.state.fixedCount||0;
-  const hash = getHash(sdk?.sudoku?.fixed||'');
-  const diff = sdk?.sudoku?.info?.difficulty||'unknown';
-  const tryN = (sdk?.sudoku?.info?.difficultyMap||{})[TRY_NUMBER_ALGORITHM];
-  const tryd = !!tryN ? `_T${tryN}` : '';
-  return `${rank}x${rank}_${fixc}num_${diff}${tryd}(${hash})`;
+export const geEditFixedCount = (sdk: EditSudoku|undefined): number => {
+  let counter = 0;
+  _forEach(sdk?.cells||{}, c => (c?.fixed) ? counter++ : null);
+  return counter;
+}
+
+export const getFixedCount = (sdk: Sudoku|undefined): number => {
+  let counter = 0;
+  _forEach((sdk?.fixed || ''), (v) => isValue(v) ? counter++ : null);
+  return counter;
+}
+
+export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, separator = '_'): string => {
+  const sudoku: Sudoku|undefined = (sdk instanceof PlaySudoku) ? (<PlaySudoku>sdk).sudoku : <Sudoku>sdk;
+  if (!sudoku) return 'unknown';
+  const rank = sudoku.rank||9;
+  const fixc = getFixedCount(sudoku);
+  const hash = getHash(sudoku.fixed);
+  const diff = sudoku.info?.difficulty||'unknown';
+  const tryN = (sudoku.info?.difficultyMap||{})[TRY_NUMBER_ALGORITHM];
+  const tryd = !!tryN ? `${separator}T${tryN}` : '';
+  return `${rank}x${rank}${separator}${fixc}num${separator}${diff}${tryd}(${hash})`;
+}
+
+export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefined, direction: string): CellInfo|undefined => {
+  const info = decodeCellId(cid);
+  if (info.row < 0 || info.col < 0) return;
+  const rank = o?.rank||9;
+  switch (AVAILABLE_DIRECTIONS[direction]||MoveDirection.next) {
+    case MoveDirection.up:
+      if (info.row <= 0) return;
+      info.row--;
+      break;
+    case MoveDirection.down:
+      if (info.row >= rank - 1) return;
+      info.row++;
+      break;
+    case MoveDirection.left:
+      if (info.col <= 0) return;
+      info.col--;
+      break;
+    case MoveDirection.right:
+      if (info.col >= rank - 1) return;
+      info.col++;
+      break;
+    case MoveDirection.prev:
+      if (info.col <= 0) {
+        if (info.row <= 0) {
+          info.col = rank - 1;
+          info.row = rank - 1;
+        } else {
+          info.row--;
+          info.col = rank - 1;
+        }
+      } else {
+        info.col --;
+      }
+      break;
+    case MoveDirection.next:
+    default:
+      if (info.col >= rank - 1) {
+        if (info.row >= rank - 1) {
+          info.col = 0;
+          info.row = 0;
+        } else {
+          info.row++;
+          info.col = 0;
+        }
+      } else {
+        info.col ++;
+      }
+      break;
+  }
+  return info;
+}
+
+
+export const hasEndGenerationValue = (o?: EditSudokuOptions): boolean => {
+  return !!o && [EditSudokuEndGenerationMode.afterN, EditSudokuEndGenerationMode.afterTime].indexOf(o.generationEndMode)>-1;
+}
+
+export const getMinNumbers = (rank: number|undefined): number => {
+  return Math.floor(((rank || 9) * (rank || 9)) / 5);
+}
+
+export const getMaxNumbers = (rank: number|undefined): number => {
+  return Math.floor(((rank || 9) * (rank || 9)) / 2);
 }

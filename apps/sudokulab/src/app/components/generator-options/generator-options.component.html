@@ -1,0 +1,87 @@
+<div class="schemalab-tool options-tool" fxLayout="column">
+  <!-- DIMESION -->
+  <mat-form-field appearance="fill">
+    <mat-label>Schema dimension</mat-label>
+    <mat-select [value]="(options$|async)?.rank"
+                (valueChange)="apply($event, 'rank')"
+                disabled="true">
+      <mat-option *ngFor="let dim of availableDimensions" [value]="dim.code">
+        {{dim.description}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <!-- SYMMETRY -->
+  <mat-form-field appearance="fill">
+    <mat-label>Symmetry</mat-label>
+    <mat-select [value]="(options$|async)?.simmetry"
+                [disabled]="running$|async"
+                (valueChange)="apply($event, 'symmetry')">
+      <mat-option *ngFor="let sym of availableSymmetries" [value]="sym.code">
+        {{sym.description}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <!-- NUMBER OF NUMBERS -->
+  <mat-label>Numbers ({{(editSudoku$|async)?.fixedCount}} / <b>{{(options$|async)?.fixedCount}}</b>)</mat-label>
+  <mat-slider
+    [disabled]="running$|async"
+    [max]="maxNumbers$|async"
+    [min]="minNumbers$|async"
+    [step]="1"
+    [thumbLabel]="true"
+    [tickInterval]="1"
+    [value]="(options$|async)?.fixedCount"
+    (valueChange)="apply($event, 'fixedCount')"
+    aria-labelledby="example-name-label">
+  </mat-slider>
+  <!-- DIFFICULTY RANGE -->
+  <div fxLayout="row" fxLayoutAlign="start center">
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Difficulty (min)</mat-label>
+      <mat-select [value]="(options$|async)?.minDiff"
+                  [disabled]="running$|async"
+                  placeholder="undefined"
+                  (valueChange)="apply($event, 'minDiff')">
+        <mat-option *ngFor="let dif of availableDifficulty" [value]="dif.code">
+          {{dif.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="space"></div>
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>(max)</mat-label>
+      <mat-select [value]="(options$|async)?.maxDiff"
+                  [disabled]="running$|async"
+                  placeholder="undefined"
+                  (valueChange)="apply($event, 'maxDiff')">
+        <mat-option *ngFor="let dif of availableDifficulty" [value]="dif.code">
+          {{dif.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <!-- EXCLUDE TRY ALGORITHM -->
+  <mat-slide-toggle class="options-editor"
+                    [checked]="(options$|async)?.excludeTryAlgorithm"
+                    [disabled]="running$|async"
+                    (change)="apply($event, 'excludeTryAlgorithm')">Exclude try algorithm</mat-slide-toggle>
+  <!-- STOP MODE -->
+  <mat-form-field appearance="fill">
+    <mat-label>Stop mode</mat-label>
+    <mat-select [value]="(options$|async)?.generationEndMode"
+                [disabled]="running$|async"
+                (valueChange)="apply($event, 'generationEndMode')">
+      <mat-option *ngFor="let stm of availableStopModes" [value]="stm.code">
+        {{stm.description}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <!-- NUMBER OF STOP SCHEMA -->
+  <mat-form-field appearance="fill" *ngIf="(isStopModeCount$|async)">
+    <mat-label>Builded schemas</mat-label>
+    <input matInput
+           [disabled]="running$|async"
+           [value]="(options$|async)?.generationEndValue"
+           (input)="apply($event, 'generationEndValue')">
+  </mat-form-field>
+</div>

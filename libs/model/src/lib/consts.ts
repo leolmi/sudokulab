@@ -2,6 +2,8 @@ import { MoveDirection } from './enums';
 import { Dictionary } from '@ngrx/entity';
 
 export const featureName = 'sudoku';
+export const SUDOKU_DYNAMIC_VALUE = 'x';
+
 
 export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
   ArrowDown: MoveDirection.down,
@@ -9,5 +11,8 @@ export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
   ArrowRight: MoveDirection.right,
   ArrowLeft: MoveDirection.left,
   Enter: MoveDirection.next,
+  Backspace: MoveDirection.prev,
   '0': MoveDirection.next
 }
+
+export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
