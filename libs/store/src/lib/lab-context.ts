@@ -1,16 +1,15 @@
-import {LabFacade, PlaySudoku, Sudoku, SudokulabPage, SudokuMessage} from "@sudokulab/model";
-import {BehaviorSubject, Observable} from "rxjs";
-import * as SudokuSelectors from "./selectors";
-import * as SudokuActions from "./actions";
-import {Store} from "@ngrx/store";
-import {SudokuStore} from "./sudoku-store";
-import {Injectable} from "@angular/core";
+import { LabFacade, PlaySudoku, Sudoku, SudokuFacade, SudokuMessage } from '@sudokulab/model';
+import { BehaviorSubject, Observable } from 'rxjs';
+import * as SudokuSelectors from './selectors';
+import * as SudokuActions from './actions';
+import { Store } from '@ngrx/store';
+import { SudokuStore } from './sudoku-store';
+import { Injectable } from '@angular/core';
 
 @Injectable()
 export class LabContext extends LabFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
-  onUpload$: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
 
   setActiveSudoku(active: string) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
@@ -57,10 +56,15 @@ export class LabContext extends LabFacade {
   }
 
   upload() {
-    this.onUpload$.next({});
+    this._sudoku.upload();
   }
 
-  constructor(private _store: Store<SudokuStore>) {
+  raiseMessage(message: SudokuMessage) {
+    this._store.dispatch(SudokuActions.setActiveMessage({ message }));
+  }
+
+  constructor(private _store: Store<SudokuStore>,
+              private _sudoku: SudokuFacade) {
     super();
   }
 }

@@ -2,12 +2,13 @@ import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { SolveStepResult } from './SolveStepResult';
 import { applySudokuRules, getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku-helper';
-import { cloneDeep as _clone, extend as _extend, forEach as _forEach, reduce as _reduce } from 'lodash';
+import { cloneDeep as _clone, extend as _extend, forEach as _forEach, reduce as _reduce, includes as _includes } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';
 import { SudokuSolution } from '../SudokuSolution';
 import { SudokuInfo } from '../SudokuInfo';
 import { ALGORITHMS_FACTORS, DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM } from '../Algorithms';
+import { Algorithms } from '../enums';
 
 export class Solver {
   private readonly _sdks: SudokuSolution[];
@@ -36,6 +37,8 @@ export class Solver {
                 });
               }
             }
+          } else {
+            sol.sdk.state.error = true;
           }
         }
       });
@@ -56,7 +59,8 @@ const _canSolveOne = (sdk: PlaySudoku): boolean => {
 };
 
 const _canSolve = (sdks: SudokuSolution[]): boolean => {
-  return !!(sdks||[]).find(sol => _canSolveOne(sol.sdk));
+  return (sdks || []).length < sdks[0].sdk.options.maxSplitSchema &&
+    !!(sdks || []).find(sol => _canSolveOne(sol.sdk));
 };
 
 const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
@@ -73,11 +77,13 @@ export const checkAvailables = (ps: PlaySudoku|undefined) => {
     if (!g) return;
     g.availableOnCells = {};
     g.cells.forEach(c => {
-      c.availables.forEach(av => {
-        const avs = `${av}`;
-        g.availableOnCells[avs] = g.availableOnCells[avs] || {};
-        (g.availableOnCells[avs] || {})[c.id] = true;
-      });
+      if (!c.value) {
+        c.availables.forEach(av => {
+          const avs = `${av}`;
+          g.availableOnCells[avs] = g.availableOnCells[avs] || {};
+          (g.availableOnCells[avs] || {})[c.id] = true;
+        });
+      }
     });
   });
   // calcolo dello state, ricerca errori, ricerca coppie
@@ -86,7 +92,7 @@ export const checkAvailables = (ps: PlaySudoku|undefined) => {
   ps.state.error = false;
   ps.state.complete = true;
   _forEach(ps.cells || {}, (c) => {
-    if (!!c && c.availables.length === 2) {
+    if (!!c && !c.value && c.availables.length === 2) {
       const cpid = c.availables.join('|');
       ps.couples[cpid] = ps.couples[cpid] || [];
       (ps.couples[cpid] || []).push(c);
@@ -138,6 +144,7 @@ export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): So
     return;
   }
   if (!sdk) return;
+  if (sdk.options.excludeTryAlgorithm && !_includes(exclude, Algorithms.tryNumber)) exclude.push(Algorithms.tryNumber);
   return _onSudoku(sdk, (ps) => {
     let result: AlgorithmResult|undefined = undefined;
     const algorithm = getAlgorithms(exclude).find(alg => {
@@ -190,11 +197,11 @@ export const calcDifficultyLabel = (value: number): string => {
 
 export const calcDifficulty = (info: SudokuInfo): void => {
   info.difficultyMap = buildDifficultyMap(info.algorithms);
-  console.log('DIFFICULTY MAP:', info.difficultyMap);
+  // console.log('DIFFICULTY MAP:', info.difficultyMap);
   info.difficultyValue = calcDifficultyValue(info.difficultyMap);
-  console.log('DIFFICULTY VAL:', info.difficultyValue);
+  // console.log('DIFFICULTY VAL:', info.difficultyValue);
   info.difficulty = calcDifficultyLabel(info.difficultyValue);
-  console.log('DIFFICULTY LAB:', info.difficulty);
+  // console.log('DIFFICULTY LAB:', info.difficulty);
   info.useTryAlgorithm = (info.difficultyMap[TRY_NUMBER_ALGORITHM] || 0) > 0;
   info.compiled = true;
 }

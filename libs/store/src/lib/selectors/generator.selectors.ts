@@ -1,6 +1,7 @@
 import {createSelector} from '@ngrx/store';
 import {selectFeature} from '../common';
-import { EditSudoku, Sudoku } from '@sudokulab/model';
+import { EditSudoku, Sudoku, WorkingInfo } from '@sudokulab/model';
+import { Dictionary } from '@ngrx/entity';
 
 
 export const selectGenerator = createSelector(
@@ -31,4 +32,9 @@ export const selectGeneratorIsStopping = createSelector(
 export const selectGeneratedSchemas = createSelector(
   selectGenerator,
   (state): Sudoku[] => state.outputSchemas||[]
+)
+
+export const selectGeneratorWorkingInfo = createSelector(
+  selectGenerator,
+  (state): WorkingInfo|undefined => state.workingInfo
 )

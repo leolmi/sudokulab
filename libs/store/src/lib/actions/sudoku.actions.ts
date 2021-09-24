@@ -1,9 +1,10 @@
 import {createAction, props} from '@ngrx/store';
 import {SudokulabPage, SudokuMessage} from '@sudokulab/model';
+import { Dictionary } from '@ngrx/entity';
 
 export const setActivePage = createAction(
   '[SudokuPlay.sudoku] set the active page',
-  props<{ page: SudokulabPage }>()
+  props<{ page: SudokulabPage|undefined }>()
 );
 
 export const setActiveMessage = createAction(
@@ -11,6 +12,10 @@ export const setActiveMessage = createAction(
   props<{ message: SudokuMessage }>()
 );
 
+export const updatePageStatus = createAction(
+  '[SudokuPlay.sudoku] update the page status',
+  props<{ status: Dictionary<boolean>|undefined }>()
+)
 
 export const test = createAction(
   '[SudokuPlay.sudoku] test sudoku action'

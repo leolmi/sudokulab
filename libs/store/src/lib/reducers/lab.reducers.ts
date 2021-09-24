@@ -20,7 +20,7 @@ const labReducers = createReducer(
   on(SudokuActions.loadSudoku, (state, { sudoku }) => {
     const psdk = new PlaySudoku({ sudoku });
     checkAvailables(psdk);
-    return { ...adapter.upsertOne(psdk, state), active: sudoku.id, activeCell: '' };
+    return adapter.upsertOne(psdk, state);
   }),
   on(SudokuActions.updateSudoku, (state, { changes }) => adapter.updateOne({ id: changes.id||'', changes }, state)),
   on(SudokuActions.setActiveSudoku, (state, { active }) => ({ ...state, active, activeCell:'' })),

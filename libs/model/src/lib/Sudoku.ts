@@ -1,6 +1,7 @@
 import { SudokuOptions } from './SudokuOptions';
 import { repeat as _repeat } from 'lodash';
 import { SudokuInfo } from './SudokuInfo';
+import { SUDOKU_EMPTY_VALUE } from './consts';
 
 export class Sudoku {
   constructor(s?: Partial<Sudoku>) {
@@ -22,7 +23,7 @@ export class Sudoku {
 }
 
 export const consolidate = (sdk: Sudoku) => {
-  sdk.values = sdk.values || sdk.fixed || _repeat('0', sdk.rank * sdk.rank);
-  sdk.fixed = sdk.fixed || _repeat('0', sdk.rank * sdk.rank);
+  sdk.values = sdk.values || sdk.fixed || _repeat(SUDOKU_EMPTY_VALUE, sdk.rank * sdk.rank);
+  sdk.fixed = sdk.fixed || _repeat(SUDOKU_EMPTY_VALUE, sdk.rank * sdk.rank);
   sdk.id = sdk.fixed;
 }

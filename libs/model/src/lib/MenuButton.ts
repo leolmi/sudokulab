@@ -8,4 +8,6 @@ export class MenuButton {
   caption?: string;
   separator?: boolean;
   tooltip?: string;
+  disabledKey?: string;
+  invisibleKey?: string;
 }

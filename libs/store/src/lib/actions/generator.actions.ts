@@ -1,5 +1,6 @@
 import {createAction, props} from "@ngrx/store";
-import { EditSudoku, Sudoku } from '@sudokulab/model';
+import { EditSudoku, Sudoku, WorkingInfo } from '@sudokulab/model';
+import { Dictionary } from '@ngrx/entity';
 
 
 export const setActiveGeneratorCell = createAction(
@@ -49,10 +50,33 @@ export const addSchema = createAction(
   props<{ schema: Sudoku }>()
 );
 
+export const generateSchema = createAction(
+  '[SudokuPlay.generator] generate schema with defined options'
+);
+
 export const clearGeneratedSchemas = createAction(
   '[SudokuPlay.generator] clear all schemas'
 );
 
 export const downloadGeneratedSchemas = createAction(
   '[SudokuPlay.generator] download all schemas'
+);
+
+export const downloadActiveGeneratorSchema = createAction(
+  '[SudokuPlay.generator] download active generator schema'
+);
+
+export const openSchemaInLab = createAction(
+  '[SudokuPlay.generator] open schema in lab',
+  props<{ schema: Sudoku }>()
+);
+
+export const setWorkingInfo = createAction(
+  '[SudokuPlay.generator] set the working info',
+  props<{ info: WorkingInfo|undefined }>()
+);
+
+export const loadGeneratorSchema = createAction(
+  '[SudokuPlay.generator] load a schema in generator',
+  props<{ schema: Sudoku }>()
 );

@@ -6,6 +6,7 @@ import { PlaySudokuOptions } from './PlaySudokuOptions';
 import { Dictionary } from '@ngrx/entity';
 import { PlaySudokuState } from './PlaySudokuState';
 import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku-helper';
+import { SUDOKU_EMPTY_VALUE } from './consts';
 
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
@@ -34,7 +35,7 @@ const _addGroup = (ps: PlaySudoku, type: SudokuGroupType, pos: number) => {
   ps.groups[gid] = new PlaySudokuGroup({ id: gid });
 }
 
-const _getValue = (v: string): string => (v||'0') === '0' ? '' : v;
+const _getValue = (v: string): string => (v||SUDOKU_EMPTY_VALUE) === SUDOKU_EMPTY_VALUE ? '' : v;
 
 const _loadSudoku = (ps: PlaySudoku) => {
   if (!ps?.sudoku) return;
@@ -57,12 +58,12 @@ const _loadSudoku = (ps: PlaySudoku) => {
       const cv = (ps.sudoku?.values||'')[x];
       const fv = (ps.sudoku?.fixed||'')[x];
       const cid = cellId(c, r);
-      const empty = !((fv || '0') !== '0' || (cv || '0') !== '0');
+      const empty = !((fv || SUDOKU_EMPTY_VALUE) !== SUDOKU_EMPTY_VALUE || (cv || SUDOKU_EMPTY_VALUE) !== SUDOKU_EMPTY_VALUE);
       const cell = new PlaySudokuCell({
         id: cid,
         position: x,
         value: _getValue(cv),
-        fixed: (fv || '0') !== '0',
+        fixed: (fv || SUDOKU_EMPTY_VALUE) !== SUDOKU_EMPTY_VALUE,
         availables: empty ? getAvailables(ps.sudoku?.rank) : []
       });
       if (cell.fixed) ps.state.fixedCount++;
@@ -77,6 +78,4 @@ const _loadSudoku = (ps: PlaySudoku) => {
       ps.groupsForCell[cell.id]?.forEach(g => g?.cells.push(cell));
     }
   }
-
-  console.log('PLAY SUDOKU', ps);
 }

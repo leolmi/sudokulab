@@ -7,8 +7,10 @@ import {
   forEach as _forEach,
   includes as _includes,
   isString as _isString,
+  isArray as _isArray,
   keys as _keys,
-  remove as _remove
+  remove as _remove,
+  reduce as _reduce
 } from 'lodash';
 import { EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
 import {
@@ -22,9 +24,10 @@ import { PlayAlgorithm } from './lib/Algorithm';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CellInfo } from './lib/CellInfo';
-import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE } from './lib/consts';
-import { EditSudoku, EditSudokuOptions } from '.';
+import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './lib/consts';
+import { calcDifficulty, EditSudoku, EditSudokuOptions, SudokuInfo } from '.';
 import { Dictionary } from '@ngrx/entity';
+import { SudokuSolution } from './lib/SudokuSolution';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
@@ -60,7 +63,10 @@ export const updateBehaviorSubject = <T>(bs$: BehaviorSubject<T>, handler: (c: T
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
 
-export const isValue = (v: string): boolean => (v || '') !== '' && v !== SUDOKU_DYNAMIC_VALUE;
+export const isValue = (v: string, acceptX = false): boolean => {
+  const effv = (v || '').trim();
+  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || v !== SUDOKU_DYNAMIC_VALUE);
+}
 
 /**
  * aaplica la regola base del sudoku:
@@ -72,12 +78,11 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined) => {
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     // vettore valori di gruppo
-    const values: Dictionary<boolean> = {};
-    g.cells.forEach(c => isValue(c.value) ? values[c.value] = true : null);
+    const values: Dictionary<string> = {};
+    g.cells.forEach(c => isValue(c.value) ? values[c.value] = c.id : null);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
-    g.cells.forEach(c => _remove(c.availables, av => values[av] || isValue(c.value)));
+    g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
   });
-
 }
 
 export const decodeCellId = (id: string): CellInfo => {
@@ -89,9 +94,9 @@ export const groupId = (type: SudokuGroupType, pos: number) => `${type}.${pos}`;
 
 export const getGroupRank = (rank: number): number => Math.sqrt(rank||9);
 
-export const getCellStyle = (sdk: Sudoku|EditSudokuOptions|undefined, ele: ElementRef, size = 40): any => {
-  const pxlw = sdk ? Math.floor(ele.nativeElement.parentElement.clientWidth / sdk.rank) : size;
-  const pxlh = sdk ? Math.floor(ele.nativeElement.parentElement.clientHeight / sdk.rank) : size;
+export const getCellStyle = (sdk: Sudoku|EditSudokuOptions|undefined, ele: HTMLElement, size = 40): any => {
+  const pxlw = sdk ? Math.floor(ele.clientWidth / sdk.rank) : size;
+  const pxlh = sdk ? Math.floor(ele.clientHeight / sdk.rank) : size;
   const mindim = Math.min(pxlw, pxlh);
   const fnts = sdk ? Math.floor(mindim / 2) : (size / 2);
   return {
@@ -154,9 +159,9 @@ export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined, handler: (c
   }
 }
 
-export const getValues = (sdk: PlaySudoku|undefined): string => {
+export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
   let values = '';
-  traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || '0'}`)
+  traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || SUDOKU_EMPTY_VALUE}`)
   return values;
 }
 
@@ -167,7 +172,6 @@ export const getDimension = (rank: number|undefined) =>
   Array(rank || 9).fill(0).map((x, i) => i)
 
 export const isValidValue = (sdk: PlaySudoku|undefined, value: string): boolean => {
-  console.log('VALID VALUE', value);
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
   const isvalue = available_pos > -1 && available_pos < (sdk?.sudoku?.rank || 9);
@@ -175,7 +179,6 @@ export const isValidValue = (sdk: PlaySudoku|undefined, value: string): boolean 
 }
 
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
-  console.log('VALID VALUE', value);
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
   const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || 9);
@@ -198,22 +201,33 @@ export const geEditFixedCount = (sdk: EditSudoku|undefined): number => {
   return counter;
 }
 
-export const getFixedCount = (sdk: Sudoku|undefined): number => {
+export const getFixedCount = (sdk: Sudoku|EditSudoku|undefined): number => {
   let counter = 0;
-  _forEach((sdk?.fixed || ''), (v) => isValue(v) ? counter++ : null);
+  if (_isArray((<EditSudoku>sdk)?.cellList)) {
+    counter = ((<EditSudoku>sdk)?.cellList||[]).filter((c: any) => !!c?.fixed).length;
+  } else if (_isString(sdk?.fixed)) {
+    _forEach((sdk?.fixed || ''), (v) => isValue(v) ? counter++ : null);
+  }
   return counter;
 }
 
-export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, separator = '_'): string => {
-  const sudoku: Sudoku|undefined = (sdk instanceof PlaySudoku) ? (<PlaySudoku>sdk).sudoku : <Sudoku>sdk;
-  if (!sudoku) return 'unknown';
+export interface SchemaNameOptions {
+  separator?: string;
+  hideHash?: boolean;
+  unknown?: string;
+}
+
+export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, o?: SchemaNameOptions): string => {
+  const separator = o?.separator||'_';
+  const sudoku: Sudoku|undefined = (<PlaySudoku>sdk)?.sudoku||<Sudoku>sdk;
+  if (!sudoku) return o?.unknown || 'unknown';
   const rank = sudoku.rank||9;
   const fixc = getFixedCount(sudoku);
-  const hash = getHash(sudoku.fixed);
-  const diff = sudoku.info?.difficulty||'unknown';
+  const hash = o?.hideHash ? '' : `(${getHash(sudoku.fixed)})`;
+  const diff = sudoku.info?.difficulty||'' ? `${separator}${sudoku.info?.difficulty}` : '';
   const tryN = (sudoku.info?.difficultyMap||{})[TRY_NUMBER_ALGORITHM];
   const tryd = !!tryN ? `${separator}T${tryN}` : '';
-  return `${rank}x${rank}${separator}${fixc}num${separator}${diff}${tryd}(${hash})`;
+  return `${rank}x${rank}${separator}${fixc}num${diff}${tryd}${separator}${hash}`;
 }
 
 export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefined, direction: string): CellInfo|undefined => {
@@ -279,4 +293,20 @@ export const getMinNumbers = (rank: number|undefined): number => {
 
 export const getMaxNumbers = (rank: number|undefined): number => {
   return Math.floor(((rank || 9) * (rank || 9)) / 2);
+}
+
+export const hasXValues = (sdk: EditSudoku|undefined): boolean => {
+  return !!(sdk?.cellList || []).find(c => c.value === SUDOKU_DYNAMIC_VALUE);
+}
+
+export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>): SudokuInfo => {
+  const info = new SudokuInfo(baseinfo);
+  calcDifficulty(info);
+  return info;
+}
+
+export const getSolutionSudoku = (sol: SudokuSolution) => {
+  const sdk: Sudoku = <Sudoku>_clone(sol.sdk.sudoku);
+  sdk.info = buildSudokuInfo(sdk, { unique: true, algorithms: sol.algorithms });
+  return sdk;
 }

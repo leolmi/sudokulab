@@ -1,36 +1,34 @@
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
-
-import {AppComponent} from './app.component';
-import {HttpClientModule} from '@angular/common/http';
-import {BoardComponent} from './components/board/board.component';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {GeneratorFacade, LabFacade, SudokuFacade, SudokulabPage} from '@sudokulab/model';
-import {GeneratorContext, LabContext, SudokuContext, SudokuStoreModule} from '@sudokulab/store';
-import {StoreModule} from '@ngrx/store';
-import {EffectsModule} from '@ngrx/effects';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatButtonModule} from '@angular/material/button';
-import {SchemasComponent} from './components/schemas/schemas.component';
-import {InfoComponent} from './components/info/info.component';
-import {MatToolbarModule} from "@angular/material/toolbar";
-import {MatIconModule} from "@angular/material/icon";
-import {MatMenuModule} from "@angular/material/menu";
-import {MatTooltipModule} from "@angular/material/tooltip";
-import {LabComponent} from "./pages/lab/lab.component";
-import {OptionsComponent} from "./pages/options/options.component";
-import {GeneratorComponent} from "./pages/generator/generator.component";
-import {RouterModule} from "@angular/router";
-import {AvailablePages} from "./model";
-import {LabManifest} from "./pages/lab/lab.manifest";
-import {GeneratorManifest} from "./pages/generator/generator.manifest";
-import {OptionsManifest} from "./pages/options/options.manifest";
-import {SudokulabPagesService} from "./services/sudokulab-pages.service";
-import {GeneratorBoardComponent} from "./components/generator-board/generator-board.component";
-import {DestroyComponent} from "./components/DestroyComponent";
-import {MatDialogModule} from "@angular/material/dialog";
-import {UploadDialogComponent} from "./components/upload-dialog/upload-dialog.component";
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { HttpClientModule } from '@angular/common/http';
+import { BoardComponent } from './components/board/board.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { GeneratorFacade, LabFacade, SudokuFacade, SudokulabPage, SudokulabPagesService } from '@sudokulab/model';
+import { GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatButtonModule } from '@angular/material/button';
+import { SchemasComponent } from './components/schemas/schemas.component';
+import { InfoComponent } from './components/info/info.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { LabComponent } from './pages/lab/lab.component';
+import { OptionsComponent } from './pages/options/options.component';
+import { GeneratorComponent } from './pages/generator/generator.component';
+import { RouterModule } from '@angular/router';
+import { AvailablePages } from './model';
+import { LabManifest } from './pages/lab/lab.manifest';
+import { GeneratorManifest } from './pages/generator/generator.manifest';
+import { OptionsManifest } from './pages/options/options.manifest';
+import { GeneratorBoardComponent } from './components/generator-board/generator-board.component';
+import { DestroyComponent } from './components/DestroyComponent';
+import { MatDialogModule } from '@angular/material/dialog';
+import { UploadDialogComponent } from './components/upload-dialog/upload-dialog.component';
 import { GeneratorOptionsComponent } from './components/generator-options/generator-options.component';
 import { GeneratorStateComponent } from './components/generator-state/generator-state.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -40,6 +38,8 @@ import { MatInputModule } from '@angular/material/input';
 import { ThumbnailComponent } from './components/thumbnail/thumbnail.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { GeneratorToolbarComponent } from './components/generator-toolbar/generator-toolbar.component';
 
 
 @NgModule({
@@ -56,7 +56,8 @@ import { MatSliderModule } from '@angular/material/slider';
     UploadDialogComponent,
     GeneratorOptionsComponent,
     GeneratorStateComponent,
-    ThumbnailComponent
+    ThumbnailComponent,
+    GeneratorToolbarComponent
   ],
   imports: [
     BrowserModule,
@@ -75,6 +76,7 @@ import { MatSliderModule } from '@angular/material/slider';
     MatSlideToggleModule,
     MatInputModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatSliderModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),

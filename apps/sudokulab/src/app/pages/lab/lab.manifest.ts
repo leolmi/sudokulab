@@ -8,15 +8,15 @@ export class LabManifest extends SudokulabPage {
   code = AvailablePages.lab;
   icon = 'grid_on';
   buttons = [
-    {icon: 'skip_next', code: 'step', tooltip: 'Solve next step'},
-    {icon: 'play_circle', code: 'solve', tooltip: 'Solve all schema'},
-    {icon: 'play_circle_outline', code: 'analyze', tooltip: 'Analyze schema'},
+    {icon: 'skip_next', code: 'step', tooltip: 'Solve next step', disabledKey: 'has_no_lab_schema'},
+    {icon: 'play_circle', code: 'solve', tooltip: 'Solve all schema', disabledKey: 'has_no_lab_schema'},
+    {icon: 'play_circle_outline', code: 'analyze', tooltip: 'Analyze schema', disabledKey: 'has_no_lab_schema'},
     {separator: true},
-    {icon: 'download', code: 'download', tooltip: 'Download current schema'},
-    {icon: 'downloading', code: 'upload', tooltip: 'Generate schema'},
-    {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema'}
+    {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: 'has_no_lab_schema'},
+    {icon: 'apps_outage', code: 'upload', tooltip: 'Open schema'},
+    {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: 'has_no_lab_schema'}
   ];
-  title = 'Lab';
+  title = 'Player';
   execute = (facade: LabFacade, code: string) => {
     switch (code) {
       case 'step': return facade.solveStep();

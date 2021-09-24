@@ -4,11 +4,11 @@ import {
   DIFFICULTY_RANGES,
   EditSudoku,
   EditSudokuEndGenerationMode,
-  EditSudokuOptions,
+  EditSudokuOptions, EditSudokuValorizationMode,
   GeneratorFacade,
   getMaxNumbers,
   getMinNumbers,
-  hasEndGenerationValue,
+  hasEndGenerationValue, hasXValues,
   SudokuSymmetry, update, use
 } from '@sudokulab/model';
 import { map, takeUntil } from 'rxjs/operators';
@@ -30,10 +30,12 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
   minNumbers$: Observable<number>;
   maxNumbers$: Observable<number>;
   isStopModeCount$: Observable<boolean>;
+  hasXValues$: Observable<boolean>;
   availableDimensions: ItemInfo[];
   availableSymmetries: ItemInfo[];
   availableDifficulty: ItemInfo[];
   availableStopModes: ItemInfo[];
+  availableValorizationModes: ItemInfo[];
 
   editSudoku$: Observable<EditSudoku|undefined>;
   options$: Observable<EditSudokuOptions>;
@@ -46,6 +48,7 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
     this.isStopModeCount$ = this.options$.pipe(map(o => hasEndGenerationValue(o)));
     this.minNumbers$ = this.editSudoku$.pipe(map(es => getMinNumbers(es?.options?.rank)));
     this.maxNumbers$ = this.editSudoku$.pipe(map(es => getMaxNumbers(es?.options?.rank)));
+    this.hasXValues$ = this.editSudoku$.pipe(map(es => hasXValues(es)));
 
     this.availableDimensions = [{
       code: 4,
@@ -77,6 +80,13 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
     }, {
       code: EditSudokuEndGenerationMode.afterTime,
       description: 'after N seconds'
+    }];
+    this.availableValorizationModes = [{
+      code: EditSudokuValorizationMode.sequential,
+      description: 'sequential'
+    }, {
+      code: EditSudokuValorizationMode.random,
+      description: 'random'
     }];
   }
 

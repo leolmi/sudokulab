@@ -24,9 +24,9 @@ export class TryNumberAlgorithm extends Algorithm implements PlayAlgorithm {
   id: string;
   name: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    // ricerca la cella con minor numero di valori possibili
+    // ricerca la cella con minor numero di valori possibili fra quelle non valorizzate
     // const firstc = _head(_values(sdk.couples));
-    const minc = _minBy(_values(sdk.cells), (c) => c?.availables.length||100);
+    const minc = _minBy(_values(sdk.cells), (c) => c?.value ? 1000 : c?.availables.length || 1000);
     const cases: Sudoku[] = [];
     if (minc) {
       const minvalues = _clone(minc.availables);

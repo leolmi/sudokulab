@@ -37,10 +37,8 @@ export class GeneratorBoardComponent extends GeneratorBaseComponent implements O
 
     this.rows$ = this.editSudoku$.pipe(map(s => getDimension(s?.options?.rank)));
     this.cols$ = this.editSudoku$.pipe(map(s => getDimension(s?.options?.rank)));
-    this.cellStyle$ = this.editSudoku$.pipe(map(s => getCellStyle(s?.options, ele)));
+    this.cellStyle$ = this.editSudoku$.pipe(map(s => getCellStyle(s?.options, ele.nativeElement.parentElement)));
     this.grline$ = this.editSudoku$.pipe(map(s => getLinesGroups(s?.options)));
-
-    this.hasFocus$.pipe(tap((v) => console.log('BOARD HAS FOCUS = ', v))).subscribe();
   }
 
   focus(status = true) {

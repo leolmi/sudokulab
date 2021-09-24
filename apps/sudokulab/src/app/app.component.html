@@ -1,32 +1,31 @@
 <div class="container" fxLayout="column">
-<!--  <div class="top-toolbar"></div>-->
   <mat-toolbar class="sudokulab-toolbar" color="primary">
-    <button class="page-button" mat-icon-button [matMenuTriggerFor]="menu" aria-label="page menu">
-      <mat-icon>{{(page$|async)?.icon}}</mat-icon>
-    </button>
-    <mat-menu #menu="matMenu">
-      <button *ngFor="let pag of (pages$|async)||[]"
-              [ngClass]="{'selected': pag.code === (page$|async)?.code}"
-              (click)="openPage(pag)"
-              mat-menu-item>
-        <mat-icon>{{pag.icon}}</mat-icon>
-        <span>{{pag.title}}</span>
-      </button>
-    </mat-menu>
+    <span class="logo">Sudoku<span class="logo-lab">Lab</span></span>
     <span class="title" fxFlex>{{(page$|async)?.title}}</span>
     <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
-      <div class="button-separator" *ngIf="pgbtn.separator"></div>
+      <div class="button-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
       <button mat-icon-button
-              *ngIf="!pgbtn.separator"
+              *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
               [matTooltip]="pgbtn.tooltip||''"
+              [disabled]="!!((status$|async)||{})[pgbtn?.disabledKey||'']"
               [matTooltipDisabled]="!pgbtn.tooltip"
               (click)="execute(pgbtn.code||'')">
         <mat-icon>{{pgbtn.icon}}</mat-icon>
       </button>
     </ng-container>
-
   </mat-toolbar>
-  <div class="central-container" fxFlex>
-    <router-outlet></router-outlet>
+  <div class="central-container" fxFlex fxLayout="row" fxLayoutAlign="center start">
+    <div class="vertical-toolbar background2" fxLayout="column">
+      <button *ngFor="let pag of (pages$|async)||[]"
+              mat-icon-button
+              [ngClass]="{'selected': pag.code === (page$|async)?.code}"
+              [matTooltip]="pag.title"
+              (click)="openPage(pag)">
+        <mat-icon>{{pag.icon}}</mat-icon>
+      </button>
+    </div>
+    <div class="page-container" fxFlex>
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>

@@ -1,11 +1,20 @@
-import {Injectable} from "@angular/core";
-import { EditSudoku, EditSudokuOptions, GeneratorFacade, Sudoku } from '@sudokulab/model';
-import {Observable, of} from "rxjs";
-import {Store} from "@ngrx/store";
-import {SudokuStore} from "./sudoku-store";
+import { Injectable } from '@angular/core';
+import {
+  EditSudoku,
+  EditSudokuOptions,
+  GeneratorFacade,
+  Sudoku,
+  SudokuFacade,
+  SudokuMessage,
+  WorkingInfo
+} from '@sudokulab/model';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { SudokuStore } from './sudoku-store';
 import * as GeneratorSelectors from './selectors';
 import * as GeneratorActions from './actions';
-import { addSchema, setActiveGeneratorCellRequest } from './actions';
+import * as SudokuActions from './actions';
+import { Dictionary } from '@ngrx/entity';
 
 @Injectable()
 export class GeneratorContext extends GeneratorFacade {
@@ -14,10 +23,7 @@ export class GeneratorContext extends GeneratorFacade {
   selectGeneratorIsRunning$: Observable<boolean> = this._store.select(GeneratorSelectors.selectActiveGeneratorIsRunning);
   selectGeneratorIsStopping$: Observable<boolean> = this._store.select(GeneratorSelectors.selectGeneratorIsStopping);
   selectGeneratorSchemas$: Observable<Sudoku[]> = this._store.select(GeneratorSelectors.selectGeneratedSchemas);
-
-  constructor(private _store: Store<SudokuStore>) {
-    super();
-  }
+  selectGeneratorWorkingInfo$: Observable<WorkingInfo|undefined> = this._store.select(GeneratorSelectors.selectGeneratorWorkingInfo);
 
   setActiveCell(id: string) {
     this._store.dispatch(GeneratorActions.setActiveGeneratorCellRequest({ id }));
@@ -39,6 +45,11 @@ export class GeneratorContext extends GeneratorFacade {
     this._store.dispatch(GeneratorActions.setGeneratorStatus({ active: true }));
   }
 
+  end() {
+    this._store.dispatch(GeneratorActions.setGeneratorStatus({ active: false }));
+    this._store.dispatch(GeneratorActions.setWorkingInfo({ info: undefined }));
+  }
+
   addSchema(schema: Sudoku) {
     this._store.dispatch(GeneratorActions.addSchema({ schema }));
   }
@@ -52,10 +63,43 @@ export class GeneratorContext extends GeneratorFacade {
   }
 
   download() {
-    // TODO: ...
+    this._store.dispatch(GeneratorActions.downloadActiveGeneratorSchema());
+  }
+
+  loadGeneratorSchema(schema: Sudoku) {
+    this._store.dispatch(GeneratorActions.loadGeneratorSchema({ schema }));
+  }
+
+  raiseMessage(message: SudokuMessage) {
+    this._store.dispatch(SudokuActions.setActiveMessage({ message }));
+  }
+
+  openInLab(schema: Sudoku) {
+    this._store.dispatch(SudokuActions.openSchemaInLab({ schema }));
+  }
+
+  setWorkingInfo(info: WorkingInfo) {
+    this._store.dispatch(SudokuActions.setWorkingInfo({ info }));
+  }
+
+  downloadAll() {
+    this._store.dispatch(GeneratorActions.downloadGeneratedSchemas());
+  }
+
+  removeAll() {
+    this._store.dispatch(GeneratorActions.clearGeneratedSchemas());
   }
 
   upload() {
-    // TODO: ...
+    this._sudoku.upload();
+  }
+
+  generate() {
+    this._store.dispatch(GeneratorActions.generateSchema());
+  }
+
+  constructor(private _store: Store<SudokuStore>,
+              private _sudoku: SudokuFacade) {
+    super();
   }
 }

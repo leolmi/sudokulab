@@ -1,5 +1,9 @@
-<div class="sudoku-thumbnail" fxLayout="column">
+<div class="sudoku-thumbnail" [ngClass]="{'working-info': !!(working$|async)}">
   <div class="thumbnail-schema-container">
+    <div class="working-container" *ngIf="!!(working$|async)">
+      <mat-progress-spinner class="working-spinner" diameter="80" color="accent" mode="indeterminate"></mat-progress-spinner>
+      <div class="working-counter">{{(working$|async)?.counter||''}}</div>
+    </div>
     <div class="thumbnail-row"
          *ngFor="let row of rows$|async"
          fxLayout="row" fxLayoutAlign="start center">
@@ -9,8 +13,8 @@
              fxLayout="row" fxLayoutAlign="center center"
              *ngIf="((cells$|async)||{})[col+'.'+row] as cell"
              [ngStyle]="cellStyle$|async"
-             [ngClass]="{'fixed': !!cell, 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
-          <div class="cell-value">{{cell}}</div>
+             [ngClass]="{'fixed': cell.fixed, 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
+          <div class="cell-value">{{cell.value}}</div>
         </div>
       </div>
     </div>

@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { GeneratorBaseComponent } from '../../components/GeneratorBaseComponent';
-import { GeneratorFacade } from '@sudokulab/model';
+import { GeneratorFacade, SudokuFacade } from '@sudokulab/model';
+import { filter, takeUntil } from 'rxjs/operators';
+import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'sudokulab-generator-page',
@@ -9,9 +12,12 @@ import { GeneratorFacade } from '@sudokulab/model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GeneratorComponent extends GeneratorBaseComponent implements OnDestroy {
-  constructor(private _generator: GeneratorFacade) {
+  constructor(private _generator: GeneratorFacade,
+              private _sudoku: SudokuFacade,
+              private _dialog: MatDialog) {
     super(_generator);
-  }
-  ngOnDestroy() {
+    _sudoku
+      .onUpload(UploadDialogComponent, this._destroy$)
+      .subscribe(sdk => !!sdk ? _generator.loadGeneratorSchema(sdk) : null);
   }
 }

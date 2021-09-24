@@ -6,16 +6,24 @@ import { SudokuStore } from '../sudoku-store';
 import * as GeneratorActions from '../actions';
 import * as GeneratorSelectors from '../selectors';
 import {
-  cellId,
-  EditSudoku, geEditFixedCount,
+  cellId, checkNumbers,
+  EditSudoku, EditSudokuOptions,
+  geEditFixedCount,
   Generator,
-  GeneratorFacade, getFixedCount, getSchemaName,
+  GeneratorFacade,
+  getSchemaName,
+  getValues,
   isValidGeneratorValue,
-  moveOnDirection, SUDOKU_DYNAMIC_VALUE
+  moveOnDirection,
+  Sudoku,
+  SUDOKU_DYNAMIC_VALUE, SudokulabPagesService
 } from '@sudokulab/model';
 import { cloneDeep as _clone, forEach as _forEach } from 'lodash';
 import * as JSZip from 'jszip';
-import {saveAs} from "file-saver";
+import { saveAs } from 'file-saver';
+import { generateSchema, loadGeneratorSchema, loadSudoku } from '../actions';
+import { EMPTY, NEVER } from 'rxjs';
+import { constants } from 'os';
 
 @Injectable()
 export class GeneratorEffects {
@@ -80,8 +88,8 @@ export class GeneratorEffects {
   stop$ = createEffect(() => this._actions$.pipe(
     ofType(GeneratorActions.stopGeneratorRequest),
     switchMap((a) => {
-
-      return [GeneratorActions.setGeneratorStatus({ active: false })];
+      return [
+        GeneratorActions.setGeneratorStatus({ active: false })];
     })
   ));
 
@@ -90,13 +98,16 @@ export class GeneratorEffects {
     withLatestFrom(
       this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
     switchMap(([a, sch]) => {
-      const changes = _clone(sch);
+      const changes: EditSudoku = <EditSudoku>_clone(sch);
       _forEach(changes.cells, (c) => {
         if (!!c) {
           c.value = '';
           c.fixed = false;
         }
       });
+      changes.fixedCount = 0;
+      changes.fixed = [];
+      delete changes.originalSchema;
       return [GeneratorActions.updateGeneratorSchema({ changes })];
     })
   ));
@@ -119,13 +130,92 @@ export class GeneratorEffects {
     map(([a, schs]) => {
       // produce lo zip con tutti gli schemi prodotti
       const zip = new JSZip();
-      schs.forEach(s => zip.file(getSchemaName(s), JSON.stringify(s, null, 2)));
+      schs.forEach(s => zip.file(`${getSchemaName(s)}.json`, JSON.stringify(s, null, 2)));
       zip.generateAsync({ type: "blob" }).then(content => saveAs(content, `sudokulab-schemas-${Date.now()}.zip`));
     })
   ), { dispatch: false });
 
+  downloadActiveSchema$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.downloadActiveGeneratorSchema),
+    withLatestFrom(
+      this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
+    map(([a, sdk]) => {
+      const sudoku = new Sudoku({
+        fixed: getValues(sdk),
+        rank: sdk.options.rank
+      })
+      const json = JSON.stringify(sudoku, null, 2);
+      const blob = new Blob([json], {type: "application/json;"});
+      saveAs(blob, `${getSchemaName(sudoku)}.json`);
+    })
+  ), { dispatch: false });
+
+  openInLab$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.openSchemaInLab),
+    switchMap((a) => {
+      const page = this._pages.pages.find(p => p.code === 'lab');
+      return [
+        GeneratorActions.loadSudoku({ sudoku: a.schema }),
+        GeneratorActions.setActivePage({ page })
+      ];
+    })
+  ));
+
+  addSchema$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.addSchema),
+    map((a) => {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'granted') {
+        this._buildNotification(a.schema);
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') this._buildNotification(a.schema);
+        });
+      }
+    })
+  ), { dispatch: false });
+
+  calcGeneratorStatus$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.addSchema, GeneratorActions.clearGeneratedSchemas, GeneratorActions.setActivePage),
+    withLatestFrom(this._store.select(GeneratorSelectors.selectGeneratedSchemas)),
+    concatMap(([a, schemas]) =>
+      [GeneratorActions.updatePageStatus({ status: { has_no_schemas: (schemas||[]).length<=0 } })])
+  ));
+
+  loadGeneratorSchema$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.loadGeneratorSchema),
+    switchMap((a) => {
+      const changes: EditSudoku = new EditSudoku({
+        options: new EditSudokuOptions({ rank: a.schema.rank })
+      });
+      changes.load(a.schema.fixed);
+      return [GeneratorActions.updateGeneratorSchema({ changes })];
+    })
+  ));
+
+  generateSchema$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.generateSchema),
+    withLatestFrom(this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
+    switchMap(([a, schema]) => {
+      const changes: EditSudoku = <EditSudoku>_clone(schema);
+      checkNumbers(changes);
+      return [GeneratorActions.updateGeneratorSchema({ changes })];
+    })
+  ));
+
   constructor(private _actions$: Actions,
               private _generator: GeneratorFacade,
-              private _store: Store<SudokuStore>) {
+              private _store: Store<SudokuStore>,
+              private _pages: SudokulabPagesService) {
+  }
+
+  private _buildNotification = (sdk: Sudoku) => {
+    var notification = new Notification('A new schema has been generated!', {
+      body: getSchemaName(sdk, {
+        hideHash: true,
+        separator: ' '
+      }),
+      data: JSON.stringify(sdk, null, 2)
+    });
   }
 }

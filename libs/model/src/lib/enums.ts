@@ -49,3 +49,8 @@ export enum EditSudokuEndGenerationMode {
   afterN = 'afterN',
   afterTime = 'afterTime'
 }
+
+export enum EditSudokuValorizationMode {
+  sequential = 'sequential',
+  random = 'random'
+}

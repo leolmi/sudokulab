@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import {LabFacade, SudokuFacade, SudokuInfo, TRY_NUMBER_ALGORITHM} from '@sudokulab/model';
+import { getFixedCount, getHash, LabFacade, SudokuInfo, TRY_NUMBER_ALGORITHM } from '@sudokulab/model';
 import { map, takeUntil } from 'rxjs/operators';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { keys as _keys } from 'lodash';
-import {DestroyComponent} from "../DestroyComponent";
+import { DestroyComponent } from '../DestroyComponent';
 
 interface MapItem {
   name: string;
@@ -21,6 +21,8 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
   percent$: Observable<string>;
   useTry$: Observable<string>;
   difficulty$: Observable<string>;
+  fixed$: Observable<number>;
+  hash$: Observable<string>;
   difficultyValue$: Observable<number>;
   difficultyMap$: Observable<MapItem[]>;
 
@@ -29,6 +31,8 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
     const sdk$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.info$ = sdk$.pipe(map(s => s?.sudoku?.info));
     this.percent$ = sdk$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));
+    this.fixed$ = sdk$.pipe(map(s => getFixedCount(s?.sudoku)));
+    this.hash$ = sdk$.pipe(map(s => s?.sudoku?.id ? `${getHash(s.sudoku.id)}` : ''));
 
     this.difficulty$ = this.info$.pipe(map(info => info?.difficulty||'unknown'));
     this.difficultyValue$ = this.info$.pipe(map(info => info?.difficultyValue||0));

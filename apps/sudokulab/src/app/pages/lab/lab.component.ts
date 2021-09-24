@@ -1,9 +1,8 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
-import {LabFacade} from "@sudokulab/model";
-import {filter, takeUntil} from "rxjs/operators";
-import {DestroyComponent} from "../../components/DestroyComponent";
-import {MatDialog} from "@angular/material/dialog";
-import {UploadDialogComponent} from "../../components/upload-dialog/upload-dialog.component";
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { LabFacade, SudokuFacade } from '@sudokulab/model';
+import { DestroyComponent } from '../../components/DestroyComponent';
+import { MatDialog } from '@angular/material/dialog';
+import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -13,10 +12,11 @@ import {UploadDialogComponent} from "../../components/upload-dialog/upload-dialo
 })
 export class LabComponent extends DestroyComponent implements OnDestroy {
   constructor(private _lab: LabFacade,
+              private _sudoku: SudokuFacade,
               private _dialog: MatDialog) {
     super();
-    _lab.onUpload$
-      .pipe(takeUntil(this._destroy$), filter(a => !!a))
-      .subscribe(() => this._dialog.open(UploadDialogComponent, { width: '500px' }));
+    _sudoku
+      .onUpload(UploadDialogComponent, this._destroy$)
+      .subscribe(sdk => !!sdk ? _lab.loadSudoku(sdk) : null);
   }
 }

@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Actions, createEffect, ofType} from "@ngrx/effects";
-import {Store} from "@ngrx/store";
+import { Action, Store } from '@ngrx/store';
 import {SudokuStore} from "../sudoku-store";
 import * as SudokuActions from "../actions";
 import {concatMap, filter, map, switchMap, withLatestFrom} from "rxjs/operators";
@@ -8,7 +8,7 @@ import * as SudokuSelectors from "../selectors";
 import {
   Algorithms,
   applyAlgorithm,
-  AVAILABLE_DIRECTIONS,
+  AVAILABLE_DIRECTIONS, buildSudokuInfo,
   calcDifficulty,
   cellId,
   checkAvailables,
@@ -35,12 +35,16 @@ export class LabEffects {
 
   loadSudoku$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.loadSudoku),
+    concatMap((a) => [SudokuActions.setActiveSudoku({ active: a.sudoku?.id||'' })])
+  ));
+
+  activeteSudoku$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setActiveSudoku),
     withLatestFrom(
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     filter(([a, sdk]) => !!sdk && !sdk.sudoku?.info?.compiled),
-    concatMap(([a, sdk]) =>
-      // TODO: verificare nelle opzioni se questa funzionalità è prevista
-      [SudokuActions.analyze()])
+    // TODO: verificare nelle opzioni se questa funzionalità è prevista
+    concatMap(([a, sdk]) => [SudokuActions.analyze()])
   ));
 
   solveStep$ = createEffect(() => this._actions$.pipe(
@@ -149,17 +153,13 @@ export class LabEffects {
           message: new SudokuMessage({message, type: MessageType.warning
           })})];
       const result = solver.solve();
-      const info = new SudokuInfo();
       if (result.unique) {
-        info.unique = true;
-        info.algorithms = result.unique.algorithms;
-        calcDifficulty(info);
         const sudoku: Sudoku = <Sudoku>_clone(result.unique.sdk.sudoku);
-        sudoku.info = info;
-        return [SudokuActions.updateSudoku({ changes: { id: result.unique.sdk.id, sudoku } })];
+        sudoku.info = buildSudokuInfo(sudoku, { unique: true, algorithms: result.unique.algorithms });
+        return [SudokuActions.updateSudoku({ changes: { id: sudoku.id, sudoku } })];
       } else if (result.multiple) {
         const sudoku: Sudoku = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
-        sudoku.info = info;
+        sudoku.info = new SudokuInfo();
         return [SudokuActions.updateSudoku({ changes: { sudoku } })];
       } else {
         return [];
@@ -177,14 +177,13 @@ export class LabEffects {
       const info = new SudokuInfo();
       const result = solver.solve();
       if (result.unique) {
+        const sudoku = result.unique.sdk.sudoku;
         message = new SudokuMessage({
           message: 'Sudoku successfully solved!',
           type: MessageType.success
         });
-        info.unique = true;
-        info.algorithms = result.unique.algorithms;
-        calcDifficulty(info);
-        if (!!result.unique.sdk.sudoku) result.unique.sdk.sudoku.info = info;
+        if (!!sudoku)
+          sudoku.info = buildSudokuInfo(sudoku, { unique: true, algorithms: result.unique.algorithms });
         return [
           SudokuActions.updateSudoku({ changes: result.unique.sdk }),
           SudokuActions.setActiveMessage({ message })];
@@ -221,6 +220,13 @@ export class LabEffects {
     })
   ), { dispatch: false });
 
+
+  calcLabStatus$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setActivePage, SudokuActions.setActiveSudoku),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    concatMap(([a, sdk]) =>
+      [SudokuActions.updatePageStatus({ status: { has_no_lab_schema: !sdk } })])
+  ));
 
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>) {

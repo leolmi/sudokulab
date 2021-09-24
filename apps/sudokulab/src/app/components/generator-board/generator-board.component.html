@@ -9,7 +9,7 @@
          fxLayout="row" fxLayoutAlign="start center">
       <div class="sudokulab-board-cell"
            *ngFor="let col of cols$|async">
-        <div class="cell-container"
+        <div class="cell-container hover-all"
              [ngStyle]="cellStyle$|async"
              (click)="select(col, row)"
              fxLayout="row" fxLayoutAlign="center center"

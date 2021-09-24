@@ -1,8 +1,8 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { EditSudoku, Sudoku, update } from '@sudokulab/model';
+import { EditSudoku, loadSchema, Sudoku, update, WorkingInfo } from '@sudokulab/model';
 import * as GeneratorActions from '../actions';
 import { cloneDeep as _clone } from 'lodash';
-import { clearGeneratedSchemas } from '../actions';
+
 
 export interface GeneratorState {
   schema: EditSudoku;
@@ -10,6 +10,7 @@ export interface GeneratorState {
   running: boolean;
   stopping: boolean;
   outputSchemas: Sudoku[];
+  workingInfo?: WorkingInfo;
 }
 
 export const initialState: GeneratorState = {
@@ -17,7 +18,8 @@ export const initialState: GeneratorState = {
   activeCell: '',
   running: false,
   stopping: false,
-  outputSchemas: []
+  outputSchemas: [],
+  workingInfo: undefined
 };
 
 export function reducer(state: GeneratorState | undefined, action: Action) {
@@ -33,7 +35,8 @@ export function reducer(state: GeneratorState | undefined, action: Action) {
       outputSchemas.push(schema);
       return ({ ...state, outputSchemas });
     }),
-    on(GeneratorActions.clearGeneratedSchemas, (state) => ({ ...state, outputSchemas: [] }))
+    on(GeneratorActions.clearGeneratedSchemas, (state) => ({ ...state, outputSchemas: [] })),
+    on(GeneratorActions.setWorkingInfo, (state, { info }) => ({ ...state, workingInfo: info }))
   );
   return generatorReducers(state, action);
 }

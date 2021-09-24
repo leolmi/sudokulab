@@ -1,4 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+@import "variables";
+
 
 html, body {
   height: 100vh;
@@ -14,6 +16,10 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   height: 100%;
   left: 0;
   top: 0;
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 .lines {
@@ -51,25 +57,84 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding: 0 10px;
 }
 
-button {
-  &.selected {
-    background: yellowgreen;
+//button {
+//  &.selected {
+//    background: yellowgreen;
+//  }
+//}
+
+.message-type-error {
+  background-color: $color-error !important;
+  color: $color-error-contrast !important;
+}
+.message-type-warning {
+  background-color: $color-warning !important;
+  color: $color-warning-contrast !important;
+}
+.message-type-info {
+  background-color: $color-info !important;
+  color: $color-info-contrast !important;
+}
+.message-type-success {
+  background-color: $color-success !important;
+  color: $color-success-contrast !important;
+}
+
+
+.background2 {
+  background-color: $color-background;
+  .selected {
+    background-color: $color-background-selected;
   }
 }
 
-.message-type-error {
-  background-color: #ff6e42 !important;
-  color: whitesmoke !important;
+.cell-container {
+  background: $color-board-background;
+  color: $color-board-background-contrast !important;
+  border: 1px solid $color-border;
+  font-weight: 100;
+  user-select: none;
+  &.fixed {
+    //color: lightgreen !important;
+    font-weight: bold;
+  }
+  &:not(.fixed),
+  &.hover-all {
+    &:hover {
+      // background-color: lightgreen !important;
+      background-color: $color-hover;
+    }
+  }
+  &.bottom-line {
+    border-bottom: 2px solid $color-border-highlight !important;
+  }
+  &.right-line {
+    border-right: 2px solid $color-border-highlight !important;
+  }
 }
-.message-type-warning {
-  background-color: #ffb762 !important;
-  color: whitesmoke !important;
+
+.dark-theme {
+  .cell-container {
+    background: #333 !important;
+    color: whitesmoke;
+    border: 1px solid rgba(200,200,200,.1) !important;
+    &.fixed {
+      //color: lightgreen !important;
+    }
+    &:not(.fixed) {
+      &:hover {
+        background-color: lightgreen !important;
+      }
+    }
+    &.bottom-line {
+      border-bottom: 2px solid $color-border-highlight !important;
+    }
+    &.right-line {
+      border-right: 2px solid $color-border-highlight !important;
+    }
+  }
 }
-.message-type-info {
-  background-color: #82a2f1 !important;
-  color: whitesmoke !important;
-}
-.message-type-success {
-  background-color: #9dff57 !important;
-  color: #333 !important;
+
+@media only screen and (max-width: 1300px) {
+
 }

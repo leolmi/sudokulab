@@ -4,10 +4,11 @@ import {GeneratorFacade, LabFacade, SudokuFacade, SudokulabPage, use} from '@sud
 import {BehaviorSubject, Observable} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {SudokulabPagesService} from "./services/sudokulab-pages.service";
+import {SudokulabPagesService} from "../../../../libs/model/src/lib/services/sudokulab-pages.service";
 import {Router} from "@angular/router";
 import {AvailablePages} from "./model";
 import {Facade} from "../../../../libs/model/src/lib/Facade";
+import { Dictionary } from '@ngrx/entity';
 
 @Component({
   selector: 'sudokulab-root',
@@ -17,6 +18,7 @@ import {Facade} from "../../../../libs/model/src/lib/Facade";
 export class AppComponent implements AfterViewInit {
   page$: Observable<SudokulabPage|undefined>;
   pages$: BehaviorSubject<SudokulabPage[]>;
+  status$: Observable<Dictionary<boolean>>;
 
   constructor(private _http: HttpClient,
               private _pagesProvider: SudokulabPagesService,
@@ -27,6 +29,7 @@ export class AppComponent implements AfterViewInit {
               private _generator: GeneratorFacade) {
     this.pages$ = new BehaviorSubject<SudokulabPage[]>(_pagesProvider.pages);
     this.page$ = _sudoku.selectActivePage$;
+    this.status$ = _sudoku.selectPageStatus$;
 
     _sudoku.selectActiveMessage$
       .pipe(filter(a => !!a?.message))

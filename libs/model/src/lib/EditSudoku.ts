@@ -2,15 +2,15 @@ import {Dictionary} from "@ngrx/entity";
 import {EditSudokuOptions} from "./EditSudokuOptions";
 import {EditSudokuCell} from "./EditSudokuCell";
 import {EditSudokuGroup} from "./EditSudokuGroup";
-import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku-helper';
+import { cellId, getAvailables, getGroupRank, groupId, isValue } from '../sudoku-helper';
 import {SudokuGroupType} from "./enums";
-import {remove as _remove} from 'lodash';
-import { SUDOKU_DYNAMIC_VALUE } from './consts';
+import {remove as _remove, forEach as _forEach} from 'lodash';
+import { SDK_PREFIX, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
 
 export class GenerationMapCellInfo {
   constructor(sdk: EditSudoku, cell: EditSudokuCell) {
     this.id = cell.id;
-    this.isValueX = sdk.originalSchema?.charAt(cell.position) === SUDOKU_DYNAMIC_VALUE;
+    this.isValueX = [SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE].indexOf(sdk.originalSchema?.charAt(cell.position)||'')>-1;
     this.index = -1;
   }
   id: string;
@@ -20,9 +20,12 @@ export class GenerationMapCellInfo {
 
 export class EditSudokuGenerationMap {
   constructor(sdk: EditSudoku) {
+    this.cellsX = {};
     this.fixedCells = sdk.fixed.map(fc => new GenerationMapCellInfo(sdk, fc));
     this.fixedCellsX = this.fixedCells.filter(c => c.isValueX);
+    this.fixedCellsX.forEach(cx => this.cellsX[cx.id] = cx);
   }
+  cellsX: Dictionary<GenerationMapCellInfo>;
   fixedCells: GenerationMapCellInfo[];
   fixedCellsX: GenerationMapCellInfo[];
 }
@@ -39,6 +42,7 @@ export class EditSudoku {
     Object.assign(this, es || {});
     this.options = new EditSudokuOptions(es?.options);
     _loadSudoku(this);
+    this.valorizations = {};
   }
   id: string;
   options: EditSudokuOptions;
@@ -50,6 +54,7 @@ export class EditSudoku {
   groupsForCell: Dictionary<(EditSudokuGroup|undefined)[]>;
   originalSchema?: string;
   generationMap?: EditSudokuGenerationMap;
+  valorizations: Dictionary<boolean>;
 
   checkFixedCell(cell: EditSudokuCell) {
     if (!!cell.value && !cell.fixed) {
@@ -60,6 +65,17 @@ export class EditSudoku {
       cell.fixed = false;
       this.fixedCount--;
       _remove(this.fixed, c => c.id === cell.id);
+    }
+  }
+
+  load(fixedValues: string) {
+    const fixed = (fixedValues||'').trim().replace(/\s/g, '');
+    if (fixed.length<=this.options.rank) return console.warn(...SDK_PREFIX, 'Cannot load schema', fixedValues);
+    for (let i = 0; i< fixed.length; i++) {
+      const v = fixed.charAt(i);
+      const cell = this.cellList[i];
+      cell.value = isValue(v, true) ? v : '';
+      this.checkFixedCell(cell);
     }
   }
 }

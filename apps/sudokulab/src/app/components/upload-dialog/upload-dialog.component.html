@@ -1,10 +1,34 @@
-<h1 mat-dialog-title>Generate schema</h1>
-<div mat-dialog-content fxLayout="column">
-  <div>UPLOAD SCHEMA...</div>
-
+<h1 mat-dialog-title>Open schema</h1>
+<div mat-dialog-content
+     class="upload-dialog"
+     (dragenter)="allowDrop($event)"
+     (dragover)="allowDrop($event)"
+     fxLayout="column">
+  <div class="upload-canvas drop-enabled"
+       (click)="import()"
+       (drop)="drop($event)"
+       fxFlex fxLayout="column" fxLayoutAlign="center">
+    <div class="upload-canvas-info">
+      <p>drag a json file here</p>
+      <p>or click to browse on folders</p>
+    </div>
+  </div>
+  <div class="text-container" fxLayout="column">
+    <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
+    <input matInput
+           class="input-schema-string"
+           autocomplete="off"
+           [value]="(text$|async)"
+           placeholder="insert schema numbers..."
+           (input)="applyText($event)">
+    <div class="text-info">{{textInfo$|async}}</div>
+  </div>
 </div>
 <mat-dialog-actions>
   <div fxFlex></div>
-  <button mat-stroked-button (click)="generate()" [disabled]="(isNotValid$|async)" mat-dialog-close>Generate</button>
+  <button mat-stroked-button
+          (click)="upload()"
+          [disabled]="!!!(valid$|async)"
+          mat-dialog-close>LOAD</button>
   <button mat-button mat-dialog-close>Cancel</button>
 </mat-dialog-actions>

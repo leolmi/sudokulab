@@ -1,6 +1,7 @@
-import {createSelector} from '@ngrx/store';
-import {selectFeature} from '../common';
-import {SudokulabPage, SudokuMessage} from '@sudokulab/model';
+import { createSelector } from '@ngrx/store';
+import { selectFeature } from '../common';
+import { SudokulabPage, SudokuMessage } from '@sudokulab/model';
+import { Dictionary } from '@ngrx/entity';
 
 export const selectSudoku = createSelector(
   selectFeature,
@@ -15,4 +16,9 @@ export const selectActiveMessage= createSelector(
 export const selectActivePage= createSelector(
   selectSudoku,
   (state): SudokulabPage|undefined => state.activePage
+)
+
+export const selectPageStatus = createSelector(
+  selectSudoku,
+  (state): Dictionary<boolean> => state.status
 )

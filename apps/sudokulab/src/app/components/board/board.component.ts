@@ -35,7 +35,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
 
     this.rows$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
     this.cols$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
-    this.cellStyle$ = this.playSudoku$.pipe(map(s => getCellStyle(s?.sudoku, ele)));
+    this.cellStyle$ = this.playSudoku$.pipe(map(s => getCellStyle(s?.sudoku, ele.nativeElement.parentElement)));
     this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku)));
 
   }

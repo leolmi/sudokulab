@@ -5,3 +5,16 @@
 .toolbar {
   padding: 10px 0;
 }
+
+sudokulab-thumbnail {
+  cursor: pointer;
+}
+
+::ng-deep {
+  .output-schemas {
+    sudokulab-thumbnail {
+      display: inline-block;
+      margin: 4px 8px;
+    }
+  }
+}

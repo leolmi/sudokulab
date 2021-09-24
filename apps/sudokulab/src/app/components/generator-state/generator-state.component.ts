@@ -13,13 +13,9 @@ export class GeneratorStateComponent extends GeneratorBaseComponent implements O
   schemas$: Observable<Sudoku[]>;
   constructor(private _generator: GeneratorFacade) {
     super(_generator);
-
     this.schemas$ = _generator.selectGeneratorSchemas$;
   }
-  run() {
-    this._generator.run();
-  }
-  stop() {
-    this._generator.stop();
+  openInLab(sdk: Sudoku) {
+    this._generator.openInLab(sdk);
   }
 }

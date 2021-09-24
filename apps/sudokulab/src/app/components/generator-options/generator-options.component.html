@@ -11,16 +11,29 @@
     </mat-select>
   </mat-form-field>
   <!-- SYMMETRY -->
-  <mat-form-field appearance="fill">
-    <mat-label>Symmetry</mat-label>
-    <mat-select [value]="(options$|async)?.simmetry"
-                [disabled]="running$|async"
-                (valueChange)="apply($event, 'symmetry')">
-      <mat-option *ngFor="let sym of availableSymmetries" [value]="sym.code">
-        {{sym.description}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+  <div fxLayout="row" fxLayoutAlign="start center">
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Symmetry</mat-label>
+      <mat-select [value]="(options$|async)?.symmetry"
+                  [disabled]="running$|async"
+                  (valueChange)="apply($event, 'symmetry')">
+        <mat-option *ngFor="let sym of availableSymmetries" [value]="sym.code">
+          {{sym.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="space" *ngIf="hasXValues$|async"></div>
+    <mat-form-field appearance="fill" *ngIf="hasXValues$|async" fxFlex>
+      <mat-label>Valorization mode</mat-label>
+      <mat-select [value]="(options$|async)?.valorizationMode"
+                  [disabled]="running$|async"
+                  (valueChange)="apply($event, 'valorizationMode')">
+        <mat-option *ngFor="let vlm of availableValorizationModes" [value]="vlm.code">
+          {{vlm.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
   <!-- NUMBER OF NUMBERS -->
   <mat-label>Numbers ({{(editSudoku$|async)?.fixedCount}} / <b>{{(options$|async)?.fixedCount}}</b>)</mat-label>
   <mat-slider
@@ -65,23 +78,49 @@
                     [checked]="(options$|async)?.excludeTryAlgorithm"
                     [disabled]="running$|async"
                     (change)="apply($event, 'excludeTryAlgorithm')">Exclude try algorithm</mat-slide-toggle>
-  <!-- STOP MODE -->
-  <mat-form-field appearance="fill">
-    <mat-label>Stop mode</mat-label>
-    <mat-select [value]="(options$|async)?.generationEndMode"
-                [disabled]="running$|async"
-                (valueChange)="apply($event, 'generationEndMode')">
-      <mat-option *ngFor="let stm of availableStopModes" [value]="stm.code">
-        {{stm.description}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <!-- NUMBER OF STOP SCHEMA -->
-  <mat-form-field appearance="fill" *ngIf="(isStopModeCount$|async)">
-    <mat-label>Builded schemas</mat-label>
-    <input matInput
-           [disabled]="running$|async"
-           [value]="(options$|async)?.generationEndValue"
-           (input)="apply($event, 'generationEndValue')">
-  </mat-form-field>
+  <!-- STOP -->
+  <div fxLayout="row" fxLayoutAlign="start center">
+    <!-- STOP MODE -->
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Stop mode</mat-label>
+      <mat-select [value]="(options$|async)?.generationEndMode"
+                  [disabled]="running$|async"
+                  (valueChange)="apply($event, 'generationEndMode')">
+        <mat-option *ngFor="let stm of availableStopModes" [value]="stm.code">
+          {{stm.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="space" *ngIf="(isStopModeCount$|async)"></div>
+    <!-- NUMBER OF STOP SCHEMA -->
+    <mat-form-field appearance="fill" *ngIf="(isStopModeCount$|async)" fxFlex>
+      <mat-label>Builded schemas</mat-label>
+      <input matInput
+             type="number"
+             [disabled]="running$|async"
+             [value]="(options$|async)?.generationEndValue"
+             (input)="apply($event, 'generationEndValue')">
+    </mat-form-field>
+  </div>
+
+  <!-- LIMITS -->
+  <div fxLayout="row" fxLayoutAlign="start center">
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Max split schemas</mat-label>
+      <input matInput
+             [disabled]="running$|async"
+             type="number"
+             [value]="(options$|async)?.maxSplitSchema"
+             (input)="apply($event, 'maxSplitSchema')">
+    </mat-form-field>
+    <div class="space"></div>
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Max schema cycles</mat-label>
+      <input matInput
+             [disabled]="running$|async"
+             type="number"
+             [value]="(options$|async)?.maxSchemaCycles"
+             (input)="apply($event, 'maxSchemaCycles')">
+    </mat-form-field>
+  </div>
 </div>

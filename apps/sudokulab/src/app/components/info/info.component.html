@@ -1,11 +1,13 @@
 <div class="schemalab-tool sudoku-info">
   <div *ngIf="!!(info$|async)?.compiled" fxLayout="column">
     <div class="info-property" fxLayout="row">percent: {{percent$|async}}</div>
+    <div class="info-property" fxLayout="row">fixed: {{(fixed$|async)||''}}</div>
     <div class="info-property" fxLayout="row">unique: {{(info$|async)?.unique}}</div>
     <div class="info-property" fxLayout="row">use try: {{useTry$|async}}</div>
     <div class="info-property" fxLayout="row">difficulty: {{(difficulty$|async)}}</div>
     <div class="info-property" fxLayout="row">difficulty value: {{(difficultyValue$|async)}}</div>
     <div class="info-property" fxLayout="row">symmetry: {{(info$|async)?.symmetry||'unknown'}}</div>
+    <div class="info-property" fxLayout="row">hash: {{(hash$|async)||''}}</div>
   </div>
   <div *ngIf="((difficultyMap$|async)||[]).length>0" class="difficulty-map" fxLayout="column">
     <div class="algorithm-item"
