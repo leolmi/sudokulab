@@ -2,10 +2,11 @@ import { SudokuOptions } from './SudokuOptions';
 import { repeat as _repeat } from 'lodash';
 import { SudokuInfo } from './SudokuInfo';
 import { SUDOKU_EMPTY_VALUE } from './consts';
+import { getHash } from '../global.helper';
 
 export class Sudoku {
   constructor(s?: Partial<Sudoku>) {
-    this.id = '';
+    this._id = 0;
     this.rank = 9;
     this.values = '';
     this.fixed = '';
@@ -14,7 +15,7 @@ export class Sudoku {
     this.options = new SudokuOptions(s?.options);
     this.info = new SudokuInfo(s?.info);
   }
-  id: string;
+  _id: number;
   rank: number;
   values: string;
   fixed: string;
@@ -25,5 +26,5 @@ export class Sudoku {
 export const consolidate = (sdk: Sudoku) => {
   sdk.values = sdk.values || sdk.fixed || _repeat(SUDOKU_EMPTY_VALUE, sdk.rank * sdk.rank);
   sdk.fixed = sdk.fixed || _repeat(SUDOKU_EMPTY_VALUE, sdk.rank * sdk.rank);
-  sdk.id = sdk.fixed;
+  sdk._id = getHash(sdk.fixed);
 }

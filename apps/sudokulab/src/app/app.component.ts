@@ -1,13 +1,19 @@
-import {AfterViewInit, Component} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {GeneratorFacade, LabFacade, SudokuFacade, SudokulabPage, use} from '@sudokulab/model';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {filter} from 'rxjs/operators';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {SudokulabPagesService} from "../../../../libs/model/src/lib/services/sudokulab-pages.service";
-import {Router} from "@angular/router";
-import {AvailablePages} from "./model";
-import {Facade} from "../../../../libs/model/src/lib/Facade";
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import {
+  Facade,
+  GeneratorFacade,
+  LabFacade,
+  SudokuFacade,
+  SudokulabPage,
+  SudokulabPagesService,
+  use
+} from '@sudokulab/model';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { AvailablePages } from './model';
 import { Dictionary } from '@ngrx/entity';
 
 @Component({
@@ -15,7 +21,7 @@ import { Dictionary } from '@ngrx/entity';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements OnInit, AfterViewInit {
   page$: Observable<SudokulabPage|undefined>;
   pages$: BehaviorSubject<SudokulabPage[]>;
   status$: Observable<Dictionary<boolean>>;
@@ -37,6 +43,10 @@ export class AppComponent implements AfterViewInit {
         duration: 3000,
         panelClass: `message-type-${a?.type||'info'}`
       }));
+  }
+
+  ngOnInit() {
+    this._sudoku.fillDocuments();
   }
 
   ngAfterViewInit() {

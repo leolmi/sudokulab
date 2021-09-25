@@ -14,7 +14,6 @@ import { SudokuStore } from './sudoku-store';
 import * as GeneratorSelectors from './selectors';
 import * as GeneratorActions from './actions';
 import * as SudokuActions from './actions';
-import { Dictionary } from '@ngrx/entity';
 
 @Injectable()
 export class GeneratorContext extends GeneratorFacade {

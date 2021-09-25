@@ -7,6 +7,7 @@ export class SudokuInfo {
   constructor(s?: Partial<SudokuInfo>) {
     this.symmetry = SudokuSymmetry.none;
     this.compiled = false;
+    this.sudokulab = false;
     this.unique = false;
     this.useTryAlgorithm = false;
     this.algorithms = [];
@@ -24,4 +25,5 @@ export class SudokuInfo {
   difficultyMap: Dictionary<number>;
   difficultyValue: number;
   solutions?: SudokuSolution[];
+  sudokulab: boolean;
 }

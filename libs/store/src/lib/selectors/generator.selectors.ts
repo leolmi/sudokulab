@@ -1,7 +1,6 @@
-import {createSelector} from '@ngrx/store';
-import {selectFeature} from '../common';
+import { createSelector } from '@ngrx/store';
+import { selectFeature } from '../common';
 import { EditSudoku, Sudoku, WorkingInfo } from '@sudokulab/model';
-import { Dictionary } from '@ngrx/entity';
 
 
 export const selectGenerator = createSelector(

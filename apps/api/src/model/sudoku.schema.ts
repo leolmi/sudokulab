@@ -19,15 +19,15 @@ export const SudokuInfoSchema = new mongoose.Schema({
   difficulty: String,
   compiled: { type: Boolean, default: false},
   unique: { type: Boolean, default: false},
+  sudokulab: { type: Boolean, default: false},
   useTryAlgorithm: { type: Boolean, default: false},
   algorithms: [SudokuAlgorithmResult],
   difficultyMap: { type: mongoose.Schema.Types.Mixed },
-  difficultyValue: { type: Number, default: 0 },
-  solutions: [{ type: mongoose.Schema.Types.Mixed }]
+  difficultyValue: { type: Number, default: 0 }
 });
 
 export const SudokuSchema = new mongoose.Schema({
-  id: { type: String, required: true, _id: true },
+  _id: { type: Number, required: true },
   rank: { type: Number, required: true },
   values: { type: String, required: true },
   fixed: { type: String, required: true },

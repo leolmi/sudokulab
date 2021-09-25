@@ -13,7 +13,7 @@ import {
   resetSchemaMap,
   solveSchema
 } from './generator.helper';
-import { getSolutionSudoku, getValues } from '../../sudoku-helper';
+import { getSolutionSudoku, getValues } from '../../sudoku.helper';
 import { WorkingInfo } from '../WorkingInfo';
 import { Dictionary } from '@ngrx/entity';
 import { SDK_PREFIX } from '../consts';
@@ -43,7 +43,7 @@ export class Generator {
   get sdk() { return this._sdk; }
 
   private _isRightSolution(schema: Sudoku): boolean {
-    if (!!this.schemas[schema?.id||'']) return false;
+    if (!!this.schemas[`${schema?._id||0}`]) return false;
     if (!schema?.info) return false;
     // verifica l'utilizzo del try-algorithm
     if (this._workSdk.options.excludeTryAlgorithm && schema.info.useTryAlgorithm) return false;
@@ -81,11 +81,10 @@ export class Generator {
       // 5. se unica salva schema altrimenti skippa
       // console.log(...SDK_PREFIX, 'solved schema', sol);
       if (!!sol.unique) {
-        const schema = getSolutionSudoku(sol.unique);
+        const schema = getSolutionSudoku(sol.unique, { sudokulab: true });
         if (!!schema && this._isRightSolution(schema)) {
           this._facade.addSchema(schema);
-          this.schemas[schema.id] = schema;
-          // updateBehaviorSubject(this.schemas$, sch => !!sch.push(schema));
+          this.schemas[`${schema._id||0}`] = schema;
           this._counter = 0;
           this._cycles = 0;
         }

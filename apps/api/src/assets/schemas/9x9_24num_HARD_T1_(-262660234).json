@@ -1,0 +1,563 @@
+{
+  "_id": -262660234,
+  "fixed": "000000007600003050005790040006100000801007200000502008340006000000000071000000690",
+  "info": {
+    "symmetry": "none",
+    "difficulty": "HARD",
+    "compiled": true,
+    "unique": true,
+    "useTryAlgorithm": true,
+    "algorithms": [
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b39"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.2"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b3a"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.6"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b3b"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b3c"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.6"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b3d"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.1"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b3e"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.1"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b3f"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.5"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b40"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.5"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b41"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b42"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.4"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b43"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.6"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b44"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b45"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b46"
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "7.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b47"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b48"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b49"
+      },
+      {
+        "algorithm": "AlignmentOnGroup",
+        "cases": [],
+        "cells": [],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b4a"
+      },
+      {
+        "algorithm": "TryNumber",
+        "cases": [
+          {
+            "_id": -262660234,
+            "rank": 9,
+            "values": "000600087670003150005790046006189030801007260000562018347916000060000471000070693",
+            "fixed": "000000007600003050005790040006100000801007200000502008340006000000000071000000690",
+            "options": {
+              "name": "",
+              "locked": false,
+              "editable": false
+            },
+            "info": {
+              "symmetry": "none",
+              "compiled": false,
+              "unique": false,
+              "useTryAlgorithm": false,
+              "algorithms": [],
+              "difficultyValue": 0,
+              "solutions": []
+            }
+          }
+        ],
+        "cells": [
+          "7.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b4b"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.1"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b4c"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.1"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b4d"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b4e"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.2"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b4f"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.1"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b50"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.1"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b51"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b52"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b53"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.2"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b54"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.2"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b55"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.2"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b56"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b57"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b58"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.4"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b59"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b5a"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b5b"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b5c"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b5d"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.4"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b5e"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b5f"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b60"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b61"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.4"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b62"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.5"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b63"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.7"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b64"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b65"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b66"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.0"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b67"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.5"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b68"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b69"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b6a"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.8"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b6b"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.4"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b6c"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.5"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b6d"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.3"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b6e"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.5"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b6f"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.6"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b70"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.6"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b71"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.6"
+        ],
+        "applied": true,
+        "_id": "614f34590a2d453a1a214b72"
+      }
+    ],
+    "difficultyMap": {
+      "OneCellForValue": 55,
+      "OneValueForCell": 1,
+      "AlignmentOnGroup": 1,
+      "TryNumber": 1
+    },
+    "difficultyValue": 826,
+    "_id": "614f34590a2d453a1a214b38"
+  },
+  "name": "9x9_24num_HARD_T1_(-262660234)"
+}

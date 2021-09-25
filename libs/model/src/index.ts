@@ -24,11 +24,16 @@ export * from './lib/PlaySudokuOptions';
 export * from './lib/MenuButton';
 export * from './lib/SudokulabPage';
 
-export * from './sudoku-helper';
 export * from './lib/logic';
+export * from './lib/Facade';
 export * from './lib/SudokuFacade';
 export * from './lib/LabFacade';
 export * from './lib/GeneratorFacade';
 export * from './lib/WorkingInfo';
 
 export * from './lib/services';
+
+export * from './sudoku.helper';
+export * from './global.helper';
+
+export * from './lib/pipes/schema-name.pipe';

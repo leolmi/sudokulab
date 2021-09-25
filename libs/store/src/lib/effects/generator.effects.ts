@@ -6,8 +6,10 @@ import { SudokuStore } from '../sudoku-store';
 import * as GeneratorActions from '../actions';
 import * as GeneratorSelectors from '../selectors';
 import {
-  cellId, checkNumbers,
-  EditSudoku, EditSudokuOptions,
+  cellId,
+  checkNumbers,
+  EditSudoku,
+  EditSudokuOptions,
   geEditFixedCount,
   Generator,
   GeneratorFacade,
@@ -16,27 +18,16 @@ import {
   isValidGeneratorValue,
   moveOnDirection,
   Sudoku,
-  SUDOKU_DYNAMIC_VALUE, SudokulabPagesService
+  SUDOKU_DYNAMIC_VALUE,
+  SudokulabPagesService
 } from '@sudokulab/model';
 import { cloneDeep as _clone, forEach as _forEach } from 'lodash';
 import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { generateSchema, loadGeneratorSchema, loadSudoku } from '../actions';
-import { EMPTY, NEVER } from 'rxjs';
-import { constants } from 'os';
+import * as SudokuActions from '../actions';
 
 @Injectable()
 export class GeneratorEffects {
-
-
-  // checkGeneratorState$ = createEffect(() => this._actions$.pipe(
-  //   ofType(GeneratorActions.checkGeneratorState),
-  //   withLatestFrom(this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
-  //   switchMap(([a, sch]) => {
-  //
-  //     return [];
-  //   })
-  // ));
 
   setActiveCell$ = createEffect(() => this._actions$.pipe(
     ofType(GeneratorActions.setActiveGeneratorCellRequest),
@@ -163,17 +154,19 @@ export class GeneratorEffects {
 
   addSchema$ = createEffect(() => this._actions$.pipe(
     ofType(GeneratorActions.addSchema),
-    map((a) => {
-      if (!('Notification' in window)) return;
-      if (Notification.permission === 'granted') {
-        this._buildNotification(a.schema);
-      } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') this._buildNotification(a.schema);
-        });
+    concatMap((a) => {
+      if (('Notification' in window)) {
+        if (Notification.permission === 'granted') {
+          this._buildNotification(a.schema);
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') this._buildNotification(a.schema);
+          });
+        }
       }
+      return [SudokuActions.checkSudoku({ schema: a.schema })];
     })
-  ), { dispatch: false });
+  ));
 
   calcGeneratorStatus$ = createEffect(() => this._actions$.pipe(
     ofType(GeneratorActions.addSchema, GeneratorActions.clearGeneratedSchemas, GeneratorActions.setActivePage),

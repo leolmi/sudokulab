@@ -1,7 +1,7 @@
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { SolveStepResult } from './SolveStepResult';
-import { applySudokuRules, getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku-helper';
+import { applySudokuRules, getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku.helper';
 import { cloneDeep as _clone, extend as _extend, forEach as _forEach, reduce as _reduce, includes as _includes } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';

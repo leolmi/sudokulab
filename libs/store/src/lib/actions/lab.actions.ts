@@ -3,7 +3,7 @@ import {PlaySudoku, Sudoku} from "@sudokulab/model";
 
 export const setActiveSudoku = createAction(
   '[SudokuPlay.lab] set the active sudoku',
-  props<{ active: string }>()
+  props<{ active: number }>()
 );
 
 export const setActiveCell = createAction(
@@ -14,6 +14,11 @@ export const setActiveCell = createAction(
 export const loadSudoku = createAction(
   '[SudokuPlay.lab] load a sudoku',
   props<{ sudoku: Sudoku }>()
+);
+
+export const loadSchemas = createAction(
+  '[SudokuPlay.lab] load scehmas store',
+  props<{ schemas: PlaySudoku[] }>()
 );
 
 export const clear = createAction(

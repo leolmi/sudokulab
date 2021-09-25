@@ -4,7 +4,14 @@ import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { BoardComponent } from './components/board/board.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { GeneratorFacade, LabFacade, SudokuFacade, SudokulabPage, SudokulabPagesService } from '@sudokulab/model';
+import {
+  GeneratorFacade,
+  LabFacade,
+  SchemaNamePipe,
+  SudokuFacade,
+  SudokulabPage,
+  SudokulabPagesService
+} from '@sudokulab/model';
 import { GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -57,7 +64,8 @@ import { GeneratorToolbarComponent } from './components/generator-toolbar/genera
     GeneratorOptionsComponent,
     GeneratorStateComponent,
     ThumbnailComponent,
-    GeneratorToolbarComponent
+    GeneratorToolbarComponent,
+    SchemaNamePipe
   ],
   imports: [
     BrowserModule,

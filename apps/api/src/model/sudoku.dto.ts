@@ -1,5 +1,5 @@
 export class SudokuDto {
-  readonly id: string;
+  readonly _id: number;
   readonly rank: number;
   readonly values: string;
   readonly fixed: string;

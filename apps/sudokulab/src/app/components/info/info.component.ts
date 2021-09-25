@@ -32,7 +32,7 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
     this.info$ = sdk$.pipe(map(s => s?.sudoku?.info));
     this.percent$ = sdk$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));
     this.fixed$ = sdk$.pipe(map(s => getFixedCount(s?.sudoku)));
-    this.hash$ = sdk$.pipe(map(s => s?.sudoku?.id ? `${getHash(s.sudoku.id)}` : ''));
+    this.hash$ = sdk$.pipe(map(s => s?.sudoku?._id ? `${s.sudoku._id}` : ''));
 
     this.difficulty$ = this.info$.pipe(map(info => info?.difficulty||'unknown'));
     this.difficultyValue$ = this.info$.pipe(map(info => info?.difficultyValue||0));

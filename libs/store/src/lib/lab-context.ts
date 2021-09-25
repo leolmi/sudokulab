@@ -5,13 +5,15 @@ import * as SudokuActions from './actions';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
 import { Injectable } from '@angular/core';
+import { selectAllSudoku } from './selectors';
 
 @Injectable()
 export class LabContext extends LabFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
+  selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
 
-  setActiveSudoku(active: string) {
+  setActiveSudoku(active: number) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
   }
 

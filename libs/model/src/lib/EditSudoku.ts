@@ -1,10 +1,10 @@
-import {Dictionary} from "@ngrx/entity";
-import {EditSudokuOptions} from "./EditSudokuOptions";
-import {EditSudokuCell} from "./EditSudokuCell";
-import {EditSudokuGroup} from "./EditSudokuGroup";
-import { cellId, getAvailables, getGroupRank, groupId, isValue } from '../sudoku-helper';
-import {SudokuGroupType} from "./enums";
-import {remove as _remove, forEach as _forEach} from 'lodash';
+import { Dictionary } from '@ngrx/entity';
+import { EditSudokuOptions } from './EditSudokuOptions';
+import { EditSudokuCell } from './EditSudokuCell';
+import { EditSudokuGroup } from './EditSudokuGroup';
+import { cellId, getGroupRank, groupId, isValue } from '../sudoku.helper';
+import { SudokuGroupType } from './enums';
+import { remove as _remove } from 'lodash';
 import { SDK_PREFIX, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
 
 export class GenerationMapCellInfo {
@@ -69,9 +69,9 @@ export class EditSudoku {
   }
 
   load(fixedValues: string) {
-    const fixed = (fixedValues||'').trim().replace(/\s/g, '');
-    if (fixed.length<=this.options.rank) return console.warn(...SDK_PREFIX, 'Cannot load schema', fixedValues);
-    for (let i = 0; i< fixed.length; i++) {
+    const fixed = (fixedValues || '').trim().replace(/\s/g, '');
+    if (fixed.length <= this.options.rank) return console.warn(...SDK_PREFIX, 'Cannot load schema', fixedValues);
+    for (let i = 0; i < fixed.length; i++) {
       const v = fixed.charAt(i);
       const cell = this.cellList[i];
       cell.value = isValue(v, true) ? v : '';

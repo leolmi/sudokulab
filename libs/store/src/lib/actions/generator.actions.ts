@@ -1,6 +1,5 @@
-import {createAction, props} from "@ngrx/store";
+import { createAction, props } from '@ngrx/store';
 import { EditSudoku, Sudoku, WorkingInfo } from '@sudokulab/model';
-import { Dictionary } from '@ngrx/entity';
 
 
 export const setActiveGeneratorCell = createAction(

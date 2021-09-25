@@ -4,7 +4,7 @@ import { AlgorithmResult } from '../AlgorithmResult';
 import { head as _head, values as _values, minBy as _minBy, cloneDeep as _clone } from 'lodash';
 import { Sudoku } from '../Sudoku';
 import { checkAvailables } from '../logic';
-import { getValues } from '../../sudoku-helper';
+import { getValues } from '../../sudoku.helper';
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { GeneratorBaseComponent } from '../../components/GeneratorBaseComponent';
 import { GeneratorFacade, SudokuFacade } from '@sudokulab/model';
-import { filter, takeUntil } from 'rxjs/operators';
 import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 

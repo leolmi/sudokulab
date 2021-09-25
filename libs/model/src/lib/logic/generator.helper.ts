@@ -6,23 +6,26 @@ import {
   EditSudokuCell,
   EditSudokuEndGenerationMode,
   EditSudokuGenerationMap,
-  EditSudokuOptions, EditSudokuValorizationMode,
+  EditSudokuOptions,
+  EditSudokuValorizationMode,
   GenerationMapCellInfo,
   Generator,
   getAvailables,
-  getMinNumbers, getValues,
+  getMinNumbers,
+  getValues,
   isValue,
   MessageType,
   PlaySudoku,
-  PlaySudokuOptions, SDK_PREFIX,
+  PlaySudokuOptions,
+  SDK_PREFIX,
   SolveAllResult,
   Solver,
   Sudoku,
-  SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE,
+  SUDOKU_DYNAMIC_VALUE,
+  SUDOKU_EMPTY_VALUE,
   SudokuMessage,
   SudokuSymmetry,
-  traverseSchema,
-  use
+  traverseSchema
 } from '@sudokulab/model';
 import {
   extend as _extend,
@@ -34,6 +37,7 @@ import {
   remove as _remove
 } from 'lodash';
 import { combineLatest } from 'rxjs';
+import { use } from '../../global.helper';
 
 
 const _getSymmetryCells = (id: string|undefined, sdk: EditSudoku): EditSudokuCell[] => {

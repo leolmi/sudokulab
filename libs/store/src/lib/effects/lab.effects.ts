@@ -1,23 +1,21 @@
-import {Injectable} from "@angular/core";
-import {Actions, createEffect, ofType} from "@ngrx/effects";
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import {SudokuStore} from "../sudoku-store";
-import * as SudokuActions from "../actions";
-import {concatMap, filter, map, switchMap, withLatestFrom} from "rxjs/operators";
-import * as SudokuSelectors from "../selectors";
+import { SudokuStore } from '../sudoku-store';
+import * as SudokuActions from '../actions';
+import { concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import * as SudokuSelectors from '../selectors';
 import {
   Algorithms,
   applyAlgorithm,
-  AVAILABLE_DIRECTIONS, buildSudokuInfo,
-  calcDifficulty,
+  buildSudokuInfo,
   cellId,
   checkAvailables,
   clear,
-  decodeCellId,
   getSchemaName,
   isValidValue,
   MessageType,
-  MoveDirection, moveOnDirection,
+  moveOnDirection,
   PlaySudoku,
   resetAvailables,
   Solver,
@@ -26,16 +24,16 @@ import {
   SudokuInfo,
   SudokuMessage
 } from '@sudokulab/model';
-import {cloneDeep as _clone} from 'lodash';
-import {Schema} from "@sudokulab/api-interfaces";
-import {saveAs} from "file-saver";
+import { cloneDeep as _clone } from 'lodash';
+import { Schema } from '@sudokulab/api-interfaces';
+import { saveAs } from 'file-saver';
 
 @Injectable()
 export class LabEffects {
 
   loadSudoku$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.loadSudoku),
-    concatMap((a) => [SudokuActions.setActiveSudoku({ active: a.sudoku?.id||'' })])
+    concatMap((a) => [SudokuActions.setActiveSudoku({ active: a.sudoku?._id||0 })])
   ));
 
   activeteSudoku$ = createEffect(() => this._actions$.pipe(
@@ -147,16 +145,18 @@ export class LabEffects {
     switchMap(([a, sdk]) => {
       if (!sdk) return [];
       const solver = new Solver(sdk);
-      const message = solver.check();
-      if (!!message)
-        return [SudokuActions.setActiveMessage({
-          message: new SudokuMessage({message, type: MessageType.warning
-          })})];
+      const check_message = solver.check();
+      if (!!check_message) {
+        const message = new SudokuMessage({ message: check_message, type: MessageType.warning });
+        return [SudokuActions.setActiveMessage({ message })];
+      }
       const result = solver.solve();
       if (result.unique) {
-        const sudoku: Sudoku = <Sudoku>_clone(result.unique.sdk.sudoku);
-        sudoku.info = buildSudokuInfo(sudoku, { unique: true, algorithms: result.unique.algorithms });
-        return [SudokuActions.updateSudoku({ changes: { id: sudoku.id, sudoku } })];
+        const schema: Sudoku = <Sudoku>_clone(result.unique.sdk.sudoku);
+        schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms });
+        return [
+          SudokuActions.updateSudoku({ changes: { _id: schema._id, sudoku: schema } }),
+          SudokuActions.checkSudoku({ schema })];
       } else if (result.multiple) {
         const sudoku: Sudoku = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
         sudoku.info = new SudokuInfo();
@@ -177,16 +177,18 @@ export class LabEffects {
       const info = new SudokuInfo();
       const result = solver.solve();
       if (result.unique) {
-        const sudoku = result.unique.sdk.sudoku;
+        const schema = result.unique.sdk.sudoku;
         message = new SudokuMessage({
           message: 'Sudoku successfully solved!',
           type: MessageType.success
         });
-        if (!!sudoku)
-          sudoku.info = buildSudokuInfo(sudoku, { unique: true, algorithms: result.unique.algorithms });
-        return [
-          SudokuActions.updateSudoku({ changes: result.unique.sdk }),
-          SudokuActions.setActiveMessage({ message })];
+        const output: Action[] = [SudokuActions.updateSudoku({ changes: result.unique.sdk })];
+        if (!!schema) {
+          schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms });
+          output.push(SudokuActions.checkSudoku({ schema }))
+        }
+        output.push(SudokuActions.setActiveMessage({ message }));
+        return output;
       } else if (result.multiple) {
         message = new SudokuMessage({
           message: 'Sudoku has multiple results!',
@@ -210,12 +212,13 @@ export class LabEffects {
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     map(([a, sdk]) => {
       const schema: Schema = {
-        fixed: sdk?.sudoku?.fixed||'',
+        _id: sdk?.sudoku?._id || 0,
+        fixed: sdk?.sudoku?.fixed || '',
         info: sdk?.sudoku?.info,
         name: getSchemaName(sdk)
       };
       const schema_str = JSON.stringify(schema, null, 2);
-      const blob = new Blob([schema_str], {type: "application/json;"});
+      const blob = new Blob([schema_str], { type: "application/json;" });
       saveAs(blob, `${schema.name}.json`);
     })
   ), { dispatch: false });

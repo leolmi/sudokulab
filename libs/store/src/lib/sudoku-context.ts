@@ -1,12 +1,12 @@
 import { Injectable, Type } from '@angular/core';
-import { MessageType, PlaySudoku, Sudoku, SudokuFacade, SudokulabPage, SudokuMessage } from '@sudokulab/model';
+import { MessageType, Sudoku, SudokuFacade, SudokulabPage, SudokuMessage } from '@sudokulab/model';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as SudokuActions from './actions';
 import * as SudokuSelectors from './selectors';
 import { Dictionary } from '@ngrx/entity';
-import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { filter, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 
 @Injectable()
@@ -15,6 +15,10 @@ export class SudokuContext extends SudokuFacade {
   selectActivePage$: Observable<SudokulabPage|undefined> = this._store.select(SudokuSelectors.selectActivePage);
   selectPageStatus$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectPageStatus);
   private _upload$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  fillDocuments() {
+    this._store.dispatch(SudokuActions.fillSchemas());
+  }
 
   setActivePage(page: SudokulabPage|undefined) {
     if (!!page) this._store.dispatch(SudokuActions.setActivePage({ page }));

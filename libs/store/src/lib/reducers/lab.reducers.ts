@@ -4,25 +4,28 @@ import {Action, createReducer, on} from '@ngrx/store';
 import * as SudokuActions from '../actions';
 
 export interface LabState extends EntityState<PlaySudoku> {
-  active: string;
+  active: number;
   activeCell: string;
 }
 
-export const adapter: EntityAdapter<PlaySudoku> = createEntityAdapter<PlaySudoku>();
+export const adapter: EntityAdapter<PlaySudoku> = createEntityAdapter<PlaySudoku>({
+  selectId: (s) => s._id
+});
 
 export const initialState: LabState = adapter.getInitialState({
-  active: '',
+  active: 0,
   activeCell: '',
 });
 
 const labReducers = createReducer(
   initialState,
+  on(SudokuActions.loadSchemas, (state, { schemas }) => adapter.upsertMany(schemas, state)),
   on(SudokuActions.loadSudoku, (state, { sudoku }) => {
     const psdk = new PlaySudoku({ sudoku });
     checkAvailables(psdk);
     return adapter.upsertOne(psdk, state);
   }),
-  on(SudokuActions.updateSudoku, (state, { changes }) => adapter.updateOne({ id: changes.id||'', changes }, state)),
+  on(SudokuActions.updateSudoku, (state, { changes }) => adapter.updateOne({ id: changes._id||0, changes }, state)),
   on(SudokuActions.setActiveSudoku, (state, { active }) => ({ ...state, active, activeCell:'' })),
   on(SudokuActions.setActiveCell, (state, { id }) => ({ ...state, activeCell: id }))
 );

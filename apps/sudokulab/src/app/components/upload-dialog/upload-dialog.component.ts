@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild } fro
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { LabFacade, MessageType, Sudoku, SudokuFacade, SudokuMessage, use } from '@sudokulab/model';
+import { getHash, MessageType, Sudoku, SudokuFacade, SudokuMessage, use } from '@sudokulab/model';
 
 @Component({
   selector: 'sudokulab-upload-dialog',
@@ -53,10 +53,10 @@ export class UploadDialogComponent {
       try {
         const json: Sudoku = <Sudoku>JSON.parse(<string>reader.result);
         const sudoku = new Sudoku({
+          _id: json._id||getHash(json.fixed),
           fixed: json.fixed,
           values: json.values||'',
           rank: json.rank,
-          id: json.id||json.fixed,
           options: json.options,
           info: json.info
         });

@@ -17,5 +17,6 @@ export abstract class SudokuFacade implements Facade {
   abstract raiseMessage(message: SudokuMessage): void;
   abstract raiseError(err: any): void;
   abstract upload(open?: boolean): void;
+  abstract fillDocuments(): void;
   abstract onUpload(component: Type<any>, destroyer$: Observable<any>): Observable<Sudoku|any>;
 }

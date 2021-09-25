@@ -5,6 +5,7 @@ export interface Message {
 }
 
 export interface Schema {
+  _id: number;
   fixed: string;
   info?: SudokuInfo;
   name?: string;
