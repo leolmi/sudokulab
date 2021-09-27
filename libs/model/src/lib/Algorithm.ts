@@ -5,6 +5,7 @@ export interface PlayAlgorithm {
   id: string;
   name: string;
   apply: (sdk: PlaySudoku) => AlgorithmResult;
+  icon: string;
 }
 
 export class Algorithm {

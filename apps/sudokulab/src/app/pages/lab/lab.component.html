@@ -6,7 +6,13 @@
     <div class="board">
       <sudokulab-board></sudokulab-board>
     </div>
-    <div class="bottom-board" fxFlex></div>
+    <div class="bottom-board" fxFlex>
+      <mat-progress-bar [value]="progress$|async"
+                        class="lab-progress-bar"
+                        color="primary"
+                        mode="determinate"></mat-progress-bar>
+      <sudokulab-key-board></sudokulab-key-board>
+    </div>
   </div>
   <div class="tools tools-right" fxFlex>
     <sudokulab-schemas></sudokulab-schemas>

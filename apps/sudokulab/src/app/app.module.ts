@@ -10,7 +10,8 @@ import {
   SchemaNamePipe,
   SudokuFacade,
   SudokulabPage,
-  SudokulabPagesService
+  SudokulabPagesService,
+  SudokulabSettingsService
 } from '@sudokulab/model';
 import { GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
 import { StoreModule } from '@ngrx/store';
@@ -47,6 +48,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GeneratorToolbarComponent } from './components/generator-toolbar/generator-toolbar.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatRippleModule } from '@angular/material/core';
+import { SchemasItemComponent } from './components/schemas/schemas-item.component';
+import { KeyBoardComponent } from './components/key-board/key-board.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +59,7 @@ import { GeneratorToolbarComponent } from './components/generator-toolbar/genera
     AppComponent,
     BoardComponent,
     GeneratorBoardComponent,
+    SchemasItemComponent,
     SchemasComponent,
     InfoComponent,
     LabComponent,
@@ -64,12 +70,14 @@ import { GeneratorToolbarComponent } from './components/generator-toolbar/genera
     GeneratorStateComponent,
     ThumbnailComponent,
     GeneratorToolbarComponent,
+    KeyBoardComponent,
     SchemaNamePipe
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     FlexLayoutModule,
+    ScrollingModule,
     SudokuStoreModule,
     MatSnackBarModule,
     MatButtonModule,
@@ -85,6 +93,7 @@ import { GeneratorToolbarComponent } from './components/generator-toolbar/genera
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSliderModule,
+    MatRippleModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     BrowserAnimationsModule,
@@ -93,6 +102,9 @@ import { GeneratorToolbarComponent } from './components/generator-toolbar/genera
         component: LabComponent
       }, {
         path: `${AvailablePages.lab}`,
+        component: LabComponent
+      }, {
+        path: `${AvailablePages.lab}/:id`,
         component: LabComponent
       }, {
         path: `${AvailablePages.generator}`,
@@ -105,6 +117,7 @@ import { GeneratorToolbarComponent } from './components/generator-toolbar/genera
     )
   ],
   providers: [
+    SudokulabSettingsService,
     SudokulabPagesService,
     { provide: SudokuFacade, useClass: SudokuContext },
     { provide: LabFacade, useClass: LabContext },

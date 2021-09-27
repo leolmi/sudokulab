@@ -50,10 +50,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    const code = location.hash.substr(2);
-    let page = this._pagesProvider.pages.find(page => page.code===code);
+    const codes = location.hash.substr(2).split('/');
+    let page = this._pagesProvider.pages.find(page => page.code===codes[0]);
     if (!page) page = this._pagesProvider.pages.find(page => page.default);
-    if (!!page) setTimeout(() => this._sudoku.setActivePage(page));
+    if (!!page) setTimeout(() => this._sudoku.setActivePage(page, { id: codes[1] }));
   }
 
   openPage(pag: SudokulabPage) {

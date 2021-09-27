@@ -25,7 +25,7 @@
   cursor: pointer;
   transition: border-color ease-in-out .5s;
   &:hover {
-    border-color: $color-accent;
+    border-color: $color-primary;
     .upload-canvas-info {
       opacity: .8;
     }

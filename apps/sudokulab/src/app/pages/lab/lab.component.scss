@@ -4,3 +4,7 @@
   position: relative;
 }
 
+.lab-progress-bar {
+  width: calc(100% - 5px);
+  height: 16px;
+}

@@ -1,18 +1,25 @@
 <div class="schemalab-tool sudoku-info">
   <div *ngIf="!!(info$|async)?.compiled" fxLayout="column">
-    <div class="info-property" fxLayout="row">percent: {{percent$|async}}</div>
-    <div class="info-property" fxLayout="row">fixed: {{(fixed$|async)||''}}</div>
-    <div class="info-property" fxLayout="row">unique: {{(info$|async)?.unique}}</div>
-    <div class="info-property" fxLayout="row">use try: {{useTry$|async}}</div>
-    <div class="info-property" fxLayout="row">difficulty: {{(difficulty$|async)}}</div>
-    <div class="info-property" fxLayout="row">difficulty value: {{(difficultyValue$|async)}}</div>
-    <div class="info-property" fxLayout="row">symmetry: {{(info$|async)?.symmetry||'unknown'}}</div>
-    <div class="info-property" fxLayout="row">hash: {{(hash$|async)||''}}</div>
+<!--    <div class="info-property" fxLayout="row">percent: {{percent$|async}}</div>-->
+    <div class="schemalab-info-toolbar" fxLayout="row" fxLayoutAlign="start center">
+      <div class="info-fixed color-primary" matTooltip="Number of fixed numbers">{{(fixed$|async)||''}}</div>
+      <div class="info-t-type color-accent" matTooltip="Number of try-algorithm usage" *ngIf="useTry$|async">{{(useTry$|async)||''}}</div>
+      <div fxFlex fxLayout="column">
+        <div class="difficulty">{{difficulty$|async}}</div>
+        <div class="difficulty-value" *ngIf="!!(difficulty$|async)">{{difficultyValue$|async}}</div>
+      </div>
+      <mat-icon matTooltip="uniq solution">looks_one</mat-icon>
+    </div>
   </div>
   <div *ngIf="((difficultyMap$|async)||[]).length>0" class="difficulty-map" fxLayout="column">
+    <div class="tool-label">Algorithms needed for the solution:</div>
     <div class="algorithm-item"
          *ngFor="let item of (difficultyMap$|async)||[]">
-      <div calss="algorithm-content">{{item.name}}: {{item.value}}</div>
+      <div class="algorithm-content" fxLayout="row" fxLayoutAlign="start center">
+        <mat-icon>{{item.icon}}</mat-icon>
+        <div class="alg-name">{{item.name}}</div>
+        <div class="alg-value" fxFlex>{{item.value}}</div>
+      </div>
     </div>
   </div>
 </div>

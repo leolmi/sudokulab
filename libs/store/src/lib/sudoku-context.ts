@@ -20,8 +20,8 @@ export class SudokuContext extends SudokuFacade {
     this._store.dispatch(SudokuActions.fillSchemas());
   }
 
-  setActivePage(page: SudokulabPage|undefined) {
-    if (!!page) this._store.dispatch(SudokuActions.setActivePage({ page }));
+  setActivePage(page: SudokulabPage|undefined, data?: any) {
+    if (!!page) this._store.dispatch(SudokuActions.setActivePage({ page, data }));
   }
 
   raiseMessage(message: SudokuMessage) {

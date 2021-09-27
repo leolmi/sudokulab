@@ -17,9 +17,11 @@ export class OneValueForCellAlgorithm extends Algorithm implements PlayAlgorithm
     super(a);
     this.name = 'One value for cell';
     this.id = ONE_VALUE_FOR_CELL_ALGORITHM;
+    this.icon = 'center_focus_strong';
   }
   id: string;
   name: string;
+  icon: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     const cell = _find(sdk.cells, c => (!c?.value && c?.availables || []).length === 1);
 

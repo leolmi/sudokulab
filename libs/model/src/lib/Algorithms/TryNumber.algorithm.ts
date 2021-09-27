@@ -20,9 +20,11 @@ export class TryNumberAlgorithm extends Algorithm implements PlayAlgorithm {
     super(a);
     this.name = 'Try number in cell';
     this.id = TRY_NUMBER_ALGORITHM;
+    this.icon = 'generating_tokens';
   }
   id: string;
   name: string;
+  icon: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     // ricerca la cella con minor numero di valori possibili fra quelle non valorizzate
     // const firstc = _head(_values(sdk.couples));

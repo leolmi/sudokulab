@@ -1,3 +1,45 @@
 .difficulty-map {
   margin-top: 50px;
 }
+
+.schemalab-info-toolbar {
+  height: 60px;
+  margin-bottom: 20px;
+}
+
+.info-fixed,
+.info-t-type {
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 32px;
+  margin-right: 10px;
+}
+
+.difficulty {
+  font-size: 40px;
+  padding: 0 10px;
+}
+
+.difficulty-value {
+  font-size: 12px;
+  opacity: .6;
+  padding-left: 12px;
+}
+
+.algorithm-content {
+  height: 32px;
+  padding: 0 10px;
+  > .mat-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+  }
+  .alg-name {
+    padding-left: 10px;
+    width: 300px;
+    font-size: 20px;
+  }
+  .alg-value {
+
+  }
+}

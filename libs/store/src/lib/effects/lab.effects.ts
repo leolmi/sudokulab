@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Location } from '@angular/common';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { SudokuStore } from '../sudoku-store';
@@ -26,22 +27,45 @@ import {
 } from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
 import { saveAs } from 'file-saver';
+import { Router } from '@angular/router';
+import { updateDocumentTitle } from '../actions';
 
 @Injectable()
 export class LabEffects {
+
+  activePage$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setActivePage),
+    filter(a => a.page?.code === 'lab'),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    concatMap(([a, sdk]) => {
+      const id = a.data?.id||sdk?._id||'';
+      this._router.navigate([`${a.page?.code}${id?`/${id}`:''}`]);
+      return [SudokuActions.updateDocumentTitle({ data: `${id}` })];
+    })
+  ));
 
   loadSudoku$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.loadSudoku),
     concatMap((a) => [SudokuActions.setActiveSudoku({ active: a.sudoku?._id||0 })])
   ));
 
-  activeteSudoku$ = createEffect(() => this._actions$.pipe(
+  activateSudoku$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.setActiveSudoku),
     withLatestFrom(
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     filter(([a, sdk]) => !!sdk && !sdk.sudoku?.info?.compiled),
     // TODO: verificare nelle opzioni se questa funzionalità è prevista
     concatMap(([a, sdk]) => [SudokuActions.analyze()])
+  ));
+
+  activateSudokuPath$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setActiveSudoku),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    concatMap(([a, sdk]) => {
+      if (!!sdk) this._location.go(`/lab/${sdk._id}`);
+      return [SudokuActions.updateDocumentTitle({ data: sdk ? `${sdk._id}` : '' })];
+    })
   ));
 
   solveStep$ = createEffect(() => this._actions$.pipe(
@@ -230,6 +254,8 @@ export class LabEffects {
   ));
 
   constructor(private _actions$: Actions,
+              private _location: Location,
+              private _router: Router,
               private _store: Store<SudokuStore>) {
   }
 }

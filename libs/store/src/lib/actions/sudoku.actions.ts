@@ -4,7 +4,7 @@ import { Dictionary } from '@ngrx/entity';
 
 export const setActivePage = createAction(
   '[SudokuPlay.sudoku] set the active page',
-  props<{ page: SudokulabPage|undefined }>()
+  props<{ page: SudokulabPage|undefined, data?: any }>()
 );
 
 export const setActiveMessage = createAction(
@@ -28,4 +28,9 @@ export const fillSchemas = createAction(
 export const checkSudoku = createAction(
   '[SudokuPlay.sudoku] check the sudoku schema',
   props<{ schema: Sudoku }>()
+);
+
+export const updateDocumentTitle = createAction(
+  '[SudokuPlay.sudoku] update document title',
+  props<{ data?: string }>()
 );

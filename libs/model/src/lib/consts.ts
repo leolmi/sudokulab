@@ -5,6 +5,8 @@ export const featureName = 'sudoku';
 export const SUDOKU_DYNAMIC_VALUE = 'x';
 export const SUDOKU_EMPTY_VALUE = '0';
 
+export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
+
 export const SDK_PREFIX = ['%cSUDOKULAB', 'color:orangered;'];
 
 export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {

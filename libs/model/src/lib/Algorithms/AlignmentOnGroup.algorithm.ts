@@ -30,10 +30,12 @@ export class AlignmentOnGroupAlgorithm extends Algorithm implements PlayAlgorith
     super(a);
     this.name = 'Alignment on group';
     this.id = ALIGNMENT_ON_GROUP_ALGORITHM;
+    this.icon = 'padding';
   }
 
   id: string;
   name: string;
+  icon: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
 
     const cells: Dictionary<boolean> = {};

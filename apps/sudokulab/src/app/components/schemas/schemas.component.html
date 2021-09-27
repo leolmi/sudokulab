@@ -1,9 +1,38 @@
-<div class="schemalab-tool" fxLayout="column">
-  <div class="schema-item"
-       (click)="select(schema)"
-       *ngFor="let schema of schemas$|async"
-       [ngClass]="{'active': (activeId$|async) === schema._id}"
+<div class="schemalab-tool schemalab-schemas" fxLayout="column">
+  <div class="schemalab-schemas-toolbar"
        fxLayout="row" fxLayoutAlign="start center">
-    <div class="schema">{{schema | schemaName}}</div>
+    <mat-form-field appearance="outline" class="no-wrapper-padding" fxFlex>
+      <mat-label>Sort by</mat-label>
+      <mat-select [value]="(sortBy$|async)"
+                  (valueChange)="applySort($event)">
+        <mat-option *ngFor="let sbi of availableSortBy" [value]="sbi.code">
+          {{sbi.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="schemas-counter" fxLayout="column">
+      <div>{{counter$|async}}</div>
+      <div *ngIf="!!!(try$|async)" class="schemas-counter-total">{{total$|async}}</div>
+    </div>
+    <button mat-icon-button
+            (click)="toggleAsc()"
+            matTooltip="Asc or desc sort">
+      <mat-icon>{{(asc$|async) ? 'south' : 'north'}}</mat-icon>
+    </button>
+    <button mat-icon-button
+            (click)="toggleTry()"
+            matTooltip="include schemas that use the try algorithm"
+            [ngClass]="{'color-primary': try$|async}">
+      <mat-icon>generating_tokens</mat-icon>
+    </button>
   </div>
+  <cdk-virtual-scroll-viewport
+    class="schemas-container"
+    itemSize="30" fxFlex>
+    <sudokulab-schemas-item
+      *cdkVirtualFor="let schema of schemas$|async"
+      [active]="(activeId$|async) === schema._id"
+      (onClick)="select($event)"
+      [schema]="schema"></sudokulab-schemas-item>
+  </cdk-virtual-scroll-viewport>
 </div>

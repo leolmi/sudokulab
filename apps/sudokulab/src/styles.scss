@@ -18,6 +18,31 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   top: 0;
 }
 
+.sudokulab-scrollbar {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(10,10,10,.1);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+.mat-form-field {
+  &.no-wrapper-padding {
+    .mat-form-field-wrapper {
+      padding-bottom: 0;
+    }
+  }
+}
+
+
 .hidden {
   visibility: hidden;
 }
@@ -41,27 +66,9 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding-top: 20px;
 }
 
-.page-button {
-  height: 65px !important;
-  width: 65px !important;
-  margin-top: -2px !important;
-  margin-left: -16px !important;
-  border-radius: 0 !important;
-  border-right: rgba(200,200,200,.5) 1px solid !important;
-  &:hover {
-    background-color: yellowgreen;
-  }
-}
-
 .schemalab-tool {
   padding: 0 10px;
 }
-
-//button {
-//  &.selected {
-//    background: yellowgreen;
-//  }
-//}
 
 .message-type-error {
   background-color: $color-error !important;
@@ -80,12 +87,26 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   color: $color-success-contrast !important;
 }
 
+.text-center {
+  text-align: center;
+}
+
 
 .background2 {
   background-color: $color-background;
   .selected {
     background-color: $color-background-selected;
   }
+}
+
+.color-primary {
+  background-color: $color-primary;
+  color: $color-primary-contrast;
+}
+
+.color-accent {
+  background-color: $color-accent;
+  color: $color-accent-contrast;
 }
 
 .cell-container {
@@ -113,26 +134,10 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
-.dark-theme {
-  .cell-container {
-    background: #333 !important;
-    color: whitesmoke;
-    border: 1px solid rgba(200,200,200,.1) !important;
-    &.fixed {
-      //color: lightgreen !important;
-    }
-    &:not(.fixed) {
-      &:hover {
-        background-color: lightgreen !important;
-      }
-    }
-    &.bottom-line {
-      border-bottom: 2px solid $color-border-highlight !important;
-    }
-    &.right-line {
-      border-right: 2px solid $color-border-highlight !important;
-    }
-  }
+.tool-label {
+  opacity: .5;
+  padding: 10px 0 24px 0;
+  user-select: none;
 }
 
 @media only screen and (max-width: 1300px) {

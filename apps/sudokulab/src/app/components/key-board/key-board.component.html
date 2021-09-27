@@ -1,0 +1,9 @@
+<div class="key-board"
+     [ngClass]="{'disabled': !!!(isCellSelected$|async)}"
+     fxLayout="row" fxLayoutAlign="start center">
+  <div class="key-number"
+       [ngClass]="{'filled': !!((status$|async)||{})[kn]}"
+       *ngFor="let kn of numbers$|async"
+       (click)="clickOnNumber(kn)"
+       fxFlex>{{kn}}</div>
+</div>

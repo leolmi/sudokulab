@@ -28,19 +28,6 @@ import { SudokuSolution } from './lib/SudokuSolution';
 import { getHash, use } from './global.helper';
 
 
-export const update = <T>(o: T, chs?: Partial<T>, handler?: (c:T) => void): T => {
-  const co = <T>_clone(o||{});
-  if (!!chs) _extend(co, chs||{});
-  if (!!handler) handler(co);
-  return co;
-}
-
-export const updateBehaviorSubject = <T>(bs$: BehaviorSubject<T>, handler: (c: T) => boolean): void =>
-  use(bs$, o => {
-    const co = _clone(o);
-    if (handler(co)) bs$.next(co);
-  });
-
 export const cellId = (column: number, row: number) => `${column}.${row}`;
 
 export const isValue = (v: string, acceptX = false): boolean => {

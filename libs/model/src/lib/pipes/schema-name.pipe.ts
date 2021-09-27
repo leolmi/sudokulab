@@ -3,7 +3,7 @@ import { getSchemaName, PlaySudoku } from '@sudokulab/model';
 
 @Pipe({name: 'schemaName'})
 export class SchemaNamePipe implements PipeTransform {
-  transform(value: PlaySudoku): string {
-    return getSchemaName(value, { separator: ' ' });
+  transform(value: PlaySudoku|undefined): string {
+    return getSchemaName(value, { separator: ' ', hideHash: true });
   }
 }

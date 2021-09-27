@@ -81,7 +81,10 @@ export class Generator {
       // 5. se unica salva schema altrimenti skippa
       // console.log(...SDK_PREFIX, 'solved schema', sol);
       if (!!sol.unique) {
-        const schema = getSolutionSudoku(sol.unique, { sudokulab: true });
+        const schema = getSolutionSudoku(sol.unique, {
+          sudokulab: true,
+          symmetry: this._workSdk.options.symmetry
+        });
         if (!!schema && this._isRightSolution(schema)) {
           this._facade.addSchema(schema);
           this.schemas[`${schema._id||0}`] = schema;

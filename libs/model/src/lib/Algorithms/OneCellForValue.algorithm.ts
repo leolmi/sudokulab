@@ -17,9 +17,11 @@ export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm
     super(a);
     this.name = 'One cell for value';
     this.id = ONE_CELL_FOR_VALUE_ALGORITHM;
+    this.icon = 'crop_free';
   }
   id: string;
   name: string;
+  icon: string;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     let ocid: string = '';
     let ocvl: string = '';

@@ -1,18 +1,44 @@
-.schema-item {
-  height: 24px;
-  position: relative;
-  cursor: pointer;
-  &:hover {
-    background-color: rgba(10,10,10,.1);
+@import "../../../variables";
+
+.schemalab-schemas {
+  height: 100%;
+}
+
+.schemalab-schemas-toolbar {
+  height: 60px;
+  margin-bottom: 20px;
+}
+
+.schemas-counter {
+  font-size: 36px;
+  font-weight: bold;
+  padding-left: 20px;
+  user-select: none;
+  text-align: center;
+  .schemas-counter-total {
+    font-size: 10px;
+    opacity: .6;
   }
-  &.active {
-    background: yellowgreen;
-  }
-  .schema {
-    position: absolute;
-    width: calc(100% - 20px);
-    left: 10px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+::ng-deep {
+  .schemas-item {
+    height: 30px;
+    position: relative;
+    cursor: pointer;
+    &:hover {
+      background-color: rgba(10, 10, 10, .1);
+      &.color-primary {
+        background-color: $color-primary-transp !important;
+      }
+    }
+    .hash {
+      font-family: monospace;
+      opacity: .6;
+    }
+    .schema-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }

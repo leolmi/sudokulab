@@ -13,7 +13,7 @@ export abstract class SudokuFacade implements Facade {
   abstract selectActivePage$: Observable<SudokulabPage|undefined>;
   abstract selectPageStatus$: Observable<Dictionary<boolean>>;
 
-  abstract setActivePage(page: SudokulabPage|undefined): void;
+  abstract setActivePage(page: SudokulabPage|undefined, data?: any): void;
   abstract raiseMessage(message: SudokuMessage): void;
   abstract raiseError(err: any): void;
   abstract upload(open?: boolean): void;

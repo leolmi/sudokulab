@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { getFixedCount, getHash, LabFacade, SudokuInfo, TRY_NUMBER_ALGORITHM } from '@sudokulab/model';
+import { getAlgorithms, getFixedCount, getHash, LabFacade, SudokuInfo, TRY_NUMBER_ALGORITHM } from '@sudokulab/model';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { keys as _keys } from 'lodash';
@@ -8,6 +8,7 @@ import { DestroyComponent } from '../DestroyComponent';
 interface MapItem {
   name: string;
   value: number;
+  icon: string;
 }
 
 @Component({
@@ -36,8 +37,16 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
 
     this.difficulty$ = this.info$.pipe(map(info => info?.difficulty||'unknown'));
     this.difficultyValue$ = this.info$.pipe(map(info => info?.difficultyValue||0));
-    this.useTry$ = this.info$.pipe(map(info => info?.useTryAlgorithm ? `true (${info.difficultyMap[TRY_NUMBER_ALGORITHM]})` : 'false'));
+    this.useTry$ = this.info$.pipe(map(info => info?.useTryAlgorithm ? `T${info.difficultyMap[TRY_NUMBER_ALGORITHM]}` : ''));
+    const algorithms = getAlgorithms();
     this.difficultyMap$ = this.info$.pipe(map(info => _keys(info?.difficultyMap||[])
-      .map(k => ({ name: k, value: (info?.difficultyMap||{})[k]||0 }))));
+      .map(k => {
+        const alg = algorithms.find(a => a.id === k);
+        return {
+          name: alg?.name||k,
+          value: (info?.difficultyMap||{})[k]||0,
+          icon: alg?.icon||''
+        }
+      })));
   }
 }
