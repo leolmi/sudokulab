@@ -14,6 +14,6 @@ const rootPath = environment.production ? './' : join(__dirname, 'public');
     SudokuModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}

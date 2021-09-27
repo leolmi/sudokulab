@@ -21,6 +21,7 @@ export class Sudoku {
   fixed: string;
   options: SudokuOptions;
   info: SudokuInfo;
+  name?: string;
 }
 
 export const consolidate = (sdk: Sudoku) => {

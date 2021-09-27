@@ -25,7 +25,6 @@ import {
   SudokuMessage
 } from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
-import { Schema } from '@sudokulab/api-interfaces';
 import { saveAs } from 'file-saver';
 
 @Injectable()
@@ -211,15 +210,14 @@ export class LabEffects {
     ofType(SudokuActions.dowloadSchema),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     map(([a, sdk]) => {
-      const schema: Schema = {
-        _id: sdk?.sudoku?._id || 0,
+      const schema: Sudoku = new Sudoku({
         fixed: sdk?.sudoku?.fixed || '',
-        info: sdk?.sudoku?.info,
-        name: getSchemaName(sdk)
-      };
+        info: new SudokuInfo(sdk?.sudoku?.info)
+      });
+      const filename = getSchemaName(schema);
       const schema_str = JSON.stringify(schema, null, 2);
       const blob = new Blob([schema_str], { type: "application/json;" });
-      saveAs(blob, `${schema.name}.json`);
+      saveAs(blob, `${filename}.json`);
     })
   ), { dispatch: false });
 

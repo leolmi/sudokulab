@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-export interface Sudoku extends Document {
+export interface SudokuDoc extends Document {
   readonly _id: number;
   readonly rank: number;
   readonly values: string;

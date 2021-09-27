@@ -1,19 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
-import { Message, Schema } from '@sudokulab/api-interfaces';
 import { AppService } from './app.service';
+import { SudokulabInfo } from '@sudokulab/model';
 
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get('hello')
-  getData(): Message {
+  @Get('sudokulab')
+  getData(): SudokulabInfo {
     return this.appService.getData();
-  }
-
-  @Get('schemas')
-  async getSchemas(): Promise<Schema[]> {
-    return this.appService.getSchemas();
   }
 }

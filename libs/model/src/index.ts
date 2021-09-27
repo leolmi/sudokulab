@@ -5,6 +5,7 @@ export * from './lib/Sudoku';
 export * from './lib/SudokuMessage';
 export * from './lib/SudokuOptions';
 export * from './lib/SudokuInfo';
+export * from './lib/SudokulabInfo';
 export * from './lib/Algorithm';
 export * from './lib/AlgorithmResult';
 export * from './lib/Algorithms';
