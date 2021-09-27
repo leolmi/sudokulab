@@ -48,7 +48,6 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GeneratorToolbarComponent } from './components/generator-toolbar/generator-toolbar.component';
 
-
 @NgModule({
   declarations: [
     DestroyComponent,

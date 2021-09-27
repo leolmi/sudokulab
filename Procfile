@@ -1,1 +1,1 @@
-web: node dist/apps/sudokulab.js
+web: npm start
