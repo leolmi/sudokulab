@@ -21,4 +21,5 @@ export abstract class SudokuFacade implements Facade {
   abstract fillDocuments(): void;
   abstract onUpload(component: Type<any>, destroyer$: Observable<any>): Observable<Sudoku|any>;
   abstract checkCompactStatus(): void;
+  abstract saveUserSettings(): void;
 }

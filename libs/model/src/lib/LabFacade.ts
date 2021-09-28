@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { PlaySudoku, Sudoku, SudokuMessage } from '@sudokulab/model';
+import { PlaySudoku, SchemasOptions, Sudoku, SudokuMessage } from '@sudokulab/model';
 import { Facade } from './Facade';
 
 export abstract class LabFacade implements Facade {
@@ -7,6 +7,7 @@ export abstract class LabFacade implements Facade {
   abstract selectActiveSudoku$: Observable<PlaySudoku|undefined>;
   abstract selectActiveCell$: Observable<string>;
   abstract selectAllSchemas$: Observable<PlaySudoku[]>;
+  abstract selectSchemasOptions$: Observable<SchemasOptions>;
 
   abstract loadSudoku(sudoku: Sudoku): void;
   abstract setActiveSudoku(id: number): void;
@@ -21,4 +22,5 @@ export abstract class LabFacade implements Facade {
   abstract download(): void;
   abstract upload(): void;
   abstract raiseMessage(message: SudokuMessage): void;
+  abstract updateSchemasOptions(changes: Partial<SchemasOptions>): void;
 }

@@ -1,30 +1,27 @@
-import {AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { AfterViewInit, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import {
   Facade,
   GeneratorFacade,
-  LabFacade,
-  OptionsFacade,
-  SUDOKU_AUTHOR_LINK,
+  LabFacade, OptionsFacade, SUDOKU_AUTHOR_LINK,
   SudokuFacade,
   SudokulabPage,
-  SudokulabPagesService,
-  SudokulabWindowService,
+  SudokulabPagesService, SudokulabWindowService,
   use
 } from '@sudokulab/model';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {filter} from 'rxjs/operators';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {AvailablePages} from './model';
-import {Dictionary} from '@ngrx/entity';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { AvailablePages } from './model';
+import { Dictionary } from '@ngrx/entity';
 
 @Component({
   selector: 'sudokulab-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   page$: Observable<SudokulabPage|undefined>;
   pages$: BehaviorSubject<SudokulabPage[]>;
   status$: Observable<Dictionary<boolean>>;
@@ -66,6 +63,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     let page = this._pagesProvider.pages.find(page => page.code===codes[0]);
     if (!page) page = this._pagesProvider.pages.find(page => page.default);
     if (!!page) setTimeout(() => this._sudoku.setActivePage(page, { id: codes[1] }));
+  }
+
+  ngOnDestroy() {
+    this._sudoku.saveUserSettings();
   }
 
   openPage(pag: SudokulabPage) {

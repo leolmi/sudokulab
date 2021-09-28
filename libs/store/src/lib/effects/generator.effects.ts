@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, debounceTime, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { SudokuStore } from '../sudoku-store';
 import * as GeneratorActions from '../actions';
+import * as SudokuActions from '../actions';
 import * as GeneratorSelectors from '../selectors';
 import {
   cellId,
@@ -17,6 +18,7 @@ import {
   getValues,
   isValidGeneratorValue,
   moveOnDirection,
+  saveUserSetting,
   Sudoku,
   SUDOKU_DYNAMIC_VALUE,
   SudokulabPagesService
@@ -24,7 +26,6 @@ import {
 import { cloneDeep as _clone, forEach as _forEach } from 'lodash';
 import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import * as SudokuActions from '../actions';
 
 @Injectable()
 export class GeneratorEffects {
@@ -195,6 +196,18 @@ export class GeneratorEffects {
       return [GeneratorActions.updateGeneratorSchema({ changes })];
     })
   ));
+
+  updateOptions$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.updateGeneratorSchema),
+    debounceTime(2000),
+    concatMap(() => [GeneratorActions.saveUserSettings()])
+  ));
+
+  saveUserSettings$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.saveUserSettings),
+    withLatestFrom(this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
+    map(([a, schema]) => saveUserSetting('generator.schema', schema))
+  ), { dispatch: false });
 
   constructor(private _actions$: Actions,
               private _generator: GeneratorFacade,

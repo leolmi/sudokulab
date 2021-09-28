@@ -40,3 +40,18 @@
     line-height: 1;
   }
 }
+
+.author-popup {
+  >img {
+    width: 40px
+  }
+  .autor-data {
+    line-height: 1.4;
+    margin-left: 10px;
+    font-size: 20px;
+    .author-name {
+      opacity: .6;
+      font-size: 13px;
+    }
+  }
+}

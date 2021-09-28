@@ -4,7 +4,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { SudokuStore } from '../sudoku-store';
 import * as SudokuActions from '../actions';
-import { concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, debounceTime, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import * as SudokuSelectors from '../selectors';
 import {
   Algorithms,
@@ -19,6 +19,7 @@ import {
   moveOnDirection,
   PlaySudoku,
   resetAvailables,
+  saveUserSetting,
   Solver,
   solveStep,
   Sudoku,
@@ -28,7 +29,8 @@ import {
 import { cloneDeep as _clone } from 'lodash';
 import { saveAs } from 'file-saver';
 import { Router } from '@angular/router';
-import { updateDocumentTitle } from '../actions';
+import * as GeneratorActions from '../actions';
+import * as GeneratorSelectors from '../selectors';
 
 @Injectable()
 export class LabEffects {
@@ -252,6 +254,18 @@ export class LabEffects {
     concatMap(([a, sdk]) =>
       [SudokuActions.updatePageStatus({ status: { has_no_lab_schema: !sdk } })])
   ));
+
+  updateOptions$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.updateSchemasOptions),
+    debounceTime(2000),
+    concatMap(() => [GeneratorActions.saveUserSettings()])
+  ));
+
+  saveUserSettings$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.saveUserSettings),
+    withLatestFrom(this._store.select(GeneratorSelectors.selectActiveSchemasOptions)),
+    map(([a, options]) => saveUserSetting('lab.schemasOptions', options))
+  ), { dispatch: false });
 
   constructor(private _actions$: Actions,
               private _location: Location,

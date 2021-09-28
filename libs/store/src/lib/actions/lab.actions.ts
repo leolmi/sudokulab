@@ -1,5 +1,5 @@
 import {createAction, props} from "@ngrx/store";
-import {PlaySudoku, Sudoku} from "@sudokulab/model";
+import { PlaySudoku, SchemasOptions, Sudoku } from '@sudokulab/model';
 
 export const setActiveSudoku = createAction(
   '[SudokuPlay.lab] set the active sudoku',
@@ -63,4 +63,9 @@ export const move = createAction(
 
 export const dowloadSchema = createAction(
   '[SudokuPlay.lab] download current schema'
+);
+
+export const updateSchemasOptions = createAction(
+  '[SudokuPlay.lab] update current schemas options',
+  props<{ changes: Partial<SchemasOptions> }>()
 );

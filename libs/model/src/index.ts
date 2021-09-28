@@ -14,7 +14,7 @@ export * from './lib/EditSudokuCell';
 export * from './lib/EditSudokuGroup';
 export * from './lib/EditSudoku';
 export * from './lib/EditSudokuOptions';
-
+export * from './lib/SchemasOptions';
 
 export * from './lib/PlaySudokuCell';
 export * from './lib/PlaySudokuGroup';

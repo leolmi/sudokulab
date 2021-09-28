@@ -69,6 +69,10 @@ export class SudokuContext extends SudokuFacade {
     this._isCompact$.next(isCompact(this._window));
   }
 
+  saveUserSettings() {
+    this._store.dispatch(SudokuActions.saveUserSettings());
+  }
+
   constructor(private _store: Store<SudokuStore>,
               private _dialog: MatDialog,
               private _window: SudokulabWindowService) {

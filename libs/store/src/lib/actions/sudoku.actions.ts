@@ -34,3 +34,7 @@ export const updateDocumentTitle = createAction(
   '[SudokuPlay.sudoku] update document title',
   props<{ data?: string }>()
 );
+
+export const saveUserSettings = createAction(
+  '[SudokuPlay.sudoku] save the user settings'
+);

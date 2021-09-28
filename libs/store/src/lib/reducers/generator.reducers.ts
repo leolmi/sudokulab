@@ -1,5 +1,5 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { EditSudoku, loadSchema, Sudoku, update, WorkingInfo } from '@sudokulab/model';
+import { EditSudoku, getUserSetting, loadSchema, Sudoku, update, WorkingInfo } from '@sudokulab/model';
 import * as GeneratorActions from '../actions';
 import { cloneDeep as _clone } from 'lodash';
 
@@ -14,7 +14,7 @@ export interface GeneratorState {
 }
 
 export const initialState: GeneratorState = {
-  schema: new EditSudoku(),
+  schema: new EditSudoku(getUserSetting('generator.schema')),
   activeCell: '',
   running: false,
   stopping: false,

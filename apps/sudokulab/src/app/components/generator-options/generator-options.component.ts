@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
   DIFFICULTY_RANGES,
   EditSudoku,
@@ -11,16 +11,15 @@ import {
   getMinNumbers,
   hasEndGenerationValue,
   hasXValues,
-  isMutation,
   SudokuFacade,
-  SudokulabSettingsService,
   SudokuSymmetry,
-  update
+  update,
+  use
 } from '@sudokulab/model';
-import {debounceTime, map, skip, takeUntil} from 'rxjs/operators';
-import {has as _has, keys as _keys} from 'lodash';
-import {GeneratorBaseComponent} from '../GeneratorBaseComponent';
-import {ItemInfo} from '../../model';
+import { map, takeUntil } from 'rxjs/operators';
+import { has as _has, keys as _keys } from 'lodash';
+import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
+import { ItemInfo } from '../../model';
 
 @Component({
   selector: 'sudokulab-generator-options',
@@ -38,21 +37,10 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
   availableDifficulty: ItemInfo[];
   availableStopModes: ItemInfo[];
   availableValorizationModes: ItemInfo[];
-
-  symmetry$: BehaviorSubject<SudokuSymmetry>;
-  valorizationMode$: BehaviorSubject<EditSudokuValorizationMode>;
-  fixedCount$: BehaviorSubject<number>;
-  minDiff$: BehaviorSubject<number>;
-  maxDiff$: BehaviorSubject<number>;
-  excludeTryAlgorithm$: BehaviorSubject<boolean>;
-  generationEndMode$: BehaviorSubject<EditSudokuEndGenerationMode>
-  generationEndValue$: BehaviorSubject<number>;
-  maxSplitSchema$: BehaviorSubject<number>;
-  maxSchemaCycles$: BehaviorSubject<number>;
+  options$: Observable<EditSudokuOptions>;
   editSudoku$: Observable<EditSudoku|undefined>;
 
   constructor(private _generator: GeneratorFacade,
-              private _settings: SudokulabSettingsService,
               _sudoku: SudokuFacade) {
     super(_generator, _sudoku);
 
@@ -61,17 +49,7 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
     this.minNumbers$ = this.editSudoku$.pipe(map(es => getMinNumbers(es?.options?.rank)));
     this.maxNumbers$ = this.editSudoku$.pipe(map(es => getMaxNumbers(es?.options?.rank)));
     this.hasXValues$ = this.editSudoku$.pipe(map(es => hasXValues(es)));
-
-    this.symmetry$ = _settings.generate<SudokuSymmetry>('generator.symmetry', SudokuSymmetry.diagonalNESW);
-    this.valorizationMode$ = _settings.generate<EditSudokuValorizationMode>('generator.valorizationMode', EditSudokuValorizationMode.sequential);
-    this.fixedCount$ = _settings.generate<number>('generator.fixedValues', 24);
-    this.minDiff$ = _settings.generate<number>('generator.minDiff', 0);
-    this.maxDiff$ = _settings.generate<number>('generator.maxDiff', 1000000);
-    this.excludeTryAlgorithm$ = _settings.generate<boolean>('generator.excludeTryAlgorithm', true);
-    this.generationEndMode$ = _settings.generate<EditSudokuEndGenerationMode>('generator.generationEndMode', EditSudokuEndGenerationMode.afterN);
-    this.generationEndValue$ = _settings.generate<number>('generator.generationEndValue', 1);
-    this.maxSplitSchema$ = _settings.generate<number>('generator.maxSplitSchema', 50);
-    this.maxSchemaCycles$ = _settings.generate<number>('generator.maxSchemaCycles', 500);
+    this.options$ = this.editSudoku$.pipe(map(es => es?.options||new EditSudokuOptions()));
 
     this.availableDimensions = [{
       code: 4,
@@ -111,48 +89,6 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
       code: EditSudokuValorizationMode.random,
       description: 'random'
     }];
-
-    combineLatest(
-      ...[
-        this.editSudoku$,
-        this.symmetry$,
-        this.valorizationMode$,
-        this.fixedCount$,
-        this.minDiff$,
-        this.maxDiff$,
-        this.excludeTryAlgorithm$,
-        this.generationEndMode$,
-        this.generationEndValue$,
-        this.maxSplitSchema$,
-        this.maxSchemaCycles$])
-      .pipe(takeUntil(this._destroy$), skip(1), debounceTime(200))
-      .subscribe(([sdk,
-                    symmetry,
-                    valorizationMode,
-                    fixedCount,
-                    minDiff,
-                    maxDiff,
-                    excludeTryAlgorithm,
-                    generationEndMode,
-                    generationEndValue,
-                    maxSplitSchema,
-                    maxSchemaCycles]) => {
-        const o = new EditSudokuOptions(sdk?.options);
-        const no = {
-          symmetry,
-          valorizationMode,
-          fixedCount,
-          minDiff,
-          maxDiff,
-          excludeTryAlgorithm,
-          generationEndMode,
-          generationEndValue,
-          maxSplitSchema,
-          maxSchemaCycles
-        };
-        if (!isMutation(o, no)) return;
-        this._generator.updateGeneratorOptions(update(o, no));
-      });
   }
 
   private _getValue(e: any) {
@@ -165,18 +101,8 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
     return value;
   }
 
-  applySettings(e: any, target$: BehaviorSubject<any>) {
-    const value = this._getValue(e);
-    target$.next(value);
-  }
-
   apply(e: any, target: string) {
-    let value = e;
-    if (_has(e, 'checked')) value = e.checked;
-    if (e?.target) {
-      const input = (<HTMLInputElement>e?.target);
-      value = input.value;
-    }
-    // use(this.options$, o => this._generator.updateGeneratorOptions(update(o, {[target]: value})));
+    const value = this._getValue(e);
+    use(this.options$, o => this._generator.updateGeneratorOptions(update(o, {[target]: value})));
   }
 }

@@ -11,7 +11,7 @@ import {
   SudokuFacade,
   SudokulabPage,
   SudokulabPagesService,
-  SudokulabSettingsService, SudokulabWindowService
+  SudokulabWindowService
 } from '@sudokulab/model';
 import { OptionsContext, GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
 import { StoreModule } from '@ngrx/store';
@@ -118,7 +118,6 @@ import { KeyBoardComponent } from './components/key-board/key-board.component';
   ],
   providers: [
     SudokulabWindowService,
-    SudokulabSettingsService,
     SudokulabPagesService,
     { provide: SudokuFacade, useClass: SudokuContext },
     { provide: LabFacade, useClass: LabContext },

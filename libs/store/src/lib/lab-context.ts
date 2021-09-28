@@ -1,4 +1,4 @@
-import { LabFacade, PlaySudoku, Sudoku, SudokuFacade, SudokuMessage } from '@sudokulab/model';
+import { LabFacade, PlaySudoku, SchemasOptions, Sudoku, SudokuFacade, SudokuMessage } from '@sudokulab/model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as SudokuSelectors from './selectors';
 import * as SudokuActions from './actions';
@@ -12,6 +12,7 @@ export class LabContext extends LabFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
   selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
+  selectSchemasOptions$: Observable<SchemasOptions> = this._store.select(SudokuSelectors.selectActiveSchemasOptions);
 
   setActiveSudoku(active: number) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
@@ -63,6 +64,10 @@ export class LabContext extends LabFacade {
 
   raiseMessage(message: SudokuMessage) {
     this._store.dispatch(SudokuActions.setActiveMessage({ message }));
+  }
+
+  updateSchemasOptions(changes: Partial<SchemasOptions>) {
+    this._store.dispatch(SudokuActions.updateSchemasOptions({ changes }));
   }
 
   constructor(private _store: Store<SudokuStore>,

@@ -3,7 +3,7 @@
        fxLayout="row" fxLayoutAlign="start center">
     <mat-form-field appearance="outline" class="no-wrapper-padding" fxFlex>
       <mat-label>Sort by</mat-label>
-      <mat-select [value]="(sortBy$|async)"
+      <mat-select [value]="(options$|async)?.sortBy"
                   (valueChange)="applySort($event)">
         <mat-option *ngFor="let sbi of availableSortBy" [value]="sbi.code">
           {{sbi.description}}
@@ -12,17 +12,17 @@
     </mat-form-field>
     <div class="schemas-counter" fxLayout="column">
       <div>{{counter$|async}}</div>
-      <div *ngIf="!!!(try$|async)" class="schemas-counter-total">{{total$|async}}</div>
+      <div *ngIf="!!!(options$|async)?.try" class="schemas-counter-total">{{total$|async}}</div>
     </div>
     <button mat-icon-button
             (click)="toggleAsc()"
             matTooltip="Asc or desc sort">
-      <mat-icon>{{(asc$|async) ? 'south' : 'north'}}</mat-icon>
+      <mat-icon>{{(options$|async)?.asc ? 'south' : 'north'}}</mat-icon>
     </button>
     <button mat-icon-button
             (click)="toggleTry()"
             matTooltip="include schemas that use the try algorithm"
-            [ngClass]="{'color-primary': try$|async}">
+            [ngClass]="{'color-primary': !!(options$|async)?.try}">
       <mat-icon>generating_tokens</mat-icon>
     </button>
   </div>

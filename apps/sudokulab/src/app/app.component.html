@@ -2,10 +2,21 @@
      [ngClass]="{'compact': compact$|async}"
      fxLayout="column">
   <mat-toolbar class="sudokulab-toolbar" color="primary">
-    <div class="logo" (click)="clickOnLogo()" matTooltip="open author site..." fxLayout="column">
+    <div class="logo" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="authorMenu" (click)="menuTrigger.openMenu()" matTooltip="author info" fxLayout="column">
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
       <span class="sub-title compact-visible">{{(page$|async)?.title}}</span>
     </div>
+    <mat-menu #authorMenu="matMenu">
+      <button (click)="clickOnLogo()" mat-menu-item>
+        <div class="author-popup" fxLayout="row" fxLayoutAlign="start center">
+          <img src="assets/github.svg">
+          <div class="autor-data" fxLayout="column">
+            <div>Sudoku<b>Lab</b> project</div>
+            <div class="author-name">Angular + Nest by leo.olmi</div>
+          </div>
+        </div>
+      </button>
+    </mat-menu>
     <span class="title compact-hidden">{{(page$|async)?.title}}</span>
     <span fxFlex></span>
     <div class="buttons-container compact-hidden" fxLayout="row" fxLayoutAlign="start center">

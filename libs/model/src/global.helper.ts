@@ -1,7 +1,16 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { extend as _extend, isString as _isString, cloneDeep as _clone, keys as _keys, isEqual as _isEqual } from 'lodash';
+import {
+  cloneDeep as _clone,
+  extend as _extend,
+  get as _get,
+  set as _set,
+  isEqual as _isEqual,
+  isString as _isString,
+  keys as _keys
+} from 'lodash';
 import { SudokulabWindowService } from './lib/services';
+import { SDK_PREFIX, SUDOKULAB_SETTINGS_KEY } from './lib/consts';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
@@ -39,3 +48,27 @@ export const isMutation = (o: any, c: any): boolean =>
   !!o && !!c && !!_keys(c||{}).find(k => !_isEqual(c[k],o[k]));
 
 export const isCompact = (ws: SudokulabWindowService): boolean => (ws.nativeWindow?.innerWidth || 2000) < 1450;
+
+
+export const getUserSetting = <T>(path: string): T|undefined => {
+  const userdata = localStorage.getItem(SUDOKULAB_SETTINGS_KEY);
+  try {
+    const udata = JSON.parse(userdata||'{}');
+    return <T>_get(udata||{}, path);
+  } catch (err) {
+    console.warn(SDK_PREFIX, 'Corrupted user data!', userdata);
+  }
+  return undefined;
+}
+
+export const saveUserSetting = (path: string, data: any) => {
+  const userdata = localStorage.getItem(SUDOKULAB_SETTINGS_KEY);
+  try {
+    const udata: any = userdata ? JSON.parse(userdata||'{}') : {};
+    _set(udata, path, data);
+    console.log('SAVE USER SETTINGS', udata);
+    localStorage.setItem(SUDOKULAB_SETTINGS_KEY, JSON.stringify(udata));
+  } catch (err) {
+    console.warn(SDK_PREFIX, 'Cannot save user data!', err);
+  }
+}

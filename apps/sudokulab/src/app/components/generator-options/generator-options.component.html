@@ -14,9 +14,9 @@
   <div fxLayout="row" fxLayoutAlign="start center">
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>Symmetry</mat-label>
-      <mat-select [value]="symmetry$|async"
+      <mat-select [value]="(options$|async)?.symmetry"
                   [disabled]="running$|async"
-                  (valueChange)="applySettings($event, symmetry$)">
+                  (valueChange)="apply($event, 'symmetry')">
         <mat-option *ngFor="let sym of availableSymmetries" [value]="sym.code">
           {{sym.description}}
         </mat-option>
@@ -25,9 +25,9 @@
     <div class="space" *ngIf="hasXValues$|async"></div>
     <mat-form-field appearance="fill" *ngIf="hasXValues$|async" fxFlex>
       <mat-label>Valorization mode</mat-label>
-      <mat-select [value]="valorizationMode$|async"
+      <mat-select [value]="(options$|async)?.valorizationMode"
                   [disabled]="running$|async"
-                  (valueChange)="applySettings($event, valorizationMode$)">
+                  (valueChange)="apply($event, 'valorizationMode')">
         <mat-option *ngFor="let vlm of availableValorizationModes" [value]="vlm.code">
           {{vlm.description}}
         </mat-option>
@@ -35,7 +35,7 @@
     </mat-form-field>
   </div>
   <!-- NUMBER OF NUMBERS -->
-  <mat-label>Numbers ({{(editSudoku$|async)?.fixedCount}} / <b>{{fixedCount$|async}}</b>)</mat-label>
+  <mat-label>Numbers ({{(editSudoku$|async)?.fixedCount}} / <b>{{(options$|async)?.fixedCount}}</b>)</mat-label>
   <mat-slider
     [disabled]="running$|async"
     [max]="maxNumbers$|async"
@@ -43,18 +43,18 @@
     [step]="1"
     [thumbLabel]="true"
     [tickInterval]="1"
-    [value]="fixedCount$|async"
-    (valueChange)="applySettings($event, fixedCount$)"
+    [value]="(options$|async)?.fixedCount"
+    (valueChange)="apply($event, 'fixedCount')"
     aria-labelledby="example-name-label">
   </mat-slider>
   <!-- DIFFICULTY RANGE -->
   <div fxLayout="row" fxLayoutAlign="start center">
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>Difficulty (min)</mat-label>
-      <mat-select [value]="minDiff$|async"
+      <mat-select [value]="(options$|async)?.minDiff"
                   [disabled]="running$|async"
                   placeholder="undefined"
-                  (valueChange)="applySettings($event, minDiff$)">
+                  (valueChange)="apply($event, 'minDiff')">
         <mat-option *ngFor="let dif of availableDifficulty" [value]="dif.code">
           {{dif.description}}
         </mat-option>
@@ -63,10 +63,10 @@
     <div class="space"></div>
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>(max)</mat-label>
-      <mat-select [value]="maxDiff$|async"
+      <mat-select [value]="(options$|async)?.maxDiff"
                   [disabled]="running$|async"
                   placeholder="undefined"
-                  (valueChange)="applySettings($event, maxDiff$)">
+                  (valueChange)="apply($event, 'maxDiff')">
         <mat-option *ngFor="let dif of availableDifficulty" [value]="dif.code">
           {{dif.description}}
         </mat-option>
@@ -75,17 +75,17 @@
   </div>
   <!-- EXCLUDE TRY ALGORITHM -->
   <mat-slide-toggle class="options-editor"
-                    [checked]="excludeTryAlgorithm$|async"
+                    [checked]="(options$|async)?.excludeTryAlgorithm"
                     [disabled]="running$|async"
-                    (change)="applySettings($event, excludeTryAlgorithm$)">Exclude try algorithm</mat-slide-toggle>
+                    (change)="apply($event, 'excludeTryAlgorithm')">Exclude try algorithm</mat-slide-toggle>
   <!-- STOP -->
   <div fxLayout="row" fxLayoutAlign="start center">
     <!-- STOP MODE -->
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>Stop mode</mat-label>
-      <mat-select [value]="generationEndMode$|async"
+      <mat-select [value]="(options$|async)?.generationEndMode"
                   [disabled]="running$|async"
-                  (valueChange)="applySettings($event, generationEndMode$)">
+                  (valueChange)="apply($event, 'generationEndMode')">
         <mat-option *ngFor="let stm of availableStopModes" [value]="stm.code">
           {{stm.description}}
         </mat-option>
@@ -98,8 +98,8 @@
       <input matInput
              type="number"
              [disabled]="running$|async"
-             [value]="generationEndValue$|async"
-             (input)="applySettings($event, generationEndValue$)">
+             [value]="(options$|async)?.generationEndValue"
+             (input)="apply($event, 'generationEndValue')">
     </mat-form-field>
   </div>
 
@@ -110,8 +110,8 @@
       <input matInput
              [disabled]="running$|async"
              type="number"
-             [value]="maxSplitSchema$|async"
-             (input)="applySettings($event, maxSplitSchema$)">
+             [value]="(options$|async)?.maxSplitSchema"
+             (input)="apply($event, 'maxSplitSchema')">
     </mat-form-field>
     <div class="space"></div>
     <mat-form-field appearance="fill" fxFlex>
@@ -119,8 +119,8 @@
       <input matInput
              [disabled]="running$|async"
              type="number"
-             [value]="maxSchemaCycles$|async"
-             (input)="applySettings($event, maxSchemaCycles$)">
+             [value]="(options$|async)?.maxSchemaCycles"
+             (input)="apply($event, 'maxSchemaCycles')">
     </mat-form-field>
   </div>
 </div>
