@@ -1,4 +1,4 @@
-<div class="schemalab-tool sudoku-info">
+<div class="schemalab-tool sudoku-info compact-size-600">
   <div *ngIf="!!(info$|async)?.compiled" fxLayout="column">
 <!--    <div class="info-property" fxLayout="row">percent: {{percent$|async}}</div>-->
     <div class="schemalab-info-toolbar" fxLayout="row" fxLayoutAlign="start center">
@@ -11,7 +11,7 @@
       <mat-icon matTooltip="uniq solution">looks_one</mat-icon>
     </div>
   </div>
-  <div *ngIf="((difficultyMap$|async)||[]).length>0" class="difficulty-map" fxLayout="column">
+  <div *ngIf="((difficultyMap$|async)||[]).length>0 && !!!(compact$|async)" class="difficulty-map" fxLayout="column">
     <div class="tool-label">Algorithms needed for the solution:</div>
     <div class="algorithm-item"
          *ngFor="let item of (difficultyMap$|async)||[]">

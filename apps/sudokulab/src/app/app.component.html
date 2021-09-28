@@ -1,21 +1,55 @@
-<div class="container sudokulab-scrollbar" fxLayout="column">
+<div class="container sudokulab-scrollbar"
+     [ngClass]="{'compact': compact$|async}"
+     fxLayout="column">
   <mat-toolbar class="sudokulab-toolbar" color="primary">
-    <span class="logo">Sudoku<span class="logo-lab">Lab</span></span>
-    <span class="title" fxFlex>{{(page$|async)?.title}}</span>
-    <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
-      <div class="button-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
-      <button mat-icon-button
-              *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
-              [matTooltip]="pgbtn.tooltip||''"
-              [disabled]="!!((status$|async)||{})[pgbtn?.disabledKey||'']"
-              [matTooltipDisabled]="!pgbtn.tooltip"
-              (click)="execute(pgbtn.code||'')">
-        <mat-icon>{{pgbtn.icon}}</mat-icon>
+    <div class="logo" (click)="clickOnLogo()" matTooltip="open author site..." fxLayout="column">
+      <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
+      <span class="sub-title compact-visible">{{(page$|async)?.title}}</span>
+    </div>
+    <span class="title compact-hidden">{{(page$|async)?.title}}</span>
+    <span fxFlex></span>
+    <div class="buttons-container compact-hidden" fxLayout="row" fxLayoutAlign="start center">
+      <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
+        <div class="button-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
+        <button mat-icon-button
+                *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
+                [matTooltip]="pgbtn.tooltip||''"
+                [disabled]="!!((status$|async)||{})[pgbtn?.disabledKey||'']"
+                [matTooltipDisabled]="!pgbtn.tooltip"
+                (click)="execute(pgbtn.code||'')">
+          <mat-icon>{{pgbtn.icon}}</mat-icon>
+        </button>
+      </ng-container>
+    </div>
+    <button mat-icon-button
+            [matMenuTriggerFor]="menu"
+            aria-label="sudokulab page menu"
+            class="compact-visible">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
+        <div class="button-menu-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
+        <button mat-menu-item
+                *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
+                [disabled]="!!((status$|async)||{})[pgbtn?.disabledKey||'']"
+                (click)="execute(pgbtn.code||'')">
+          <mat-icon>{{pgbtn.icon}}</mat-icon>
+          <span>{{pgbtn.tooltip}}</span>
+        </button>
+      </ng-container>
+      <div class="button-menu-separator"></div>
+      <button *ngFor="let pag of (pages$|async)||[]"
+              mat-menu-item
+              [ngClass]="{'color-accent': pag.code === (page$|async)?.code}"
+              (click)="openPage(pag)">
+        <mat-icon>{{pag.icon}}</mat-icon>
+        <span>{{pag.title}}</span>
       </button>
-    </ng-container>
+    </mat-menu>
   </mat-toolbar>
   <div class="central-container" fxFlex fxLayout="row" fxLayoutAlign="center start">
-    <div class="vertical-toolbar background2" fxLayout="column">
+    <div class="vertical-toolbar background2 compact-hidden" fxLayout="column">
       <button *ngFor="let pag of (pages$|async)||[]"
               mat-icon-button
               [ngClass]="{'selected': pag.code === (page$|async)?.code}"

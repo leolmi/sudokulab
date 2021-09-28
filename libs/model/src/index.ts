@@ -31,6 +31,7 @@ export * from './lib/SudokuFacade';
 export * from './lib/LabFacade';
 export * from './lib/GeneratorFacade';
 export * from './lib/WorkingInfo';
+export * from './lib/OptionsFacade';
 
 export * from './lib/services';
 

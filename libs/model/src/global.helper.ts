@@ -1,6 +1,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { extend as _extend, isString as _isString, cloneDeep as _clone, keys as _keys, isEqual as _isEqual } from 'lodash';
+import { SudokulabWindowService } from './lib/services';
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
@@ -36,3 +37,5 @@ export const updateBehaviorSubject = <T>(bs$: BehaviorSubject<T>, handler: (c: T
 
 export const isMutation = (o: any, c: any): boolean =>
   !!o && !!c && !!_keys(c||{}).find(k => !_isEqual(c[k],o[k]));
+
+export const isCompact = (ws: SudokulabWindowService): boolean => (ws.nativeWindow?.innerWidth || 2000) < 1450;

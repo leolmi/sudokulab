@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { LabFacade, PlaySudoku, SudokulabSettingsService, use } from '@sudokulab/model';
+import { LabFacade, PlaySudoku, SudokuFacade, SudokulabSettingsService, use } from '@sudokulab/model';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { DestroyComponent } from '../DestroyComponent';
@@ -24,8 +24,9 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   total$: Observable<number>;
 
   constructor(private _lab: LabFacade,
-              private _settings: SudokulabSettingsService) {
-    super();
+              private _settings: SudokulabSettingsService,
+              _sudoku: SudokuFacade) {
+    super(_sudoku);
     this._schemas$ = _lab.selectAllSchemas$.pipe(
       takeUntil(this._destroy$));
     this.activeId$ = _lab.selectActiveSudoku$.pipe(

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {
   DIFFICULTY_RANGES,
   EditSudoku,
@@ -8,16 +8,19 @@ import {
   EditSudokuValorizationMode,
   GeneratorFacade,
   getMaxNumbers,
-  getMinNumbers, hasEndGenerationValue,
-  hasXValues, isMutation,
+  getMinNumbers,
+  hasEndGenerationValue,
+  hasXValues,
+  isMutation,
+  SudokuFacade,
   SudokulabSettingsService,
   SudokuSymmetry,
   update
 } from '@sudokulab/model';
-import { debounceTime, map, skip, takeUntil } from 'rxjs/operators';
-import { has as _has, keys as _keys, isEqual as _isEqual } from 'lodash';
-import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
-import { ItemInfo } from '../../model';
+import {debounceTime, map, skip, takeUntil} from 'rxjs/operators';
+import {has as _has, keys as _keys} from 'lodash';
+import {GeneratorBaseComponent} from '../GeneratorBaseComponent';
+import {ItemInfo} from '../../model';
 
 @Component({
   selector: 'sudokulab-generator-options',
@@ -49,8 +52,9 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
   editSudoku$: Observable<EditSudoku|undefined>;
 
   constructor(private _generator: GeneratorFacade,
-              private _settings: SudokulabSettingsService) {
-    super(_generator);
+              private _settings: SudokulabSettingsService,
+              _sudoku: SudokuFacade) {
+    super(_generator, _sudoku);
 
     this.editSudoku$ = _generator.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.isStopModeCount$ = this.editSudoku$.pipe(map(es => hasEndGenerationValue(es?.options)));

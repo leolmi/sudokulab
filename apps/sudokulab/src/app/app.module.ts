@@ -6,14 +6,14 @@ import { BoardComponent } from './components/board/board.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {
   GeneratorFacade,
-  LabFacade,
+  LabFacade, OptionsFacade,
   SchemaNamePipe,
   SudokuFacade,
   SudokulabPage,
   SudokulabPagesService,
-  SudokulabSettingsService
+  SudokulabSettingsService, SudokulabWindowService
 } from '@sudokulab/model';
-import { GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
+import { OptionsContext, GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -117,11 +117,13 @@ import { KeyBoardComponent } from './components/key-board/key-board.component';
     )
   ],
   providers: [
+    SudokulabWindowService,
     SudokulabSettingsService,
     SudokulabPagesService,
     { provide: SudokuFacade, useClass: SudokuContext },
     { provide: LabFacade, useClass: LabContext },
     { provide: GeneratorFacade, useClass: GeneratorContext },
+    { provide: OptionsFacade, useClass: OptionsContext },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
     { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
     { provide: SudokulabPage, useClass: OptionsManifest, multi: true }

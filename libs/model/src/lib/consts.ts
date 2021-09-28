@@ -7,6 +7,8 @@ export const SUDOKU_EMPTY_VALUE = '0';
 
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
 
+export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
+
 export const SDK_PREFIX = ['%cSUDOKULAB', 'color:orangered;'];
 
 export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {

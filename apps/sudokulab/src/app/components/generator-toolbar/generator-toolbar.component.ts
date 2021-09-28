@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
-import { EditSudoku, GeneratorFacade, getFixedCount, Sudoku } from '@sudokulab/model';
+import { EditSudoku, GeneratorFacade, getFixedCount, Sudoku, SudokuFacade } from '@sudokulab/model';
 import { Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
@@ -12,8 +12,9 @@ import { map, takeUntil } from 'rxjs/operators';
 })
 export class GeneratorToolbarComponent extends GeneratorBaseComponent implements OnDestroy {
   description$: Observable<string>;
-  constructor(private _generator: GeneratorFacade) {
-    super(_generator);
+  constructor(private _generator: GeneratorFacade,
+              _sudoku: SudokuFacade) {
+    super(_generator, _sudoku);
     this.description$ = _generator.selectActiveSudoku$.pipe(
       takeUntil(this._destroy$),
       map((s) => `${getFixedCount(s)} fixed cells`));

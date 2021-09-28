@@ -91,6 +91,11 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   text-align: center;
 }
 
+.button-menu-separator {
+  border-bottom: rgba(10,10,10,.1) 1px solid;
+  height: 10px;
+  margin-bottom: 10px;
+}
 
 .background2 {
   background-color: $color-background;
@@ -134,6 +139,45 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
+.compact-visible {
+  display: none !important;
+}
+
+
+.compact {
+  .compact-visible {
+    display: block !important;
+  }
+  .compact-hidden {
+    display: none !important;
+  }
+  .sudokulab-page {
+    overflow: auto;
+    min-width: 640px;
+  }
+
+  .compact-size-600 {
+    width: 600px;
+    margin-left: calc(50% - 300px);
+  }
+
+  .options-tool {
+    &.compact-auto-height {
+      height: auto;
+      padding: 20px 0 !important;
+    }
+  }
+
+  .tools {
+    &:not(.compact-auto-height) {
+      min-height: 600px;
+    }
+    .schemalab-tool {
+      padding: 0;
+    }
+  }
+}
+
 .tool-label {
   opacity: .5;
   padding: 10px 0 24px 0;
@@ -142,4 +186,12 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 @media only screen and (max-width: 1300px) {
 
+}
+
+@media only screen and (max-width: 640px) {
+  .compact {
+    .sudokulab-page {
+      zoom: .5;
+    }
+  }
 }

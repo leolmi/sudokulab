@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { getAvailables, getValues, isValue, LabFacade, PlaySudokuCell } from '@sudokulab/model';
+import { getAvailables, getValues, isValue, LabFacade, PlaySudokuCell, SudokuFacade } from '@sudokulab/model';
 import { DestroyComponent } from '../DestroyComponent';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -17,8 +17,8 @@ export class KeyBoardComponent extends DestroyComponent implements OnDestroy {
   status$: Observable<Dictionary<boolean>>;
   isCellSelected$: Observable<boolean>;
 
-  constructor(private _lab: LabFacade) {
-    super();
+  constructor(private _lab: LabFacade, _sudoku: SudokuFacade) {
+    super(_sudoku);
     this.numbers$ = _lab.selectActiveSudoku$.pipe(
       takeUntil(this._destroy$),
       map(sdk => getAvailables(sdk?.sudoku?.rank || 9).concat('x')));

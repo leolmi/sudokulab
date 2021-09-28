@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
-import { GeneratorFacade, Sudoku } from '@sudokulab/model';
+import { GeneratorFacade, Sudoku, SudokuFacade } from '@sudokulab/model';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -11,8 +11,9 @@ import { Observable } from 'rxjs';
 })
 export class GeneratorStateComponent extends GeneratorBaseComponent implements OnDestroy {
   schemas$: Observable<Sudoku[]>;
-  constructor(private _generator: GeneratorFacade) {
-    super(_generator);
+  constructor(private _generator: GeneratorFacade,
+              _sudoku: SudokuFacade) {
+    super(_generator, _sudoku);
     this.schemas$ = _generator.selectGeneratorSchemas$;
   }
   openInLab(sdk: Sudoku) {

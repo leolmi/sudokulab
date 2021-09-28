@@ -1,5 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { getAlgorithms, getFixedCount, getHash, LabFacade, SudokuInfo, TRY_NUMBER_ALGORITHM } from '@sudokulab/model';
+import {
+  getAlgorithms,
+  getFixedCount,
+  getHash,
+  LabFacade,
+  SudokuFacade,
+  SudokuInfo,
+  TRY_NUMBER_ALGORITHM
+} from '@sudokulab/model';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { keys as _keys } from 'lodash';
@@ -27,8 +35,9 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
   difficultyValue$: Observable<number>;
   difficultyMap$: Observable<MapItem[]>;
 
-  constructor(private _lab: LabFacade) {
-    super();
+  constructor(private _lab: LabFacade,
+              _sudoku: SudokuFacade) {
+    super(_sudoku);
     const sdk$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.info$ = sdk$.pipe(map(s => s?.sudoku?.info));
     this.percent$ = sdk$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));

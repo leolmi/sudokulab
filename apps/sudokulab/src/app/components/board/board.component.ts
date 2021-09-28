@@ -6,7 +6,7 @@ import {
   getLinesGroups,
   isDirectionKey,
   LabFacade,
-  PlaySudoku
+  PlaySudoku, SudokuFacade
 } from '@sudokulab/model';
 import {Observable, Subject} from 'rxjs';
 import {map, takeUntil} from 'rxjs/operators';
@@ -28,8 +28,9 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
 
 
   constructor(private ele: ElementRef,
-              private _lab: LabFacade) {
-    super();
+              private _lab: LabFacade,
+              _sudoku: SudokuFacade) {
+    super(_sudoku);
     this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
 

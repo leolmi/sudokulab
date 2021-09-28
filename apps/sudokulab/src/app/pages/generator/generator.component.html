@@ -2,8 +2,8 @@
                   class="progress-bar"
                   color="accent"
                   mode="indeterminate"></mat-progress-bar>
-<div class="sudokulab-page" fxLayout="row">
-  <div class="tools tools-left" fxFlex>
+<div class="sudokulab-page" [fxLayout]="layout$|async">
+  <div class="tools tools-left compact-hidden" fxFlex>
     <sudokulab-generator-options></sudokulab-generator-options>
   </div>
   <div class="board-container" fxLayout="column">
@@ -14,6 +14,7 @@
     <div class="bottom-board" fxFlex></div>
   </div>
   <div class="tools tools-right" fxFlex>
+    <sudokulab-generator-options class="compact-visible"></sudokulab-generator-options>
     <sudokulab-generator-state></sudokulab-generator-state>
   </div>
 </div>

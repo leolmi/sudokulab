@@ -2,9 +2,27 @@
   width: 600px;
   height: 600px;
   position: relative;
+  margin-left: calc(50% - 300px);
+}
+
+.board-container {
+  min-width: 640px;
+}
+
+.bottom-board {
+  width: 600px;
+  margin-left: calc(50% - 300px);
 }
 
 .lab-progress-bar {
   width: calc(100% - 5px);
   height: 16px;
+}
+
+::ng-deep {
+  .compact {
+    .bottom-board {
+      margin-bottom: 50px;
+    }
+  }
 }

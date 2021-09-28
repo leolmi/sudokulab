@@ -28,7 +28,15 @@
 .logo {
   font-weight: 100;
   font-size: 1.2em;
+  user-select: none;
+  cursor: pointer;
   .logo-lab {
     color: $color-primary-highlight;
+  }
+  .sub-title {
+    font-size: 10px;
+    font-weight: 100;
+    opacity: .5;
+    line-height: 1;
   }
 }

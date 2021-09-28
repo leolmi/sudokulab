@@ -1,12 +1,12 @@
-<div class="sudokulab-page" fxLayout="row">
-  <div class="tools tools-left" fxFlex>
+<div class="sudokulab-page" [fxLayout]="layout$|async">
+  <div class="tools tools-left compact-auto-height" fxFlex>
     <sudokulab-info></sudokulab-info>
   </div>
   <div class="board-container" fxLayout="column">
     <div class="board">
       <sudokulab-board></sudokulab-board>
     </div>
-    <div class="bottom-board" fxFlex>
+    <div class="bottom-board compact-size-600" fxFlex>
       <mat-progress-bar [value]="progress$|async"
                         class="lab-progress-bar"
                         color="primary"

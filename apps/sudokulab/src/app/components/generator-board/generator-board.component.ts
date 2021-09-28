@@ -7,7 +7,7 @@ import {
   GeneratorFacade,
   cellId,
   isDirectionKey,
-  use, getDimension
+  use, getDimension, SudokuFacade
 } from '@sudokulab/model';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
@@ -29,8 +29,9 @@ export class GeneratorBoardComponent extends GeneratorBaseComponent implements O
   hasFocus$: BehaviorSubject<boolean>;
   PROXYVALUE: any = {x: '?'};
   constructor(private ele: ElementRef,
-              private _generator: GeneratorFacade) {
-    super(_generator);
+              private _generator: GeneratorFacade,
+              _sudoku: SudokuFacade) {
+    super(_generator, _sudoku);
     this.editSudoku$ = _generator.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _generator.selectActiveCell$.pipe(takeUntil(this._destroy$));
     this.hasFocus$ = new BehaviorSubject<boolean>(false);

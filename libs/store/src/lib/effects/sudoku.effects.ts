@@ -53,6 +53,14 @@ export class SudokuEffects {
     map(([a, page]) => document.title = page ? `SudokuLab - ${page.title} ${a.data||''}` : 'SudokuLab')
   ), { dispatch: false });
 
+  resetOptions$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.resetOptions),
+    map(() => {
+      // TODO: reset options...
+      console.log('reset user options...');
+    })
+  ), { dispatch: false });
+
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>,
               private _router: Router,

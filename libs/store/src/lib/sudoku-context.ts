@@ -1,22 +1,33 @@
 import { Injectable, Type } from '@angular/core';
-import { MessageType, Sudoku, SudokuFacade, SudokulabPage, SudokuMessage } from '@sudokulab/model';
+import {
+  isCompact,
+  MessageType,
+  Sudoku,
+  SudokuFacade,
+  SudokulabPage,
+  SudokulabWindowService,
+  SudokuMessage
+} from '@sudokulab/model';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as SudokuActions from './actions';
 import * as SudokuSelectors from './selectors';
 import { Dictionary } from '@ngrx/entity';
-import { filter, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 
 @Injectable()
 export class SudokuContext extends SudokuFacade {
+  private _isCompact$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(isCompact(this._window));
+  private _upload$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   selectActiveMessage$: Observable<SudokuMessage|undefined> = this._store.select(SudokuSelectors.selectActiveMessage);
   selectActivePage$: Observable<SudokulabPage|undefined> = this._store.select(SudokuSelectors.selectActivePage);
   selectPageStatus$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectPageStatus);
-  private _upload$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  selectIsCompact$: Observable<boolean> = this._isCompact$.pipe(distinctUntilChanged());
 
-  fillDocuments() {
+    fillDocuments() {
     this._store.dispatch(SudokuActions.fillSchemas());
   }
 
@@ -54,8 +65,13 @@ export class SudokuContext extends SudokuFacade {
         }));
   }
 
+  checkCompactStatus() {
+    this._isCompact$.next(isCompact(this._window));
+  }
+
   constructor(private _store: Store<SudokuStore>,
-              private _dialog: MatDialog) {
+              private _dialog: MatDialog,
+              private _window: SudokulabWindowService) {
     super();
   }
 }

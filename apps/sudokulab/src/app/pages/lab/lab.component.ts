@@ -15,15 +15,17 @@ import { map, takeUntil } from 'rxjs/operators';
 })
 export class LabComponent extends DestroyComponent implements OnInit, OnDestroy {
   progress$: Observable<number>;
+  layout$: Observable<string>;
 
   constructor(private _lab: LabFacade,
-              private _sudoku: SudokuFacade,
               private _route: ActivatedRoute,
-              private _dialog: MatDialog) {
-    super();
+              private _dialog: MatDialog,
+              _sudoku: SudokuFacade) {
+    super(_sudoku);
     _sudoku
       .onUpload(UploadDialogComponent, this._destroy$)
       .subscribe(sdk => !!sdk ? _lab.loadSudoku(sdk) : null);
+    this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.progress$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.state.percent||0));
   }
 

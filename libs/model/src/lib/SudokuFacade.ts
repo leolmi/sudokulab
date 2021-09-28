@@ -12,6 +12,7 @@ export abstract class SudokuFacade implements Facade {
   abstract selectActiveMessage$: Observable<SudokuMessage|undefined>;
   abstract selectActivePage$: Observable<SudokulabPage|undefined>;
   abstract selectPageStatus$: Observable<Dictionary<boolean>>;
+  abstract selectIsCompact$: Observable<boolean>;
 
   abstract setActivePage(page: SudokulabPage|undefined, data?: any): void;
   abstract raiseMessage(message: SudokuMessage): void;
@@ -19,4 +20,5 @@ export abstract class SudokuFacade implements Facade {
   abstract upload(open?: boolean): void;
   abstract fillDocuments(): void;
   abstract onUpload(component: Type<any>, destroyer$: Observable<any>): Observable<Sudoku|any>;
+  abstract checkCompactStatus(): void;
 }
