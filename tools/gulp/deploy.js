@@ -10,7 +10,7 @@ const PROJECTS = {
 const OUTPUT = 'dist/apps/sudokulab';
 
 function build(prj, cb) {
-  exec(`nx build ${prj}`, (err, stdout, stderr) => {
+  exec(`nx build ${prj} --prod`, (err, stdout, stderr) => {
     if (!!err) return cb(err);
     cb();
   });
