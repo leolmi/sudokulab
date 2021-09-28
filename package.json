@@ -1,14 +1,11 @@
 {
   "name": "sudokulab",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
-  "scripts": {
-    "ng": "nx",
-    "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
-    "start": "node dist/apps/api/main.js",
-    "build": "gulp deploy"
-  },
   "private": true,
+  "author": "leo.olmi",
+  "url": "https://github.com/leolmi/sudokulab",
+  "main": "dist/apps/api/main.js",
   "dependencies": {
     "@angular/animations": "^12.1.0",
     "@angular/cdk": "^12.2.4",
@@ -76,5 +73,14 @@
     "ts-jest": "27.0.3",
     "typescript": "~4.3.5",
     "yargs": "^17.2.1"
+  },
+  "scripts": {
+    "ng": "nx",
+    "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
+    "start": "node dist/apps/api/main.js",
+    "build": "gulp deploy"
+  },
+  "engines": {
+    "node": "14.17.1"
   }
 }
