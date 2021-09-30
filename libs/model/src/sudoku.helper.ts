@@ -52,9 +52,14 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined) => {
   });
 }
 
-export const decodeCellId = (id: string): CellInfo => {
+export const decodeCellId = (id: string, rank?: number): CellInfo => {
   const parts = (id || '').split('.');
-  return new CellInfo(parseInt(parts[0] || '-1', 10), parseInt(parts[1] || '-1'));
+  const col = parseInt(parts[0] || '-1', 10);
+  const row = parseInt(parts[1] || '-1', 10);
+
+  const grank = !!rank ? getGroupRank(rank) : 0;
+  const gpos = !!grank ? Math.floor(row / grank) * grank + Math.floor(col / grank) : -1;
+  return new CellInfo(col, row, gpos);
 }
 
 export const groupId = (type: SudokuGroupType, pos: number) => `${type}.${pos}`;
@@ -73,10 +78,20 @@ export const getCellStyle = (sdk: Sudoku|EditSudokuOptions|undefined, ele: HTMLE
   }
 }
 
-export const getLinesGroups = (sdk: Sudoku|EditSudokuOptions|undefined): {[id: number]: boolean} => {
+export const getSchemaCellStyle = (rank: number, pxlWidth: number): any => {
+  const pxlw = Math.floor(pxlWidth / rank);
+  const fnts = Math.floor(pxlw / 2);
+  return {
+    width: `${pxlw}px`,
+    height: `${pxlw}px`,
+    'font-size': `${fnts}px`
+  }
+}
+
+export const getLinesGroups = (rank: number|undefined): {[id: number]: boolean} => {
   const res: {[id: number]: boolean} = {};
-  const grank = getGroupRank(sdk?.rank||9);
-  for(let g = 0; g < (sdk?.rank||9)-1; g++) {
+  const grank = getGroupRank(rank||9);
+  for(let g = 0; g < (rank||9)-1; g++) {
     res[g] = ((g+1)%grank === 0);
   }
   return res;

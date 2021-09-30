@@ -1,5 +1,5 @@
 import {createAction, props} from "@ngrx/store";
-import { PlaySudoku, SchemasOptions, Sudoku } from '@sudokulab/model';
+import { PlaySudoku, SchemasOptions, SolveStepResult, Sudoku } from '@sudokulab/model';
 
 export const setActiveSudoku = createAction(
   '[SudokuPlay.lab] set the active sudoku',
@@ -39,6 +39,10 @@ export const applyAlgorithm = createAction(
   props<{ algorithm: string }>()
 );
 
+export const stepInfo = createAction(
+  '[SudokuPlay.lab] show the next step info'
+);
+
 export const solveStep = createAction(
   '[SudokuPlay.lab] try do a new solve step'
 );
@@ -69,3 +73,8 @@ export const updateSchemasOptions = createAction(
   '[SudokuPlay.lab] update current schemas options',
   props<{ changes: Partial<SchemasOptions> }>()
 );
+
+export const setStepInfo = createAction(
+  '[SudokuPlay.lab] set current step-info',
+  props<{ info?: SolveStepResult }>()
+)

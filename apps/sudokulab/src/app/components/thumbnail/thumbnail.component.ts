@@ -52,7 +52,7 @@ export class ThumbnailComponent {
     this.cols$ = this._sdk$.pipe(map(s => getDimension(s?.rank)));
     this.cells$ = this._sdk$.pipe(map(sdk => this._getCells(sdk)));
     this.description$ = this._sdk$.pipe(map(s => getSchemaName(s, { separator: ' ', hideHash: true, unknown: this.unknown })));
-    this.grline$ = this._sdk$.pipe(map(s => getLinesGroups(s)));
+    this.grline$ = this._sdk$.pipe(map(s => getLinesGroups(s?.rank)));
     const elem = (<HTMLElement>ele.nativeElement).getElementsByClassName('thumbnail-schema-container');
     this.cellStyle$ = this._sdk$.pipe(map(s => getCellStyle(s, <HTMLElement>elem[0])));
 

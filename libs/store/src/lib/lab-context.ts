@@ -1,4 +1,13 @@
-import { LabFacade, PlaySudoku, SchemasOptions, Sudoku, SudokuFacade, SudokuMessage } from '@sudokulab/model';
+import {
+  LabFacade,
+  PlaySudoku,
+  SchemasOptions,
+  SolveStepResult,
+  StepInfo,
+  Sudoku,
+  SudokuFacade,
+  SudokuMessage
+} from '@sudokulab/model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as SudokuSelectors from './selectors';
 import * as SudokuActions from './actions';
@@ -13,6 +22,7 @@ export class LabContext extends LabFacade {
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
   selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
   selectSchemasOptions$: Observable<SchemasOptions> = this._store.select(SudokuSelectors.selectActiveSchemasOptions);
+  selectStepInfo$: Observable<SolveStepResult|undefined> = this._store.select(SudokuSelectors.selectActiveSchemaStepInfo);
 
   setActiveSudoku(active: number) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
@@ -28,6 +38,14 @@ export class LabContext extends LabFacade {
 
   applyAlgorithm(algorithm: string) {
     this._store.dispatch(SudokuActions.applyAlgorithm({ algorithm }));
+  }
+
+  stepInfo() {
+    this._store.dispatch(SudokuActions.stepInfo());
+  }
+
+  clearStepInfo() {
+    this._store.dispatch(SudokuActions.setStepInfo({}));
   }
 
   solveStep() {

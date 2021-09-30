@@ -11,12 +11,22 @@
              (click)="select(col, row)"
              fxLayout="row" fxLayoutAlign="center center"
              *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
-             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row], 'error': cell.error}">
+             [ngClass]="{
+                'fixed': cell?.fixed,
+                'selected': cell.id === (selected$|async),
+                'right-line': ((grline$|async)||{})[col],
+                'bottom-line': ((grline$|async)||{})[row],
+                'error': cell.error,
+                'highlight': ((highlights$|async)||{})[cell.id],
+                'highlight-cell': ((highlightsCell$|async)||{})[cell.id]
+             }">
           <div class="cell-value">{{cell?.value}}</div>
-<!--          <div class="cell-available-values" *ngIf="!cell?.value && (playSudoku$|async)?.options?.usePencil">-->
-<!--            <div class="cell-available-value"-->
-<!--                 *ngFor="let av of cell?.pencil">{{av}}</div>-->
-<!--          </div>-->
+          <div class="cell-pencil-values" *ngIf="!cell?.value && !!(showPencil$|async)">
+            <div class="cell-available-value" *ngFor="let pv of cell?.pencil">{{pv}}</div>
+          </div>
+          <div class="cell-available-values" *ngIf="showAvailables$|async">
+            <div class="cell-available-value" *ngFor="let av of cell.availables">{{av}}</div>
+          </div>
         </div>
       </div>
     </div>

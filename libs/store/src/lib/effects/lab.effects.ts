@@ -21,7 +21,7 @@ import {
   resetAvailables,
   saveUserSetting,
   Solver,
-  solveStep,
+  solveStep, StepInfo,
   Sudoku,
   SudokuInfo,
   SudokuMessage
@@ -253,6 +253,15 @@ export class LabEffects {
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) =>
       [SudokuActions.updatePageStatus({ status: { has_no_lab_schema: !sdk } })])
+  ));
+
+  stepInfo$ = createEffect(() => this._actions$.pipe(
+    ofType(GeneratorActions.stepInfo),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    concatMap(([a, sdk]) => {
+      const info = solveStep(sdk, [Algorithms.tryNumber]);
+      return [GeneratorActions.setStepInfo({ info })];
+    })
   ));
 
   updateOptions$ = createEffect(() => this._actions$.pipe(

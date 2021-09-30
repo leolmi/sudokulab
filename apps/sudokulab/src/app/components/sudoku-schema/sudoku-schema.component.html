@@ -1,0 +1,32 @@
+<div class="sudokulab-schema" #schemaElement>
+  <div class="sudokulab-schema-background"
+       *ngIf="!!(element$|async)"
+       fxLayout="column">
+    <div class="sudokulab-schema-row"
+         *ngFor="let row of rows$|async"
+         fxLayout="row" fxLayoutAlign="start center">
+      <div class="sudokulab-schema-cell"
+           *ngFor="let col of cols$|async">
+        <div class="cell-container"
+             [ngStyle]="cellStyle$|async"
+             (click)="select(col, row)"
+             fxLayout="row" fxLayoutAlign="center center"
+             *ngIf="(schema.cells||{})[col+'.'+row] as cell"
+             [ngClass]="{
+                'fixed': cell?.fixed,
+                'selected': cell.id === (selected$|async),
+                'right-line': ((grline$|async)||{})[col],
+                'bottom-line': ((grline$|async)||{})[row],
+                'error': cell.error,
+                'has-value': !!(cell?.value$|async)
+             }">
+          <div class="cell-value">{{cell.value$|async}}</div>
+          <div class="cell-available-values">
+            <div class="cell-available-value"
+                 *ngFor="let av of cell.availables$|async">{{av}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

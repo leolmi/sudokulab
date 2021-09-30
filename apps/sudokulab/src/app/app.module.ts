@@ -52,6 +52,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatRippleModule } from '@angular/material/core';
 import { SchemasItemComponent } from './components/schemas/schemas-item.component';
 import { KeyBoardComponent } from './components/key-board/key-board.component';
+import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.component';
 
 @NgModule({
   declarations: [
@@ -71,7 +72,8 @@ import { KeyBoardComponent } from './components/key-board/key-board.component';
     ThumbnailComponent,
     GeneratorToolbarComponent,
     KeyBoardComponent,
-    SchemaNamePipe
+    SchemaNamePipe,
+    SudokuSchemaComponent
   ],
   imports: [
     BrowserModule,

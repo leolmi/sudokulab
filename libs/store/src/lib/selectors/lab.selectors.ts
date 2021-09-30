@@ -1,7 +1,7 @@
 import {createSelector} from '@ngrx/store';
 import {selectFeature} from '../common';
 import {adapter} from '../reducers/lab.reducers';
-import { PlaySudoku, SchemasOptions } from '@sudokulab/model';
+import { PlaySudoku, SchemasOptions, SolveStepResult } from '@sudokulab/model';
 
 export const selectLab = createSelector(
   selectFeature,
@@ -37,3 +37,7 @@ export const selectActiveSchemasOptions = createSelector(
   (state): SchemasOptions => state.options
 )
 
+export const selectActiveSchemaStepInfo = createSelector(
+  selectLab,
+  (state): SolveStepResult|undefined => state.stepInfo
+)

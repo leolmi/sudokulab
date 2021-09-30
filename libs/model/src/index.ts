@@ -10,6 +10,8 @@ export * from './lib/Algorithm';
 export * from './lib/AlgorithmResult';
 export * from './lib/Algorithms';
 
+export * from './lib/SudokuSchema';
+
 export * from './lib/EditSudokuCell';
 export * from './lib/EditSudokuGroup';
 export * from './lib/EditSudoku';
@@ -21,6 +23,7 @@ export * from './lib/PlaySudokuGroup';
 export * from './lib/PlaySudoku';
 export * from './lib/PlaySudokuState';
 export * from './lib/PlaySudokuOptions';
+export * from './lib/StepInfo';
 
 export * from './lib/MenuButton';
 export * from './lib/SudokulabPage';
