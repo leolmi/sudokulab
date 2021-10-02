@@ -6,6 +6,7 @@ export const SUDOKU_DYNAMIC_VALUE = 'x';
 export const SUDOKU_EMPTY_VALUE = '0';
 export const SUDOKU_DEFAULT_RANK = 9;
 
+export const SUDOKU_COMPACT_WIDTH = 1450;
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
 
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';

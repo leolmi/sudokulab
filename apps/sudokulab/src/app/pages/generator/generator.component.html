@@ -2,13 +2,23 @@
                   class="progress-bar"
                   color="accent"
                   mode="indeterminate"></mat-progress-bar>
-<div class="sudokulab-page" [fxLayout]="layout$|async">
+<div class="sudokulab-page"
+     [fxLayout]="layout$|async"
+     [fxLayoutAlign]="layoutAlign$|async">
   <div class="tools tools-left compact-hidden" fxFlex>
     <sudokulab-generator-options></sudokulab-generator-options>
   </div>
   <div class="board-container" fxLayout="column">
-    <div class="board">
+    <div class="board" #board [ngStyle]="boardStyle$|async">
       <sudokulab-generator-board></sudokulab-generator-board>
+      <div class="working-container compact-visible" *ngIf="!!(working$|async)">
+        <mat-progress-spinner class="working-spinner"
+                              diameter="300"
+                              color="accent"
+                              strokeWidth="12"
+                              mode="indeterminate"></mat-progress-spinner>
+        <div class="working-counter">{{(working$|async)?.counter||''}}</div>
+      </div>
     </div>
     <sudokulab-generator-toolbar></sudokulab-generator-toolbar>
     <div class="bottom-board" fxFlex></div>

@@ -66,6 +66,10 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding-top: 20px;
 }
 
+.blur {
+  filter: blur(4px);
+}
+
 .schemalab-tool {
   padding: 0 10px;
 }
@@ -153,12 +157,16 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
   .sudokulab-page {
     overflow: auto;
-    min-width: 640px;
+    //min-width: 640px;
   }
 
   .compact-size-600 {
-    width: 600px;
-    margin-left: calc(50% - 300px);
+    //width: 600px;
+    //margin-left: calc(50% - 300px);
+  }
+
+  .compact-blur {
+    filter: blur(4px);
   }
 
   .options-tool {
@@ -170,7 +178,7 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
 
   .tools {
     &:not(.compact-auto-height) {
-      min-height: 600px;
+      //min-height: 600px;
     }
     .schemalab-tool {
       padding: 0;
@@ -184,14 +192,21 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   user-select: none;
 }
 
-@media only screen and (max-width: 1300px) {
-
+@media only screen and (max-width: 1450px) {
+  .compact-size-600 {
+    width: 600px;
+  }
+  .sudokulab-page {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
 }
 
 @media only screen and (max-width: 640px) {
-  .compact {
-    .sudokulab-page {
-      // zoom: .5;
-    }
+  .compact-size-600,
+  .tools,
+  .board-container,
+  .board {
+    width: 100% !important;
   }
 }

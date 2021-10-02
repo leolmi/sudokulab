@@ -1,11 +1,12 @@
-<div class="sudokulab-page" [fxLayout]="layout$|async">
-  <div class="tools tools-left compact-auto-height" fxFlex>
+<div class="sudokulab-page"
+     [fxLayout]="layout$|async"
+     [fxLayoutAlign]="layoutAlign$|async">
+  <div class="tools tools-left compact-auto-height" [fxFlex]="topToolFlex$|async">
     <sudokulab-info></sudokulab-info>
   </div>
   <div class="board-container" fxLayout="column">
-    <div class="board">
+    <div class="board" #board [ngStyle]="boardStyle$|async">
       <sudokulab-board></sudokulab-board>
-<!--      <sudokulab-schema></sudokulab-schema>-->
     </div>
     <div class="bottom-board compact-size-600" fxFlex>
       <mat-progress-bar [value]="progress$|async"
@@ -15,7 +16,7 @@
       <sudokulab-key-board></sudokulab-key-board>
     </div>
   </div>
-  <div class="tools tools-right" fxFlex>
+  <div class="tools tools-right" fxFlex="50">
     <sudokulab-schemas></sudokulab-schemas>
   </div>
 </div>

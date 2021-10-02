@@ -1,16 +1,28 @@
-import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy} from '@angular/core';
 import {
-  cellId, decodeCellId,
-  getCellStyle,
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild
+} from '@angular/core';
+import {
+  cellId,
+  decodeCellId,
   getDimension,
   getLinesGroups,
+  getSchemaCellStyle,
   isDirectionKey,
   LabFacade,
-  PlaySudoku, SolveStepResult, SudokuFacade
+  PlaySudoku,
+  SolveStepResult,
+  SUDOKU_DEFAULT_RANK,
+  SudokuFacade
 } from '@sudokulab/model';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { delay, filter, map, takeUntil } from 'rxjs/operators';
-import {DestroyComponent} from "../DestroyComponent";
+import { DestroyComponent } from '../DestroyComponent';
 import { Dictionary } from '@ngrx/entity';
 
 @Component({
@@ -19,7 +31,8 @@ import { Dictionary } from '@ngrx/entity';
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BoardComponent extends DestroyComponent implements OnDestroy {
+export class BoardComponent extends DestroyComponent implements OnDestroy, AfterViewInit {
+  @ViewChild('schemaElement') schemaElement: ElementRef|undefined = undefined;
   playSudoku$: Observable<PlaySudoku|undefined>;
   selected$: Observable<string>;
   cellStyle$: Observable<any>;
@@ -32,18 +45,19 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
   highlights$: Observable<Dictionary<boolean>>;
   highlightsCell$: Observable<Dictionary<boolean>>;
 
-
   constructor(private ele: ElementRef,
               private _lab: LabFacade,
               _sudoku: SudokuFacade) {
     super(_sudoku);
+
     this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
     this.stepInfo$ = _lab.selectStepInfo$.pipe(takeUntil(this._destroy$));
 
     this.rows$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
     this.cols$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
-    this.cellStyle$ = this.playSudoku$.pipe(map(s => getCellStyle(s?.sudoku, ele.nativeElement.parentElement)));
+    this.cellStyle$ = combineLatest(this.playSudoku$, this._resize$, this._element$).pipe(map(([sdk, r, ele]) =>
+      getSchemaCellStyle(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
     this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)));
     this.showPencil$ = this.playSudoku$.pipe(map(s => !!s?.options.usePencil));
     this.showAvailables$ = this.playSudoku$.pipe(map(s => !s?.options.usePencil && !!s?.options.showAvailables));
@@ -56,6 +70,9 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
         filter(si => !!si),
         delay(3000))
       .subscribe(() => _lab.clearStepInfo());
+  }
+  ngAfterViewInit() {
+    this._element$.next(this.schemaElement);
   }
 
   @HostListener('window:keyup', ['$event'])

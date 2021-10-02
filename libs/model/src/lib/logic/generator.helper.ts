@@ -100,8 +100,10 @@ const _randomEmptyCell = (sdk: EditSudoku): EditSudokuCell|undefined => {
  * @param sdk
  */
 export const solvable = (sdk: EditSudoku): boolean => {
-  return (sdk.cellList || []).filter(c => c.fixed).length > getMinNumbers(sdk.options?.rank) &&
-    !!(sdk.cellList || []).find(c => c.value === SUDOKU_DYNAMIC_VALUE);
+  return (sdk.options.fixedCount >= getMinNumbers(sdk.options?.rank) &&
+    (sdk.fixedCount < sdk.options.fixedCount || !!(sdk.cellList||[]).find(fc => fc.fixed && fc.value === SUDOKU_DYNAMIC_VALUE)));
+  // return (sdk.cellList || []).filter(c => c.fixed).length > getMinNumbers(sdk.options?.rank) &&
+  //   !!(sdk.cellList || []).find(c => c.value === SUDOKU_DYNAMIC_VALUE);
 }
 
 /**
@@ -303,7 +305,7 @@ const upgradeXCell = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
       break;
   }
   if (!!cell) cell.value = cell.availables[xcell.index];
-  applySudokuRules(sdk);
+  applySudokuRules(sdk, true);
 }
 
 /**
@@ -316,9 +318,6 @@ export const checkValues = (sdk: EditSudoku): boolean => {
   const xcells = (sdk.generationMap?.fixedCellsX || []);
   const xcells_count = xcells.length;
   if (xcells_count <= 0) return true;
-  // ricerca la cella da incrementare
-  //  - verifia che tutte le celle fixed siano valorizzate
-  applySudokuRules(sdk);
 
   // la prima valorizzazione inserisce per ogni cella il primo valore disponibile
   if (isFirstValorization(xcells)) {
@@ -343,9 +342,10 @@ export const checkValues = (sdk: EditSudoku): boolean => {
   }
 
   values = getValues(sdk);
-  let invalidValues = !!xcells.find(c => !isValue(sdk.cells[c.id]?.value||''));
+  let invalidValues = !!xcells.find(c => !isValue(sdk.cells[c.id]?.value || ''));
   if (invalidValues) console.warn(...SDK_PREFIX, 'Invalid values', values);
-  if (sdk.cellList.find(c => !c.fixed && c.availables.length<=0)) invalidValues = true;
+  const errorcell = sdk.cellList.find(c => !c.fixed && c.availables.length <= 0);
+  if (!!errorcell) invalidValues = true;
   return !invalidValues;
 }
 

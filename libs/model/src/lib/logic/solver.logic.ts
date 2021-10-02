@@ -68,12 +68,12 @@ const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
   return handler(changes);
 }
 
-export const checkAvailables = (ps: PlaySudoku|undefined) => {
-  if (!ps) return;
+export const checkAvailables = (sk: PlaySudoku|undefined) => {
+  if (!sk) return;
   // aaplica le regole base del sudoku
-  applySudokuRules(ps);
+  applySudokuRules(sk);
   // for Algorithm OneCellFOrValue
-  _forEach(ps.groups || {}, (g) => {
+  _forEach(sk.groups || {}, (g) => {
     if (!g) return;
     g.availableOnCells = {};
     g.cells.forEach(c => {
@@ -87,25 +87,25 @@ export const checkAvailables = (ps: PlaySudoku|undefined) => {
     });
   });
   // calcolo dello state, ricerca errori, ricerca coppie
-  ps.couples = {};
-  ps.state.valuesCount = 0;
-  ps.state.error = false;
-  ps.state.complete = true;
-  _forEach(ps.cells || {}, (c) => {
+  sk.couples = {};
+  sk.state.valuesCount = 0;
+  sk.state.error = false;
+  sk.state.complete = true;
+  _forEach(sk.cells || {}, (c) => {
     if (!!c && !c.value && c.availables.length === 2) {
       const cpid = c.availables.join('|');
-      ps.couples[cpid] = ps.couples[cpid] || [];
-      (ps.couples[cpid] || []).push(c);
+      sk.couples[cpid] = sk.couples[cpid] || [];
+      (sk.couples[cpid] || []).push(c);
     }
-    if (!!c?.value) ps.state.valuesCount++;
+    if (!!c?.value) sk.state.valuesCount++;
     if (!!c) {
       c.error = (c.availables.length < 1 && !c.value);
-      if (!!c.error) ps.state.error = true;
-      if (!c.value) ps.state.complete = false;
+      if (!!c.error) sk.state.error = true;
+      if (!c.value) sk.state.complete = false;
     }
   });
   // percentuale di riempimento calcolata sul numero di valori da inserirre
-  ps.state.percent = ((ps.state.valuesCount - ps.state.fixedCount) / (81 - ps.state.fixedCount)) * 100;
+  sk.state.percent = ((sk.state.valuesCount - sk.state.fixedCount) / (81 - sk.state.fixedCount)) * 100;
 }
 
 

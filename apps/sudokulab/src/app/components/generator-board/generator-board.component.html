@@ -1,5 +1,5 @@
 <div #board class="sudokulab-board" tabindex="0"
-     [ngClass]="{'has-focus': hasFocus$|async, 'disabled': running$|async}"
+     [ngClass]="{'has-focus': hasFocus$|async, 'disabled': running$|async, 'compact-blur': running$|async}"
      (focusin)="focus(true)"
      (focusout)="focus(false)">
   <div class="sudokulab-board-background"
@@ -16,6 +16,10 @@
              *ngIf="((editSudoku$|async)?.cells||{})[col+'.'+row] as cell"
              [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
           <div class="cell-value">{{PROXYVALUE[cell?.value||'']||cell?.value}}</div>
+          <div class="cell-available-values">
+            <div class="cell-available-value"
+                 *ngFor="let av of cell.availables">{{av}}</div>
+          </div>
         </div>
       </div>
     </div>

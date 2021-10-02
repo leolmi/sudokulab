@@ -1,7 +1,7 @@
 <div class="schemalab-tool schemalab-schemas compact-size-600" fxLayout="column">
   <div class="schemalab-schemas-toolbar"
        fxLayout="row" fxLayoutAlign="start center">
-    <mat-form-field appearance="outline" class="no-wrapper-padding" fxFlex>
+    <mat-form-field appearance="outline" class="no-wrapper-padding difficulty-combo" fxFlex>
       <mat-label>Sort by</mat-label>
       <mat-select [value]="(options$|async)?.sortBy"
                   (valueChange)="applySort($event)">

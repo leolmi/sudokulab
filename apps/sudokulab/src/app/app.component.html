@@ -2,7 +2,11 @@
      [ngClass]="{'compact': compact$|async}"
      fxLayout="column">
   <mat-toolbar class="sudokulab-toolbar" color="primary">
-    <div class="logo" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="authorMenu" (click)="menuTrigger.openMenu()" matTooltip="author info" fxLayout="column">
+    <div class="logo"
+         #menuTrigger="matMenuTrigger"
+         [matMenuTriggerFor]="authorMenu"
+         (click)="menuTrigger.openMenu()"
+         matTooltip="author info" fxLayout="column">
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
       <span class="sub-title compact-visible">{{(page$|async)?.title}}</span>
     </div>

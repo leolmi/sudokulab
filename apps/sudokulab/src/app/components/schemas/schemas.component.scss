@@ -4,9 +4,16 @@
   height: 100%;
 }
 
+.schemas-container {
+  min-height: 400px;
+}
+
 .schemalab-schemas-toolbar {
   height: 60px;
   margin-bottom: 20px;
+  .difficulty-combo {
+    min-width: 60px;
+  }
 }
 
 .schemas-counter {

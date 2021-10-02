@@ -57,8 +57,7 @@ export class ThumbnailComponent {
     this.cellStyle$ = this._sdk$.pipe(map(s => getCellStyle(s, <HTMLElement>elem[0])));
 
     this.working$ = combineLatest(this.workingMode$, _generator.selectGeneratorWorkingInfo$).pipe(
-      map(([wm, info]) => wm ? info : undefined)
-    )
+      map(([wm, info]) => wm ? info : undefined));
   }
 
   private _getCells(sdk: Sudoku|undefined): Dictionary<CellInfo> {

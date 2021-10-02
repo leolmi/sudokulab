@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
   getCellStyle,
   getLinesGroups,
@@ -7,7 +7,7 @@ import {
   GeneratorFacade,
   cellId,
   isDirectionKey,
-  use, getDimension, SudokuFacade
+  use, getDimension, SudokuFacade, getSchemaCellStyle, SUDOKU_DEFAULT_RANK
 } from '@sudokulab/model';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
@@ -38,8 +38,15 @@ export class GeneratorBoardComponent extends GeneratorBaseComponent implements O
 
     this.rows$ = this.editSudoku$.pipe(map(s => getDimension(s?.options?.rank)));
     this.cols$ = this.editSudoku$.pipe(map(s => getDimension(s?.options?.rank)));
-    this.cellStyle$ = this.editSudoku$.pipe(map(s => getCellStyle(s?.options, ele.nativeElement.parentElement)));
+    this.cellStyle$ = combineLatest(this.editSudoku$, this._resize$, this._element$).pipe(map(([sdk, r, ele]) =>
+      getSchemaCellStyle(sdk?.options?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
+
+    // this.cellStyle$ = this.editSudoku$.pipe(map(s => getCellStyle(s?.options, ele.nativeElement.parentElement)));
     this.grline$ = this.editSudoku$.pipe(map(s => getLinesGroups(s?.options?.rank)));
+  }
+
+  ngAfterViewInit() {
+    this._element$.next(this.board);
   }
 
   focus(status = true) {

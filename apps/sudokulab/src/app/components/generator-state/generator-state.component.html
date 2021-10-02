@@ -1,5 +1,10 @@
 <div class="schemalab-tool options-tool compact-auto-height" fxLayout="column">
   <div class="output-schemas">
+    <div class="output-empty"
+         *ngIf="((schemas$|async)||[]).length<=0 && !(running$|async)"
+         fxLayout="column" fxLayoutAlign="center">
+      <div>no schema</div>
+    </div>
     <sudokulab-thumbnail *ngFor="let sdk of schemas$|async"
                          [sudoku]="sdk"
                          matTooltip="click to open in player"

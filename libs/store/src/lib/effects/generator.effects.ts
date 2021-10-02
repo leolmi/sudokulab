@@ -7,6 +7,7 @@ import * as GeneratorActions from '../actions';
 import * as SudokuActions from '../actions';
 import * as GeneratorSelectors from '../selectors';
 import {
+  applySudokuRules,
   cellId,
   checkNumbers,
   EditSudoku,
@@ -16,7 +17,7 @@ import {
   GeneratorFacade,
   getSchemaName,
   getValues,
-  isValidGeneratorValue,
+  isValidGeneratorValue, isValue,
   moveOnDirection,
   saveUserSetting,
   Sudoku,
@@ -56,9 +57,11 @@ export class GeneratorEffects {
       if (!cell) return [];
       let value = a.value;
       if (value === 'Delete') value = '';
+      const old = cell.value;
       cell.value = (value||'').trim();
       cell.fixed = !!cell.value;
       changes.fixedCount = geEditFixedCount(changes);
+      applySudokuRules(changes, isValue(old, true));
       return [
         GeneratorActions.updateGeneratorSchema({ changes }),
         GeneratorActions.checkGeneratorState()];
@@ -99,6 +102,7 @@ export class GeneratorEffects {
       });
       changes.fixedCount = 0;
       changes.fixed = [];
+      applySudokuRules(changes, true);
       delete changes.originalSchema;
       return [GeneratorActions.updateGeneratorSchema({ changes })];
     })
@@ -147,7 +151,7 @@ export class GeneratorEffects {
     switchMap((a) => {
       const page = this._pages.pages.find(p => p.code === 'lab');
       return [
-        GeneratorActions.loadSudoku({ sudoku: a.schema }),
+        GeneratorActions.setActiveSudoku({ active: a.schema._id }),
         GeneratorActions.setActivePage({ page })
       ];
     })

@@ -1,4 +1,6 @@
-<div class="sudokulab-board" [ngClass]="{'lines': !!!(playSudoku$|async)}">
+<div class="sudokulab-board"
+     #schemaElement
+     [ngClass]="{'lines': !!!(playSudoku$|async)}">
   <div class="sudokulab-board-background"
        fxLayout="column">
     <div class="sudokulab-board-row"

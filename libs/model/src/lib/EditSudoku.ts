@@ -2,10 +2,12 @@ import { Dictionary } from '@ngrx/entity';
 import { EditSudokuOptions } from './EditSudokuOptions';
 import { EditSudokuCell } from './EditSudokuCell';
 import { EditSudokuGroup } from './EditSudokuGroup';
-import { cellId, getGroupRank, groupId, isValue } from '../sudoku.helper';
+import { applySudokuRules, cellId, getAvailables, getGroupRank, groupId, isValue } from '../sudoku.helper';
 import { SudokuGroupType } from './enums';
 import { remove as _remove } from 'lodash';
 import { SDK_PREFIX, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
+import { guid } from '../global.helper';
+import { checkAvailables } from './logic';
 
 export class GenerationMapCellInfo {
   constructor(sdk: EditSudoku, cell: EditSudokuCell) {
@@ -32,7 +34,6 @@ export class EditSudokuGenerationMap {
 
 export class EditSudoku {
   constructor(es?: Partial<EditSudoku>) {
-    this.id = `${performance.now()}`;
     this.cells = {};
     this.cellList = [];
     this.fixed = [];
@@ -40,8 +41,9 @@ export class EditSudoku {
     this.groupsForCell = {};
     this.fixedCount = 0;
     Object.assign(this, es || {});
+    this.id = guid();
     this.options = new EditSudokuOptions(es?.options);
-    _loadSudoku(this);
+    _loadSudoku(this, es);
     this.valorizations = {};
   }
   id: string;
@@ -77,6 +79,7 @@ export class EditSudoku {
       cell.value = isValue(v, true) ? v : '';
       this.checkFixedCell(cell);
     }
+    applySudokuRules(this, true);
   }
 }
 
@@ -85,9 +88,14 @@ const _addGroup = (es: EditSudoku, type: SudokuGroupType, pos: number) => {
   es.groups[gid] = new EditSudokuGroup({ id: gid });
 }
 
-const _loadSudoku = (es: EditSudoku) => {
+const _loadSudoku = (es: EditSudoku, esx?: Partial<EditSudoku>) => {
+  es.fixed = [];
   es.groups = {};
   es.cells = {};
+  es.cellList = [];
+  es.groupsForCell = {};
+  es.generationMap = undefined;
+  es.fixedCount = 0;
   // genera i gruppi
   for(let g = 0; g < es.options.rank; g++) {
     _addGroup(es, SudokuGroupType.row, g);
@@ -101,7 +109,9 @@ const _loadSudoku = (es: EditSudoku) => {
       const cid = cellId(c, r);
       const cell = new EditSudokuCell({
         id: cid,
-        position: x
+        position: x,
+        value: (esx?.cells||{})[cid]?.value||'',
+        availables: getAvailables(es.options.rank)
       });
       es.cells[cid] = cell;
       es.cellList.push(cell);
@@ -116,4 +126,11 @@ const _loadSudoku = (es: EditSudoku) => {
       es.groupsForCell[cell.id]?.forEach(g => g?.cells.push(cell));
     }
   }
+  checkEditAvailables(es);
+}
+
+const checkEditAvailables = (es: EditSudoku) => {
+  if (!es) return;
+  // aaplica le regole base del sudoku
+  applySudokuRules(es);
 }

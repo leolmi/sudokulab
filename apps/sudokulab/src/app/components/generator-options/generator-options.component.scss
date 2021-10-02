@@ -1,3 +1,11 @@
+::ng-deep {
+  .options-tool {
+    .mat-form-field {
+      min-width: 60px;
+    }
+  }
+
+}
 .options-tool {
   padding: 0 50px;
 }

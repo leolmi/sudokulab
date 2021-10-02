@@ -9,17 +9,19 @@ import {
 } from '@angular/core';
 import {
   cellId,
-  getCellStyle,
-  getDimension, getLinesGroups, getSchemaCellStyle,
+  getDimension,
+  getLinesGroups,
+  getSchemaCellStyle,
   isDirectionKey,
   LabFacade,
-  SudokuFacade, SudokulabWindowService,
+  SudokuFacade,
+  SudokulabWindowService,
   SudokuSchema,
   use
 } from '@sudokulab/model';
 import { DestroyComponent } from '../DestroyComponent';
 import { distinctUntilChanged, filter, map, takeUntil } from 'rxjs/operators';
-import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'sudokulab-schema',
@@ -28,7 +30,6 @@ import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SudokuSchemaComponent extends DestroyComponent implements OnDestroy, AfterViewInit {
-  private readonly _resize$: BehaviorSubject<any>;
   @ViewChild('schemaElement') schemaElement: ElementRef|undefined = undefined;
   schema: SudokuSchema;
   selected$: Observable<string>;
@@ -43,7 +44,6 @@ export class SudokuSchemaComponent extends DestroyComponent implements OnDestroy
               private _window: SudokulabWindowService,
               _sudoku: SudokuFacade) {
     super(_sudoku);
-    this._resize$ = new BehaviorSubject<any>({});
     this.element$ = new BehaviorSubject<ElementRef|undefined>(undefined);
     this.schema = new SudokuSchema();
     this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));

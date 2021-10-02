@@ -19,13 +19,13 @@ import {
   TryNumberAlgorithm
 } from './lib/Algorithms';
 import { PlayAlgorithm } from './lib/Algorithm';
-import { BehaviorSubject } from 'rxjs';
 import { CellInfo } from './lib/CellInfo';
 import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './lib/consts';
 import { calcDifficulty, EditSudoku, EditSudokuOptions, SudokuInfo } from '.';
 import { Dictionary } from '@ngrx/entity';
 import { SudokuSolution } from './lib/SudokuSolution';
-import { getHash, use } from './global.helper';
+import { getHash } from './global.helper';
+import { ElementRef } from '@angular/core';
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -40,8 +40,11 @@ export const isValue = (v: string, acceptX = false): boolean => {
  * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
  * @param sdk
  */
-export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined) => {
+export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefore = false) => {
   if (!sdk) return;
+  if (resetBefore) {
+    _forEach(sdk.cells, (c) => c ? c.availables = getAvailables(getRank(sdk)) : null);
+  }
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     // vettore valori di gruppo
@@ -85,6 +88,12 @@ export const getSchemaCellStyle = (rank: number, pxlWidth: number): any => {
     width: `${pxlw}px`,
     height: `${pxlw}px`,
     'font-size': `${fnts}px`
+  }
+}
+
+export const getBoardStyle = (ele: ElementRef|undefined): any => {
+  return {
+    height: `${ele?.nativeElement.clientWidth||600}px`,
   }
 }
 

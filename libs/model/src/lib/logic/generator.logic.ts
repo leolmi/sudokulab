@@ -112,7 +112,7 @@ export class Generator {
     this._counter = 0;
     this._cycles = 0;
     this._workSdk = _clone(this._sdk);
-    this._workSdk.originalSchema = getValues(this._workSdk);
+    this._workSdk.originalSchema = getValues(this._sdk);
     this._generate();
   }
 }

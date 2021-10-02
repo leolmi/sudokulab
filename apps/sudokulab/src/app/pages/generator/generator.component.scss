@@ -2,7 +2,6 @@
   width: 600px;
   height: 600px;
   position: relative;
-  margin-left: calc(50% - 300px);
 }
 
 .progress-bar {
@@ -10,4 +9,19 @@
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 2;
+}
+
+.working-container {
+  position: absolute;
+  left: calc(50% - 155px);
+  top: calc(50% - 150px);
+  .working-counter {
+    position: absolute;
+    font-size: 42px;
+    text-align: center;
+    top: calc(50% - 0.5em);
+    width: 100%;
+    opacity: .6;
+  }
 }
