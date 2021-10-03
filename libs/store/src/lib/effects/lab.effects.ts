@@ -4,8 +4,10 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { SudokuStore } from '../sudoku-store';
 import * as SudokuActions from '../actions';
+import * as GeneratorActions from '../actions';
 import { concatMap, debounceTime, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import * as SudokuSelectors from '../selectors';
+import * as GeneratorSelectors from '../selectors';
 import {
   Algorithms,
   applyAlgorithm,
@@ -21,7 +23,7 @@ import {
   resetAvailables,
   saveUserSetting,
   Solver,
-  solveStep, StepInfo,
+  solveStepToCell,
   Sudoku,
   SudokuInfo,
   SudokuMessage
@@ -29,8 +31,6 @@ import {
 import { cloneDeep as _clone } from 'lodash';
 import { saveAs } from 'file-saver';
 import { Router } from '@angular/router';
-import * as GeneratorActions from '../actions';
-import * as GeneratorSelectors from '../selectors';
 
 @Injectable()
 export class LabEffects {
@@ -74,9 +74,10 @@ export class LabEffects {
     ofType(SudokuActions.solveStep),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     switchMap(([a, sdk]) => {
-      const result = solveStep(sdk, [Algorithms.tryNumber]);
+      const result = solveStepToCell(sdk, [Algorithms.tryNumber]);
       if (!result) return [];
       return [
+        SudokuActions.highlightCells({ cells: result.result?.cells } ),
         SudokuActions.updateSudoku({ changes: result.sdk }),
         SudokuActions.checkState()];
     })
@@ -115,12 +116,9 @@ export class LabEffects {
       if (!cell || cell.fixed) return [];
       let value = a.value;
       if (value === 'Delete') value = '';
+      const prev = cell.value;
       cell.value = (value||'').trim();
-      if (!cell.value) {
-        resetAvailables(changes);
-      } else {
-        cell.availables = [];
-      }
+      if (!!prev && cell.value !== prev) resetAvailables(changes);
       checkAvailables(changes);
       return [
         SudokuActions.updateSudoku({ changes }),
@@ -259,7 +257,7 @@ export class LabEffects {
     ofType(GeneratorActions.stepInfo),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) => {
-      const info = solveStep(sdk, [Algorithms.tryNumber]);
+      const info = solveStepToCell(sdk, [Algorithms.tryNumber])
       return [GeneratorActions.setStepInfo({ info })];
     })
   ));

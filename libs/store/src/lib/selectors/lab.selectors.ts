@@ -2,6 +2,7 @@ import {createSelector} from '@ngrx/store';
 import {selectFeature} from '../common';
 import {adapter} from '../reducers/lab.reducers';
 import { PlaySudoku, SchemasOptions, SolveStepResult } from '@sudokulab/model';
+import { Dictionary } from '@ngrx/entity';
 
 export const selectLab = createSelector(
   selectFeature,
@@ -40,4 +41,9 @@ export const selectActiveSchemasOptions = createSelector(
 export const selectActiveSchemaStepInfo = createSelector(
   selectLab,
   (state): SolveStepResult|undefined => state.stepInfo
+)
+
+export const selectHighlightCells = createSelector(
+  selectLab,
+  (state): Dictionary<boolean> => state.highlight
 )

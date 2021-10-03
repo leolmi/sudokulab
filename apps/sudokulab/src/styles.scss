@@ -90,6 +90,10 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   background-color: $color-success !important;
   color: $color-success-contrast !important;
 }
+.message-type-highlight {
+  background-color: $color-accent !important;
+  color: $color-accent-contrast !important;
+}
 
 .text-center {
   text-align: center;
@@ -106,6 +110,10 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   .selected {
     background-color: $color-background-selected;
   }
+}
+
+.text-color-error {
+  color: $color-error !important;
 }
 
 .color-primary {
@@ -125,13 +133,11 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   font-weight: 100;
   user-select: none;
   &.fixed {
-    //color: lightgreen !important;
     font-weight: bold;
   }
   &:not(.fixed),
   &.hover-all {
     &:hover {
-      // background-color: lightgreen !important;
       background-color: $color-hover;
     }
   }
@@ -140,6 +146,12 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
   &.right-line {
     border-right: 2px solid $color-border-highlight !important;
+  }
+  &.error {
+    color: orangered !important;
+  }
+  .cell-value {
+    transition: color .5s ease-in-out;
   }
 }
 
@@ -202,11 +214,33 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
+.pulse {
+  animation: pulse 2s infinite;
+  font-weight: bold;
+  color: $color-accent;
+}
+
 @media only screen and (max-width: 640px) {
   .compact-size-600,
   .tools,
   .board-container,
   .board {
     width: 100% !important;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+  }
+
+  70% {
+    transform: scale(2);
+    //font-weight: bold;
+    //color: $color-accent;
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

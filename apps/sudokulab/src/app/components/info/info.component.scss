@@ -39,7 +39,17 @@
     width: 300px;
     font-size: 20px;
   }
-  .alg-value {
+}
 
+::ng-deep {
+  .menu-item-alg {
+    .mat-icon {
+      margin-right: 0 !important;
+    }
+    .alg-value {
+      width: 50px;
+      font-size: 18px;
+      margin-left: 6px;
+    }
   }
 }

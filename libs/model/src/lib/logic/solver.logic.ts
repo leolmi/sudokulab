@@ -1,8 +1,15 @@
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { SolveStepResult } from './SolveStepResult';
-import { applySudokuRules, getAlgorithm, getAlgorithms, getAvailables } from '../../sudoku.helper';
-import { cloneDeep as _clone, extend as _extend, forEach as _forEach, reduce as _reduce, includes as _includes } from 'lodash';
+import { applySudokuRules, getAlgorithm, getAlgorithms, getAvailables, isValue } from '../../sudoku.helper';
+import {
+  cloneDeep as _clone,
+  extend as _extend,
+  forEach as _forEach,
+  includes as _includes,
+  keys as _keys,
+  reduce as _reduce
+} from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';
 import { SudokuSolution } from '../SudokuSolution';
@@ -99,7 +106,7 @@ export const checkAvailables = (sk: PlaySudoku|undefined) => {
     }
     if (!!c?.value) sk.state.valuesCount++;
     if (!!c) {
-      c.error = (c.availables.length < 1 && !c.value);
+      c.error = (!c.fixed && isValue(c.value) && !_includes(c.availables, c.value));
       if (!!c.error) sk.state.error = true;
       if (!c.value) sk.state.complete = false;
     }
@@ -136,6 +143,17 @@ export const applyAlgorithm = (sdk: PlaySudoku, aname: string): PlaySudoku|undef
     if (!result.applied) return;
     return ps;
   });
+}
+
+export const solveStepToCell = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult|undefined => {
+  let cycles = 0;
+  let info: SolveStepResult | undefined;
+  do {
+    info = solveStep(sdk, exclude);
+    if (!!info?.sdk) sdk = info.sdk;
+    cycles++;
+  } while (cycles < 10 && _keys(info?.result?.cells || []).length <= 0);
+  return info;
 }
 
 export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult|undefined => {

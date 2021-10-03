@@ -14,7 +14,8 @@ import * as SudokuActions from './actions';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
 import { Injectable } from '@angular/core';
-import { selectAllSudoku } from './selectors';
+import { selectAllSudoku, selectHighlightCells } from './selectors';
+import { Dictionary } from '@ngrx/entity';
 
 @Injectable()
 export class LabContext extends LabFacade {
@@ -23,6 +24,7 @@ export class LabContext extends LabFacade {
   selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
   selectSchemasOptions$: Observable<SchemasOptions> = this._store.select(SudokuSelectors.selectActiveSchemasOptions);
   selectStepInfo$: Observable<SolveStepResult|undefined> = this._store.select(SudokuSelectors.selectActiveSchemaStepInfo);
+  selectHighlightCells$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectHighlightCells);
 
   setActiveSudoku(active: number) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
@@ -86,6 +88,10 @@ export class LabContext extends LabFacade {
 
   updateSchemasOptions(changes: Partial<SchemasOptions>) {
     this._store.dispatch(SudokuActions.updateSchemasOptions({ changes }));
+  }
+
+  clesrHighlightCells() {
+    this._store.dispatch(SudokuActions.highlightCells({}));
   }
 
   constructor(private _store: Store<SudokuStore>,

@@ -35,6 +35,8 @@ export * from './lib/LabFacade';
 export * from './lib/GeneratorFacade';
 export * from './lib/WorkingInfo';
 export * from './lib/OptionsFacade';
+export * from './lib/PrintFacade';
+export * from './lib/HelpFacade';
 
 export * from './lib/services';
 

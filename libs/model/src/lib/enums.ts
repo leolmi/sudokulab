@@ -41,7 +41,8 @@ export enum MessageType {
   info = 'info',
   success = 'success',
   warning = 'warning',
-  error = 'error'
+  error = 'error',
+  highlight = 'highlight'
 }
 
 export enum EditSudokuEndGenerationMode {

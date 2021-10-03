@@ -8,7 +8,8 @@ import {
   isArray as _isArray,
   isString as _isString,
   keys as _keys,
-  remove as _remove
+  remove as _remove,
+  random as _random
 } from 'lodash';
 import { EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
 import {
@@ -43,13 +44,15 @@ export const isValue = (v: string, acceptX = false): boolean => {
 export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefore = false) => {
   if (!sdk) return;
   if (resetBefore) {
-    _forEach(sdk.cells, (c) => c ? c.availables = getAvailables(getRank(sdk)) : null);
+    _forEach(sdk.cells, (c) => c ? c.availables = (c.fixed ? [] : getAvailables(getRank(sdk))) : null);
   }
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     // vettore valori di gruppo
     const values: Dictionary<string> = {};
-    g.cells.forEach(c => isValue(c.value) ? values[c.value] = c.id : null);
+    g.cells.forEach(c => {
+      if (isValue(c.value)) values[c.value] = `${values[c.value]||''}${c.id}`;
+    });
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
     g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
   });
@@ -178,7 +181,7 @@ export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string):
 
 export const resetAvailables = (sdk: PlaySudoku|undefined) => {
   _forEach(sdk?.cells||{}, (c) => {
-    if (!!c) c.availables = c.value ? [] : getAvailables(sdk?.sudoku?.rank);
+    if (!!c) c.availables = c.fixed ? [] : getAvailables(sdk?.sudoku?.rank);
   });
 }
 
@@ -305,4 +308,10 @@ export const getSolutionSudoku = (sol: SudokuSolution, i?: Partial<SudokuInfo>) 
   _extend(baseinfo, i || {});
   sdk.info = buildSudokuInfo(sdk, baseinfo);
   return sdk;
+}
+
+export const getRandomSchema = (schemas: PlaySudoku[]): PlaySudoku => {
+  const tot = (schemas||[]).length;
+  const index = _random(0, tot);
+  return schemas[index];
 }

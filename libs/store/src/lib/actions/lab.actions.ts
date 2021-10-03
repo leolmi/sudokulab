@@ -77,4 +77,9 @@ export const updateSchemasOptions = createAction(
 export const setStepInfo = createAction(
   '[SudokuPlay.lab] set current step-info',
   props<{ info?: SolveStepResult }>()
-)
+);
+
+export const highlightCells = createAction(
+  '[SudokuPlay.lab] highlight cells',
+  props<{ cells?: string[] }>()
+);

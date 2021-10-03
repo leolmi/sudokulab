@@ -1,6 +1,5 @@
 <div class="schemalab-tool sudoku-info compact-size-600">
   <div *ngIf="!!(info$|async)?.compiled" fxLayout="column">
-<!--    <div class="info-property" fxLayout="row">percent: {{percent$|async}}</div>-->
     <div class="schemalab-info-toolbar" fxLayout="row" fxLayoutAlign="start center">
       <div class="info-fixed color-primary" matTooltip="Number of fixed numbers">{{(fixed$|async)||''}}</div>
       <div class="info-t-type color-accent" matTooltip="Number of try-algorithm usage" *ngIf="useTry$|async">{{(useTry$|async)||''}}</div>
@@ -8,7 +7,29 @@
         <div class="difficulty">{{difficulty$|async}}</div>
         <div class="difficulty-value" *ngIf="!!(difficulty$|async)">{{difficultyValue$|async}}</div>
       </div>
-      <mat-icon matTooltip="uniq solution">looks_one</mat-icon>
+      <button mat-icon-button
+              matTooltip="uniq solution"
+              aria-label="uniq solution">
+        <mat-icon>looks_one</mat-icon>
+      </button>
+      <button mat-icon-button
+              [matMenuTriggerFor]="menu"
+              aria-label="sudokulab algorithms"
+              matTooltip="solution algorithms"
+              class="compact-visible">
+        <mat-icon>info</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item
+                class="menu-item-alg"
+                *ngFor="let item of (difficultyMap$|async)||[]">
+          <div fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon>{{item.icon}}</mat-icon>
+            <div class="alg-value"> x {{item.value}}</div>
+            <span fxFlex>{{item.name}}</span>
+          </div>
+        </button>
+      </mat-menu>
     </div>
   </div>
   <div *ngIf="((difficultyMap$|async)||[]).length>0 && !!!(compact$|async)" class="difficulty-map" fxLayout="column">
