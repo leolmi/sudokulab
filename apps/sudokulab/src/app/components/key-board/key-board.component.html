@@ -6,4 +6,10 @@
        *ngFor="let kn of numbers$|async"
        (click)="clickOnNumber(kn)"
        fxFlex>{{kn}}</div>
+  <div class="key-number"
+       (click)="togglePencil()"
+       [ngClass]="{'color-accent': isPencil$|async}"
+       fxFlex>
+    <mat-icon>edit</mat-icon>
+  </div>
 </div>

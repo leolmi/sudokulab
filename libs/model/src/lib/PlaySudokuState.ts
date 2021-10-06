@@ -3,13 +3,13 @@ export class PlaySudokuState {
     this.fixedCount = 0;
     this.valuesCount = 0;
     this.percent = 0.0;
-    this.error = false;
+    this.error = '';
     this.complete = false;
     Object.assign(this, s || {});
   }
   fixedCount: number;
   valuesCount: number;
   percent: number;
-  error: boolean;
+  error: string;
   complete: boolean;
 }

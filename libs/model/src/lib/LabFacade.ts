@@ -1,5 +1,13 @@
 import { Observable } from 'rxjs';
-import { PlaySudoku, SchemasOptions, SolveStepResult, StepInfo, Sudoku, SudokuMessage } from '@sudokulab/model';
+import {
+  PlaySudoku,
+  PlaySudokuOptions,
+  SchemasOptions,
+  SolveStepResult,
+  StepInfo,
+  Sudoku,
+  SudokuMessage
+} from '@sudokulab/model';
 import { Facade } from './Facade';
 import { Dictionary } from '@ngrx/entity';
 
@@ -12,7 +20,7 @@ export abstract class LabFacade implements Facade {
   abstract selectStepInfo$: Observable<SolveStepResult|undefined>;
   abstract selectHighlightCells$: Observable<Dictionary<boolean>>;
 
-  abstract loadSudoku(sudoku: Sudoku): void;
+  abstract loadSudoku(sudoku: Sudoku, onlyValues?: boolean): void;
   abstract setActiveSudoku(id: number): void;
   abstract setActiveCell(id: string): void;
   abstract applyAlgorithm(algorithm: string): void;
@@ -28,5 +36,6 @@ export abstract class LabFacade implements Facade {
   abstract clearStepInfo(): void;
   abstract raiseMessage(message: SudokuMessage): void;
   abstract updateSchemasOptions(changes: Partial<SchemasOptions>): void;
+  abstract updatePlayerOptions(changes: Partial<PlaySudokuOptions>): void;
   abstract clesrHighlightCells(): void;
 }

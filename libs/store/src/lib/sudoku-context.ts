@@ -6,7 +6,7 @@ import {
   SudokuFacade,
   SudokulabPage,
   SudokulabWindowService,
-  SudokuMessage
+  SudokuMessage, UploadDialogOptions, UploadDialogResult
 } from '@sudokulab/model';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
@@ -52,7 +52,7 @@ export class SudokuContext extends SudokuFacade {
     this._upload$.next(open);
   }
 
-  onUpload(component: Type<any>, destroyer$: Observable<any>): Observable<Sudoku|any> {
+  onUpload(component: Type<any>, destroyer$: Observable<any>, options?: UploadDialogOptions): Observable<UploadDialogResult|any> {
     return this._upload$
       .pipe(
         takeUntil(destroyer$),
@@ -60,7 +60,7 @@ export class SudokuContext extends SudokuFacade {
         tap(() => this._upload$.next(false)),
         switchMap(() => {
           return this._dialog
-            .open(component, { width: '500px' })
+            .open(component, { width: '500px', data: options })
             .afterClosed()
         }));
   }

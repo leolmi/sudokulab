@@ -1,8 +1,8 @@
 import {
+  addLine,
   Algorithm,
   AlgorithmResult,
-  getAlignment,
-  PlayAlgorithm,
+  getAlignment, getGroupCouples,
   PlaySudoku,
   PlaySudokuCellAlignment
 } from '@sudokulab/model';
@@ -25,28 +25,18 @@ export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
  * quando un possibile valore è presente solo 2 volte in un gruppo e genera un allineamento,
  * può essere escluso dagli altri gruppi intersecanti
  */
-export class AlignmentOnGroupAlgorithm extends Algorithm implements PlayAlgorithm {
-  constructor(a?: Partial<AlignmentOnGroupAlgorithm>) {
-    super(a);
-    this.name = 'Alignment on group';
-    this.id = ALIGNMENT_ON_GROUP_ALGORITHM;
-    this.icon = 'padding';
-  }
-
-  id: string;
-  name: string;
-  icon: string;
+export class AlignmentOnGroupAlgorithm extends Algorithm {
+  id = ALIGNMENT_ON_GROUP_ALGORITHM;
+  name = 'Alignment on group';
+  icon = 'padding';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
 
     const cells: Dictionary<boolean> = {};
     let applied = false;
+    let description = '';
     _forEach(sdk.groups, (g) => {
       // ricerca i valori che sono presenti solo in due celle allineate
-      const couples: Dictionary<string[]> = _reduce(g?.availableOnCells || {}, (res, cids, k) => {
-        const ids = _keys(cids||{});
-        if (ids.length === 2 && getAlignment(ids[0], ids[1]) !== PlaySudokuCellAlignment.none) res[k] = ids;
-        return res;
-      }, <Dictionary<string[]>>{});
+      const couples = getGroupCouples(g, (ids) => getAlignment(ids[0], ids[1]) !== PlaySudokuCellAlignment.none);
       // l'algoritmo è applicato se fra tutte le coppie trovate, almeno una
       // permette di eliminare valori possibili da altre celle
       _forEach(couples,(cp, v) => {
@@ -55,7 +45,10 @@ export class AlignmentOnGroupAlgorithm extends Algorithm implements PlayAlgorith
         groups.forEach(g =>
           g?.cells.forEach(c => {
             const removed = _remove(c.availables, av => !_includes(cp, c.id) && av === v);
-            if (removed.length > 0) applied = true;
+            if (removed.length > 0) {
+              addLine(description, `On cell "${c.id}" the possible values [${removed.join(',')}] have been removed`);
+              applied = true;
+            }
           }));
       });
     });
@@ -63,6 +56,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm implements PlayAlgorith
     return new AlgorithmResult({
       algorithm: this.id,
       applied,
+      description,
       cells: _keys(cells)
     });
   }

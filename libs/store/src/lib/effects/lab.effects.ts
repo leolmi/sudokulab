@@ -3,11 +3,9 @@ import { Location } from '@angular/common';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { SudokuStore } from '../sudoku-store';
-import * as SudokuActions from '../actions';
-import * as GeneratorActions from '../actions';
 import { concatMap, debounceTime, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import * as SudokuSelectors from '../selectors';
-import * as GeneratorSelectors from '../selectors';
+import * as SudokuActions from '../actions';
 import {
   Algorithms,
   applyAlgorithm,
@@ -17,18 +15,20 @@ import {
   clear,
   getSchemaName,
   isValidValue,
+  loadValues,
   MessageType,
   moveOnDirection,
   PlaySudoku,
   resetAvailables,
   saveUserSetting,
+  SDK_PREFIX,
   Solver,
   solveStepToCell,
   Sudoku,
   SudokuInfo,
-  SudokuMessage
+  SudokuMessage, toggleValue
 } from '@sudokulab/model';
-import { cloneDeep as _clone } from 'lodash';
+import { cloneDeep as _clone, extend as _extend } from 'lodash';
 import { saveAs } from 'file-saver';
 import { Router } from '@angular/router';
 
@@ -49,6 +49,24 @@ export class LabEffects {
   loadSudoku$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.loadSudoku),
     concatMap((a) => [SudokuActions.setActiveSudoku({ active: a.sudoku?._id||0 })])
+  ));
+
+  loadSudokuRequest$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.loadSudokuRequest),
+    filter(a => !!a?.sudoku),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    concatMap(([a, sdk]) => {
+      if (a.onlyValues) {
+        if (!sdk) return [];
+        const changes = _clone(sdk);
+        loadValues(changes, a.sudoku.values);
+        return [
+          SudokuActions.updateSudoku({ changes }),
+          SudokuActions.checkState()];
+      }
+      return [SudokuActions.loadSudoku({ sudoku: a.sudoku })];
+    })
   ));
 
   activateSudoku$ = createEffect(() => this._actions$.pipe(
@@ -114,12 +132,26 @@ export class LabEffects {
       const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
       const cell = changes.cells[cid];
       if (!cell || cell.fixed) return [];
+      const prev = cell.value;
       let value = a.value;
       if (value === 'Delete') value = '';
-      const prev = cell.value;
-      cell.value = (value||'').trim();
-      if (!!prev && cell.value !== prev) resetAvailables(changes);
-      checkAvailables(changes);
+      if (!!sdk?.options.usePencil) {
+        cell.value = '';
+        if (!value) {
+          cell.pencil = [];
+        } else {
+          cell.pencil = toggleValue(cell.pencil, value);
+        }
+        if (!!prev && cell.value !== prev) {
+          resetAvailables(changes);
+          checkAvailables(changes);
+        }
+      } else {
+        cell.pencil = [];
+        cell.value = (value || '').trim();
+        if (!!prev && cell.value !== prev) resetAvailables(changes);
+        checkAvailables(changes);
+      }
       return [
         SudokuActions.updateSudoku({ changes }),
         SudokuActions.checkState()];
@@ -200,6 +232,7 @@ export class LabEffects {
       const info = new SudokuInfo();
       const result = solver.solve();
       if (result.unique) {
+        console.log(...SDK_PREFIX, 'schema uniq solved', result);
         const schema = result.unique.sdk.sudoku;
         message = new SudokuMessage({
           message: 'Sudoku successfully solved!',
@@ -226,6 +259,7 @@ export class LabEffects {
         message: 'Sudoku has no valid result!',
         type: MessageType.error
       });
+      console.log(...SDK_PREFIX, 'no valid result', result);
       return [SudokuActions.setActiveMessage({ message })];
     })
   ));
@@ -254,23 +288,34 @@ export class LabEffects {
   ));
 
   stepInfo$ = createEffect(() => this._actions$.pipe(
-    ofType(GeneratorActions.stepInfo),
+    ofType(SudokuActions.stepInfo),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) => {
       const info = solveStepToCell(sdk, [Algorithms.tryNumber])
-      return [GeneratorActions.setStepInfo({ info })];
+      return [SudokuActions.setStepInfo({ info })];
     })
   ));
 
   updateOptions$ = createEffect(() => this._actions$.pipe(
-    ofType(GeneratorActions.updateSchemasOptions),
+    ofType(SudokuActions.updateSchemasOptions),
     debounceTime(2000),
-    concatMap(() => [GeneratorActions.saveUserSettings()])
+    concatMap(() => [SudokuActions.saveUserSettings()])
+  ));
+
+  updatePlayerOptions$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.updatePlayerOptions),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    concatMap(([a, sdk]) => {
+      if (!sdk) return [];
+      const changes = { _id: sdk._id, options: _clone(sdk.options) };
+      _extend(changes.options, a.changes);
+      return [SudokuActions.updateSudoku({ changes })];
+    })
   ));
 
   saveUserSettings$ = createEffect(() => this._actions$.pipe(
-    ofType(GeneratorActions.saveUserSettings),
-    withLatestFrom(this._store.select(GeneratorSelectors.selectActiveSchemasOptions)),
+    ofType(SudokuActions.saveUserSettings),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSchemasOptions)),
     map(([a, options]) => saveUserSetting('lab.schemasOptions', options))
   ), { dispatch: false });
 

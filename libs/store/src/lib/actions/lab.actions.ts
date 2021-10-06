@@ -1,5 +1,5 @@
 import {createAction, props} from "@ngrx/store";
-import { PlaySudoku, SchemasOptions, SolveStepResult, Sudoku } from '@sudokulab/model';
+import { PlaySudoku, PlaySudokuOptions, SchemasOptions, SolveStepResult, Sudoku } from '@sudokulab/model';
 
 export const setActiveSudoku = createAction(
   '[SudokuPlay.lab] set the active sudoku',
@@ -9,6 +9,11 @@ export const setActiveSudoku = createAction(
 export const setActiveCell = createAction(
   '[SudokuPlay.lab] set the active cell',
   props<{ id: string }>()
+);
+
+export const loadSudokuRequest = createAction(
+  '[SudokuPlay.lab] raise request to load a sudoku',
+  props<{ sudoku: Sudoku, onlyValues?: boolean }>()
 );
 
 export const loadSudoku = createAction(
@@ -72,6 +77,11 @@ export const dowloadSchema = createAction(
 export const updateSchemasOptions = createAction(
   '[SudokuPlay.lab] update current schemas options',
   props<{ changes: Partial<SchemasOptions> }>()
+);
+
+export const updatePlayerOptions = createAction(
+  '[SudokuPlay.lab] update current player options',
+  props<{ changes: Partial<PlaySudokuOptions> }>()
 );
 
 export const setStepInfo = createAction(

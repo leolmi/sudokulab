@@ -5,13 +5,18 @@ export const featureName = 'sudoku';
 export const SUDOKU_DYNAMIC_VALUE = 'x';
 export const SUDOKU_EMPTY_VALUE = '0';
 export const SUDOKU_DEFAULT_RANK = 9;
+export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
+
 
 export const SUDOKU_COMPACT_WIDTH = 1450;
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
-
+export const SUDOKULAB_DEBUG_KEY = 'SUDOKULAB-DEBUG-STATUS';
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
 
-export const SDK_PREFIX = ['%cSUDOKULAB', 'color:orangered;'];
+export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];
+export const SDK_PREFIX_DEBUG = ['%cSUDOKULAB', 'color:#ff4081;'];
+export const SDK_PREFIX_W = ['\u001b[34m[SUDOKULAB]\u001b[0m'];
+
 
 export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
   ArrowDown: MoveDirection.down,

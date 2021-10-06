@@ -1,5 +1,7 @@
 .options-container {
-  width: 1000px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 ::ng-deep {
@@ -7,5 +9,25 @@
     .options-container {
       padding: 20px;
     }
+  }
+}
+
+.sudokulab-page-options {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  .options-container {
+    padding: 40px;
+  }
+}
+
+.options-group {
+  padding: 24px 0 24px 24px;
+  border: rgba(10,10,10,.1) 1px solid;
+  margin-bottom: 24px;
+  .options-group-title {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 16px;
   }
 }

@@ -1,41 +1,69 @@
-import { Algorithm, PlayAlgorithm } from '../Algorithm';
+import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
+import { Dictionary } from '@ngrx/entity';
+import { forEach as _forEach, keys as _keys, reduce as _reduce, remove as _remove, includes as _includes } from 'lodash';
+import { getGroupCouples } from '../logic';
+import { getGroups } from '../../sudoku.helper';
+import { addLine } from '../../global.helper';
 
 export const TWINS_ALGORITHM = 'Twins';
 
 /**
- * ALGORITMO (OBSOLETO)
+ * ALGORITMO
+ * (OBSOLETO: non viene mai richiamato poiché l'algoritmo "AlignmentOnGroup" ne preclude l'utilizzo)
  * Gemelli
  *
  * se all'interno di un gruppo due celle possono contenere la stessa coppia di valori
- * allora posso escludere questi valori da tutte le altre celle e, se generano allineamento,
- * escluderle anche dai gruppi intesecanti
+ * allora posso escludere questi valori da tutte le altre celle
  */
-export class TwinsAlgorithm extends Algorithm implements PlayAlgorithm {
-  constructor(a?: Partial<TwinsAlgorithm>) {
-    super(a);
-    this.name = 'Twins in group';
-    this.id = TWINS_ALGORITHM;
-  }
-  id: string;
-  name: string;
+export class TwinsAlgorithm extends Algorithm {
+  id = TWINS_ALGORITHM;
+  name = 'Twins in group';
+  icon = 'bookmarks';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
+    let applied = false;
+    let description = '';
 
-    sdk.couples
+    _forEach(sdk.groups, (g) => {
+      // ricerca i valori che sono presenti solo in due celle
+      //  availableOnCells:  { '2': { '0.1': true, '0.5': true }  }
+      //  couples: { '2': ['0.1', '0.5'] }
+      const couples = getGroupCouples(g);
+      // trasforma le coppie in una mappa
+      // couples_map: { '0.1|0.2': ['2'] }
+      // in tal modo si evidenziano le coppie che hanno due valori
+      const couples_map = _reduce(couples, (inv, ids, av) => {
+        const id = (ids || []).join('|');
+        inv[id] = inv[id] || [];
+        (inv[id] || []).push(av);
+        return inv;
+      }, <Dictionary<string[]>>{});
 
-    // _forEach(sdk.groups, (g) => {
-    //   const twins: Dictionary<PlaySudokuCell[]> = {};
-    //   if ((g?.couples || []).length > 0) {
-    //     (g?.couples || []).forEach(c => {
-    //       const twin = (g?.couples || []).find(cp => cp.id !== c.id && _isEqual(cp.availables, c.availables));
-    //       if (twin && !twins[twin.id] && !twins[c.id]) twins[c.id] = [c, twin];
-    //     });
-    //   }
-    // });
+      // ricerca quindi le coppie di celle che possono contenere i due numeri
+      const couple = _keys(couples_map).find(ids => (couples_map[ids] || []).length === 2);
+      if (!!couple) {
+        // elimina la coppia di valori dagli availables delle altre celle presenti
+        // nei gruppi comuni alle celle della coppia
+        const ids = couple.split('|');
+        const values = couples_map[couple];
+        getGroups(sdk, ids).forEach(g =>
+          g.cells.forEach(gc => {
+            if (!_includes(ids, gc.id)) {
+              const removed = _remove(gc.availables, v => _includes(values, v));
+              if (removed.length > 0) {
+                addLine(description, `On cell "${gc.id}" the possible values [${removed.join(',')}] have been removed`);
+                applied = true;
+              }
+            }
+          }));
+      }
+    });
 
     return new AlgorithmResult({
-      algorithm: this.id
+      algorithm: this.id,
+      applied,
+      description
     });
   }
 }

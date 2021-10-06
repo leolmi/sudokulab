@@ -1,4 +1,6 @@
 import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
+import { BehaviorSubject } from 'rxjs';
+import { isDebugMode, setDebugMode } from '@sudokulab/model';
 
 @Component({
   selector: 'sudokulab-options-page',
@@ -6,9 +8,20 @@ import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
   styleUrls: ['./options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class OptionsComponent implements OnDestroy {
+export class OptionsComponent  {
+  isDebugMode$: BehaviorSubject<boolean>;
+  showAvailable$: BehaviorSubject<boolean>;
+
   constructor() {
+    this.isDebugMode$ = new BehaviorSubject<boolean>(isDebugMode());
+    this.showAvailable$ = new BehaviorSubject<boolean>(false);
   }
-  ngOnDestroy() {
+
+  setDebugMode(e: any) {
+    setDebugMode(e.checked);
+  }
+
+  apply(e: any, target: string) {
+
   }
 }

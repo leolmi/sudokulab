@@ -5,11 +5,13 @@ import {
   extend as _extend,
   forEach as _forEach,
   includes as _includes,
+  intersection as _intersection,
   isArray as _isArray,
   isString as _isString,
   keys as _keys,
-  remove as _remove,
-  random as _random
+  random as _random,
+  reduce as _reduce,
+  remove as _remove
 } from 'lodash';
 import { EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
 import {
@@ -19,10 +21,19 @@ import {
   TRY_NUMBER_ALGORITHM,
   TryNumberAlgorithm
 } from './lib/Algorithms';
-import { PlayAlgorithm } from './lib/Algorithm';
+import { Algorithm } from './lib/Algorithm';
 import { CellInfo } from './lib/CellInfo';
 import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './lib/consts';
-import { calcDifficulty, EditSudoku, EditSudokuOptions, SudokuInfo } from '.';
+import {
+  calcDifficulty,
+  EditSudoku,
+  EditSudokuCell,
+  EditSudokuGenerationMap,
+  EditSudokuGroup,
+  EditSudokuOptions,
+  PlaySudokuGroup,
+  SudokuInfo
+} from '.';
 import { Dictionary } from '@ngrx/entity';
 import { SudokuSolution } from './lib/SudokuSolution';
 import { getHash } from './global.helper';
@@ -36,25 +47,38 @@ export const isValue = (v: string, acceptX = false): boolean => {
   return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || v !== SUDOKU_DYNAMIC_VALUE);
 }
 
+export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap): boolean => {
+  if (!gmap) return !!cell?.fixed && cell.value !== SUDOKU_DYNAMIC_VALUE;
+  return !!cell?.fixed && !gmap.cellsX[cell.id]?.isValueX;
+}
+
+
+const _getGroupCellValuesMap = (g: PlaySudokuGroup|EditSudokuGroup): Dictionary<string> => {
+  return _reduce(g.cells, (m, c) => {
+    if (isValue(c.value)) m[c.value] = `${m[c.value] || ''}${c.id}`;
+    return m;
+  }, <Dictionary<string>>{});
+}
+
 /**
  * aaplica la regola base del sudoku:
  * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
  * @param sdk
+ * @param resetBefore
  */
 export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefore = false) => {
   if (!sdk) return;
+  const gmap: EditSudokuGenerationMap|undefined = (<EditSudoku>sdk).generationMap;
   if (resetBefore) {
-    _forEach(sdk.cells, (c) => c ? c.availables = (c.fixed ? [] : getAvailables(getRank(sdk))) : null);
+    _forEach(sdk.cells, (c) => c ? c.availables = (isFixedNotX(c, gmap) ? [] : getAvailables(getRank(sdk))) : null);
   }
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     // vettore valori di gruppo
-    const values: Dictionary<string> = {};
-    g.cells.forEach(c => {
-      if (isValue(c.value)) values[c.value] = `${values[c.value]||''}${c.id}`;
-    });
+    const values = _getGroupCellValuesMap(g);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
-    g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
+    // g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
+    g.cells.forEach(c => _remove(c.availables, av => av !== c.value && !!values[av]));
   });
 }
 
@@ -109,7 +133,7 @@ export const getLinesGroups = (rank: number|undefined): {[id: number]: boolean} 
   return res;
 }
 
-const _algorithms: PlayAlgorithm[] = [];
+const _algorithms: Algorithm[] = [];
 
 const _checkAlgorithms = () => {
   if (_algorithms.length<1) {
@@ -126,7 +150,7 @@ export const getAlgorithms = (exclude: string[] = []) => {
   return _algorithms.filter(a => !_includes(exclude, a.id));
 };
 
-export const getAlgorithm = (code: string): PlayAlgorithm|undefined => {
+export const getAlgorithm = (code: string): Algorithm|undefined => {
   _checkAlgorithms();
   return _algorithms.find(a => a.id === code);
 }
@@ -153,10 +177,24 @@ export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined, handler: (c
   }
 }
 
+
+export const isSolved = (sdk: PlaySudoku): boolean => {
+  return !sdk.state.error && sdk.state.complete;
+}
+
 export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
   let values = '';
   traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || SUDOKU_EMPTY_VALUE}`)
   return values;
+}
+
+export const loadValues = (sdk: PlaySudoku|undefined, values: string): void => {
+  if (!sdk || (values || '').length < getRank(sdk)) return;
+  _forEach(sdk.cells, c => {
+    const v = values.charAt(c?.position||0);
+    if (!!c) c.value = isValue(v) ? v : '';
+  });
+  applySudokuRules(sdk, true);
 }
 
 export const getAvailables = (rank: number|undefined) =>
@@ -183,6 +221,18 @@ export const resetAvailables = (sdk: PlaySudoku|undefined) => {
   _forEach(sdk?.cells||{}, (c) => {
     if (!!c) c.availables = c.fixed ? [] : getAvailables(sdk?.sudoku?.rank);
   });
+}
+
+export const toggleValue = (vls: string[], value: string): string[] => {
+  const values = _clone(vls);
+  const pos = values.indexOf(value);
+  if (pos >= 0) {
+    values.splice(pos, 1);
+    return values;
+  }
+  values.push(value);
+  values.sort();
+  return values;
 }
 
 export const isDirectionKey = (direction: string): boolean => {
@@ -314,4 +364,24 @@ export const getRandomSchema = (schemas: PlaySudoku[]): PlaySudoku => {
   const tot = (schemas||[]).length;
   const index = _random(0, tot);
   return schemas[index];
+}
+
+/**
+ * Restituisce l'elenco dei gruppi a cui appartengono contenmporaneamente tutte le celle passate
+ * @param sdk
+ * @param cids
+ */
+export const getGroups = (sdk: PlaySudoku, cids: string[]): PlaySudokuGroup[] => {
+  const gg: string[][] = [];
+  (cids||[]).forEach(cid => {
+    const idi = decodeCellId(cid);
+    gg.push([
+      groupId(SudokuGroupType.row, idi.row),
+      groupId(SudokuGroupType.column, idi.col),
+      groupId(SudokuGroupType.square, idi.sqr)]);
+  });
+  const groups = _intersection(...gg);
+  return <PlaySudokuGroup[]>groups
+    .map(gid => sdk.groups[gid])
+    .filter(g => !!g);
 }

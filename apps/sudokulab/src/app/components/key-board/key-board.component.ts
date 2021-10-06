@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { getAvailables, getValues, isValue, LabFacade, PlaySudokuCell, SudokuFacade } from '@sudokulab/model';
+import { getAvailables, getValues, isValue, LabFacade, PlaySudokuCell, SudokuFacade, use } from '@sudokulab/model';
 import { DestroyComponent } from '../DestroyComponent';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -16,6 +16,7 @@ export class KeyBoardComponent extends DestroyComponent implements OnDestroy {
   numbers$: Observable<string[]>;
   status$: Observable<Dictionary<boolean>>;
   isCellSelected$: Observable<boolean>;
+  isPencil$: Observable<boolean>;
 
   constructor(private _lab: LabFacade, _sudoku: SudokuFacade) {
     super(_sudoku);
@@ -39,10 +40,18 @@ export class KeyBoardComponent extends DestroyComponent implements OnDestroy {
         });
         return status;
       }));
+
+    this.isPencil$ = _lab.selectActiveSudoku$.pipe(
+      takeUntil(this._destroy$),
+      map(sdk => !!sdk?.options.usePencil));
   }
 
   clickOnNumber(num: string) {
     if (num === 'x') num = ' ';
     this._lab.setValue(num);
+  }
+
+  togglePencil() {
+    use(this.isPencil$, pencil => this._lab.updatePlayerOptions({ usePencil: !pencil }));
   }
 }

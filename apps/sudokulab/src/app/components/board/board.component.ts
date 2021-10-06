@@ -43,7 +43,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
   rows$: Observable<number[]>;
   cols$: Observable<number[]>;
   showPencil$: Observable<boolean>;
-  showAvailables$: Observable<boolean>;
+  showAvailable$: Observable<boolean>;
   grline$: Observable<{[id: number]: boolean}>;
   stepInfo$: Observable<SolveStepResult|undefined>;
   highlights$: Observable<Dictionary<boolean>>;
@@ -66,7 +66,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
       getSchemaCellStyle(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
     this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)));
     this.showPencil$ = this.playSudoku$.pipe(map(s => !!s?.options.usePencil));
-    this.showAvailables$ = this.playSudoku$.pipe(map(s => !s?.options.usePencil && !!s?.options.showAvailables));
+    this.showAvailable$ = this.playSudoku$.pipe(map(s => !s?.options.usePencil && !!s?.options.showAvailables));
     this.highlights$ = this.stepInfo$.pipe(map(r => getHighlight(r)));
     this.highlightsCell$ = this.stepInfo$.pipe(map(r => getCellHighlight(r)));
 

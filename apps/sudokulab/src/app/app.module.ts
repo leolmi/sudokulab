@@ -53,6 +53,8 @@ import { MatRippleModule } from '@angular/material/core';
 import { SchemasItemComponent } from './components/schemas/schemas-item.component';
 import { KeyBoardComponent } from './components/key-board/key-board.component';
 import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.component';
+import { HelpManifest } from './pages/help/help.manifest';
+import { HelpComponent } from './pages/help/help.component';
 
 @NgModule({
   declarations: [
@@ -73,7 +75,8 @@ import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.
     GeneratorToolbarComponent,
     KeyBoardComponent,
     SchemaNamePipe,
-    SudokuSchemaComponent
+    SudokuSchemaComponent,
+    HelpComponent
   ],
   imports: [
     BrowserModule,
@@ -114,6 +117,9 @@ import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.
       }, {
         path: `${AvailablePages.options}`,
         component: OptionsComponent
+      }, {
+        path: `${AvailablePages.help}`,
+        component: HelpComponent
       }],
       { useHash: true }
     )
@@ -127,6 +133,7 @@ import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.
     { provide: OptionsFacade, useClass: OptionsContext },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
     { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
+    { provide: SudokulabPage, useClass: HelpManifest, multi: true },
     { provide: SudokulabPage, useClass: OptionsManifest, multi: true }
   ],
   bootstrap: [AppComponent],

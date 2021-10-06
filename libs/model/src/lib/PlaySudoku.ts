@@ -7,26 +7,27 @@ import { Dictionary } from '@ngrx/entity';
 import { PlaySudokuState } from './PlaySudokuState';
 import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku.helper';
 import { SUDOKU_EMPTY_VALUE } from './consts';
+import { guid } from '../global.helper';
 
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
+    this.id = guid();
     this._id = ps?.sudoku?._id || 0;
     this.cells = {};
     this.groups = {};
     this.groupsForCell = {};
-    this.couples = {};
     Object.assign(this, ps || {});
     this.options = new PlaySudokuOptions(ps?.options);
     this.state = new PlaySudokuState(ps?.state);
     _loadSudoku(this);
   }
+  id: string;
   _id: number;
   options: PlaySudokuOptions;
   sudoku?: Sudoku;
   cells: Dictionary<PlaySudokuCell>;
   groups: Dictionary<PlaySudokuGroup>;
   groupsForCell: Dictionary<(PlaySudokuGroup|undefined)[]>;
-  couples: Dictionary<PlaySudokuCell[]>;
   state: PlaySudokuState;
 }
 

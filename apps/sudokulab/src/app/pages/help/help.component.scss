@@ -1,0 +1,48 @@
+[evidence] {
+  border-left: #3f51b5 4px solid;
+  background: rgba(10,10,10,.05);
+  padding: 20px;
+}
+
+[ndr] {
+  opacity: .5;
+  font-style: italic;
+}
+
+[underline] {
+  text-decoration: underline;
+}
+
+.help-content {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-container {
+  text-align: center;
+  .help-image {
+    max-width: 100%;
+    margin: 20px 0;
+    border: rgba(10, 10, 10, .3) 1px solid;
+  }
+}
+
+.sudokulab-page-help {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  .help-content {
+    padding: 40px;
+  }
+}
+
+.schema-t {
+  padding: 5px;
+  background-color: #ff4081;
+  color: whitesmoke;
+  border-radius: 50%;
+  font-size: 24px;
+  margin-right: 10px;
+}
+

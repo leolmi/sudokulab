@@ -2,7 +2,17 @@ import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild } fro
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getHash, MessageType, Sudoku, SudokuFacade, SudokuMessage, use } from '@sudokulab/model';
+import {
+  getHash,
+  MessageType,
+  Sudoku,
+  SudokuFacade,
+  SudokuMessage,
+  UploadDialogOptions,
+  UploadDialogResult,
+  use
+} from '@sudokulab/model';
+
 
 @Component({
   selector: 'sudokulab-upload-dialog',
@@ -15,11 +25,13 @@ export class UploadDialogComponent {
   text$: BehaviorSubject<string>;
   textInfo$: Observable<string>;
   valid$: Observable<boolean>;
+  onlyValues$: BehaviorSubject<boolean>;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
+  constructor(@Inject(MAT_DIALOG_DATA) public data: UploadDialogOptions,
               private _sudoku: SudokuFacade,
               private _dialogRef: MatDialogRef<UploadDialogComponent>) {
     this.text$ = new BehaviorSubject<string>('');
+    this.onlyValues$ = new BehaviorSubject<boolean>(false);
 
     const textLenght$ = this.text$.pipe(map(txt => (txt || '').replace(/\s/g, '').length));
     this.textInfo$ = textLenght$.pipe(map(ln => `${ln} characthers`));
@@ -28,7 +40,7 @@ export class UploadDialogComponent {
 
   private _upload(sdk: Sudoku) {
     this._sudoku.upload(false);
-    this._dialogRef.close(sdk);
+    this._dialogRef.close(new UploadDialogResult(sdk, this.onlyValues$.getValue()));
   }
 
   applyText(e: any) {
@@ -45,6 +57,10 @@ export class UploadDialogComponent {
       const sudoku = new Sudoku({ fixed });
       this._upload(sudoku);
     });
+  }
+
+  onlyValuesChanged(e: any) {
+    this.onlyValues$.next(e.checked);
   }
 
   private _readFile(file: any) {

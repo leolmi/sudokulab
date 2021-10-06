@@ -1,8 +1,10 @@
-import { Algorithm, PlayAlgorithm } from '../Algorithm';
+import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { find as _find, keys as _keys } from 'lodash';
 import { checkAvailables } from '../logic';
+import { isValue } from '../../sudoku.helper';
+import { PlaySudokuCell } from '../PlaySudokuCell';
 
 export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
 
@@ -12,19 +14,15 @@ export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
  *
  * all'interno di un gruppo esiste solo una cella per il valore
  */
-export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm {
-  constructor(a?: Partial<OneCellForValueAlgorithm>) {
-    super(a);
-    this.name = 'One cell for value';
-    this.id = ONE_CELL_FOR_VALUE_ALGORITHM;
-    this.icon = 'crop_free';
-  }
-  id: string;
-  name: string;
-  icon: string;
+export class OneCellForValueAlgorithm extends Algorithm {
+  id = ONE_CELL_FOR_VALUE_ALGORITHM;
+  name = 'One cell for value';
+  icon = 'crop_free';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    let ocid: string = '';
-    let ocvl: string = '';
+    let ocid = '';
+    let ocvl = '';
+    let applied = false;
+    let cell: PlaySudokuCell|undefined = undefined;
     const xg = _find(sdk.groups, (g) => {
       const ov = _find(g?.availableOnCells||{}, (vls, v) => {
         ocvl = v;
@@ -35,15 +33,22 @@ export class OneCellForValueAlgorithm extends Algorithm implements PlayAlgorithm
     });
 
     if (!!xg) {
-      const cell = sdk.cells[ocid];
-      if (cell) cell.value = ocvl;
-      checkAvailables(sdk);
+      cell = sdk.cells[ocid];
+      if (cell && !isValue(cell.value)) {
+        applied = true;
+        cell.value = ocvl;
+        checkAvailables(sdk);
+      }
     }
 
     return new AlgorithmResult({
       algorithm: this.id,
-      applied: !!xg,
+      applied,
+      description: getDescription(applied, cell),
       cells: [ocid]
     });
   }
 }
+
+const getDescription = (applied: boolean, cell?: PlaySudokuCell): string =>
+  (cell && applied) ? `Cell "${cell.id}" has been assigned the value "${cell.value}"` : ''

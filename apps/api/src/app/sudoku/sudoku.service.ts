@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { validate } from './sudoku.logic';
-import { Sudoku } from '@sudokulab/model';
+import { SDK_PREFIX, SDK_PREFIX_W, Sudoku } from '@sudokulab/model';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -28,7 +28,7 @@ export class SudokuService implements OnModuleInit {
   }
 
   onModuleInit(): any {
-    console.log('check static schemas...');
+    console.log(...SDK_PREFIX_W, 'check static schemas...');
     const schemasFolder = path.resolve(__dirname, `./assets/schemas`);
     fs.readdir(schemasFolder, (err, files) => {
       (files||[])
@@ -39,7 +39,7 @@ export class SudokuService implements OnModuleInit {
             if (!!schema) {
               this.sudokuModel
                 .updateOne({ _id: schema._id }, { $setOnInsert: schema }, { upsert: true })
-                .then(resp => resp.upsertedCount>0 ? console.log(`The schema "${schema._id}" has been successfully added!`) : null);
+                .then(resp => resp.upsertedCount>0 ? console.log(...SDK_PREFIX_W, `The schema "${schema._id}" has been successfully added!`) : null);
             }
           } catch (err) {
             console.error('Cannot deserialize schema data!', file);

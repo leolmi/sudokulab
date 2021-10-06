@@ -25,6 +25,10 @@
   </div>
 </div>
 <mat-dialog-actions>
+  <mat-slide-toggle class="options-editor"
+                    *ngIf="!!data?.allowOnlyValues"
+                    [checked]="onlyValues$|async"
+                    (change)="onlyValuesChanged($event)">only values</mat-slide-toggle>
   <div fxFlex></div>
   <button mat-stroked-button
           (click)="upload()"

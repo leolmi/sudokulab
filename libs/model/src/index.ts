@@ -38,6 +38,9 @@ export * from './lib/OptionsFacade';
 export * from './lib/PrintFacade';
 export * from './lib/HelpFacade';
 
+export * from './lib/UploadDialogOptions';
+export * from './lib/UploadDialogResult';
+
 export * from './lib/services';
 
 export * from './sudoku.helper';

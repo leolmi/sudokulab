@@ -10,7 +10,7 @@ import {
   keys as _keys
 } from 'lodash';
 import { SudokulabWindowService } from './lib/services';
-import { SDK_PREFIX, SUDOKU_COMPACT_WIDTH, SUDOKULAB_SETTINGS_KEY } from './lib/consts';
+import { SDK_PREFIX, SUDOKU_COMPACT_WIDTH, SUDOKULAB_DEBUG_KEY, SUDOKULAB_SETTINGS_KEY } from './lib/consts';
 
 export function guid(): string {
   return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, c => {
@@ -81,3 +81,11 @@ export const saveUserSetting = (path: string, data: any) => {
     console.warn(SDK_PREFIX, 'Cannot save user data!', err);
   }
 }
+
+export const addLine = (original: string, line: string, separator = '\n'): string => {
+  return original ? `${original}${separator}${line}` : line;
+}
+
+export const setDebugMode = (on = true) => localStorage.setItem(SUDOKULAB_DEBUG_KEY, on ? 'active' : '');
+export const isDebugMode = () => localStorage.getItem(SUDOKULAB_DEBUG_KEY) === 'active';
+export const debug = (handler: () => any): void => isDebugMode() ? handler() : null;

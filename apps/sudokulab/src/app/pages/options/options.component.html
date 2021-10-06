@@ -1,12 +1,22 @@
-<div class="sudokulab-page" fxLayout="row">
-  <div class="tools tools-left" fxFlex>
+<div class="sudokulab-page sudokulab-page-options">
 
-  </div>
   <div class="options-container" fxLayout="column">
+    <div class="options-group">
+      <div class="options-group-title">General</div>
+      <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
+        <mat-slide-toggle [checked]="isDebugMode$|async"
+                          (change)="setDebugMode($event)">Debug active</mat-slide-toggle>
+      </div>
+    </div>
 
-    SOON...
-  </div>
-  <div class="tools tools-right" fxFlex>
+    <div class="options-group">
+      <div class="options-group-title">Player</div>
+      <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
+        <mat-slide-toggle [checked]="showAvailable$|async"
+                          disabled="true"
+                          (change)="apply($event, 'showAvailable')">Show available numbers on cell</mat-slide-toggle>
+      </div>
+    </div>
 
   </div>
 </div>

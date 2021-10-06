@@ -26,7 +26,7 @@ export class GeneratorComponent extends GeneratorBaseComponent implements OnDest
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
     _sudoku
       .onUpload(UploadDialogComponent, this._destroy$)
-      .subscribe(sdk => !!sdk ? _generator.loadGeneratorSchema(sdk) : null);
+      .subscribe(res => !!res ? _generator.loadGeneratorSchema(res.sdk) : null);
 
     this.boardStyle$ = combineLatest(this._resize$, this._element$)
       .pipe(map(([r, ele]) => getBoardStyle(ele)));

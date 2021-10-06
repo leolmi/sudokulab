@@ -28,6 +28,7 @@ export class SudokuEffects {
       const sdk: Sudoku = <Sudoku>_clone(a.schema);
       sdk._id = sdk._id || getHash(sdk.fixed);
       sdk.values = sdk.fixed;
+      (sdk.info?.algorithms || []).forEach(a => a.cases = []);
       return this._http.post<Sudoku>('/api/sudoku/check', sdk).pipe(
         switchMap((res) => {
           console.log('CHECK RESULT', res);

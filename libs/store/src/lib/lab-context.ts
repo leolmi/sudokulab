@@ -1,6 +1,6 @@
 import {
   LabFacade,
-  PlaySudoku,
+  PlaySudoku, PlaySudokuOptions,
   SchemasOptions,
   SolveStepResult,
   StepInfo,
@@ -16,6 +16,7 @@ import { SudokuStore } from './sudoku-store';
 import { Injectable } from '@angular/core';
 import { selectAllSudoku, selectHighlightCells } from './selectors';
 import { Dictionary } from '@ngrx/entity';
+import { loadSudokuRequest } from './actions';
 
 @Injectable()
 export class LabContext extends LabFacade {
@@ -34,8 +35,8 @@ export class LabContext extends LabFacade {
     this._store.dispatch(SudokuActions.setActiveCell({ id }));
   }
 
-  loadSudoku(sudoku: Sudoku) {
-    this._store.dispatch(SudokuActions.loadSudoku({ sudoku }));
+  loadSudoku(sudoku: Sudoku, onlyValues?: boolean) {
+    this._store.dispatch(SudokuActions.loadSudokuRequest({ sudoku, onlyValues }));
   }
 
   applyAlgorithm(algorithm: string) {
@@ -88,6 +89,10 @@ export class LabContext extends LabFacade {
 
   updateSchemasOptions(changes: Partial<SchemasOptions>) {
     this._store.dispatch(SudokuActions.updateSchemasOptions({ changes }));
+  }
+
+  updatePlayerOptions(changes: Partial<PlaySudokuOptions>) {
+    this._store.dispatch(SudokuActions.updatePlayerOptions({ changes }));
   }
 
   clesrHighlightCells() {

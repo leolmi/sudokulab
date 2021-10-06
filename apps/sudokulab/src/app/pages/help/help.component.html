@@ -1,1 +1,92 @@
+<div class="sudokulab-page sudokulab-page-help">
+  <div class="help-content">
+    <h1>Quando uno schema sudoku si può considerare <i>bello</i>?</h1>
+    <p>Appassionato di questo gioco di logica, questa è stata la domanda che mi ha fatto venire la voglia di capire di
+      più e sviluppare questa applicazione.</p>
+    <p>Risolutori di schemi ne esistono tantissimi on-line e farne uno è relativamente semplice. Ma, a mio avviso,
+      le cose interessanti sono queste:</p>
+    <ul>
+      <li>risolvere lo schema trovando un modo per valutarne la difficolta in maniera oggettiva;</li>
+      <li>trovare un modo per indicizzare gli schemi, quindi associare ad ogni schema possibile un identificativo univoco;</li>
+      <li>trovare una definizione di schema <i>bello</i>;</li>
+      <li>creare un generatore che, sulla base di opzioni e uno schema pensato anche solo in parte dall'utente,
+        possa creare sudoku <i>"belli"</i>;</li>
+    </ul>
+    <p>Per rispondere quindi alla domanda iniziale il primo passo è stato quello di fare il player e quindi un risolutore.</p>
+    <h1>Player</h1>
+    <div class="image-container">
+      <img class="help-image" src="assets/images/player_01.png" aria-label="sudokulab player">
+    </div>
+    <p>Il player mostra lo schema risolvibile dall'utente usando la tastiera (da pc) o il tastierino (da mobile).
+      È possibile aprire uno degli schemi presenti nell'elenco ordinato e filtrato.</p>
+    <p>Sulla sinistra la valutazione della difficoltà e l'elenco degli algoritmi utilizzati per la soluzione.</p>
+    <p>Quest'ultimo è l'aspetto penso più interessante del player/solver, ossia quello di ricercare una valutazione
+      oggettiva sulla base degli algoritmi utilizzati per risolverlo.</p>
+    <p evidence>Tutti gli schemi in elenco sono schemi a <b>soluzione unica</b>.</p>
+    <p>La lista degli schemi è ordinabile secondo il parametro <b>sortBy</b> che può essere:</p>
+    <ul>
+      <li>La difficoltà</li>
+      <li>L'ordine d'inserimento nel catalogo</li>
+    </ul>
+    <p>È possibile poi escludere dall'elenco tutti quelli schemi per i quali, al fine di risolverli, si è dovuto utilizzare
+      l'algoritmo <i>Try number</i>, ossia quello che utilizza il metodo <i>brutal force</i> per giungere all'obiettivo.</p>
+    <p>Quindi qui credo stia il fondamento della risposta per la ricerca dello schema più <i>bello</i>:</p>
+    <p evidence>Lo schema più difficile nel quale non si debba ricorrere al metodo <i>brutal force</i> per risolverlo,
+      rappresenta la sfida logica più interessante ossia, in effetti, <b>lo schema più bello</b>!
+      <br><span ndr>(opinione personale dell'autore)</span></p>
 
+    <h1>Gli algoritmi di risoluzione</h1>
+    <p>Il primo passo quindi per sviluppare il risolutore di schemi sudoku è stato quello di implementare un motore di
+      risoluzione che utilizzasse una serie di algoritmi classificabili, la cui applicazione contribuisse a definire una
+      valutazione finale quindi un grado di difficoltà.</p>
+    <p>Si sono individuati quindi 4 algoritmi al momento:</p>
+    <ul>
+      <li><b>One Cell For Value</b>: <i>esiste una sola cella nel gruppo che possa ospitare quel determinato valore</i>.<br>
+        Rappresenta l'approccio più basico e più immediato al quale è stato associato un punteggio minimo;</li>
+      <li><b>One Value For Cell</b>: <i>esiste un solo valore possibile per la cella nel gruppo</i>.<br>
+        Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un
+        punteggio più alto rispetto al precedente;</li>
+      <li><b>Alignment on group</b>: <i>quando due celle all'interno di un gruppo sono le uniche a poter contenere un
+        determinato valore e generano un allineamento che coinvolge altri gruppi, in questi secondi è possibile escludere
+        quel valore da quelli possibili</i>.<br>Un po' più complesso del precedente anche perché non risolve un valore di
+        una cella ma contribuisce con i precedenti. Per questo ha un punteggio ancora più alto;</li>
+      <li><b>Try Number</b>: <i>se una determinata cella può ospitare N numeri, si divide la soluzione in N schemi, uno
+        per ogni valore</i>.<br>Come si è già detto, rappresenta l'applicazione del metodo <i>brutal force</i>.
+        Questo algoritmo sceglie la prima cella con il numero di valori possibili più basso. Ovviamente rappresenta la
+        difficolta maggiore tra tutti gli algoritmi.</li>
+    </ul>
+    <p>Il risolutore quindi applica gli algoritmi visti in maniera sequenziale fino a raggiungere la soluzione ed ogni
+      algoritmo applicato incrementa il punteggio dello schema fino al raggiungimento di un valore che ne determina
+      la difficoltà.</p>
+    <p>Si è scelto poi di indicare gli schemi con una indicazione <b>TX</b> quando, per essere risolti, si è
+      ricorsi all'applicazione del <i>Try Number</i> per <i>X</i> volte.</p>
+    <p>Quindi uno schema <span class="schema-t">T3</span> è quello in cui si è ricorso tre volte all'utilizzo del
+      metodo <i>brutal-force</i>.</p>
+
+    <h1>Il generatore di schemi</h1>
+    <div class="image-container">
+      <img class="help-image" src="assets/images/generator_01.png" aria-label="sudokulab player">
+    </div>
+    <p>La generazione degli schemi prevede che l'utente possa definire una propria geometria delle celle fisse indicando
+      dei valori esatti o dei marker [ ? ] che saranno poi valorizzati dai cicli di risoluzione.</p>
+    <p>In tal modo la geometria può essere totalmente indicata dall'utennte, indicata solo parzialmente o demandata
+      totalmente al generatore. Indicando infatti un numenro di valori fissi maggiore di quelli inseriti, sarà la procedura
+      ad aggiungere i valori necessari fino ad arrivare al numero indicato nelle opzioni.</p>
+    <p>L'utente può quindi definire</p>
+    <ul>
+      <li><b>La tipologia di schema</b> ossia la dimensione. Al momento bloccata su <b>9x9</b>;</li>
+      <li><b>La simmetria</b> utilizzata solo per aggiungere i valori fissi dinamici;</li>
+      <li><b>Modalità di valorizzazione</b> cioè la logica con cui vengono valorizzati i valori fissi dinamici. Questa
+        può essere <i>sequential</i>, quindi la valorizzazione avviene in maniera sequenziale rispettando le regole del
+        sudoku, oppure <i>random</i> cioè applicando valori randomici tra quelli disponibili per le celle fisse dinamiche;</li>
+      <li><b>Numero di celle fisse</b></li>
+      <li><b>Range di difficoltà</b></li>
+      <li><b>Esclusione del metodo <i>brutal force</i></b></li>
+      <li><b>Modalità di conclusione</b> dove è possibile scegliere se terminare dopo che sono stati prodotti N schemi o
+        dopo un certo tempo oppure manualmente;</li>
+      <li><b>Massimo numero di split</b> che limita la divisione degli schemi nell'applicazione dell'algoritmo di
+        <i>Try Number</i></li>
+      <li><b>Massimo numero di cicli</b> che limita invece i cicli complessivi;</li>
+    </ul>
+  </div>
+</div>

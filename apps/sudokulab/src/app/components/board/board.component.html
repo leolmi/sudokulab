@@ -23,10 +23,10 @@
                 'highlight-cell': ((highlightsCell$|async)||{})[cell.id]
              }">
           <div class="cell-value" [ngClass]="{'pulse': ((highlightStep$|async)||{})[cell.id]}">{{cell?.value}}</div>
-          <div class="cell-pencil-values" *ngIf="!cell?.value && !!(showPencil$|async)">
+          <div class="cell-pencil-values" *ngIf="!cell?.value && !!!(showAvailable$|async)">
             <div class="cell-available-value" *ngFor="let pv of cell?.pencil">{{pv}}</div>
           </div>
-          <div class="cell-available-values" *ngIf="showAvailables$|async">
+          <div class="cell-available-values" *ngIf="showAvailable$|async">
             <div class="cell-available-value" *ngFor="let av of cell.availables">{{av}}</div>
           </div>
         </div>

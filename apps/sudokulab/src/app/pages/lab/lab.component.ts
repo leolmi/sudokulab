@@ -27,8 +27,8 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
               _sudoku: SudokuFacade) {
     super(_sudoku);
     _sudoku
-      .onUpload(UploadDialogComponent, this._destroy$)
-      .subscribe(sdk => !!sdk ? _lab.loadSudoku(sdk) : null);
+      .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true })
+      .subscribe(res => !!res ? _lab.loadSudoku(res.sdk, res.onlyValues) : null);
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
     this.topToolFlex$ = this.compact$.pipe(map(iscompact => iscompact ? 'none' : '50'));

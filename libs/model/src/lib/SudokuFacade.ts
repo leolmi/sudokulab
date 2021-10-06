@@ -5,6 +5,8 @@ import {SudokulabPage} from "./SudokulabPage";
 import { Dictionary } from '@ngrx/entity';
 import { Type } from '@angular/core';
 import { Sudoku } from './Sudoku';
+import { UploadDialogOptions } from './UploadDialogOptions';
+import { UploadDialogResult } from './UploadDialogResult';
 
 
 export abstract class SudokuFacade implements Facade {
@@ -19,7 +21,7 @@ export abstract class SudokuFacade implements Facade {
   abstract raiseError(err: any): void;
   abstract upload(open?: boolean): void;
   abstract fillDocuments(): void;
-  abstract onUpload(component: Type<any>, destroyer$: Observable<any>): Observable<Sudoku|any>;
+  abstract onUpload(component: Type<any>, destroyer$: Observable<any>, options?: UploadDialogOptions): Observable<UploadDialogResult|any>;
   abstract checkCompactStatus(): void;
   abstract saveUserSettings(): void;
 }

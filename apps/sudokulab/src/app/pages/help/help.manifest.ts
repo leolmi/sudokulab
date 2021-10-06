@@ -8,9 +8,5 @@ export class HelpManifest extends SudokulabPage {
   icon = 'help';
   buttons = [];
   title = 'Help';
-  execute = (facade: HelpFacade, code: string) => {
-    switch (code) {
-
-    }
-  }
+  execute = (facade: HelpFacade, code: string) => {}
 }

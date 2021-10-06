@@ -17,6 +17,7 @@ import { getSolutionSudoku, getValues } from '../../sudoku.helper';
 import { WorkingInfo } from '../WorkingInfo';
 import { Dictionary } from '@ngrx/entity';
 import { SDK_PREFIX } from '../consts';
+import { debug } from '../../global.helper';
 
 
 export class Generator {
@@ -92,7 +93,7 @@ export class Generator {
           this._cycles = 0;
         }
       } else {
-        console.log(...SDK_PREFIX, 'not resolved', getValues(this._workSdk));
+        debug(() => console.log(...SDK_PREFIX, 'not resolved', getValues(this._workSdk)));
       }
       // resetSchema(this._workSdk);
       // console.log(...SDK_PREFIX, 'resetted schema', _clone(this._workSdk.cells));
