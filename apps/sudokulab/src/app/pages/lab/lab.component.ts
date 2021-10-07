@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { getBoardStyle, getRandomSchema, LabFacade, SudokuFacade, use } from '@sudokulab/model';
+import { getBoardStyle, LabFacade, SudokuFacade, use } from '@sudokulab/model';
 import { DestroyComponent } from '../../components/DestroyComponent';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
@@ -44,8 +44,8 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
       .pipe(skip(1), take(1))
       .subscribe(schemas =>
         use(this._route.paramMap, gp => {
-          let id = parseInt(gp.get('id') || '0', 10) || getRandomSchema(schemas)?._id;
-          setTimeout(() => this._lab.setActiveSudoku(id), 250);
+          const id = parseInt(gp.get('id') || '0', 10);
+          setTimeout(() => id ? this._lab.setActiveSudoku(id) : this._sudoku.checkStatus(), 250);
         }));
   }
 }

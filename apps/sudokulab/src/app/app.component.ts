@@ -1,16 +1,19 @@
-import { AfterViewInit, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
   Facade,
   GeneratorFacade,
-  LabFacade, OptionsFacade, SUDOKU_AUTHOR_LINK,
-  SudokuFacade,
+  LabFacade,
+  OptionsFacade, setApplicationTheme,
+  SUDOKU_AUTHOR_LINK,
+  SudokuFacade, SUDOKULAB_DARK_THEME,
   SudokulabPage,
-  SudokulabPagesService, SudokulabWindowService,
+  SudokulabPagesService,
+  SudokulabWindowService,
   use
 } from '@sudokulab/model';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AvailablePages } from './model';
@@ -21,7 +24,7 @@ import { Dictionary } from '@ngrx/entity';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AppComponent implements AfterViewInit, OnDestroy {
   page$: Observable<SudokulabPage|undefined>;
   pages$: BehaviorSubject<SudokulabPage[]>;
   status$: Observable<Dictionary<boolean>>;
@@ -41,21 +44,21 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.status$ = _sudoku.selectPageStatus$;
     this.compact$ = _sudoku.selectIsCompact$;
 
+    _sudoku.fillDocuments();
+
     _sudoku.selectActiveMessage$
       .pipe(filter(a => !!a?.message))
       .subscribe(a => this._snack.open(a?.message||'unknown', undefined, {
         duration: 3000,
         panelClass: `message-type-${a?.type||'info'}`
       }));
+
+    _sudoku.selectTheme$.pipe(take(1)).subscribe(theme => setApplicationTheme(_window, theme));
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(e: any) {
     this._sudoku.checkCompactStatus();
-  }
-
-  ngOnInit() {
-    this._sudoku.fillDocuments();
   }
 
   ngAfterViewInit() {

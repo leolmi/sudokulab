@@ -48,11 +48,11 @@ export class TwinsAlgorithm extends Algorithm {
         const ids = couple.split('|');
         const values = couples_map[couple];
         getGroups(sdk, ids).forEach(g =>
-          g.cells.forEach(gc => {
-            if (!_includes(ids, gc.id)) {
-              const removed = _remove(gc.availables, v => _includes(values, v));
+          g.cells.forEach(gcid => {
+            if (!_includes(ids, gcid)) {
+              const removed = _remove(sdk.cells[gcid]?.availables||[], v => _includes(values, v));
               if (removed.length > 0) {
-                addLine(description, `On cell "${gc.id}" the possible values [${removed.join(',')}] have been removed`);
+                description = addLine(description, `On cell "${gcid}" the possible values [${removed.join(',')}] have been removed`);
                 applied = true;
               }
             }

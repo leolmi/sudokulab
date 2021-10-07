@@ -2,11 +2,12 @@ import { Injectable, Type } from '@angular/core';
 import {
   isCompact,
   MessageType,
-  Sudoku,
   SudokuFacade,
   SudokulabPage,
   SudokulabWindowService,
-  SudokuMessage, UploadDialogOptions, UploadDialogResult
+  SudokuMessage,
+  UploadDialogOptions,
+  UploadDialogResult
 } from '@sudokulab/model';
 import { Store } from '@ngrx/store';
 import { SudokuStore } from './sudoku-store';
@@ -26,6 +27,7 @@ export class SudokuContext extends SudokuFacade {
   selectActivePage$: Observable<SudokulabPage|undefined> = this._store.select(SudokuSelectors.selectActivePage);
   selectPageStatus$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectPageStatus);
   selectIsCompact$: Observable<boolean> = this._isCompact$.pipe(distinctUntilChanged());
+  selectTheme$: Observable<string> = this._store.select(SudokuSelectors.selectTheme);
 
     fillDocuments() {
     this._store.dispatch(SudokuActions.fillSchemas());
@@ -71,6 +73,14 @@ export class SudokuContext extends SudokuFacade {
 
   saveUserSettings() {
     this._store.dispatch(SudokuActions.saveUserSettings());
+  }
+
+  checkStatus() {
+    this._store.dispatch(SudokuActions.checkStatus());
+  }
+
+  setTheme(theme: string) {
+    this._store.dispatch(SudokuActions.setTheme({ theme }));
   }
 
   constructor(private _store: Store<SudokuStore>,

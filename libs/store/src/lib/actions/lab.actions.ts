@@ -6,6 +6,15 @@ export const setActiveSudoku = createAction(
   props<{ active: number }>()
 );
 
+export const setSelectedSudoku = createAction(
+  '[SudokuPlay.lab] set the selected sudoku',
+  props<{ selected: number }>()
+);
+
+export const openSelectedSudoku = createAction(
+  '[SudokuPlay.lab] open the selected sudoku'
+);
+
 export const setActiveCell = createAction(
   '[SudokuPlay.lab] set the active cell',
   props<{ id: string }>()

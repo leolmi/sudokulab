@@ -7,6 +7,15 @@
   }
 }
 
+.empty-text {
+  position: absolute;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+  margin-top: 40%;
+  font-size: 42px;
+  opacity: .3;
+}
 
 .cell-container {
   position: relative;

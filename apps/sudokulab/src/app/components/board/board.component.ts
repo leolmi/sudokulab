@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  HostListener,
+  HostListener, Input,
   OnDestroy,
   ViewChild
 } from '@angular/core';
@@ -49,6 +49,8 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
   highlights$: Observable<Dictionary<boolean>>;
   highlightsCell$: Observable<Dictionary<boolean>>;
   highlightStep$: Observable<Dictionary<boolean>>;
+
+  @Input() emptyText: string = '';
 
   constructor(private ele: ElementRef,
               private _lab: LabFacade,

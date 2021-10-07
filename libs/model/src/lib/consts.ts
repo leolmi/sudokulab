@@ -7,10 +7,14 @@ export const SUDOKU_EMPTY_VALUE = '0';
 export const SUDOKU_DEFAULT_RANK = 9;
 export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
 
+export const SUDOKULAB_LIGHT_THEME = 'light';
+export const SUDOKULAB_DARK_THEME = 'dark';
+
 
 export const SUDOKU_COMPACT_WIDTH = 1450;
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
 export const SUDOKULAB_DEBUG_KEY = 'SUDOKULAB-DEBUG-STATUS';
+export const SUDOKULAB_DEFAULT_THEME = SUDOKULAB_LIGHT_THEME;
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
 
 export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];

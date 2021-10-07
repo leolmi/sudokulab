@@ -16,10 +16,12 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   private _schemas$: Observable<PlaySudoku[]>;
   schemas$: Observable<PlaySudoku[]>;
   activeId$: Observable<number>;
+  selectedId$: Observable<number>;
   options$: Observable<SchemasOptions>;
   availableSortBy: ItemInfo[];
   counter$: Observable<number>;
   total$: Observable<number>;
+  canOpen$: Observable<boolean>;
 
   constructor(private _lab: LabFacade,
               _sudoku: SudokuFacade) {
@@ -31,6 +33,9 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
       map(s => s?._id||0));
     this.options$ = _lab.selectSchemasOptions$.pipe(
       takeUntil(this._destroy$));
+    this.selectedId$ = _lab.selectSelectedSudoku$.pipe(
+      takeUntil(this._destroy$),
+      map(s => s?._id||0));
 
     this.availableSortBy = [{
       code: 'sudoku.info.difficultyValue',
@@ -50,10 +55,16 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
 
     this.counter$ = this.schemas$.pipe(map(sch => (sch||[]).length));
     this.total$ = this._schemas$.pipe(map(sch => (sch||[]).length));
+    this.canOpen$ = combineLatest(this.activeId$, this.selectedId$)
+      .pipe(map(([aid, sid]) => !!sid && sid !== aid));
   }
 
   select(schema: PlaySudoku) {
-    this._lab.setActiveSudoku(schema._id);
+    this._lab.setSelectedSudoku(schema._id);
+  }
+
+  open() {
+    this._lab.openSelectedSudoku();
   }
 
   applySort(sortBy: string) {

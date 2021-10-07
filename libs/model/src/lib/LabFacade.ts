@@ -14,6 +14,7 @@ import { Dictionary } from '@ngrx/entity';
 export abstract class LabFacade implements Facade {
   name = 'lab';
   abstract selectActiveSudoku$: Observable<PlaySudoku|undefined>;
+  abstract selectSelectedSudoku$: Observable<PlaySudoku|undefined>;
   abstract selectActiveCell$: Observable<string>;
   abstract selectAllSchemas$: Observable<PlaySudoku[]>;
   abstract selectSchemasOptions$: Observable<SchemasOptions>;
@@ -22,6 +23,8 @@ export abstract class LabFacade implements Facade {
 
   abstract loadSudoku(sudoku: Sudoku, onlyValues?: boolean): void;
   abstract setActiveSudoku(id: number): void;
+  abstract setSelectedSudoku(id: number): void;
+  abstract openSelectedSudoku(): void;
   abstract setActiveCell(id: string): void;
   abstract applyAlgorithm(algorithm: string): void;
   abstract solveStep(): void;

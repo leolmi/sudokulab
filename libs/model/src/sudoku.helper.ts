@@ -42,7 +42,7 @@ import { ElementRef } from '@angular/core';
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
 
-export const isValue = (v: string, acceptX = false): boolean => {
+export const isValue = (v?: string, acceptX = false): boolean => {
   const effv = (v || '').trim();
   return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || v !== SUDOKU_DYNAMIC_VALUE);
 }
@@ -53,9 +53,10 @@ export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap
 }
 
 
-const _getGroupCellValuesMap = (g: PlaySudokuGroup|EditSudokuGroup): Dictionary<string> => {
-  return _reduce(g.cells, (m, c) => {
-    if (isValue(c.value)) m[c.value] = `${m[c.value] || ''}${c.id}`;
+const _getGroupCellValuesMap = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<string> => {
+  return _reduce(g.cells, (m, cid) => {
+    const v = cid ? sdk?.cells[cid]?.value : '';
+    if (!!cid && !!v && isValue(v)) m[v] = `${m[v] || ''}${cid}`;
     return m;
   }, <Dictionary<string>>{});
 }
@@ -75,10 +76,10 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefo
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     // vettore valori di gruppo
-    const values = _getGroupCellValuesMap(g);
+    const values = _getGroupCellValuesMap(sdk, g);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
     // g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
-    g.cells.forEach(c => _remove(c.availables, av => av !== c.value && !!values[av]));
+    g.cells.forEach(cid => _remove(sdk.cells[cid]?.availables||[], av => av !== sdk.cells[cid]?.value && !!values[av]));
   });
 }
 
@@ -340,7 +341,7 @@ export const getMaxNumbers = (rank: number|undefined): number => {
 }
 
 export const hasXValues = (sdk: EditSudoku|undefined): boolean => {
-  return !!(sdk?.cellList || []).find(c => c.value === SUDOKU_DYNAMIC_VALUE);
+  return !!(sdk?.cellList || []).find(cid => sdk?.cells[cid]?.value === SUDOKU_DYNAMIC_VALUE);
 }
 
 export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>): SudokuInfo => {
@@ -384,4 +385,11 @@ export const getGroups = (sdk: PlaySudoku, cids: string[]): PlaySudokuGroup[] =>
   return <PlaySudokuGroup[]>groups
     .map(gid => sdk.groups[gid])
     .filter(g => !!g);
+}
+
+export const getSudokuForUserSettings = (sdk: PlaySudoku|undefined): Partial<PlaySudoku>|undefined => {
+  if (!sdk) return undefined;
+  const s = _clone(sdk);
+  delete s.sudoku;
+  return s;
 }

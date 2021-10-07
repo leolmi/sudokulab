@@ -1,6 +1,6 @@
+@import "../../../variables";
+
 [evidence] {
-  border-left: #3f51b5 4px solid;
-  background: rgba(10,10,10,.05);
   padding: 20px;
 }
 
@@ -11,6 +11,19 @@
 
 [underline] {
   text-decoration: underline;
+}
+
+[code] {
+  font-family: monospace;
+  font-size: 2em;
+}
+
+[bold] {
+  font-weight: bold;
+}
+
+.author-name {
+  text-decoration: none;
 }
 
 .help-content {
@@ -37,6 +50,34 @@
   }
 }
 
+.logo-container {
+  margin-bottom: 80px;
+}
+
+.github-logo {
+  max-width: 50px;
+  display: block;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.help-line {
+  margin-top: 35px;
+}
+
+.logo {
+  font-size: 4em;
+  font-weight: 100;
+  padding: .5em;
+  border-radius: 1em;
+  background: rgba(10,10,10,.1);
+}
+
+.project-info {
+  padding: 50px 0;
+  text-align: center;
+}
+
 .schema-t {
   padding: 5px;
   background-color: #ff4081;
@@ -46,3 +87,52 @@
   margin-right: 10px;
 }
 
+.toolbar-commands {
+  .mat-icon {
+    border-radius: 50%;
+    padding: 4px;
+    background-color: $color-hover;
+    margin-top: 10px;
+  }
+}
+
+.small-image {
+  max-width: 300px !important;
+  max-height: 300px !important;
+}
+
+::ng-deep {
+  .theme-light {
+    .help-content {
+      [evidence] {
+        border-left: #3f51b5 4px solid;
+        background: rgba(10, 10, 10, .05);
+      }
+      .help-line {
+        border-top: $color-border 1px solid;
+      }
+
+      .toolbar-commands {
+        .mat-icon {
+          background-color: $color-hover;
+        }
+      }
+    }
+  }
+  .theme-dark {
+    .help-content {
+      [evidence] {
+        border-left: #3f51b5 4px solid;
+        background: $color-hover-dark;
+      }
+      .help-line {
+        border-top: $color-border-dark 1px solid;
+      }
+      .toolbar-commands {
+        .mat-icon {
+          background-color: $color-hover-dark;
+        }
+      }
+    }
+  }
+}

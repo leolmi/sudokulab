@@ -143,10 +143,10 @@ const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
   return handler(changes);
 }
 
-export const checkAvailables = (sdk: PlaySudoku|undefined) => {
+export const checkAvailables = (sdk: PlaySudoku|undefined, resetBefore = false) => {
   if (!sdk) return;
   // aaplica le regole base del sudoku
-  applySudokuRules(sdk);
+  applySudokuRules(sdk, resetBefore);
   // reset dei valori
   sdk.state.valuesCount = 0;
   sdk.state.error = '';
@@ -155,12 +155,12 @@ export const checkAvailables = (sdk: PlaySudoku|undefined) => {
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     g.availableOnCells = {};
-    g.cells.forEach(c => {
-      if (!c.value) {
-        c.availables.forEach(av => {
+    g.cells.forEach(cid => {
+      if (!sdk.cells[cid]?.value) {
+        sdk.cells[cid]?.availables.forEach(av => {
           const avs = `${av}`;
           g.availableOnCells[avs] = g.availableOnCells[avs] || {};
-          (g.availableOnCells[avs] || {})[c.id] = true;
+          (g.availableOnCells[avs] || {})[cid] = true;
         });
       }
     });
@@ -228,7 +228,7 @@ export const solveStepToCell = (sdk: PlaySudoku|undefined, exclude: string[] = [
     info = solveStep(sdk, exclude);
     if (!!info?.sdk) sdk = info.sdk;
     cycles++;
-  } while (cycles < 10 && _keys(info?.result?.cells || []).length <= 0);
+  } while (!!info && cycles < 10 && _keys(info?.result?.cells || []).length <= 0);
   return info;
 }
 

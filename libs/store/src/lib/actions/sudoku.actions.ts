@@ -38,3 +38,12 @@ export const updateDocumentTitle = createAction(
 export const saveUserSettings = createAction(
   '[SudokuPlay.sudoku] save the user settings'
 );
+
+export const checkStatus = createAction(
+  '[SudokuPlay.sudoku] check the page status'
+);
+
+export const setTheme = createAction(
+  '[SudokuPlay.sudoku] set the theme',
+  props<{ theme: string }>()
+);

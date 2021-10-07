@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @import "variables";
-
+@import "theme-light";
+@import "theme-dark";
 
 html, body {
   height: 100vh;
@@ -47,14 +48,6 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   visibility: hidden;
 }
 
-.lines {
-  background: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 6px,
-      rgba(10,10,10,.1) 1px,
-      rgba(10,10,10,.1) 8px);
-}
 
 .sudokulab-page {
   position: absolute;
@@ -74,82 +67,25 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding: 0 10px;
 }
 
-.message-type-error {
-  background-color: $color-error !important;
-  color: $color-error-contrast !important;
-}
-.message-type-warning {
-  background-color: $color-warning !important;
-  color: $color-warning-contrast !important;
-}
-.message-type-info {
-  background-color: $color-info !important;
-  color: $color-info-contrast !important;
-}
-.message-type-success {
-  background-color: $color-success !important;
-  color: $color-success-contrast !important;
-}
-.message-type-highlight {
-  background-color: $color-accent !important;
-  color: $color-accent-contrast !important;
-}
 
 .text-center {
   text-align: center;
 }
 
 .button-menu-separator {
-  border-bottom: rgba(10,10,10,.1) 1px solid;
   height: 10px;
   margin-bottom: 10px;
 }
 
-.background2 {
-  background-color: $color-background;
-  .selected {
-    background-color: $color-background-selected;
-  }
-}
 
-.text-color-error {
-  color: $color-error !important;
-}
-
-.color-primary {
-  background-color: $color-primary;
-  color: $color-primary-contrast;
-}
-
-.color-accent {
-  background-color: $color-accent;
-  color: $color-accent-contrast;
-}
 
 .cell-container {
-  background: $color-board-background;
-  color: $color-board-background-contrast !important;
-  border: 1px solid $color-border;
   font-weight: 100;
   user-select: none;
   &.fixed {
     font-weight: bold;
   }
   &:not(.fixed),
-  &.hover-all {
-    &:hover {
-      background-color: $color-hover;
-    }
-  }
-  &.bottom-line {
-    border-bottom: 2px solid $color-border-highlight !important;
-  }
-  &.right-line {
-    border-right: 2px solid $color-border-highlight !important;
-  }
-  &.error {
-    color: orangered !important;
-  }
   .cell-value {
     transition: color .5s ease-in-out;
   }
@@ -169,12 +105,6 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
   .sudokulab-page {
     overflow: auto;
-    //min-width: 640px;
-  }
-
-  .compact-size-600 {
-    //width: 600px;
-    //margin-left: calc(50% - 300px);
   }
 
   .compact-blur {
@@ -189,9 +119,6 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 
   .tools {
-    &:not(.compact-auto-height) {
-      //min-height: 600px;
-    }
     .schemalab-tool {
       padding: 0;
     }
@@ -204,6 +131,12 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   user-select: none;
 }
 
+
+.pulse {
+  animation: pulse 2s infinite;
+  font-weight: bold;
+}
+
 @media only screen and (max-width: 1450px) {
   .compact-size-600 {
     width: 600px;
@@ -214,11 +147,6 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
-.pulse {
-  animation: pulse 2s infinite;
-  font-weight: bold;
-  color: $color-accent;
-}
 
 @media only screen and (max-width: 640px) {
   .compact-size-600,
@@ -226,6 +154,9 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   .board-container,
   .board {
     width: 100% !important;
+    .empty-text {
+      font-size: 7vw !important;
+    }
   }
 }
 
@@ -233,13 +164,9 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   0% {
     transform: scale(0.95);
   }
-
   70% {
     transform: scale(2);
-    //font-weight: bold;
-    //color: $color-accent;
   }
-
   100% {
     transform: scale(1);
   }

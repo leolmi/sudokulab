@@ -1,4 +1,3 @@
-import { PlaySudokuCell } from '@sudokulab/model';
 import { Dictionary } from '@ngrx/entity';
 
 export class PlaySudokuGroup {
@@ -9,6 +8,6 @@ export class PlaySudokuGroup {
     Object.assign(this, sg || {});
   }
   id: string;
-  cells: PlaySudokuCell[];
+  cells: string[];
   availableOnCells: Dictionary<Dictionary<boolean>>;
 }

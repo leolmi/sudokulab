@@ -6,7 +6,7 @@
   </div>
   <div class="board-container" fxLayout="column">
     <div class="board" #board [ngStyle]="boardStyle$|async">
-      <sudokulab-board></sudokulab-board>
+      <sudokulab-board emptyText="select a schema"></sudokulab-board>
     </div>
     <div class="bottom-board compact-size-600" fxFlex>
       <mat-progress-bar [value]="progress$|async"
@@ -14,6 +14,7 @@
                         color="primary"
                         mode="determinate"></mat-progress-bar>
       <sudokulab-key-board></sudokulab-key-board>
+      <sudokulab-board-state></sudokulab-board-state>
     </div>
   </div>
   <div class="tools tools-right" fxFlex="50">

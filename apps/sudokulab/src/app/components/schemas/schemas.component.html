@@ -26,13 +26,25 @@
       <mat-icon>generating_tokens</mat-icon>
     </button>
   </div>
-  <cdk-virtual-scroll-viewport
-    class="schemas-container"
-    itemSize="30" fxFlex>
-    <sudokulab-schemas-item
-      *cdkVirtualFor="let schema of schemas$|async"
-      [active]="(activeId$|async) === schema._id"
-      (onClick)="select($event)"
-      [schema]="schema"></sudokulab-schemas-item>
-  </cdk-virtual-scroll-viewport>
+  <div class="list-container" fxFlex>
+    <cdk-virtual-scroll-viewport
+      class="schemas-container"
+      itemSize="30" >
+      <sudokulab-schemas-item
+        *cdkVirtualFor="let schema of schemas$|async"
+        [active]="(activeId$|async) === schema._id"
+        [selected]="(selectedId$|async) === schema._id"
+        (onClick)="select($event)"
+        [schema]="schema"></sudokulab-schemas-item>
+    </cdk-virtual-scroll-viewport>
+    <button mat-fab
+            class="open-button"
+            color="accent"
+            matTooltip="open selected schema"
+            *ngIf="canOpen$|async"
+            (click)="open()"
+            aria-label="Open player schema">
+      <mat-icon>play_arrow</mat-icon>
+    </button>
+  </div>
 </div>

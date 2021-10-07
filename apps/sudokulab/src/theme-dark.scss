@@ -1,0 +1,140 @@
+@import "variables";
+
+.theme-dark {
+
+  background-color: $color-background-dark;
+  color: $color-background-contrast-dark;
+
+  .message-type-error {
+    background-color: $color-error-dark !important;
+    color: $color-error-contrast-dark !important;
+  }
+
+  .message-type-warning {
+    background-color: $color-warning-dark !important;
+    color: $color-warning-contrast-dark !important;
+  }
+
+  .message-type-info {
+    background-color: $color-info-dark !important;
+    color: $color-info-contrast-dark !important;
+  }
+
+  .message-type-success {
+    background-color: $color-success-dark !important;
+    color: $color-success-contrast-dark !important;
+  }
+
+  .message-type-highlight {
+    background-color: $color-accent-dark !important;
+    color: $color-accent-contrast-dark !important;
+  }
+
+  .background2 {
+    background-color: $color-background2-dark;
+
+    .selected {
+      background-color: $color-background-selected-dark;
+    }
+  }
+
+  .text-color-primary {
+    color: $color-primary-dark !important;
+  }
+
+  .text-color-error {
+    color: $color-error-dark !important;
+  }
+
+  .text-color-accent {
+    color: $color-accent-dark !important;
+  }
+
+  .color-primary {
+    background-color: $color-primary-dark;
+    color: $color-primary-contrast-dark;
+  }
+
+  .color-accent {
+    background-color: $color-accent-dark;
+    color: $color-accent-contrast-dark;
+  }
+
+  .cell-container {
+    background: $color-board-background-dark;
+    color: $color-board-background-contrast-dark !important;
+    border: 1px solid rgba(10,10,10,.2);
+
+    &.hover-all {
+      &:hover {
+        background-color: $color-hover-dark;
+      }
+    }
+
+    &.bottom-line {
+      border-bottom: 2px solid #111 !important;
+    }
+
+    &.right-line {
+      border-right: 2px solid #111 !important;
+    }
+
+    &.error {
+      color: $color-error2-dark !important;
+    }
+  }
+
+  .logo-lab {
+    color: $color-primary-highlight-dark;
+  }
+
+  .pulse {
+    color: $color-accent-dark;
+  }
+
+  .button-menu-separator {
+    border-bottom: $color-hover-dark 1px solid;
+  }
+
+  .lines {
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 6px,
+        $color-hover-dark 1px,
+        $color-hover-dark 8px);
+  }
+
+
+  .mat-toolbar.mat-primary {
+    background: $color-primary-dark;
+    color: #111;
+  }
+
+  .mat-select-value {
+    color: whitesmoke;
+  }
+  .mat-form-field-ripple {
+    background-color: rgba(200,200,200,.87);
+  }
+  .mat-form-field-label {
+    color: rgba(200,200,200,.6);
+  }
+  .mat-select-arrow {
+    color: rgba(200,200,200,.54);
+  }
+
+  .github-logo {
+    path {
+      fill: #ddd;
+    }
+  }
+  .sudokulab-scrollbar {
+    ::-webkit-scrollbar-thumb {
+      background: rgba(200,200,200,.3);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #777;
+    }
+  }
+}

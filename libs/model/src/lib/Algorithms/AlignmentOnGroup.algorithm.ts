@@ -42,11 +42,11 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
       _forEach(couples,(cp, v) => {
         // considera i gruppi a cui appartengono entrambe le celle
         const groups = _intersection(sdk.groupsForCell[(cp || [])[0]], sdk.groupsForCell[(cp || [])[1]]);
-        groups.forEach(g =>
-          g?.cells.forEach(c => {
-            const removed = _remove(c.availables, av => !_includes(cp, c.id) && av === v);
+        groups.forEach(gid =>
+          sdk.groups[gid]?.cells.forEach(cid => {
+            const removed = _remove(sdk.cells[cid]?.availables||[], av => !_includes(cp, cid) && av === v);
             if (removed.length > 0) {
-              addLine(description, `On cell "${c.id}" the possible values [${removed.join(',')}] have been removed`);
+              description = addLine(description, `On cell "${cid}" the possible values [${removed.join(',')}] have been removed`);
               applied = true;
             }
           }));

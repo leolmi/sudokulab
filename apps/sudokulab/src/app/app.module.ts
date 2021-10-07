@@ -55,6 +55,7 @@ import { KeyBoardComponent } from './components/key-board/key-board.component';
 import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.component';
 import { HelpManifest } from './pages/help/help.manifest';
 import { HelpComponent } from './pages/help/help.component';
+import { BoardStateComponent } from './components/board-state/board-state.component';
 
 @NgModule({
   declarations: [
@@ -76,7 +77,8 @@ import { HelpComponent } from './pages/help/help.component';
     KeyBoardComponent,
     SchemaNamePipe,
     SudokuSchemaComponent,
-    HelpComponent
+    HelpComponent,
+    BoardStateComponent
   ],
   imports: [
     BrowserModule,

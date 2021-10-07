@@ -1,12 +1,9 @@
 import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
-import { head as _head, values as _values, minBy as _minBy, cloneDeep as _clone } from 'lodash';
-import { Sudoku } from '../Sudoku';
+import { cloneDeep as _clone, minBy as _minBy, values as _values } from 'lodash';
 import { checkAvailables } from '../logic';
-import { getValues } from '../../sudoku.helper';
 import { PlaySudokuCell } from '../PlaySudokuCell';
-import { PlaySudokuGroup } from '../PlaySudokuGroup';
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 

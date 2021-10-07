@@ -22,3 +22,8 @@ export const selectPageStatus = createSelector(
   selectSudoku,
   (state): Dictionary<boolean> => state.status
 )
+
+export const selectTheme = createSelector(
+  selectSudoku,
+  (state): string => state.theme
+)

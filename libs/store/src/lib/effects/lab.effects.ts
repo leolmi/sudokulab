@@ -13,7 +13,7 @@ import {
   cellId,
   checkAvailables,
   clear,
-  getSchemaName,
+  getSchemaName, getSudokuForUserSettings, getUserSetting,
   isValidValue,
   loadValues,
   MessageType,
@@ -84,8 +84,21 @@ export class LabEffects {
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) => {
       if (!!sdk) this._location.go(`/lab/${sdk._id}`);
-      return [SudokuActions.updateDocumentTitle({ data: sdk ? `${sdk._id}` : '' })];
+      const output: Action[] = [SudokuActions.updateDocumentTitle({ data: sdk ? `${sdk._id}` : '' })];
+      if (!!sdk) {
+        const userschema = getUserSetting<PlaySudoku>('lab.activeSudoku');
+        if (!!userschema && userschema._id !== sdk._id) output.push(SudokuActions.saveUserSettings());
+      }
+      return output;
     })
+  ));
+
+  openSelectedSudoku$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.openSelectedSudoku),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectSelectedSudoku)),
+    filter(([a, sdk]) => !!sdk),
+    switchMap(([a, sdk]) => [SudokuActions.setActiveSudoku({ active: sdk?._id||0 })])
   ));
 
   solveStep$ = createEffect(() => this._actions$.pipe(
@@ -118,7 +131,10 @@ export class LabEffects {
     switchMap(([a, sdk]) => {
       if (!sdk) return [];
       const changes = clear(sdk);
-      return [SudokuActions.updateSudoku({ changes })];
+      checkAvailables(changes, true);
+      return [
+        SudokuActions.updateSudoku({ changes }),
+        SudokuActions.saveUserSettings()];
     })
   ));
 
@@ -133,7 +149,7 @@ export class LabEffects {
       const cell = changes.cells[cid];
       if (!cell || cell.fixed) return [];
       const prev = cell.value;
-      let value = a.value;
+      let value = (a.value||'').trim();
       if (value === 'Delete') value = '';
       if (!!sdk?.options.usePencil) {
         cell.value = '';
@@ -154,7 +170,9 @@ export class LabEffects {
       }
       return [
         SudokuActions.updateSudoku({ changes }),
-        SudokuActions.checkState()];
+        SudokuActions.checkState(),
+        SudokuActions.saveUserSettings()
+      ];
     })
   ));
 
@@ -281,7 +299,7 @@ export class LabEffects {
 
 
   calcLabStatus$ = createEffect(() => this._actions$.pipe(
-    ofType(SudokuActions.setActivePage, SudokuActions.setActiveSudoku),
+    ofType(SudokuActions.setActivePage, SudokuActions.setActiveSudoku, SudokuActions.checkStatus),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) =>
       [SudokuActions.updatePageStatus({ status: { has_no_lab_schema: !sdk } })])
@@ -315,8 +333,13 @@ export class LabEffects {
 
   saveUserSettings$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.saveUserSettings),
-    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSchemasOptions)),
-    map(([a, options]) => saveUserSetting('lab.schemasOptions', options))
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSchemasOptions),
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    map(([a, options, sdk]) => {
+      saveUserSetting('lab.schemasOptions', options);
+      saveUserSetting('lab.activeSudoku', getSudokuForUserSettings(sdk))
+    })
   ), { dispatch: false });
 
   constructor(private _actions$: Actions,

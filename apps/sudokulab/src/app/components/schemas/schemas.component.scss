@@ -4,9 +4,20 @@
   height: 100%;
 }
 
-.schemas-container {
+.list-container {
+  position: relative;
   min-height: 400px;
+  .schemas-container {
+    height: 100%;
+  }
+  .open-button {
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+  }
 }
+
+
 
 .schemalab-schemas-toolbar {
   height: 60px;
@@ -35,6 +46,9 @@
     cursor: pointer;
     &:hover {
       background-color: rgba(10, 10, 10, .1);
+      &.color-accent {
+        background-color: $color-accent-transp !important;
+      }
       &.color-primary {
         background-color: $color-primary-transp !important;
       }
@@ -49,3 +63,4 @@
     }
   }
 }
+

@@ -1,0 +1,108 @@
+@import "variables";
+
+.theme-light {
+
+  background-color: $color-background;
+  color: $color-background-contrast;
+
+  .message-type-error {
+    background-color: $color-error !important;
+    color: $color-error-contrast !important;
+  }
+
+  .message-type-warning {
+    background-color: $color-warning !important;
+    color: $color-warning-contrast !important;
+  }
+
+  .message-type-info {
+    background-color: $color-info !important;
+    color: $color-info-contrast !important;
+  }
+
+  .message-type-success {
+    background-color: $color-success !important;
+    color: $color-success-contrast !important;
+  }
+
+  .message-type-highlight {
+    background-color: $color-accent !important;
+    color: $color-accent-contrast !important;
+  }
+
+  .background2 {
+    background-color: $color-background2;
+
+    .selected {
+      background-color: $color-background-selected;
+    }
+  }
+
+  .text-color-primary {
+    color: $color-primary !important;
+  }
+
+  .text-color-error {
+    color: $color-error !important;
+  }
+
+  .text-color-accent {
+    color: $color-accent !important;
+  }
+
+  .color-primary {
+    background-color: $color-primary;
+    color: $color-primary-contrast;
+  }
+
+  .color-accent {
+    background-color: $color-accent;
+    color: $color-accent-contrast;
+  }
+
+  .cell-container {
+    background: $color-board-background;
+    color: $color-board-background-contrast !important;
+    border: 1px solid $color-border;
+
+    &.hover-all {
+      &:hover {
+        background-color: $color-hover;
+      }
+    }
+
+    &.bottom-line {
+      border-bottom: 2px solid $color-border-highlight !important;
+    }
+
+    &.right-line {
+      border-right: 2px solid $color-border-highlight !important;
+    }
+
+    &.error {
+      color: $color-error2 !important;
+    }
+  }
+
+  .logo-lab {
+    color: $color-primary-highlight;
+  }
+
+  .pulse {
+    color: $color-accent;
+  }
+
+  .button-menu-separator {
+    border-bottom: $color-hover 1px solid;
+  }
+
+  .lines {
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 6px,
+        $color-hover 1px,
+        $color-hover 8px);
+  }
+
+}

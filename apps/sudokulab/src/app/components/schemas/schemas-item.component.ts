@@ -5,7 +5,7 @@ import { PlaySudoku } from '@sudokulab/model';
   selector: 'sudokulab-schemas-item',
   template: `<div (click)="clickOnItem()"
                   class="schemas-item"
-                  [ngClass]="{'color-primary': active}"
+                  [ngClass]="{'color-primary': active, 'color-accent': selected && !active}"
                   fxLayout="row" fxLayoutAlign="start center">
     <div class="schema-name" fxFlex>{{schema | schemaName}}</div>
     <div class="hash">{{schema?.sudoku?._id||''}}</div>
@@ -16,6 +16,7 @@ import { PlaySudoku } from '@sudokulab/model';
 export class SchemasItemComponent {
   @Input() schema: PlaySudoku|undefined = undefined;
   @Input() active: boolean = false;
+  @Input() selected: boolean = false;
   @Output() onClick: EventEmitter<PlaySudoku> = new EventEmitter<PlaySudoku>();
 
   constructor() {

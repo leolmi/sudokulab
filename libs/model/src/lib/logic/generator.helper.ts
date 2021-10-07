@@ -101,9 +101,10 @@ const _randomEmptyCell = (sdk: EditSudoku): EditSudokuCell|undefined => {
  */
 export const solvable = (sdk: EditSudoku): boolean => {
   return (sdk.options.fixedCount >= getMinNumbers(sdk.options?.rank) &&
-    (sdk.fixedCount < sdk.options.fixedCount || !!(sdk.cellList||[]).find(fc => fc.fixed && fc.value === SUDOKU_DYNAMIC_VALUE)));
-  // return (sdk.cellList || []).filter(c => c.fixed).length > getMinNumbers(sdk.options?.rank) &&
-  //   !!(sdk.cellList || []).find(c => c.value === SUDOKU_DYNAMIC_VALUE);
+    (sdk.fixedCount < sdk.options.fixedCount || !!(sdk.cellList||[]).find(fcid => {
+      const cell = sdk.cells[fcid];
+      return !!cell && cell.fixed && cell.value === SUDOKU_DYNAMIC_VALUE;
+    })));
 }
 
 /**
@@ -171,10 +172,13 @@ export const loadSchema = (sdk: EditSudoku, sch: string) => {
     originalSchema: sch,
     options: new EditSudokuOptions({ ...sdk.options, rank })
   });
-  esdk.cellList.forEach((cell, index) => {
+  esdk.cellList.forEach((cid, index) => {
     const v = sch.charAt(index) || '';
-    cell.value = isValue(v, true) ? v : '';
-    esdk.checkFixedCell(cell);
+    const cell = esdk.cells[cid];
+    if (cell) {
+      cell.value = isValue(v, true) ? v : '';
+      esdk.checkFixedCell(cell);
+    }
   });
   _checkOriginalSchema(esdk);
   _extend(sdk, esdk);
@@ -184,7 +188,7 @@ export const loadSchema = (sdk: EditSudoku, sch: string) => {
 export const loadOriginalSchema = (sdk: EditSudoku) => loadSchema(sdk, sdk.originalSchema || '');
 
 const _checkSchema = (sdk: EditSudoku) => {
-  sdk.fixed = _reduce(sdk.cells, (cll, c) => c?.fixed ? cll.concat(c) : cll, <EditSudokuCell[]>[]);
+  sdk.fixed = _reduce(sdk.cells, (cll, c) => c?.fixed ? cll.concat(c?.id||'') : cll, <string[]>[]);
 }
 
 /**
@@ -193,7 +197,7 @@ const _checkSchema = (sdk: EditSudoku) => {
  */
 const _checkOriginalSchema = (sdk: EditSudoku) => {
   if (!sdk.originalSchema)
-    sdk.originalSchema = sdk.cellList.map(c => c.value||SUDOKU_EMPTY_VALUE).join('');
+    sdk.originalSchema = sdk.cellList.map(cid => sdk.cells[cid]).map(c => c?.value||SUDOKU_EMPTY_VALUE).join('');
 }
 
 /**
@@ -344,7 +348,7 @@ export const checkValues = (sdk: EditSudoku): boolean => {
   values = getValues(sdk);
   let invalidValues = !!xcells.find(c => !isValue(sdk.cells[c.id]?.value || ''));
   if (invalidValues) console.warn(...SDK_PREFIX, 'Invalid values', values);
-  const errorcell = sdk.cellList.find(c => !c.fixed && c.availables.length <= 0);
+  const errorcell = sdk.cellList.map(cid => sdk.cells[cid]).find(c => !c?.fixed && (c?.availables || []).length <= 0);
   if (!!errorcell) invalidValues = true;
   return !invalidValues;
 }

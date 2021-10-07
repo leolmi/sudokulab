@@ -27,7 +27,7 @@ export class PlaySudoku {
   sudoku?: Sudoku;
   cells: Dictionary<PlaySudokuCell>;
   groups: Dictionary<PlaySudokuGroup>;
-  groupsForCell: Dictionary<(PlaySudokuGroup|undefined)[]>;
+  groupsForCell: Dictionary<string[]>;
   state: PlaySudokuState;
 }
 
@@ -71,12 +71,12 @@ const _loadSudoku = (ps: PlaySudoku) => {
       if (!!cell.value) ps.state.valuesCount++;
       ps.cells[cid] = cell;
       const gpos = Math.floor(r / grank) * grank + Math.floor(c / grank);
-      ps.groupsForCell[cell.id] = [
-        ps.groups[groupId(SudokuGroupType.row, r)],
-        ps.groups[groupId(SudokuGroupType.column, c)],
-        ps.groups[groupId(SudokuGroupType.square, gpos)]
+      ps.groupsForCell[cid] = [
+        groupId(SudokuGroupType.row, r),
+        groupId(SudokuGroupType.column, c),
+        groupId(SudokuGroupType.square, gpos)
       ];
-      ps.groupsForCell[cell.id]?.forEach(g => g?.cells.push(cell));
+      ps.groupsForCell[cid]?.forEach(gid => ps.groups[gid]?.cells.push(cid));
     }
   }
 }

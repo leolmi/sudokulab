@@ -4,7 +4,14 @@ import * as SudokuActions from '../actions';
 import { concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { checkAvailables, getHash, PlaySudoku, Sudoku } from '@sudokulab/model';
+import {
+  checkAvailables,
+  getHash,
+  PlaySudoku,
+  saveUserSetting, setApplicationTheme,
+  Sudoku,
+  SudokulabWindowService
+} from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
 import * as SudokuSelectors from '../selectors';
 import { Store } from '@ngrx/store';
@@ -62,8 +69,17 @@ export class SudokuEffects {
     })
   ), { dispatch: false });
 
+  setTheme$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setTheme),
+    map((a) => {
+      setApplicationTheme(this._window, a.theme);
+      saveUserSetting('sudoku.theme', a.theme);
+    })
+  ), { dispatch: false });
+
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>,
+              private _window: SudokulabWindowService,
               private _router: Router,
               private _http: HttpClient) {
   }

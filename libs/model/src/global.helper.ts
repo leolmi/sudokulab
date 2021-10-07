@@ -4,13 +4,21 @@ import {
   cloneDeep as _clone,
   extend as _extend,
   get as _get,
-  set as _set,
   isEqual as _isEqual,
   isString as _isString,
-  keys as _keys
+  keys as _keys,
+  set as _set
 } from 'lodash';
 import { SudokulabWindowService } from './lib/services';
-import { SDK_PREFIX, SUDOKU_COMPACT_WIDTH, SUDOKULAB_DEBUG_KEY, SUDOKULAB_SETTINGS_KEY } from './lib/consts';
+import {
+  SDK_PREFIX,
+  SDK_PREFIX_DEBUG,
+  SUDOKU_COMPACT_WIDTH,
+  SUDOKULAB_DARK_THEME,
+  SUDOKULAB_DEBUG_KEY,
+  SUDOKULAB_LIGHT_THEME,
+  SUDOKULAB_SETTINGS_KEY
+} from './lib/consts';
 
 export function guid(): string {
   return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, c => {
@@ -19,6 +27,13 @@ export function guid(): string {
     return v.toString(16);
     /* tslint:enable */
   });
+}
+
+export const setApplicationTheme = (wins: SudokulabWindowService, theme: string) => {
+  const thm = theme === SUDOKULAB_DARK_THEME ? SUDOKULAB_DARK_THEME : SUDOKULAB_LIGHT_THEME;
+  const othm = thm === SUDOKULAB_DARK_THEME ? SUDOKULAB_LIGHT_THEME : SUDOKULAB_DARK_THEME;
+  wins.nativeWindow.document.body.classList.remove(`theme-${othm}`);
+  wins.nativeWindow.document.body.classList.add(`theme-${thm}`);
 }
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
@@ -75,7 +90,7 @@ export const saveUserSetting = (path: string, data: any) => {
   try {
     const udata: any = userdata ? JSON.parse(userdata||'{}') : {};
     _set(udata, path, data);
-    console.log('SAVE USER SETTINGS', udata);
+    debug(() => console.log(...SDK_PREFIX_DEBUG, 'SAVE USER SETTINGS', udata));
     localStorage.setItem(SUDOKULAB_SETTINGS_KEY, JSON.stringify(udata));
   } catch (err) {
     console.warn(SDK_PREFIX, 'Cannot save user data!', err);
