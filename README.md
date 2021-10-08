@@ -17,6 +17,13 @@ symmetry, bookmarks for random values, difficulty, and so on.
 
 <br>
 
+# On line
+
+You can see the app online at:
+
+[sudokulab.herokuapp.com](https://sudokulab.herokuapp.com/)
+
+
 # local use:
 
 build dependencies
