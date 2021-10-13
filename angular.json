@@ -122,7 +122,11 @@
               "apps/sudokulab/src/assets"
             ],
             "styles": ["./node_modules/@angular/material/prebuilt-themes/indigo-pink.css", "apps/sudokulab/src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "tesseract.js",
+              "jimp"
+            ]
           },
           "configurations": {
             "production": {

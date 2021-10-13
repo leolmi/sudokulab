@@ -2,6 +2,12 @@
   "name": "sudokulab",
   "version": "1.0.0",
   "license": "MIT",
+  "scripts": {
+    "ng": "nx",
+    "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
+    "start": "node dist/apps/api/main.js",
+    "build": "gulp deploy"
+  },
   "private": true,
   "author": "leo.olmi",
   "url": "https://github.com/leolmi/sudokulab",
@@ -28,11 +34,14 @@
     "@ngrx/store": "^12.4.0",
     "@nrwl/angular": "12.8.0",
     "file-saver": "^2.0.5",
+    "image-size": "^1.0.0",
+    "jimp": "^0.16.1",
     "jszip": "^3.1.5",
     "lodash": "^4.17.21",
     "mongoose": "^6.0.7",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.6.0",
+    "tesseract.js": "^2.1.5",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.4"
   },
@@ -73,12 +82,6 @@
     "ts-jest": "27.0.3",
     "typescript": "~4.3.5",
     "yargs": "^17.2.1"
-  },
-  "scripts": {
-    "ng": "nx",
-    "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
-    "start": "node dist/apps/api/main.js",
-    "build": "gulp deploy"
   },
   "engines": {
     "node": "14.17.1"

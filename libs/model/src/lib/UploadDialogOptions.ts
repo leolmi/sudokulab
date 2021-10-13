@@ -1,3 +1,4 @@
 export interface UploadDialogOptions {
-  allowOnlyValues: boolean;
+  allowOnlyValues?: boolean;
+  allowImages?: boolean;
 }

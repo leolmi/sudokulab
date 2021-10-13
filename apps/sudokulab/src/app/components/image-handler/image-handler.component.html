@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>Handle Image</h1>
+<div class="dialog-container" mat-dialog-content>
+  <div class="image-container"
+       *ngIf="!!data?.image" fxLayout="column">
+    <img [src]="data?.image" [ngStyle]="style$|async">
+    <crop-area (cropChanged)="cropChanged($event)" class="crop-area"></crop-area>
+  </div>
+  <mat-slider *ngIf="!!data?.image"
+              class="rotation-slider"
+              [max]="maxRotation"
+              [step]="1"
+              [value]="rotationValue$|async"
+              (input)="setRotation($event)"></mat-slider>
+  <div class="wait-overlay" *ngIf="!!(working$|async)">
+    <mat-spinner class="loader" diameter="100"></mat-spinner>
+  </div>
+</div>
+<mat-dialog-actions *ngIf="!!!(working$|async)">
+  <button mat-stroked-button (click)="done()">LOAD</button>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

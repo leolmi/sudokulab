@@ -16,6 +16,7 @@ export class LabManifest extends SudokulabPage {
     {separator: true},
     {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: 'has_no_lab_schema'},
     {icon: 'apps_outage', code: 'upload', tooltip: 'Open schema'},
+    {icon: 'camera', code: 'camera', tooltip: 'Acquire by camera'},
     {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: 'has_no_lab_schema'}
   ];
   title = 'Player';
@@ -28,6 +29,7 @@ export class LabManifest extends SudokulabPage {
       case 'download': return facade.download();
       case 'upload': return facade.upload();
       case 'stepinfo': return facade.stepInfo();
+      case 'camera': return facade.camera();
     }
   }
 }

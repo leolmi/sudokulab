@@ -3,9 +3,10 @@ import { Model } from 'mongoose';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { validate } from './sudoku.logic';
-import { SDK_PREFIX, SDK_PREFIX_W, Sudoku } from '@sudokulab/model';
+import { ImgDto, OcrOptions, OcrResult, SDK_PREFIX_W, Sudoku } from '@sudokulab/model';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ocr } from '../ocr/ocr';
 
 @Injectable()
 export class SudokuService implements OnModuleInit {
@@ -46,5 +47,9 @@ export class SudokuService implements OnModuleInit {
           }
         });
     });
+  }
+
+  async ocr(img: ImgDto, o?: OcrOptions): Promise<OcrResult> {
+    return await ocr(img, o);
   }
 }

@@ -56,6 +56,10 @@ import { SudokuSchemaComponent } from './components/sudoku-schema/sudoku-schema.
 import { HelpManifest } from './pages/help/help.manifest';
 import { HelpComponent } from './pages/help/help.component';
 import { BoardStateComponent } from './components/board-state/board-state.component';
+import { ImageHandlerComponent } from './components/image-handler/image-handler.component';
+import { CameraDialogComponent } from './components/camera-dialog/camera-dialog.component';
+import { CropAreaComponent } from './components/image-handler/crop-area.component';
+import { SchemaCheckComponent } from './components/schema-check/schema-check.component';
 
 @NgModule({
   declarations: [
@@ -78,7 +82,11 @@ import { BoardStateComponent } from './components/board-state/board-state.compon
     SchemaNamePipe,
     SudokuSchemaComponent,
     HelpComponent,
-    BoardStateComponent
+    BoardStateComponent,
+    CropAreaComponent,
+    ImageHandlerComponent,
+    CameraDialogComponent,
+    SchemaCheckComponent
   ],
   imports: [
     BrowserModule,

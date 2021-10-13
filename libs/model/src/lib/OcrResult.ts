@@ -1,0 +1,11 @@
+export class OcrResult {
+  constructor(r?: Partial<OcrResult>) {
+    this.values = '';
+    this.cells = {};
+    this.confidence = 0;
+    Object.assign(this, r || {});
+  }
+  cells: any;
+  values: string;
+  confidence: number;
+}

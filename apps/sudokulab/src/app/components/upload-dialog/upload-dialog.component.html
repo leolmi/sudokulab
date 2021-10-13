@@ -9,7 +9,8 @@
        (drop)="drop($event)"
        fxFlex fxLayout="column" fxLayoutAlign="center">
     <div class="upload-canvas-info">
-      <p>drag a json file here</p>
+      <p *ngIf="data.allowImages">drag a file here (json or image)</p>
+      <p *ngIf="!data.allowImages">drag a json file here</p>
       <p>or click to browse on folders</p>
     </div>
   </div>

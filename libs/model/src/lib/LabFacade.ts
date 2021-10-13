@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
 import {
+  HandleImageOptions,
+  HandleImageResult,
   PlaySudoku,
   PlaySudokuOptions,
   SchemasOptions,
   SolveStepResult,
-  StepInfo,
   Sudoku,
   SudokuMessage
 } from '@sudokulab/model';
@@ -21,7 +22,9 @@ export abstract class LabFacade implements Facade {
   abstract selectStepInfo$: Observable<SolveStepResult|undefined>;
   abstract selectHighlightCells$: Observable<Dictionary<boolean>>;
 
-  abstract loadSudoku(sudoku: Sudoku, onlyValues?: boolean): void;
+  // abstract loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean): void;
+  // abstract handleImage(o?: HandleImageOptions): void;
+  // abstract checkSchema(o: HandleImageResult): Observable<HandleImageResult>;
   abstract setActiveSudoku(id: number): void;
   abstract setSelectedSudoku(id: number): void;
   abstract openSelectedSudoku(): void;
@@ -41,4 +44,5 @@ export abstract class LabFacade implements Facade {
   abstract updateSchemasOptions(changes: Partial<SchemasOptions>): void;
   abstract updatePlayerOptions(changes: Partial<PlaySudokuOptions>): void;
   abstract clesrHighlightCells(): void;
+  abstract camera(): void;
 }

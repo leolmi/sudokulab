@@ -143,7 +143,7 @@ export class LabEffects {
     withLatestFrom(
       this._store.select(SudokuSelectors.selectActiveSudoku),
       this._store.select(SudokuSelectors.selectActiveCell)),
-    filter(([a, sdk, cid]) => !!sdk && isValidValue(sdk, a.value)),
+    filter(([a, sdk, cid]) => !!sdk && isValidValue(a.value, sdk?.sudoku?.rank)),
     switchMap(([a, sdk, cid]) => {
       const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
       const cell = changes.cells[cid];

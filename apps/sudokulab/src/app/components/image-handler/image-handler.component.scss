@@ -1,0 +1,69 @@
+@import "../../../variables";
+
+.dialog-container {
+  position: relative;
+}
+
+.image-container {
+  position: relative;
+  user-select: none;
+  padding: 50px;
+}
+.rotation-slider {
+  width: 100%;
+}
+.spacer {
+  height: 80px;
+}
+
+
+.crop-point {
+  position: absolute;
+  border-radius: 50%;
+  border: rgba(10, 10, 10, .3) 1px solid;
+  background-color: $color-accent;
+  cursor: grab;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.crop-area {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+
+  .crop-area-inner {
+    position: absolute;
+    pointer-events: none;
+    border: rgba(10,10,10,.4) 2px dashed;
+  }
+  &.on-point {
+    cursor: grab;
+  }
+  &.mooving {
+    &.on-point {
+      cursor: grabbing;
+    }
+    cursor: grabbing;
+    .crop-point {
+      cursor: grabbing;
+    }
+  }
+}
+
+.wait-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  .loader {
+    width: 100px;
+    height: 100px;
+    margin: 230px auto 0 auto;
+  }
+}

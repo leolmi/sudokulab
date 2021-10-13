@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Handle Image</h1>
+<div class="dialog-container" mat-dialog-content>
+  <div class="webcam">
+    <video #webcam class="hidden"></video>
+    <canvas #canvas></canvas>
+  </div>
+  <div class="button-acquire-container" *ngIf="isRunning$|async">
+    <button class="button-acquire" mat-fab color="accent" (click)="acquire()">
+      <mat-icon>camera</mat-icon>
+    </button>
+  </div>
+</div>
+<mat-dialog-actions>
+  <div fxFlex></div>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

@@ -28,6 +28,11 @@ export * from './lib/StepInfo';
 export * from './lib/MenuButton';
 export * from './lib/SudokulabPage';
 
+export * from './lib/ImgDto';
+export * from './lib/RectangleDto';
+export * from './lib/OcrOptions';
+export * from './lib/OcrResult';
+
 export * from './lib/logic';
 export * from './lib/Facade';
 export * from './lib/SudokuFacade';
@@ -40,6 +45,10 @@ export * from './lib/HelpFacade';
 
 export * from './lib/UploadDialogOptions';
 export * from './lib/UploadDialogResult';
+export * from './lib/CameraDialogOptions';
+export * from './lib/CameraDialogResult';
+export * from './lib/HandleImageOptions';
+export * from './lib/HandleImageResult';
 
 export * from './lib/services';
 

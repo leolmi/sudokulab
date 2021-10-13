@@ -40,7 +40,12 @@ export class UploadDialogComponent {
 
   private _upload(sdk: Sudoku) {
     this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult(sdk, this.onlyValues$.getValue()));
+    this._dialogRef.close(new UploadDialogResult({ sdk, onlyValues: this.onlyValues$.getValue() }));
+  }
+
+  private _image(image: string) {
+    this._sudoku.upload(false);
+    this._dialogRef.close(new UploadDialogResult({ image, onlyValues: this.onlyValues$.getValue() }));
   }
 
   applyText(e: any) {
@@ -63,7 +68,7 @@ export class UploadDialogComponent {
     this.onlyValues$.next(e.checked);
   }
 
-  private _readFile(file: any) {
+  private _readJsonFile(file: any) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -85,32 +90,65 @@ export class UploadDialogComponent {
     reader.readAsText(file);
   }
 
-  onFileChange(e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    const files = (e.dataTransfer || e.target).files;
-    const file = files[0];
-    if (!/(.*)(.json)$/i.test(file.name)) {
-      e.target.value = '';
+  private _readImageFile(file: Blob) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        this._image(<string>reader.result);
+      } catch (err) {
+        this._sudoku.raiseError(err);
+      }
+    };
+    reader.onerror = (err) => {
+      this._sudoku.raiseError(err);
+    }
+    reader.readAsDataURL(file);
+  }
+
+  private _checkFile(file: any, e?: any) {
+    if (!file) return;
+    if (isImageType(file?.type) && this.data.allowImages) {
+      this._readImageFile(file);
+    } else if (isJsonType(file?.type)) {
+      this._readJsonFile(file);
+    } else {
+      if (!!e) e.target.value = '';
       return this._sudoku.raiseMessage(new SudokuMessage({
         message: 'Invalid file!',
         type: MessageType.error
       }));
-    } else {
-      this._readFile(file);
     }
+  }
+
+  onFileChange(e: any) {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = (e.dataTransfer || e.target).files;
+    this._checkFile(files[0], e);
   }
 
   allowDrop(e: any) {
     e.preventDefault();
     const enabled = (<HTMLElement>e.target)?.classList.contains('drop-enabled');
-    const file = Array.from(e.dataTransfer?.items||[]).find((i: any) => !!i && i.kind === 'file' && i.type === 'application/json');
+    const file = Array.from(e.dataTransfer?.items||[]).find((i: any) => !!i && i.kind === 'file' && isAvailableType(i.type));
     e.dataTransfer.dropEffect = (!!file && enabled) ? 'copy' : 'none';
   }
   drop(e: any) {
     e.preventDefault();
     e.stopPropagation();
-    const file = Array.from(e.dataTransfer?.files||[]).find((i: any) => !!i && i.type === 'application/json');
-    if (!!file) this._readFile(file);
+    const file = Array.from(e.dataTransfer?.files||[]).find((i: any) => !!i && isAvailableType(i.type));
+    this._checkFile(file);
   }
+}
+
+const isImageType = (type: string): boolean => {
+  return ['image/png','image/jpg','image/jpeg','image/bmp'].indexOf(type)>-1
+}
+
+const isJsonType = (type: string): boolean => {
+  return type === 'application/json';
+}
+
+const isAvailableType = (type: string): boolean => {
+  return isImageType(type) || isJsonType(type);
 }

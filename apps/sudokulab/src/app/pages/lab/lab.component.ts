@@ -1,11 +1,14 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { getBoardStyle, LabFacade, SudokuFacade, use } from '@sudokulab/model';
+import { CameraDialogResult, getBoardStyle, LabFacade, SudokuFacade, use } from '@sudokulab/model';
 import { DestroyComponent } from '../../components/DestroyComponent';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
-import { map, skip, take, takeUntil } from 'rxjs/operators';
+import { filter, map, skip, switchMap, take, takeUntil } from 'rxjs/operators';
+import { ImageHandlerComponent } from '../../components/image-handler/image-handler.component';
+import { CameraDialogComponent } from '../../components/camera-dialog/camera-dialog.component';
+import { SchemaCheckComponent } from '../../components/schema-check/schema-check.component';
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -27,8 +30,16 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
               _sudoku: SudokuFacade) {
     super(_sudoku);
     _sudoku
-      .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true })
-      .subscribe(res => !!res ? _lab.loadSudoku(res.sdk, res.onlyValues) : null);
+      .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true, allowImages: true })
+      .pipe(filter(res => !!res?.sdk || !!res?.image))
+      .subscribe(res => res.sdk ?
+        _sudoku.loadSudoku(res.sdk, res.onlyValues) :
+        _sudoku.handleImage(res));
+
+    _sudoku.onCamera(CameraDialogComponent, this._destroy$);
+    _sudoku.onHandleImage(ImageHandlerComponent, this._destroy$);
+    _sudoku.onCheckSchema(SchemaCheckComponent, this._destroy$);
+
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
     this.topToolFlex$ = this.compact$.pipe(map(iscompact => iscompact ? 'none' : '50'));

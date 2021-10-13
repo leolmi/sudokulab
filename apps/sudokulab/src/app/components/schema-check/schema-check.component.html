@@ -1,0 +1,14 @@
+<h1 mat-dialog-title>Check schema</h1>
+<div mat-dialog-content class="schema-check-dialog">
+  <div class="schema-container">
+    <sudokulab-schema
+      class="schema"
+      [schema]="schema$|async"
+      (schemaChanged)="updateSchema($event)"></sudokulab-schema>
+  </div>
+</div>
+<mat-dialog-actions>
+  <div fxFlex></div>
+  <button mat-stroked-button (click)="done()">DONE</button>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

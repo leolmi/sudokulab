@@ -11,20 +11,15 @@
              [ngStyle]="cellStyle$|async"
              (click)="select(col, row)"
              fxLayout="row" fxLayoutAlign="center center"
-             *ngIf="(schema.cells||{})[col+'.'+row] as cell"
+             *ngIf="((cells$|async)||{})[col+'.'+row] as cell"
              [ngClass]="{
                 'fixed': cell?.fixed,
                 'selected': cell.id === (selected$|async),
                 'right-line': ((grline$|async)||{})[col],
                 'bottom-line': ((grline$|async)||{})[row],
-                'error': cell.error,
-                'has-value': !!(cell?.value$|async)
+                'has-value': !!(cell?.value)
              }">
-          <div class="cell-value">{{cell.value$|async}}</div>
-          <div class="cell-available-values">
-            <div class="cell-available-value"
-                 *ngFor="let av of cell.availables$|async">{{av}}</div>
-          </div>
+          <div class="cell-value">{{cell.value}}</div>
         </div>
       </div>
     </div>

@@ -65,10 +65,6 @@ export class GeneratorContext extends GeneratorFacade {
     this._store.dispatch(GeneratorActions.downloadActiveGeneratorSchema());
   }
 
-  loadGeneratorSchema(schema: Sudoku) {
-    this._store.dispatch(GeneratorActions.loadGeneratorSchema({ schema }));
-  }
-
   raiseMessage(message: SudokuMessage) {
     this._store.dispatch(SudokuActions.setActiveMessage({ message }));
   }

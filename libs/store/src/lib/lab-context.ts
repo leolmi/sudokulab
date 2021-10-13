@@ -1,4 +1,5 @@
 import {
+  HandleImageOptions, HandleImageResult,
   LabFacade,
   PlaySudoku,
   PlaySudokuOptions,
@@ -8,7 +9,7 @@ import {
   SudokuFacade,
   SudokuMessage
 } from '@sudokulab/model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import * as SudokuSelectors from './selectors';
 import * as SudokuActions from './actions';
 import { Store } from '@ngrx/store';
@@ -38,9 +39,13 @@ export class LabContext extends LabFacade {
     this._store.dispatch(SudokuActions.setActiveCell({ id }));
   }
 
-  loadSudoku(sudoku: Sudoku, onlyValues?: boolean) {
-    this._store.dispatch(SudokuActions.loadSudokuRequest({ sudoku, onlyValues }));
-  }
+  // loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean) {
+  //   if (!!sudoku) this._sudoku.loadSudoku(sudoku, onlyValues);
+  // }
+  //
+  // handleImage(o?: HandleImageOptions) {
+  //   this._sudoku.handleImage(o);
+  // }
 
   applyAlgorithm(algorithm: string) {
     this._store.dispatch(SudokuActions.applyAlgorithm({ algorithm }));
@@ -104,6 +109,10 @@ export class LabContext extends LabFacade {
 
   openSelectedSudoku() {
     this._store.dispatch(SudokuActions.openSelectedSudoku());
+  }
+
+  camera() {
+    this._sudoku.camera();
   }
 
   constructor(private _store: Store<SudokuStore>,

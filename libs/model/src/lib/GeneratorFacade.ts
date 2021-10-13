@@ -18,7 +18,6 @@ export abstract class GeneratorFacade implements Facade {
   abstract addSchema(schema: Sudoku): void;
   abstract openInLab(schema: Sudoku): void;
   abstract setWorkingInfo(info: WorkingInfo): void;
-  abstract loadGeneratorSchema(schema: Sudoku): void;
 
   abstract run(): void;
   abstract stop(): void;

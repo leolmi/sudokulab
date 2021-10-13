@@ -52,6 +52,11 @@ export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap
   return !!cell?.fixed && !gmap.cellsX[cell.id]?.isValueX;
 }
 
+export const parseValue = (raw: string, rank?: number, acceptX = false): string => {
+  let value = (raw||'').trim();
+  if (value === 'Delete' || !isValidValue(value, rank, acceptX)) value = '';
+  return value;
+}
 
 const _getGroupCellValuesMap = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<string> => {
   return _reduce(g.cells, (m, cid) => {
@@ -204,11 +209,12 @@ export const getAvailables = (rank: number|undefined) =>
 export const getDimension = (rank: number|undefined) =>
   Array(rank || 9).fill(0).map((x, i) => i)
 
-export const isValidValue = (sdk: PlaySudoku|undefined, value: string): boolean => {
+export const isValidValue = (value: string, rank?: number, acceptX = false): boolean => {
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
-  const isvalue = available_pos > -1 && available_pos < (sdk?.sudoku?.rank || 9);
-  return (value.length === 1 && isvalue) || ['Delete', ' '].indexOf(value)>-1;
+  const isvalue = available_pos > -1 && available_pos < (rank || 9);
+  const isdynamic = value === SUDOKU_DYNAMIC_VALUE;
+  return (value.length === 1 && (isvalue || (isdynamic && acceptX))) || ['Delete', ' '].indexOf(value)>-1;
 }
 
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
