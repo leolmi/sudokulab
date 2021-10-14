@@ -49,11 +49,23 @@ interface RectPos {
                   (mousemove)="mousemoove($event)"
                   (mousedown)="mousedown($event)"
                   (mouseout)="leave()"
-                  (mouseup)="leave()">
-    <div class="crop-point" [ngStyle]="((cropPointStyle$|async)||{})['TopLeft']"></div>
-    <div class="crop-point" [ngStyle]="((cropPointStyle$|async)||{})['TopRight']"></div>
-    <div class="crop-point" [ngStyle]="((cropPointStyle$|async)||{})['BottomLeft']"></div>
-    <div class="crop-point" [ngStyle]="((cropPointStyle$|async)||{})['BottomRight']"></div>
+                  (mouseup)="leave()"
+                  (touchstart)="touchstart($event)"
+                  (touchend)="leave()"
+                  (touchmove)="touchmove($event)"
+                  (touchcancel)="leave()">
+    <div class="crop-point"
+         [ngClass]="{'active': (currentPoint$|async) === 'TopLeft'}"
+         [ngStyle]="((cropPointStyle$|async)||{})['TopLeft']"></div>
+    <div class="crop-point"
+         [ngClass]="{'active': (currentPoint$|async) === 'TopRight'}"
+         [ngStyle]="((cropPointStyle$|async)||{})['TopRight']"></div>
+    <div class="crop-point"
+         [ngClass]="{'active': (currentPoint$|async) === 'BottomLeft'}"
+         [ngStyle]="((cropPointStyle$|async)||{})['BottomLeft']"></div>
+    <div class="crop-point"
+         [ngClass]="{'active': (currentPoint$|async) === 'BottomRight'}"
+         [ngStyle]="((cropPointStyle$|async)||{})['BottomRight']"></div>
     <div class="crop-area-inner" [ngStyle]="cropAreaStyle$|async" #area>
       <svg width="100%" height="100%" viewBox="0 0 90 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -120,8 +132,16 @@ export class CropAreaComponent implements AfterViewInit {
   }
 
   mousedown(e: any) {
-    this.mooving$.next(this.currentPoint$.getValue() !== 'none');
     console.log('MOUSE DOWN ORIGINAL', e);
+    this.mooving$.next(this.currentPoint$.getValue() !== 'none');
+  }
+
+  touchstart(e: any) {
+    console.log('TOUCH DOWN ORIGINAL', e);
+    const movement = getTouchMoovement(e);
+    const point = getCurrentPoint(this.cropRect$.getValue(), movement);
+    this.currentPoint$.next(point);
+    this.mooving$.next(point !== 'none');
   }
 
   mousemoove(e: any) {
@@ -138,9 +158,27 @@ export class CropAreaComponent implements AfterViewInit {
     }
   }
 
+  touchmove(e: any) {
+    const point = this.currentPoint$.getValue();
+    if (point === 'none') return;
+    e.stopPropagation();
+    e.preventDefault();
+    const movement = getTouchMoovement(e);
+    const position = this.userMove$.getValue();
+    const move = calcMovement(position, movement, point, this._ele.nativeElement.parentElement);
+    this.userMove$.next(move);
+  }
+
   ngAfterViewInit() {
     setTimeout(() => this._winresize$.next({}), 250);
   }
+}
+
+const getTouchMoovement = (e: any): Vector => {
+  const rect = e.target.getBoundingClientRect();
+  const evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+  const touch = evt.touches[0] || evt.changedTouches[0];
+  return <Vector>{ x: touch.pageX - rect.left, y: touch.pageY - rect.top};
 }
 
 const getSize = (ele: HTMLElement): Size => {
