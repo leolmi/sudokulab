@@ -109,13 +109,13 @@ export class SudokuContext extends SudokuFacade {
   }
 
   onCamera(component: Type<any>, destroyer$: Observable<any>, options?: CameraDialogOptions): void {
-    this._on(this._camera$, component, destroyer$, { width: '800px', panelClass: 'full-screen' }, options)
+    this._on(this._camera$, component, destroyer$, { width: '800px', panelClass: 'full-screen', disableClose: true }, options)
       .pipe(filter(res => !!(<HandleImageOptions>res)?.image))
       .subscribe(res => !!res ? this._handleImage$.next(<HandleImageOptions>res) : null);
   }
 
   onCheckSchema(component: Type<any>, destroyer$: Observable<any>): void {
-    this._on(this._checkSchema$, component, destroyer$, { width: '800px', panelClass: 'full-screen' })
+    this._on(this._checkSchema$, component, destroyer$, { width: '500px', panelClass: 'full-screen' })
       .pipe(filter(res => !!(<HandleImageResult>res)?.sdk))
       .subscribe((res) => this.loadSudoku((<HandleImageResult>res).sdk, (<HandleImageResult>res).onlyValues));
   }

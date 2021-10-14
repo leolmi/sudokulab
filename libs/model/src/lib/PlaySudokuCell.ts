@@ -1,4 +1,6 @@
-export class PlaySudokuCell {
+import { Cell } from './Cell';
+
+export class PlaySudokuCell implements Cell {
   constructor(c?: Partial<PlaySudokuCell>) {
     this.id = '';
     this.position = 0;

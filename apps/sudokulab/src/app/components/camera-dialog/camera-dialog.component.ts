@@ -8,10 +8,13 @@ import {
   ViewChild
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { CameraDialogOptions, CameraDialogResult, SudokuFacade } from '@sudokulab/model';
+import { CameraDialogOptions, CameraDialogResult, MessageType, SudokuFacade, SudokuMessage } from '@sudokulab/model';
 import { BehaviorSubject } from 'rxjs';
 
 const CAMERA_CONSTRAINTS: any = {
+  facingMode: {
+    exact: 'environment'
+  },
   video: {
     width: {
       max: 720,
@@ -19,7 +22,8 @@ const CAMERA_CONSTRAINTS: any = {
     height: {
       max: 720,
     },
-  },
+    aspectRatio: { ideal: 1 }
+  }
 }
 @Component({
   selector: 'sudokulab-camera-dialog',
@@ -43,12 +47,23 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     this.isRunning$ = new BehaviorSubject<boolean>(false);
     this.error$ = new BehaviorSubject<boolean>(false);
     this.message$ = new BehaviorSubject<string>('initializing...');
+
+    this.message$.subscribe(message => _sudoku.raiseMessage(new SudokuMessage({ message })));
   }
 
   private _error(err?: any, message?: string) {
     this.error$.next(!!err);
     if (err) console.error(message||'Errors', err);
     if (message) this.message$.next(message);
+  }
+
+  private async _close() {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
+      mediaStream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+      console.error('Error while stopping media stream video', err);
+    }
   }
 
   private async _init() {
@@ -63,14 +78,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     const ctx: CanvasDrawImage = <CanvasDrawImage>canvas.getContext("2d");
 
     try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const environmentCamera = devices.find(device =>
-        device.kind === 'videoinput' && device.label.includes('facing back'));
-      if (environmentCamera) {
-        CAMERA_CONSTRAINTS.video.deviceId = environmentCamera.deviceId;
-      } else {
-        CAMERA_CONSTRAINTS.facingMode = { exact: 'environment' };
-      }
+      CAMERA_CONSTRAINTS.facingMode = { exact: 'environment' };
 
       const mediaStream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
       webcam.srcObject = mediaStream;
@@ -96,7 +104,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     await this._init();
   }
 
-  acquire() {
+  async acquire() {
     try {
       this.isRunning$.next(false);
       const canvas = (<HTMLCanvasElement>this.canvas?.nativeElement);
@@ -106,6 +114,8 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
       ctx.drawImage(webcam, 0, 0, CAMERA_CONSTRAINTS.video.width.max, CAMERA_CONSTRAINTS.video.height.max);
       const image = canvas.toDataURL();
 
+      await this._close();
+
       this._dialogRef.close(new CameraDialogResult({ image }))
 
     } catch (err) {
@@ -113,8 +123,12 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  async ngOnDestroy() {
-    const mediaStream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
-    mediaStream.getTracks().forEach(track => track.stop());
+  async close() {
+    await this._close();
+    this._dialogRef.close();
+  }
+
+  ngOnDestroy() {
+    this._close();
   }
 }

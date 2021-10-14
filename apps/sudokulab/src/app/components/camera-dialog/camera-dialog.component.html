@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Handle Image</h1>
+<h1 mat-dialog-title>Take a picture</h1>
 <div class="dialog-container" mat-dialog-content>
   <div class="webcam">
     <video #webcam class="hidden"></video>
@@ -12,5 +12,5 @@
 </div>
 <mat-dialog-actions>
   <div fxFlex></div>
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="close()">Cancel</button>
 </mat-dialog-actions>

@@ -1,14 +1,23 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { CameraDialogResult, getBoardStyle, LabFacade, SudokuFacade, use } from '@sudokulab/model';
-import { DestroyComponent } from '../../components/DestroyComponent';
+import {
+  Cell,
+  getBoardStyle,
+  HandleImageResult,
+  LabFacade, Sudoku,
+  SUDOKU_DEFAULT_RANK,
+  SudokuFacade,
+  use
+} from '@sudokulab/model';
 import { MatDialog } from '@angular/material/dialog';
+import { DestroyComponent } from '../../components/DestroyComponent';
 import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
-import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, skip, switchMap, take, takeUntil } from 'rxjs/operators';
 import { ImageHandlerComponent } from '../../components/image-handler/image-handler.component';
 import { CameraDialogComponent } from '../../components/camera-dialog/camera-dialog.component';
 import { SchemaCheckComponent } from '../../components/schema-check/schema-check.component';
+import { ActivatedRoute } from '@angular/router';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, map, skip, take, takeUntil } from 'rxjs/operators';
+import { Dictionary } from '@ngrx/entity';
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -23,18 +32,29 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   layoutAlign$: Observable<string>;
   topToolFlex$: Observable<string>;
   boardStyle$: Observable<any>;
+  cells$: Observable<Dictionary<Cell>>;
+  isActiveCell$: Observable<boolean>;
+  isPencil$: Observable<boolean>;
+  rank$: Observable<number>;
 
   constructor(private _lab: LabFacade,
               private _route: ActivatedRoute,
               private _dialog: MatDialog,
               _sudoku: SudokuFacade) {
     super(_sudoku);
+    this.cells$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.cells||{}));
+    this.isActiveCell$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$), map(cell => !!cell));
+    this.isPencil$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => !!sdk?.options?.usePencil));
+    this.rank$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.sudoku?.rank||SUDOKU_DEFAULT_RANK));
+
     _sudoku
-      .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true, allowImages: true })
-      .pipe(filter(res => !!res?.sdk || !!res?.image))
-      .subscribe(res => res.sdk ?
-        _sudoku.loadSudoku(res.sdk, res.onlyValues) :
-        _sudoku.handleImage(res));
+      .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true, allowImages: true, allowEditOnGrid: true })
+      .pipe(filter(res => res.editOnGrid || !!res?.sdk || !!res?.image))
+      .subscribe(res => res.editOnGrid ?
+        _sudoku.checkSchema(new HandleImageResult({ sdk: new Sudoku(), onlyValues: res.onlyValues })) :
+        res.sdk ?
+          _sudoku.loadSudoku(res.sdk, res.onlyValues) :
+          _sudoku.handleImage(res));
 
     _sudoku.onCamera(CameraDialogComponent, this._destroy$);
     _sudoku.onHandleImage(ImageHandlerComponent, this._destroy$);
@@ -58,5 +78,13 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
           const id = parseInt(gp.get('id') || '0', 10);
           setTimeout(() => id ? this._lab.setActiveSudoku(id) : this._sudoku.checkStatus(), 250);
         }));
+  }
+
+  keyPressed(num: string) {
+    this._lab.setValue(num);
+  }
+
+  pencilChanged(pencil: boolean) {
+    this._lab.updatePlayerOptions({ usePencil: pencil });
   }
 }

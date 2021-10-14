@@ -1,5 +1,5 @@
 <div class="key-board"
-     [ngClass]="{'disabled': !!!(isCellSelected$|async)}"
+     [ngClass]="{'disabled': !!!(isActive$|async)}"
      fxLayout="row" fxLayoutAlign="start center">
   <div class="key-number"
        [ngClass]="{'filled': !!((status$|async)||{})[kn]}"
@@ -7,6 +7,7 @@
        (click)="clickOnNumber(kn)"
        fxFlex>{{kn}}</div>
   <div class="key-number"
+       *ngIf="usePencil"
        (click)="togglePencil()"
        [ngClass]="{'color-accent': isPencil$|async}"
        fxFlex>

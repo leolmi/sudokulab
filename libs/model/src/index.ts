@@ -1,5 +1,6 @@
 export * from './lib/enums';
 export * from './lib/consts';
+export * from './lib/Cell';
 export * from './lib/CellInfo';
 export * from './lib/Sudoku';
 export * from './lib/SudokuMessage';

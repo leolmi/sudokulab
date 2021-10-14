@@ -25,7 +25,7 @@ import { Algorithm } from './lib/Algorithm';
 import { CellInfo } from './lib/CellInfo';
 import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './lib/consts';
 import {
-  calcDifficulty,
+  calcDifficulty, Cell,
   EditSudoku,
   EditSudokuCell,
   EditSudokuGenerationMap,
@@ -38,6 +38,7 @@ import { Dictionary } from '@ngrx/entity';
 import { SudokuSolution } from './lib/SudokuSolution';
 import { getHash } from './global.helper';
 import { ElementRef } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -398,4 +399,38 @@ export const getSudokuForUserSettings = (sdk: PlaySudoku|undefined): Partial<Pla
   const s = _clone(sdk);
   delete s.sudoku;
   return s;
+}
+
+const setCellFixedValue = (sdk: Sudoku, cell: Cell) => {
+  const cid = decodeCellId(cell.id);
+  const index = (cid.row * sdk.rank) + cid.col;
+  const char = parseValue(cell.value, sdk.rank)||SUDOKU_EMPTY_VALUE;
+  sdk.fixed = sdk.fixed.substr(0, index) + char + sdk.fixed.substr(index+1);
+  sdk.values = sdk.fixed;
+}
+
+export const updateSudokuCellValue = (sudoku$: BehaviorSubject<Sudoku>, cell: Cell): Sudoku => {
+  const sdk = sudoku$.getValue();
+  const nsdk = _clone(sdk);
+  setCellFixedValue(nsdk, cell);
+  sudoku$.next(nsdk);
+  return nsdk;
+}
+
+export const getSudokuCells = (sdk: Sudoku): Dictionary<Cell> => {
+  const cells: Dictionary<Cell> = {};
+  if(!!sdk) {
+    for (let col = 0; col < sdk.rank; col++) {
+      for (let row = 0; row < sdk.rank; row++) {
+        const index = (row * sdk.rank) + col;
+        const v = parseValue(sdk.fixed.charAt(index), sdk.rank, true);
+        cells[cellId(col, row)] = {
+          id: cellId(col, row),
+          value: v,
+          fixed: !!v
+        }
+      }
+    }
+  }
+  return cells;
 }

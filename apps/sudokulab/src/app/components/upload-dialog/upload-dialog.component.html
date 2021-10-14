@@ -14,7 +14,7 @@
       <p>or click to browse on folders</p>
     </div>
   </div>
-  <div class="text-container" fxLayout="column">
+  <div class="text-container" [ngClass]="{'has-edit-on-grid': !!data?.allowEditOnGrid}" fxLayout="column">
     <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
     <input matInput
            class="input-schema-string"
@@ -22,6 +22,9 @@
            [value]="(text$|async)"
            placeholder="insert schema numbers..."
            (input)="applyText($event)">
+    <button class="edit-on-grid" mat-icon-button matTooltip="Edit on grid" (click)="editOnGrid()">
+      <mat-icon>apps</mat-icon>
+    </button>
     <div class="text-info">{{textInfo$|async}}</div>
   </div>
 </div>

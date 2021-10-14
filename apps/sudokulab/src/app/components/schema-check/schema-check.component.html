@@ -4,11 +4,16 @@
     <sudokulab-schema
       class="schema"
       [schema]="schema$|async"
+      (selectionChanged)="selectionChanged($event)"
       (schemaChanged)="updateSchema($event)"></sudokulab-schema>
   </div>
+  <sudokulab-key-board [cells]="cells$|async"
+                       [isActive]="!!(activeCellId$|async)"
+                       [rank]="(schema$|async)?.rank"
+                       (onValueChanged)="keyPressed($event)"></sudokulab-key-board>
 </div>
 <mat-dialog-actions>
   <div fxFlex></div>
-  <button mat-stroked-button (click)="done()">DONE</button>
+  <button mat-stroked-button (click)="done()">LOAD</button>
   <button mat-button mat-dialog-close>Cancel</button>
 </mat-dialog-actions>

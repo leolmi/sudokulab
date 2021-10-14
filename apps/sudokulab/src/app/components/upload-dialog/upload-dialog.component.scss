@@ -3,13 +3,32 @@
 .upload-dialog {
   height: 340px;
 }
-
-.input-schema-string {
-  font-family: monospace;
-  font-size: 1.5em;
-  padding: 6px;
-  border: rgba(10,10,10,.1) 1px solid;
+.text-container {
+  position: relative;
+  .input-schema-string {
+    font-family: monospace;
+    font-size: 1.5em;
+    padding: 6px;
+    border: rgba(10, 10, 10, 0.1) 1px solid;
+  }
+  .edit-on-grid {
+    position: absolute;
+    right: -3px;
+    top: 17px;
+    display: none;
+  }
+  &.has-edit-on-grid {
+    .input-schema-string {
+      width: calc(100% - 44px);
+      padding-right: 36px;
+    }
+    .edit-on-grid {
+      display: block;
+    }
+  }
 }
+
+
 .text-info {
   opacity: .6;
   font-size: .8em;

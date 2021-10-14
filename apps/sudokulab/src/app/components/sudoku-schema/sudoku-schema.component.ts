@@ -2,34 +2,31 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef, EventEmitter,
+  ElementRef,
+  EventEmitter,
   HostListener,
-  Input, Output,
+  Input,
+  Output,
   ViewChild
 } from '@angular/core';
 import {
+  Cell,
   cellId,
-  decodeCellId,
-  getDimension, getFixedCount,
+  getDimension,
   getLinesGroups,
   getSchemaCellStyle,
+  getSudokuCells,
   isDirectionKey,
   moveOnDirection,
-  parseValue,
   Sudoku,
-  SUDOKU_EMPTY_VALUE,
-  SudokulabWindowService
+  SudokulabWindowService,
+  updateSudokuCellValue
 } from '@sudokulab/model';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { cloneDeep as _clone } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 
-class Cell {
-  id?: string;
-  value?: string;
-  fixed?: boolean;
-}
 
 @Component({
   selector: 'sudokulab-schema',
@@ -54,6 +51,7 @@ export class SudokuSchemaComponent implements AfterViewInit {
   }
 
   @Output() schemaChanged: EventEmitter<Sudoku> = new EventEmitter<Sudoku>();
+  @Output() selectionChanged: EventEmitter<string> = new EventEmitter<string>();
 
   constructor(private _ele: ElementRef,
               private _window: SudokulabWindowService) {
@@ -64,12 +62,14 @@ export class SudokuSchemaComponent implements AfterViewInit {
 
     this.cells$ = new BehaviorSubject<Dictionary<Cell>>({});
 
-    this.schema$.subscribe(sdk => this.cells$.next(getSchemaCells(sdk)));
+    this.schema$.subscribe(sdk => this.cells$.next(getSudokuCells(sdk)));
     this.rows$ = this.schema$.pipe(map(s => getDimension(s?.rank)));
     this.cols$ = this.schema$.pipe(map(s => getDimension(s?.rank)));
     this.grline$ = this.schema$.pipe(map(s => getLinesGroups(s.rank)));
     this.cellStyle$ = combineLatest(this._resize$, this.element$, this.schema$).pipe(map(([r, ele, schema]) =>
       getSchemaCellStyle(schema?.rank||9, ele?.nativeElement?.clientWidth||200)));
+
+    this.selected$.pipe(filter(sel => !!sel)).subscribe(sel => this.selectionChanged.emit(sel));
   }
 
   ngAfterViewInit() {
@@ -85,7 +85,6 @@ export class SudokuSchemaComponent implements AfterViewInit {
   keyEvent(e: KeyboardEvent) {
     const sdk = this.schema$.getValue();
     const sel = this.selected$.getValue();
-    const cells = this.cells$.getValue();
     if (!sdk || !sel) return;
     if (isDirectionKey(e?.key)) {
       const m = moveOnDirection(sel, sdk, e?.key);
@@ -93,10 +92,7 @@ export class SudokuSchemaComponent implements AfterViewInit {
       e.stopPropagation();
       e.preventDefault();
     } else {
-      const nsdk = _clone(sdk);
-      setCellFixedValue(nsdk, sel, e?.key);
-      this.schema$.next(nsdk);
-      this.schemaChanged.emit(nsdk);
+      this.schemaChanged.emit(updateSudokuCellValue(this.schema$, { id: sel, value: e?.key }));
     }
   }
 
@@ -107,30 +103,6 @@ export class SudokuSchemaComponent implements AfterViewInit {
   repaint() {
     this._resize$.next({});
   }
-}
-
-const getSchemaCells = (sdk: Sudoku): Dictionary<Cell> => {
-  const cells: Dictionary<Cell> = {};
-  for(let col = 0; col<sdk.rank; col++) {
-    for (let row = 0; row < sdk.rank; row++) {
-      const index = (row * sdk.rank) + col;
-      const v = parseValue(sdk.fixed.charAt(index), sdk.rank, true);
-      cells[cellId(col, row)] = {
-        id: cellId(col, row),
-        value: v,
-        fixed: !!v
-      }
-    }
-  }
-  return cells;
-}
-
-const setCellFixedValue = (sdk: Sudoku, cellid: string, value: string) => {
-  const cid = decodeCellId(cellid);
-  const index = (cid.row * sdk.rank) + cid.col;
-  const char = parseValue(value, sdk.rank)||SUDOKU_EMPTY_VALUE;
-  sdk.fixed = sdk.fixed.substr(0, index) + char + sdk.fixed.substr(index+1);
-  sdk.values = sdk.fixed;
 }
 
 

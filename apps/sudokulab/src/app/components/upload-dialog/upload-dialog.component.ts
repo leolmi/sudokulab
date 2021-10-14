@@ -48,6 +48,11 @@ export class UploadDialogComponent {
     this._dialogRef.close(new UploadDialogResult({ image, onlyValues: this.onlyValues$.getValue() }));
   }
 
+  editOnGrid() {
+    this._sudoku.upload(false);
+    this._dialogRef.close(new UploadDialogResult({ editOnGrid: true, onlyValues: this.onlyValues$.getValue() }));
+  }
+
   applyText(e: any) {
     if (!e?.target) return;
     this.text$.next((<HTMLInputElement>e?.target).value);
@@ -139,6 +144,7 @@ export class UploadDialogComponent {
     const file = Array.from(e.dataTransfer?.files||[]).find((i: any) => !!i && isAvailableType(i.type));
     this._checkFile(file);
   }
+
 }
 
 const isImageType = (type: string): boolean => {

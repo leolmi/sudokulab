@@ -13,7 +13,13 @@
                         class="lab-progress-bar"
                         color="primary"
                         mode="determinate"></mat-progress-bar>
-      <sudokulab-key-board></sudokulab-key-board>
+      <sudokulab-key-board [cells]="cells$|async"
+                           [isActive]="isActiveCell$|async"
+                           [isPencil]="isPencil$|async"
+                           [rank]="rank$|async"
+                           [usePencil]="true"
+                           (onValueChanged)="keyPressed($event)"
+                           (onPencilChanged)="pencilChanged($event)"></sudokulab-key-board>
       <sudokulab-board-state></sudokulab-board-state>
     </div>
   </div>
@@ -21,3 +27,4 @@
     <sudokulab-schemas></sudokulab-schemas>
   </div>
 </div>
+

@@ -1,4 +1,6 @@
-export class EditSudokuCell {
+import { Cell } from './Cell';
+
+export class EditSudokuCell implements Cell {
   constructor(c?: Partial<EditSudokuCell>) {
     this.id = '';
     this.position = 0;
