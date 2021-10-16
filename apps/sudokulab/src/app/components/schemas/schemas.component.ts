@@ -60,7 +60,14 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   }
 
   select(schema: PlaySudoku) {
-    this._lab.setSelectedSudoku(schema._id);
+    use(combineLatest(this.selectedId$, this.activeId$), ([sid, aid]) => {
+      if (schema._id === sid && schema._id !== aid) {
+        this._lab.openSelectedSudoku();
+      } else {
+        this._lab.setSelectedSudoku(schema._id);
+      }
+    });
+
   }
 
   open() {

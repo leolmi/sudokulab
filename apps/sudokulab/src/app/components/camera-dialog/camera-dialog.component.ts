@@ -8,14 +8,10 @@ import {
   ViewChild
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { CameraDialogOptions, CameraDialogResult, MessageType, SudokuFacade, SudokuMessage } from '@sudokulab/model';
+import { CameraDialogOptions, CameraDialogResult, SquareInfo, SudokuFacade, SudokuMessage } from '@sudokulab/model';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep as _clone } from 'lodash';
-
-const CAMERA_ICON = {
-  front: 'camera_front',
-  rear: 'camera_rear'
-}
+import { CAMERA_CONSTRAINTS, searchForSquare } from './logic';
 
 interface DeviceInfo {
   name: string;
@@ -23,20 +19,6 @@ interface DeviceInfo {
   _dev: any;
 }
 
-const CAMERA_CONSTRAINTS: any = {
-  // facingMode: {
-  //   exact: 'environment'
-  // },
-  video: {
-    width: {
-      max: 720,
-    },
-    height: {
-      max: 720,
-    },
-    aspectRatio: { ideal: 1 }
-  }
-}
 @Component({
   selector: 'sudokulab-camera-dialog',
   templateUrl: './camera-dialog.component.html',
@@ -52,6 +34,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
   message$: BehaviorSubject<string>;
   error$: BehaviorSubject<boolean>;
   devices$: BehaviorSubject<DeviceInfo[]>;
+  square$: BehaviorSubject<SquareInfo|null>;
 
   isDoubleCam$: BehaviorSubject<boolean>;
   camIcon$: BehaviorSubject<string>;
@@ -67,6 +50,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     this.isDoubleCam$ = new BehaviorSubject<boolean>(false);
     this.camIcon$ = new BehaviorSubject<string>('');
     this.devices$ = new BehaviorSubject<DeviceInfo[]>([]);
+    this.square$ = new BehaviorSubject<SquareInfo|null>(null);
 
     this.message$.subscribe(message => _sudoku.raiseMessage(new SudokuMessage({ message })));
   }
@@ -93,7 +77,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
 
     const canvas = (<HTMLCanvasElement>this.canvas?.nativeElement);
     const webcam = (<HTMLVideoElement>this.webcam?.nativeElement);
-    const ctx: CanvasDrawImage = <CanvasDrawImage>canvas.getContext("2d");
+    const ctx: CanvasDrawImage&CanvasImageData = <CanvasDrawImage&CanvasImageData>canvas.getContext("2d");
 
     try {
       await this._close();
@@ -103,20 +87,39 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
       webcam.srcObject = mediaStream;
       webcam.play();
 
+      let squareInfo = new SquareInfo();
+
       this.isRunning$.next(true);
 
-      const runProcessing = async () => {
+      const refresh = async () => {
         if (!this.isRunning$.getValue()) {
           mediaStream.getTracks().forEach(track => track.stop());
           return
         }
         ctx.drawImage(webcam, 0, 0, constraints.video.width.max, constraints.video.height.max);
-        requestAnimationFrame(runProcessing);
+        requestAnimationFrame(refresh);
       }
 
-      runProcessing();
+      refresh();
+
+      // const findSquare = async () => {
+      //   if (!this.isRunning$.getValue()) return;
+      //   const imageData = ctx.getImageData(0, 0, constraints.video.width.max, constraints.video.height.max)
+      //   squareInfo = await searchForSquare(new Uint8Array(imageData.data))
+      //
+      //   this.square$.next(squareInfo);
+      //
+      //   if ((squareInfo?.corners||[]).length > 0) {
+      //     ctx.putImageData(new ImageData(squareInfo.image, constraints.video.width.max, constraints.video.height.max), 0, 0);
+      //   }
+      //
+      //   requestAnimationFrame(findSquare);
+      // }
+      //
+      // findSquare();
+
     } catch (err) {
-      this._error(err, 'Errors while initializing camera');
+      this._error(err, 'Errors while set camera');
     }
   }
 
@@ -125,12 +128,12 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     const canvas = (<HTMLCanvasElement>this.canvas?.nativeElement);
     const webcam = (<HTMLVideoElement>this.webcam?.nativeElement);
 
-    canvas.setAttribute('width', `${CAMERA_CONSTRAINTS.video.width.max}px`)
-    canvas.setAttribute('height', `${CAMERA_CONSTRAINTS.video.height.max}px`)
-    webcam.setAttribute('width', `${CAMERA_CONSTRAINTS.video.width.max}px`)
-    webcam.setAttribute('height', `${CAMERA_CONSTRAINTS.video.height.max}px`)
-
     try {
+      canvas.setAttribute('width', `${CAMERA_CONSTRAINTS.video.width.max}px`)
+      canvas.setAttribute('height', `${CAMERA_CONSTRAINTS.video.height.max}px`)
+      webcam.setAttribute('width', `${CAMERA_CONSTRAINTS.video.width.max}px`)
+      webcam.setAttribute('height', `${CAMERA_CONSTRAINTS.video.height.max}px`)
+
       const devices = await navigator.mediaDevices.enumerateDevices();
       this.devices$.next(devices.filter(dev => dev.kind === 'videoinput').map((dev, i) => ({
         name: dev.label || `Camera ${(i+1)}`,
@@ -138,7 +141,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
         _dev: dev
       })));
 
-      this.setMedia(this.devices$.getValue()[0]);
+      await this.setMedia(this.devices$.getValue()[0]);
     } catch (err) {
       this._error(err, 'Errors while initializing camera');
     }
@@ -175,8 +178,6 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this._close();
   }
-
-  toggleCam() {
-
-  }
 }
+
+

@@ -16,7 +16,7 @@ export class LabManifest extends SudokulabPage {
     {separator: true},
     {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: 'has_no_lab_schema'},
     {icon: 'apps_outage', code: 'upload', tooltip: 'Open schema'},
-    {icon: 'camera', code: 'camera', tooltip: 'Acquire by camera'},
+    {icon: 'camera', code: 'camera', tooltip: 'Acquire by camera', invisibleKey: 'not_available_camera' },
     {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: 'has_no_lab_schema'}
   ];
   title = 'Player';

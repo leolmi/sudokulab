@@ -33,6 +33,7 @@ export * from './lib/ImgDto';
 export * from './lib/RectangleDto';
 export * from './lib/OcrOptions';
 export * from './lib/OcrResult';
+export * from './lib/SquareInfo';
 
 export * from './lib/logic';
 export * from './lib/Facade';

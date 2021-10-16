@@ -302,7 +302,12 @@ export class LabEffects {
     ofType(SudokuActions.setActivePage, SudokuActions.setActiveSudoku, SudokuActions.checkStatus),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) =>
-      [SudokuActions.updatePageStatus({ status: { has_no_lab_schema: !sdk } })])
+      [SudokuActions.updatePageStatus({
+        status: {
+          has_no_lab_schema: !sdk,
+          not_available_camera: !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices
+        }
+      })])
   ));
 
   stepInfo$ = createEffect(() => this._actions$.pipe(

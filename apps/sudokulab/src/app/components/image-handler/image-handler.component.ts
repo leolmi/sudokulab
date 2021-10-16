@@ -1,18 +1,11 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {
-  HandleImageOptions,
-  HandleImageResult,
-  ImgDto,
-  OcrResult,
-  RectangleDto,
-  Sudoku,
-  SudokuFacade
-} from '@sudokulab/model';
+import { HandleImageOptions, HandleImageResult, ImgDto, OcrResult, Sudoku, SudokuFacade } from '@sudokulab/model';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { Rect } from './crop-area.component';
 import { map, switchMap, take } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { checkImageSize, getRectDto } from '../../utils/image.utils';
 
 @Component({
   selector: 'sudokulab-image-handler',
@@ -55,12 +48,13 @@ export class ImageHandlerComponent {
     combineLatest(this.rotationDeg$, this.crop$)
       .pipe(
         take(1),
-        switchMap(([rotation, crop]) =>
-          this._http.post<any>('/api/sudoku/ocr', <ImgDto>{
-            data: this.data.image,
-            rect: getRectDto(crop) ,
+        switchMap(([rotation, crop]) => checkImageSize(this.data.image)
+          .pipe(switchMap(image => this._http.post<any>('/api/sudoku/ocr', <ImgDto>{
+            data: image,
+            rect: getRectDto(crop),
             rotation
           })))
+        ))
       .subscribe((resp: OcrResult) => {
         this.working$.next(false);
         const sdk = new Sudoku({ fixed: resp.values });
@@ -72,11 +66,5 @@ export class ImageHandlerComponent {
   }
 }
 
-const getRectDto = (crop: Rect): RectangleDto => {
-  return {
-    left: crop.x,
-    top: crop.y,
-    width: crop.w,
-    height: crop.h
-  }
-}
+
+

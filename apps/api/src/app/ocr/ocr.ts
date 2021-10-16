@@ -21,34 +21,39 @@ export const ocr = async (img: ImgDto, o?: OcrOptions): Promise<OcrResult> => {
   const options = new OcrOptions(o);
   let confidence = 0;
   const elaboration: Elaboration = { img, cells: [] };
+  const dim = options.rank * options.rank;
+  const cells: any = {};
+  let values = '';
+  const langPath = join(__dirname, 'assets');
+
   try {
     await elaborate(elaboration, options);
   } catch (err) {
     console.error('Error while elaborating image', err);
     return new OcrResult({ cells: {}, values: '', confidence: 0 });
   }
-  const langPath = join(__dirname, 'assets');
-  const worker = createWorker({ langPath });
-  await worker.load();
-  await worker.loadLanguage('eng');
-  await worker.initialize('eng');
-  await worker.setParameters({ tessedit_char_whitelist: '123456789' });
-  const dim = options.rank * options.rank;
-  const cells: any = {};
-  let values = '';
+  try {
+    const worker = createWorker({ langPath });
+    await worker.load();
+    await worker.loadLanguage('eng');
+    await worker.initialize('eng');
+    await worker.setParameters({ tessedit_char_whitelist: '123456789' });
 
-
-  await onCells(options.rank, async (col, row, id, i) => {
-    const cell = elaboration.cells[i];
-    const { data } = await worker.recognize(cell.buffer);
-    const value = getCellValue(data, options);
-    console.log(`CELL "${cell.id}" TEXT=${(data.text || '').trim().replace(/\s/g, '')}  CONFIDENCE=${data.confidence}  RIGHT-VALUE=${value}`);
-    if (data.confidence>10 && data.confidence<options.min_confidenze) {
-      console.log(`SKIPPED CELL "${cell.id}" CONFIDENCE=${data.confidence}`, data);
-    }
-    cells[cell.id] = value;
-    values = `${values}${value || '0'}`
-  });
+    await onCells(options.rank, async (col, row, id, i) => {
+      const cell = elaboration.cells[i];
+      const { data } = await worker.recognize(cell.buffer);
+      const value = getCellValue(data, options);
+      // console.log(`CELL "${cell.id}" TEXT=${(data.text || '').trim().replace(/\s/g, '')}  CONFIDENCE=${data.confidence}  RIGHT-VALUE=${value}`);
+      if (data.confidence > 10 && data.confidence < options.min_confidenze) {
+        // console.log(`SKIPPED CELL "${cell.id}" CONFIDENCE=${data.confidence}`, data);
+      }
+      cells[cell.id] = value;
+      values = `${values}${value || '0'}`
+    });
+  } catch (err) {
+    console.error('Error while ocr processing image', err);
+    return new OcrResult({ cells: {}, values: '', confidence: 0 });
+  }
 
   if (values.length === dim) confidence = 100;
   const result = new OcrResult({ cells, values, confidence });
