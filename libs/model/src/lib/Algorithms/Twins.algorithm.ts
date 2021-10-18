@@ -3,7 +3,7 @@ import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { Dictionary } from '@ngrx/entity';
 import { forEach as _forEach, keys as _keys, reduce as _reduce, remove as _remove, includes as _includes } from 'lodash';
-import { getGroupCouples } from '../logic';
+import { checkAvailables, getGroupCouples } from '../logic';
 import { getGroups } from '../../sudoku.helper';
 import { addLine } from '../../global.helper';
 
@@ -43,10 +43,18 @@ export class TwinsAlgorithm extends Algorithm {
       // ricerca quindi le coppie di celle che possono contenere i due numeri
       const couple = _keys(couples_map).find(ids => (couples_map[ids] || []).length === 2);
       if (!!couple) {
-        // elimina la coppia di valori dagli availables delle altre celle presenti
-        // nei gruppi comuni alle celle della coppia
         const ids = couple.split('|');
         const values = couples_map[couple];
+        // toglie dai valori possibili delle celle gemelle gli altri
+        ids.forEach(id => {
+          const removed = _remove(sdk.cells[id]?.availables||[], v => !_includes(values, v));
+          if (removed.length > 0) {
+            description = addLine(description, `On cell "${id}" the possible values [${removed.join(',')}] have been removed`);
+            applied = true;
+          }
+        });
+        // elimina la coppia di valori dagli availables delle altre celle presenti
+        // nei gruppi comuni alle celle della coppia
         getGroups(sdk, ids).forEach(g =>
           g.cells.forEach(gcid => {
             if (!_includes(ids, gcid)) {
@@ -59,6 +67,8 @@ export class TwinsAlgorithm extends Algorithm {
           }));
       }
     });
+
+    if (applied) checkAvailables(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

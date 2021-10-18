@@ -32,6 +32,7 @@
       <li><mat-icon>auto_fix_high</mat-icon>: risolve integralmente lo schema applicando tutti i valori;</li>
       <li><mat-icon>download</mat-icon>: scarica lo schema corrente come file json;</li>
       <li><mat-icon>apps_outage</mat-icon>: apre il tool di import (vedi più avanti) di schemi salvati o da stringa ti testo;</li>
+      <li><mat-icon>camera</mat-icon>: permette di acquisire uno schema dalla telecamera del dispositivo;</li>
       <li><mat-icon>border_clear</mat-icon>: cancella tutti i valori non fissi dallo schema riportandolo allo stato iniziale;</li>
     </ul>
     <p>Sulla sinistra la valutazione della difficoltà e l'elenco degli algoritmi utilizzati per la soluzione.</p>
@@ -63,10 +64,14 @@
       <li><b>One Value For Cell</b>: <i>esiste un solo valore possibile per la cella nel gruppo</i>.<br>
         Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un
         punteggio più alto rispetto al precedente;</li>
-      <li><b>Alignment on group</b>: <i>quando due celle all'interno di un gruppo sono le uniche a poter contenere un
+      <li><b>Alignment on group</b>: <i>quando alcune celle all'interno di un gruppo sono le uniche a poter contenere un
         determinato valore e generano un allineamento che coinvolge altri gruppi, in questi secondi è possibile escludere
         quel valore da quelli possibili</i>.<br>Un po' più complesso del precedente anche perché non risolve un valore di
         una cella ma contribuisce con i precedenti. Per questo ha un punteggio ancora più alto;</li>
+      <li><b>Twins</b>: <i>quando una coppia di celle all'interno di un gruppo può contenere la stessa coppia di valori
+        questi possono essere esclusi da tutte le altre celle del gruppo e dagli altri gruppi che le contengono</i>.<br>
+        Complesso poco più del precedente e come questo non risolve un valore di una cella ma contribuisce con i precedenti.
+        Per questo ha un punteggio leggermente più alto del precedente;</li>
       <li><b>Try Number</b>: <i>se una determinata cella può ospitare N numeri, si divide la soluzione in N schemi, uno
         per ogni valore</i>.<br>Come si è già detto, rappresenta l'applicazione del metodo <i>brutal force</i>.
         Questo algoritmo sceglie la prima cella con il numero di valori possibili più basso. Ovviamente rappresenta la
@@ -121,7 +126,7 @@
     <br><br>
     <h1 id="help-import">Import schemi</h1>
     <div class="image-container">
-      <img class="help-image small-image" src="assets/images/import_01.png" aria-label="sudokulab import">
+      <img class="help-image small-image" src="assets/images/open-schema.png" aria-label="sudokulab import">
     </div>
     <p>Il tool permette di caricare schemi precedentemente scaricati in formato json. È quindi possibile scambiarsi
       schemi utilizzando l'export.</p>
@@ -135,7 +140,23 @@
     <p code>000780002004500703010000000720...</p>
     <p>nel caso si stia importando uno schema nel generatore è possibile considerare anche i marker utilizzando il
       carattere <span code>x</span></p>
-    <p>In fine l'opzione <i bold>only values</i> aggiungerà allo schema presente i valori non fissi.</p>
+    <p>L'opzione <i bold>only values</i> aggiungerà allo schema presente i valori non fissi.</p>
+    <p>Utilizzando il pulsante <mat-icon>apps</mat-icon> è possibile inserire i valori direttamente in uno schema apposito:</p>
+    <div class="image-container">
+      <img class="help-image small-image" src="assets/images/check-schema.png" aria-label="sudokulab check schema dialog">
+    </div>
+    <p>Come si è notato è possibile trascinare anche file di tipo immagine, e in tal caso si accederà al tool di gestione
+      dell'immagine che permette all'utente di ritagliare e/o ruotare lo schema ed avviare la fase di decodifica</p>
+    <div class="image-container">
+      <img class="help-image small-image" src="assets/images/handle-image.png" aria-label="sudokulab check schema dialog">
+    </div>
+    <p>Dopo tale operazione, se la decodifica ha successo lo schema letto viene aperto nel precedente tool "Check Schema"
+      per correggere o integrare informazioni non correttamente interpretate.</p>
+    <p>L'acquisizione dell'immagine, se il device lo supporta, è startabile anche dal pulsante apposito <mat-icon>camera</mat-icon>:</p>
+    <div class="image-container">
+      <img class="help-image small-image" src="assets/images/take-picture.png" aria-label="sudokulab camera dialog">
+    </div>
+
 
 
     <br><br><br><br>

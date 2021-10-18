@@ -2,7 +2,10 @@ import {
   addLine,
   Algorithm,
   AlgorithmResult,
-  getAlignment, getGroupCouples,
+  checkAvailables,
+  getAlignment,
+  getGroupCouples,
+  getValuesAlignment,
   PlaySudoku,
   PlaySudokuCellAlignment
 } from '@sudokulab/model';
@@ -10,9 +13,8 @@ import {
   forEach as _forEach,
   includes as _includes,
   intersection as _intersection,
-  reduce as _reduce,
-  remove as _remove,
-  keys as _keys
+  keys as _keys,
+  remove as _remove
 } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 
@@ -22,7 +24,7 @@ export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
  * ALGORITMO
  * allineamento nel gruppo:
  *
- * quando un possibile valore è presente solo 2 volte in un gruppo e genera un allineamento,
+ * quando un possibile valore è presente in un allineamento in un gruppo,
  * può essere escluso dagli altri gruppi intersecanti
  */
 export class AlignmentOnGroupAlgorithm extends Algorithm {
@@ -35,23 +37,27 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
     let applied = false;
     let description = '';
     _forEach(sdk.groups, (g) => {
-      // ricerca i valori che sono presenti solo in due celle allineate
-      const couples = getGroupCouples(g, (ids) => getAlignment(ids[0], ids[1]) !== PlaySudokuCellAlignment.none);
-      // l'algoritmo è applicato se fra tutte le coppie trovate, almeno una
-      // permette di eliminare valori possibili da altre celle
-      _forEach(couples,(cp, v) => {
-        // considera i gruppi a cui appartengono entrambe le celle
-        const groups = _intersection(sdk.groupsForCell[(cp || [])[0]], sdk.groupsForCell[(cp || [])[1]]);
-        groups.forEach(gid =>
-          sdk.groups[gid]?.cells.forEach(cid => {
-            const removed = _remove(sdk.cells[cid]?.availables||[], av => !_includes(cp, cid) && av === v);
-            if (removed.length > 0) {
-              description = addLine(description, `On cell "${cid}" the possible values [${removed.join(',')}] have been removed`);
-              applied = true;
-            }
-          }));
+      // ricerca i valori che sono presenti solo in celle allineate
+      _forEach(g?.availableOnCells||{}, (cls, v) => {
+        const cids = _keys(cls);
+        if (getValuesAlignment(cids, sdk?.sudoku?.rank) !== PlaySudokuCellAlignment.none) {
+          // ricerca i gruppi comuni a tutte le celle allineate
+          const groups = _intersection(...cids.map(id => sdk.groupsForCell[id]));
+          // rimuove dai valori possibili per le celle dei gruppi comuni il valore dell'allineamento
+          groups.forEach(gid => {
+            sdk.groups[gid]?.cells.forEach(cid => {
+              const removed = _remove(sdk.cells[cid]?.availables||[], av => !_includes(cids, cid) && av === v);
+              if (removed.length > 0) {
+                description = addLine(description, `On cell "${cid}" the possible values [${removed.join(',')}] have been removed`);
+                applied = true;
+              }
+            });
+          });
+        }
       });
     });
+
+    if (applied) checkAvailables(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

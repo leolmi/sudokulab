@@ -19,13 +19,15 @@ import {
   OneCellForValueAlgorithm,
   OneValueForCellAlgorithm,
   TRY_NUMBER_ALGORITHM,
-  TryNumberAlgorithm
+  TryNumberAlgorithm,
+  TwinsAlgorithm
 } from './lib/Algorithms';
 import { Algorithm } from './lib/Algorithm';
 import { CellInfo } from './lib/CellInfo';
 import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './lib/consts';
 import {
-  calcDifficulty, Cell,
+  calcDifficulty,
+  Cell,
   EditSudoku,
   EditSudokuCell,
   EditSudokuGenerationMap,
@@ -148,6 +150,7 @@ const _checkAlgorithms = () => {
       new OneCellForValueAlgorithm(),
       new OneValueForCellAlgorithm(),
       new AlignmentOnGroupAlgorithm(),
+      new TwinsAlgorithm(),
       new TryNumberAlgorithm());
   }
 }
@@ -167,6 +170,30 @@ export const getAlignment = (cid1: string, cid2: string): PlaySudokuCellAlignmen
   const id2 = cid2.split('.');
   if (id1[0] === id2[0]) return PlaySudokuCellAlignment.vertical;
   if (id1[1] === id2[1]) return PlaySudokuCellAlignment.horizontal;
+  return PlaySudokuCellAlignment.none;
+}
+
+export const getValuesAlignment = (cids: string[], rank: number|undefined): PlaySudokuCellAlignment => {
+  if (cids.length < 2) return PlaySudokuCellAlignment.none;
+  let horz = true;
+  let vert = true;
+  let col = -1;
+  let row = -1;
+  cids.forEach(id => {
+    const cinfo = decodeCellId(id, rank);
+    if (col < 0) {
+      col = cinfo.col
+    } else if (col !== cinfo.col) {
+      vert = false;
+    }
+    if (row < 0) {
+      row = cinfo.row;
+    } else if (row !== cinfo.row) {
+      horz = false;
+    }
+  });
+  if (horz) return PlaySudokuCellAlignment.horizontal;
+  if (vert) return PlaySudokuCellAlignment.vertical;
   return PlaySudokuCellAlignment.none;
 }
 
