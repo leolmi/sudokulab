@@ -4,6 +4,8 @@ import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { ImgDto, ManageDto, OcrResult } from '@sudokulab/model';
 import { AuthGuard } from '@nestjs/passport';
+import { environment } from '../../environments/environment';
+import { DevelopGuard } from '../app.develop.guard';
 
 @Controller('sudoku')
 export class SudokuController {
@@ -25,8 +27,14 @@ export class SudokuController {
   }
 
   @Post('manage')
-  // @UseGuards(AuthGuard('google'))
+  @UseGuards(AuthGuard('google'))
   async manage(@Body() data: ManageDto) {
+    return this.sudokuService.manage(data);
+  }
+
+  @Post('managedev')
+  @UseGuards(new DevelopGuard())
+  async managedev(@Body() data: ManageDto) {
     return this.sudokuService.manage(data);
   }
 }

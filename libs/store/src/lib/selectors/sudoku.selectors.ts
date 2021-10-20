@@ -1,6 +1,6 @@
 import { createSelector } from '@ngrx/store';
 import { selectFeature } from '../common';
-import { SudokulabPage, SudokuMessage } from '@sudokulab/model';
+import { PrintData, PrintTemplate, SudokulabPage, SudokuMessage } from '@sudokulab/model';
 import { Dictionary } from '@ngrx/entity';
 
 export const selectSudoku = createSelector(
@@ -37,3 +37,19 @@ export const selectOperationStatus = createSelector(
   selectSudoku,
   (state): number => state.operationStatus||-1
 )
+
+export const selectEnvironment = createSelector(
+  selectSudoku,
+  (state): any => state.env
+)
+
+export const selectActiveTemplate = createSelector(
+  selectSudoku,
+  (state): string => state.template
+)
+
+export const selectPrintData = createSelector(
+  selectSudoku,
+  (state): PrintData|undefined => state.printData
+)
+

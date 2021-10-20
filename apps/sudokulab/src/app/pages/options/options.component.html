@@ -11,14 +11,6 @@
         <mat-slide-toggle [checked]="isDebugMode$|async"
                           (change)="setDebugMode($event)">Debug active</mat-slide-toggle>
       </div>
-
-<!--      <div class="options-row" fxLayout="row" fxLayoutAlign="center">-->
-<!--        <button mat-stroked-button id="google-login-button"-->
-<!--                color="accent" class="login-button contrast-button" *ngIf="googleok$|async">-->
-<!--          <img src="assets/images/google_24.png">-->
-<!--          <span>Authenticate with Google</span>-->
-<!--        </button>-->
-<!--      </div>-->
     </div>
 
     <div class="options-group">
@@ -28,6 +20,17 @@
                           disabled="true"
                           (change)="apply($event, 'showAvailable')">Show available numbers on cell</mat-slide-toggle>
       </div>
+    </div>
+
+    <div class="options-row" fxLayout="row" fxLayoutAlign="end center">
+      <button mat-stroked-button
+              id="google-login-button"
+              color="accent"
+              class="login-button contrast-button available"
+              [ngClass]="{'available': googleok_check$|async}">
+        <img src="assets/images/google_24.png">
+        <span>Authenticate with Google</span>
+      </button>
     </div>
 
     <div class="options-group" *ngIf="isAuthenticated$|async">

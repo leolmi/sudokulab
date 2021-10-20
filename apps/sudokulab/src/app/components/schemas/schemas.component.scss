@@ -44,6 +44,8 @@
     height: 30px;
     position: relative;
     cursor: pointer;
+    width: 100%;
+    overflow: hidden;
     &:hover {
       background-color: rgba(10, 10, 10, .1);
       &.color-accent {

@@ -38,6 +38,11 @@ export class SudokuContext extends SudokuFacade {
   selectTheme$: Observable<string> = this._store.select(SudokuSelectors.selectTheme);
   selectToken$: Observable<string> = this._store.select(SudokuSelectors.selectToken);
   selectOperationStatus$: Observable<number> = this._store.select(SudokuSelectors.selectOperationStatus);
+  selectActiveTemplate$: Observable<string> = this._store.select(SudokuSelectors.selectActiveTemplate);
+
+  setEnvironment(env: any) {
+    this._store.dispatch(SudokuActions.setEnvironment({ env }));
+  }
 
   googleLogin(credentials: GoogleCredentials) {
     this._store.dispatch(SudokuActions.doGoogleLogin({ credentials }));
@@ -128,6 +133,10 @@ export class SudokuContext extends SudokuFacade {
 
   manage(operation: string, args?: any) {
     this._store.dispatch(SudokuActions.manage({ operation, args }));
+  }
+
+  setPrintTemplate(template: string) {
+    this._store.dispatch(SudokuActions.setPrintTemplate({ template }));
   }
 
   constructor(private _store: Store<SudokuStore>,

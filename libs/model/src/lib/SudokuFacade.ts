@@ -23,7 +23,9 @@ export abstract class SudokuFacade implements Facade {
   abstract selectTheme$: Observable<string>;
   abstract selectToken$: Observable<string>;
   abstract selectOperationStatus$: Observable<number>;
+  abstract selectActiveTemplate$: Observable<string>;
 
+  abstract setEnvironment(env: any): void;
   abstract googleLogin(credentials: GoogleCredentials): void;
   abstract loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean): void;
   abstract loadSchema(schema: Sudoku): void;
@@ -40,6 +42,7 @@ export abstract class SudokuFacade implements Facade {
   abstract handleImage(o?: HandleImageOptions): void;
   abstract camera(): void;
   abstract manage(operation: string, args?: any): void;
+  abstract setPrintTemplate(template: string): void;
 
   abstract onUpload(component: Type<any>, destroyer$: Observable<any>, options?: UploadDialogOptions): Observable<UploadDialogResult|any>;
   abstract onHandleImage(component: Type<any>, destroyer$: Observable<any>): void;

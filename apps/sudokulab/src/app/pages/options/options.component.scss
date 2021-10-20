@@ -44,9 +44,14 @@
 }
 
 .login-button {
-  padding: 10px;
+  padding: 10px 16px;
   margin: 10px 0;
-  opacity: .9;
+  opacity: 0;
+  pointer-events: none;
+  &.available {
+    opacity: 1;
+    pointer-events: auto;
+  }
   img {
     margin-right: 10px;
   }

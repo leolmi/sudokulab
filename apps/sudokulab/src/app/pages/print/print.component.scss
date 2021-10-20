@@ -1,0 +1,12 @@
+.template-card {
+  max-width: 240px;
+  margin: 8px;
+  &.active {
+    outline: rgba(10,10,10,.3) 1px dashed;
+    outline-offset: -10px;
+  }
+}
+
+.templates {
+  margin-bottom: 24px;
+}

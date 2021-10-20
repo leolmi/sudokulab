@@ -104,7 +104,8 @@ export class SudokuEffects {
 
   _manage$ = createEffect(() => this._actions$.pipe(
     ofType(this._manage),
-    switchMap(a => this._http.post('/api/sudoku/manage', a).pipe(
+    withLatestFrom(this._store.select(SudokuSelectors.selectEnvironment)),
+    switchMap(([a, env]) => this._http.post(`/api/sudoku/manage${env.production?'':'dev'}`, a).pipe(
       switchMap((resp) => {
         const output: Action[] = [
           SudokuActions.setOperationStatus({ status: -1 }),

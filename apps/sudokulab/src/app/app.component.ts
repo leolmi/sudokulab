@@ -4,7 +4,7 @@ import {
   Facade,
   GeneratorFacade,
   LabFacade,
-  OptionsFacade, setApplicationTheme,
+  OptionsFacade, PrintFacade, setApplicationTheme,
   SUDOKU_AUTHOR_LINK,
   SudokuFacade, SUDOKULAB_DARK_THEME,
   SudokulabPage,
@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AvailablePages } from './model';
 import { Dictionary } from '@ngrx/entity';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'sudokulab-root',
@@ -37,6 +38,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
               private _sudoku: SudokuFacade,
               private _lab: LabFacade,
               private _generator: GeneratorFacade,
+              private _print: PrintFacade,
               private _options: OptionsFacade,
               private _window: SudokulabWindowService) {
     this.pages$ = new BehaviorSubject<SudokulabPage[]>(_pagesProvider.pages);
@@ -44,6 +46,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.status$ = _sudoku.selectPageStatus$;
     this.compact$ = _sudoku.selectIsCompact$;
 
+    _sudoku.setEnvironment(environment);
     _sudoku.fillDocuments();
 
     _sudoku.selectActiveMessage$
@@ -81,6 +84,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       case AvailablePages.options: return this._options;
       case AvailablePages.lab: return this._lab;
       case AvailablePages.generator: return this._generator;
+      case AvailablePages.print: return this._print;
       default: return undefined;
     }
   }

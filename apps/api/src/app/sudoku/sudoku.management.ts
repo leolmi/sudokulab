@@ -60,7 +60,7 @@ const getSudokuDoc = (sol: SudokuSolution): Sudoku => {
 }
 
 const solveSchema = (s: SudokuDoc): SolveAllResult|undefined => {
-  if (!checkImportText(s.fixed, s.rank)) return undefined;
+  if (s.fixed !== checkImportText(s.fixed, s.rank)) return undefined;
   console.log('create play-sudoku');
   const sdk = new PlaySudoku({ sudoku: _clone(s) });
   console.log('create solver');

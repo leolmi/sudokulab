@@ -1,0 +1,612 @@
+{
+  "_id": 1817571827,
+  "rank": 9,
+  "values": "056207930300060004800090005900040002500000008040000010007000200000805000000030000",
+  "fixed": "056207930300060004800090005900040002500000008040000010007000200000805000000030000",
+  "info": {
+    "fixedCount": 24,
+    "symmetry": "none",
+    "compiled": true,
+    "sudokulab": false,
+    "unique": true,
+    "useTryAlgorithm": false,
+    "algorithms": [
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.0"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcef"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.0"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf0"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.0"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf1"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf2"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.1"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf3"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf4"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf5"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.1"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf6"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf7"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf8"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.3"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcf9"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcfa"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcfb"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcfc"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcfd"
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "5.1"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcfe"
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "4.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdcff"
+      },
+      {
+        "algorithm": "OneValueForCell",
+        "cases": [],
+        "cells": [
+          "0.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd00"
+      },
+      {
+        "algorithm": "Twins",
+        "cases": [],
+        "cells": [],
+        "applied": true,
+        "_id": "61700004265c839af74bdd01"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd02"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd03"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "0.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd04"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd05"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd06"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.3"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd07"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd08"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "2.2"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd09"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "4.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd0a"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd0b"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd0c"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd0d"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd0e"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd0f"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.5"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd10"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd11"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd12"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd13"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.3"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd14"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.3"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd15"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd16"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.3"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd17"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.3"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd18"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.2"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd19"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.2"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd1a"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "3.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd1b"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.4"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd1c"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "5.6"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd1d"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.2"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd1e"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.2"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd1f"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "1.1"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd20"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.1"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd21"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.1"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd22"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.2"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd23"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "6.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd24"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd25"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.7"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd26"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "7.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd27"
+      },
+      {
+        "algorithm": "OneCellForValue",
+        "cases": [],
+        "cells": [
+          "8.8"
+        ],
+        "applied": true,
+        "_id": "61700004265c839af74bdd28"
+      }
+    ],
+    "difficultyMap": {
+      "OneCellForValue": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57
+      ],
+      "OneValueForCell": [
+        15,
+        16,
+        17
+      ],
+      "Twins": [
+        18
+      ]
+    },
+    "difficultyValue": 635,
+    "solutions": [],
+    "difficulty": "MEDIUM",
+    "_id": "61700004265c839af74bdcee",
+    "rank": 9
+  },
+  "options": {
+    "name": "",
+    "locked": false,
+    "editable": false
+  }
+}

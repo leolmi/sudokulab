@@ -8,7 +8,7 @@ import {
   SUDOKULAB_LIGHT_THEME, SUDOKULAB_MANAGE_OPERATION,
   SudokulabWindowService
 } from '@sudokulab/model';
-import { map } from 'rxjs/operators';
+import { map, skip } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 declare const gapi: any;
@@ -24,6 +24,7 @@ export class OptionsComponent implements AfterViewInit {
   isDarkTheme$: Observable<boolean>;
   showAvailable$: BehaviorSubject<boolean>;
   googleok$: BehaviorSubject<boolean>;
+  googleok_check$: Observable<boolean>;
   isAuthenticated$: Observable<boolean>;
   operationStatus$: Observable<number>;
   isOperationActive$: Observable<boolean>;
@@ -35,9 +36,9 @@ export class OptionsComponent implements AfterViewInit {
     this.isDebugMode$ = new BehaviorSubject<boolean>(isDebugMode());
     this.showAvailable$ = new BehaviorSubject<boolean>(false);
     this.googleok$ = new BehaviorSubject<boolean>(true);
+    this.googleok_check$ = this.googleok$.pipe(skip(1));
     this.isDarkTheme$ = _sudoku.selectTheme$.pipe(map(theme => theme === SUDOKULAB_DARK_THEME));
-    // TODO: >>>>>>>>>>>>>> TEMPORARY DISABLED
-    this.isAuthenticated$ = of(true); //_sudoku.selectToken$.pipe(map(t => !!t));
+    this.isAuthenticated$ = _sudoku.selectToken$.pipe(map(t => !!t || !environment.production));
     this.operationStatus$ = _sudoku.selectOperationStatus$;
     this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
   }
@@ -92,7 +93,6 @@ export class OptionsComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // TODO: >>>>>>>>>>>>>> TEMPORARY DISABLED
-    // this._initGoogleApi();
+    this._initGoogleApi();
   }
 }

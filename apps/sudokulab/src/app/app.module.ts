@@ -6,14 +6,23 @@ import { BoardComponent } from './components/board/board.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {
   GeneratorFacade,
-  LabFacade, OptionsFacade,
+  LabFacade,
+  OptionsFacade,
+  PrintFacade,
   SchemaNamePipe,
   SudokuFacade,
   SudokulabPage,
   SudokulabPagesService,
   SudokulabWindowService
 } from '@sudokulab/model';
-import { OptionsContext, GeneratorContext, LabContext, SudokuContext, SudokuStoreModule } from '@sudokulab/store';
+import {
+  GeneratorContext,
+  LabContext,
+  OptionsContext,
+  PrintContext,
+  SudokuContext,
+  SudokuStoreModule
+} from '@sudokulab/store';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -29,7 +38,6 @@ import { LabComponent } from './pages/lab/lab.component';
 import { OptionsComponent } from './pages/options/options.component';
 import { GeneratorComponent } from './pages/generator/generator.component';
 import { RouterModule } from '@angular/router';
-import { AvailablePages } from './model';
 import { LabManifest } from './pages/lab/lab.manifest';
 import { GeneratorManifest } from './pages/generator/generator.manifest';
 import { OptionsManifest } from './pages/options/options.manifest';
@@ -63,6 +71,7 @@ import { SchemaCheckComponent } from './components/schema-check/schema-check.com
 import { PrintComponent } from './pages/print/print.component';
 import { PrintManifest } from './pages/print/print.manifest';
 import { AppInterceptor } from './app.interceptor';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
   declarations: [
@@ -113,6 +122,7 @@ import { AppInterceptor } from './app.interceptor';
     MatProgressSpinnerModule,
     MatSliderModule,
     MatRippleModule,
+    MatCardModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     BrowserAnimationsModule,
@@ -122,7 +132,7 @@ import { AppInterceptor } from './app.interceptor';
       ...OptionsManifest.routes(),
       ...HelpManifest.routes(),
       ...PrintManifest.routes()
-      ], { useHash: true })
+    ], { useHash: true })
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AppInterceptor, multi: true },
@@ -131,12 +141,13 @@ import { AppInterceptor } from './app.interceptor';
     { provide: SudokuFacade, useClass: SudokuContext },
     { provide: LabFacade, useClass: LabContext },
     { provide: GeneratorFacade, useClass: GeneratorContext },
+    { provide: PrintFacade, useClass: PrintContext },
     { provide: OptionsFacade, useClass: OptionsContext },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
     { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
     { provide: SudokulabPage, useClass: HelpManifest, multi: true },
-    { provide: SudokulabPage, useClass: OptionsManifest, multi: true },
-    { provide: SudokulabPage, useClass: PrintManifest, multi: true }
+    { provide: SudokulabPage, useClass: PrintManifest, multi: true },
+    { provide: SudokulabPage, useClass: OptionsManifest, multi: true }
   ],
   bootstrap: [AppComponent],
 })

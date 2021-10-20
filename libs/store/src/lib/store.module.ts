@@ -10,6 +10,7 @@ import { LabEffects } from './effects/lab.effects';
 import { GeneratorEffects } from './effects/generator.effects';
 import { MatDialogModule } from '@angular/material/dialog';
 import { featureName } from '@sudokulab/model';
+import { PrintEffects } from './effects/print.effects';
 
 @NgModule({
   imports: [
@@ -23,7 +24,8 @@ import { featureName } from '@sudokulab/model';
     EffectsModule.forFeature([
       SudokuEffects,
       LabEffects,
-      GeneratorEffects
+      GeneratorEffects,
+      PrintEffects
     ])
   ]
 })
