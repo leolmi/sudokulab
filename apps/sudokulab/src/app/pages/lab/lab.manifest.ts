@@ -1,6 +1,8 @@
-import {Injectable} from "@angular/core";
-import {LabFacade, SudokuFacade, SudokulabPage} from "@sudokulab/model";
-import {AvailablePages} from "../../model";
+import { Injectable } from '@angular/core';
+import { LabFacade, SudokulabPage } from '@sudokulab/model';
+import { AvailablePages } from '../../model';
+import { LabComponent } from './lab.component';
+import { Routes } from '@angular/router';
 
 @Injectable()
 export class LabManifest extends SudokulabPage {
@@ -32,4 +34,14 @@ export class LabManifest extends SudokulabPage {
       case 'camera': return facade.camera();
     }
   }
+  static routes = (): Routes => [{
+    path: '',
+    component: LabComponent
+  }, {
+    path: `${AvailablePages.lab}`,
+    component: LabComponent
+  }, {
+    path: `${AvailablePages.lab}/:id`,
+    component: LabComponent
+  }];
 }

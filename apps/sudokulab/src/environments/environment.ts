@@ -4,6 +4,9 @@
 
 export const environment = {
   production: false,
+  google: {
+    client_id: 'xxxxxxxxxxxxxxxxxxxxxxxxx',
+  }
 };
 
 /*

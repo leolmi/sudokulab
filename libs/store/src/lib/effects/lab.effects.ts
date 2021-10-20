@@ -9,7 +9,7 @@ import * as SudokuActions from '../actions';
 import {
   Algorithms,
   applyAlgorithm,
-  buildSudokuInfo,
+  buildSudokuInfo, calcFixedCount,
   cellId,
   checkAvailables,
   clear,
@@ -226,13 +226,16 @@ export class LabEffects {
       const result = solver.solve();
       if (result.unique) {
         const schema: Sudoku = <Sudoku>_clone(result.unique.sdk.sudoku);
-        schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms });
+        schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms }, true);
         return [
           SudokuActions.updateSudoku({ changes: { _id: schema._id, sudoku: schema } }),
           SudokuActions.checkSudoku({ schema })];
       } else if (result.multiple) {
         const sudoku: Sudoku = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
-        sudoku.info = new SudokuInfo();
+        sudoku.info = new SudokuInfo({
+          rank: sudoku.rank,
+          fixedCount: calcFixedCount(sudoku.fixed)
+        });
         return [SudokuActions.updateSudoku({ changes: { sudoku } })];
       } else {
         return [];
@@ -247,7 +250,10 @@ export class LabEffects {
       if (!sdk) return [];
       const solver = new Solver(sdk);
       let message: SudokuMessage;
-      const info = new SudokuInfo();
+      const info = new SudokuInfo({
+        rank: sdk?.sudoku?.rank,
+        fixedCount: calcFixedCount(sdk?.sudoku?.fixed)
+      });
       const result = solver.solve();
       if (result.unique) {
         console.log(...SDK_PREFIX, 'schema uniq solved', result);
@@ -258,7 +264,7 @@ export class LabEffects {
         });
         const output: Action[] = [SudokuActions.updateSudoku({ changes: result.unique.sdk })];
         if (!!schema) {
-          schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms });
+          schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms }, true);
           output.push(SudokuActions.checkSudoku({ schema }))
         }
         output.push(SudokuActions.setActiveMessage({ message }));

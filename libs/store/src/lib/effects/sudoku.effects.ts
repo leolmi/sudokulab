@@ -1,24 +1,48 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as SudokuActions from '../actions';
-import { concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import {
   checkAvailables,
   getHash,
+  GoogleCredentials,
+  MessageType,
   PlaySudoku,
-  saveUserSetting, setApplicationTheme,
+  saveUserSetting,
+  setApplicationTheme,
   Sudoku,
-  SudokulabWindowService
+  OPERATION_NEED_RELOAD_DOCS,
+  SudokulabWindowService,
+  SudokuMessage
 } from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
 import * as SudokuSelectors from '../selectors';
-import { Store } from '@ngrx/store';
+import { Action, createAction, props, Store } from '@ngrx/store';
 import { SudokuStore } from '../sudoku-store';
+
 
 @Injectable()
 export class SudokuEffects {
+  _manage = createAction('[SudokuLab.sudoku.private] manage', props<{ operation: string, args?: any }>());
+
+
+  doGoogleLogin = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.doGoogleLogin),
+    switchMap((a) => this._http.post<GoogleCredentials>('/api/auth/google', a.credentials).pipe(
+      switchMap(resp => [SudokuActions.setToken({ token: resp.accessToken })]),
+      catchError((err) => [
+        SudokuActions.setActiveMessage({
+          message: new SudokuMessage({
+            message: 'Cannot access!',
+            type: MessageType.error
+          })
+        }),
+        SudokuActions.setToken({})
+      ])
+    ))
+  ));
 
   activePage$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.setActivePage),
@@ -76,6 +100,44 @@ export class SudokuEffects {
       saveUserSetting('sudoku.theme', a.theme);
     })
   ), { dispatch: false });
+
+
+  _manage$ = createEffect(() => this._actions$.pipe(
+    ofType(this._manage),
+    switchMap(a => this._http.post('/api/sudoku/manage', a).pipe(
+      switchMap((resp) => {
+        const output: Action[] = [
+          SudokuActions.setOperationStatus({ status: -1 }),
+          SudokuActions.setActiveMessage({
+            message: new SudokuMessage({
+              message: `Operation "${a.operation}" successfully executed!`,
+              type: MessageType.success
+            })
+          })
+        ];
+        if (OPERATION_NEED_RELOAD_DOCS[a.operation]) output.push(SudokuActions.fillSchemas());
+        return output;
+      }),
+      catchError(err => [
+        SudokuActions.setOperationStatus({ status: -1 }),
+        SudokuActions.setActiveMessage({
+          message: new SudokuMessage({
+            message: `Error while executing operation "${a.operation}"`,
+            type: MessageType.error
+          })
+        })
+      ])
+    ))
+  ));
+
+  manage$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.manage),
+    switchMap(a => [
+      SudokuActions.setOperationStatus({ status: 1 }),
+      this._manage(a)
+    ])
+  ));
+
 
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>,

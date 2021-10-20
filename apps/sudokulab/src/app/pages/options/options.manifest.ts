@@ -1,6 +1,8 @@
 import {Injectable} from "@angular/core";
 import { OptionsFacade, SudokulabPage } from '@sudokulab/model';
 import {AvailablePages} from "../../model";
+import { OptionsComponent } from './options.component';
+import { Routes } from '@angular/router';
 
 @Injectable()
 export class OptionsManifest extends SudokulabPage {
@@ -13,5 +15,9 @@ export class OptionsManifest extends SudokulabPage {
     switch (code) {
       case 'reset': return facade.reset();
     }
-  }
+  };
+  static routes = (): Routes => [{
+    path: `${AvailablePages.options}`,
+    component: OptionsComponent
+  }];
 }

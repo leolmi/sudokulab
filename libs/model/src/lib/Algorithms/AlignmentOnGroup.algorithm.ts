@@ -2,9 +2,7 @@ import {
   addLine,
   Algorithm,
   AlgorithmResult,
-  checkAvailables,
-  getAlignment,
-  getGroupCouples,
+  AlgorithmType,
   getValuesAlignment,
   PlaySudoku,
   PlaySudokuCellAlignment
@@ -29,8 +27,10 @@ export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
  */
 export class AlignmentOnGroupAlgorithm extends Algorithm {
   id = ALIGNMENT_ON_GROUP_ALGORITHM;
+  factor = '+15';
   name = 'Alignment on group';
   icon = 'padding';
+  type = AlgorithmType.support;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
 
     const cells: Dictionary<boolean> = {};
@@ -56,8 +56,6 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
         }
       });
     });
-
-    if (applied) checkAvailables(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

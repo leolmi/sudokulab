@@ -1,7 +1,17 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
-import { BehaviorSubject, Observable } from 'rxjs';
-import { isDebugMode, setDebugMode, SudokuFacade, SUDOKULAB_DARK_THEME, SUDOKULAB_LIGHT_THEME } from '@sudokulab/model';
+import { AfterViewInit, ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import {
+  isDebugMode,
+  setDebugMode,
+  SudokuFacade,
+  SUDOKULAB_DARK_THEME,
+  SUDOKULAB_LIGHT_THEME, SUDOKULAB_MANAGE_OPERATION,
+  SudokulabWindowService
+} from '@sudokulab/model';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+
+declare const gapi: any;
 
 @Component({
   selector: 'sudokulab-options-page',
@@ -9,15 +19,54 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class OptionsComponent  {
+export class OptionsComponent implements AfterViewInit {
   isDebugMode$: BehaviorSubject<boolean>;
   isDarkTheme$: Observable<boolean>;
   showAvailable$: BehaviorSubject<boolean>;
+  googleok$: BehaviorSubject<boolean>;
+  isAuthenticated$: Observable<boolean>;
+  operationStatus$: Observable<number>;
+  isOperationActive$: Observable<boolean>;
+  OPERATION = SUDOKULAB_MANAGE_OPERATION;
 
-  constructor(private _sudoku: SudokuFacade) {
+  constructor(private _sudoku: SudokuFacade,
+              private _window: SudokulabWindowService,
+              private _zone: NgZone) {
     this.isDebugMode$ = new BehaviorSubject<boolean>(isDebugMode());
     this.showAvailable$ = new BehaviorSubject<boolean>(false);
+    this.googleok$ = new BehaviorSubject<boolean>(true);
     this.isDarkTheme$ = _sudoku.selectTheme$.pipe(map(theme => theme === SUDOKULAB_DARK_THEME));
+    // TODO: >>>>>>>>>>>>>> TEMPORARY DISABLED
+    this.isAuthenticated$ = of(true); //_sudoku.selectToken$.pipe(map(t => !!t));
+    this.operationStatus$ = _sudoku.selectOperationStatus$;
+    this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
+  }
+
+  private _initGoogleApi() {
+    const btn = this._window.nativeWindow.document.getElementById('google-login-button');
+    gapi.load('client:auth2', () =>
+      gapi.auth2.init({
+        client_id: environment.google.client_id,
+        cookie_policy: 'single_host_origin',
+        scope: 'profile email'
+      }).then(() => gapi.auth2.attachClickHandler(btn, {},
+        (googleUser: any) =>
+          this._zone.run(() => {
+            const profile = googleUser.getBasicProfile();
+            this._sudoku.googleLogin({
+              accessToken: googleUser.getAuthResponse().id_token,
+              name: profile.getName(),
+              email: profile.getEmail(),
+              picture: profile.getImageUrl()
+            });
+            this.googleok$.next(true);
+          }),
+        (error: any) =>
+          this._zone.run(() =>
+            this._error(error))),
+        (err: any) =>
+          this._zone.run(() =>
+            this._error(err))));
   }
 
   setDebugMode(e: any) {
@@ -28,6 +77,22 @@ export class OptionsComponent  {
   }
 
   apply(e: any, target: string) {
+    // TODO: applica l'opzione
+  }
 
+  manage(operation: string, args?: any) {
+    this._sudoku.manage(operation, args);
+  }
+
+  private _error(err: any, hidden = false) {
+    if (!hidden) {
+      this._sudoku.raiseError(err);
+    }
+    this.googleok$.next(false);
+  }
+
+  ngAfterViewInit() {
+    // TODO: >>>>>>>>>>>>>> TEMPORARY DISABLED
+    // this._initGoogleApi();
   }
 }

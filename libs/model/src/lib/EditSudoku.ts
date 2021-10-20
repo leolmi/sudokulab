@@ -2,11 +2,11 @@ import { Dictionary } from '@ngrx/entity';
 import { EditSudokuOptions } from './EditSudokuOptions';
 import { EditSudokuCell } from './EditSudokuCell';
 import { EditSudokuGroup } from './EditSudokuGroup';
-import { applySudokuRules, cellId, getAvailables, getGroupRank, groupId, isValue } from '../sudoku.helper';
+import { applySudokuRules, cellId, getAvailables, getGroupRank, groupId } from '../sudoku.helper';
 import { SudokuGroupType } from './enums';
 import { remove as _remove } from 'lodash';
 import { SDK_PREFIX, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
-import { guid } from '../global.helper';
+import { guid, isValue } from '../global.helper';
 
 export class GenerationMapCellInfo {
   constructor(sdk: EditSudoku, cid: string) {

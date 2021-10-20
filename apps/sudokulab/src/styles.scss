@@ -137,6 +137,20 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   font-weight: bold;
 }
 
+.contrast-button {
+  border-color: $color-accent-transp !important;
+  &:hover {
+    border-color: $color-accent !important;
+  }
+  &[disabled] {
+    background-color: transparent !important;
+    border-color: #666 !important;
+    color: #666 !important;
+  }
+}
+
+
+
 @media only screen and (max-width: 1450px) {
   .compact-size-600 {
     width: 600px;

@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import {
   getAlgorithms,
+  getDiffCount,
   getFixedCount,
-  getHash,
+  getTryCount,
   LabFacade,
   SudokuFacade,
-  SudokuInfo,
-  TRY_NUMBER_ALGORITHM
+  SudokuInfo
 } from '@sudokulab/model';
 import { map, takeUntil } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -28,7 +28,7 @@ interface MapItem {
 export class InfoComponent extends DestroyComponent implements OnDestroy {
   info$: Observable<SudokuInfo|undefined>;
   percent$: Observable<string>;
-  useTry$: Observable<string>;
+  useTry$: Observable<number>;
   difficulty$: Observable<string>;
   fixed$: Observable<number>;
   hash$: Observable<string>;
@@ -43,18 +43,18 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
     this.percent$ = sdk$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));
     this.fixed$ = sdk$.pipe(map(s => getFixedCount(s?.sudoku)));
     this.hash$ = sdk$.pipe(map(s => s?.sudoku?._id ? `${s.sudoku._id}` : ''));
+    this.useTry$ = sdk$.pipe(map(s => getTryCount(s)));
 
     this.difficulty$ = this.info$.pipe(map(info => info?.difficulty||'unknown'));
     this.difficultyValue$ = this.info$.pipe(map(info => info?.difficultyValue||0));
-    this.useTry$ = this.info$.pipe(map(info => info?.useTryAlgorithm ? `T${info.difficultyMap[TRY_NUMBER_ALGORITHM]}` : ''));
     const algorithms = getAlgorithms();
-    this.difficultyMap$ = this.info$.pipe(map(info => _keys(info?.difficultyMap||[])
+    this.difficultyMap$ = this.info$.pipe(map(info => _keys(info?.difficultyMap||{})
       .map(k => {
         const alg = algorithms.find(a => a.id === k);
         return {
-          name: alg?.name||k,
-          value: (info?.difficultyMap||{})[k]||0,
-          icon: alg?.icon||''
+          name: alg?.name || k,
+          value: getDiffCount(info?.difficultyMap || {}, k),
+          icon: alg?.icon || ''
         }
       })));
   }

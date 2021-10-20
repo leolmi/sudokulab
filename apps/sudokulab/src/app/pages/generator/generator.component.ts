@@ -5,6 +5,7 @@ import { UploadDialogComponent } from '../../components/upload-dialog/upload-dia
 import { MatDialog } from '@angular/material/dialog';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { AvailablePages } from '../../model';
 
 @Component({
   selector: 'sudokulab-generator-page',

@@ -4,6 +4,7 @@ import { AlgorithmResult } from '../AlgorithmResult';
 import { find as _find } from 'lodash';
 import { checkAvailables } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
+import { AlgorithmType } from '../enums';
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
 
@@ -12,11 +13,15 @@ export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
  * Unico valore per la cella
  *
  * all'interno di un gruppo la cella può contenere solo un valore
+ *
+ * fattore: +25
  */
 export class OneValueForCellAlgorithm extends Algorithm {
   id = ONE_VALUE_FOR_CELL_ALGORITHM;
+  factor = '+25';
   name = 'One value for cell';
   icon = 'center_focus_strong';
+  type = AlgorithmType.solver;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     const cell = _find(sdk.cells, c => (!c?.value && c?.availables || []).length === 1);
 

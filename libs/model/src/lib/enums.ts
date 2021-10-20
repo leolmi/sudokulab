@@ -28,6 +28,11 @@ export enum Algorithms {
   tryNumber = 'TryNumber'
 }
 
+export enum AlgorithmType {
+  solver = 'solver',
+  support = 'support'
+}
+
 export enum MoveDirection {
   up = 'up',
   down = 'down',

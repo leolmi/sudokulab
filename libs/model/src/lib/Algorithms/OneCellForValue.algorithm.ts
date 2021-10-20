@@ -3,8 +3,9 @@ import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { find as _find, keys as _keys } from 'lodash';
 import { checkAvailables } from '../logic';
-import { isValue } from '../../sudoku.helper';
+import { isValue } from '../../global.helper';
 import { PlaySudokuCell } from '../PlaySudokuCell';
+import { AlgorithmType } from '../enums';
 
 export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
 
@@ -16,8 +17,10 @@ export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
  */
 export class OneCellForValueAlgorithm extends Algorithm {
   id = ONE_CELL_FOR_VALUE_ALGORITHM;
+  factor = '+10';
   name = 'One cell for value';
   icon = 'crop_free';
+  type = AlgorithmType.solver;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     let ocid = '';
     let ocvl = '';

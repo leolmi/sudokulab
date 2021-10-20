@@ -3,10 +3,11 @@ import { Model } from 'mongoose';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { validate } from './sudoku.logic';
-import { ImgDto, OcrOptions, OcrResult, SDK_PREFIX_W, Sudoku } from '@sudokulab/model';
+import { ImgDto, ManageDto, OcrOptions, OcrResult, SDK_PREFIX_W, Sudoku } from '@sudokulab/model';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ocr } from '../ocr/ocr';
+import { manage } from './sudoku.management';
 
 @Injectable()
 export class SudokuService implements OnModuleInit {
@@ -51,5 +52,10 @@ export class SudokuService implements OnModuleInit {
 
   async ocr(img: ImgDto, o?: OcrOptions): Promise<OcrResult> {
     return await ocr(img, o);
+  }
+
+  async manage(data: ManageDto): Promise<any> {
+    const func = manage[data.operation];
+    return func ? func(this.sudokuModel, data.args) : Promise.reject('Unknown operation');
   }
 }

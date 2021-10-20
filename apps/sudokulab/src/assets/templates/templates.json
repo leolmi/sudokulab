@@ -1,0 +1,28 @@
+{
+  "template_1": {
+    "name": "template 1 schema",
+    "file": "print-1-schema.html",
+    "schemaCount": 1,
+    "bookmark": {
+      "MAIN_TITLE": "",
+      "SUBTITLE": "",
+      "SCHEMA_1": "",
+      "SCHEMA_1_INFO": "",
+      "FOOTER": ""
+    }
+  },
+  "template_2": {
+    "name": "template 2 schemas",
+    "file": "print-2-schema.html",
+    "schemaCount": 2,
+    "bookmark": {
+      "MAIN_TITLE": "",
+      "SUBTITLE": "",
+      "SCHEMA_1": "",
+      "SCHEMA_1_INFO": "",
+      "SCHEMA_2": "",
+      "SCHEMA_2_INFO": "",
+      "FOOTER": ""
+    }
+  }
+}

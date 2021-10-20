@@ -5,27 +5,29 @@ import {
   applySudokuRules,
   getAlgorithm,
   getAlgorithms,
+  getAlgorithmsMap,
   getAvailables,
   getValues,
-  isSolved,
-  isValue
+  isSolved
 } from '../../sudoku.helper';
 import {
   cloneDeep as _clone,
   extend as _extend,
   forEach as _forEach,
   includes as _includes,
+  isNumber as _isNumber,
   keys as _keys,
-  reduce as _reduce
+  reduce as _reduce,
+  values as _values
 } from 'lodash';
 import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';
 import { SudokuSolution } from '../SudokuSolution';
 import { SudokuInfo } from '../SudokuInfo';
-import { ALGORITHMS_FACTORS, DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM } from '../Algorithms';
-import { Algorithms } from '../enums';
+import { DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM } from '../Algorithms';
+import { Algorithms, AlgorithmType } from '../enums';
 import { PlaySudokuGroup } from '../PlaySudokuGroup';
-import { addLine, debug } from '../../global.helper';
+import { addLine, debug, isValue } from '../../global.helper';
 import { SDK_PREFIX, SDK_PREFIX_DEBUG } from '../consts';
 
 export class Solver {
@@ -52,7 +54,7 @@ export class Solver {
   }
 
   private _solveParallel(): SolveAllResult {
-    const start = performance.now();
+    const start = Date.now();
     let reason = '';
     do {
       this._sdks.forEach(sol => {
@@ -66,7 +68,7 @@ export class Solver {
   }
 
   private _solveSerial(): SolveAllResult {
-    const start = performance.now();
+    const start = Date.now();
     const maxsplit = this._sdks[0].sdk.options.maxSplitSchema;
     let reason = '';
     do {
@@ -256,33 +258,54 @@ export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): So
   });
 }
 
-export const buildDifficultyMap = (algs: AlgorithmResult[]): Dictionary<number> => {
-  return _reduce(algs || [], (m, alg) => {
-    m[alg.algorithm] = (m[alg.algorithm] || 0) + 1;
+export const buildDifficultyMap = (algs: AlgorithmResult[]): Dictionary<number[]> => {
+  return _reduce(algs || [], (m, alg, i) => {
+    m[alg.algorithm] = m[alg.algorithm] || [];
+    (m[alg.algorithm]||[]).push(i);
     return m;
-  }, <Dictionary<number>>{});
+  }, <Dictionary<number[]>>{});
 }
 
-export const calcDifficultyValue = (diffMap: Dictionary<number>): number => {
+/**
+ * Calcola l'incremento della difficoltà
+ * @param v     valore della difficoltà provvisorio
+ * @param N     numero di valori considerati
+ * @param rank  rank dello schema
+ * @param f     fattore incrementante (come porzione d'espressione)
+ */
+const calcIncrement = (v: number, N: number, rank: number, fxC: number, f: string): number => {
+  // conta i numeri che completano lo schema
+  const nums = ((rank * rank) || 81) - fxC;
+  // scope dell'espressione
+  const scope = {
+    N,                    // numero di valori considerati (posizione del ciclo)
+    NU: nums,             // numeri necessari al riempimento
+    NE: nums-N,           // numeri mancanti al riempimento
+    NEP: (nums-N)/nums    // percentuale di numeri mancanti al riempimento
+  };
+  const exp = `return ${v} ${f};`;
+  try {
+    const c = new Function(_keys(scope).join(','), exp);
+    const res = c.apply(c, _values(scope));
+    debug(() => console.log('INCREMENT', exp, '=', res, scope));
+    return _isNumber(res) ? res : v;
+  } catch (err) {
+    console.error('Error while calc increment', exp, '\n\tscope', scope);
+    return v;
+  }
+}
+
+export const calcDifficultyValue = (info: SudokuInfo): number => {
   let diff = 0;
-  getAlgorithms().forEach(a => {
-    const cycles = diffMap[a.id] || 0;
-    const factor = ALGORITHMS_FACTORS[a.id] || '';
-    const sign = factor[0] || '+';
-    const increment = parseFloat(factor.substring(1));
-    if (cycles > 0) {
-      switch (sign) {
-        case '+':
-          diff = diff + (increment * cycles);
-          break;
-        case 'x':
-          for (let i = 0; i < cycles; i++) {
-            diff = (diff || 1) * parseFloat(factor.substring(1));
-          }
-          break;
-      }
+  let N = 0;
+  const algorithms = getAlgorithmsMap();
+  info.algorithms.forEach(a => {
+    const alg = algorithms[a.algorithm];
+    if (!!alg) {
+      if (alg.type === AlgorithmType.solver) N++;
+      diff = calcIncrement(diff, N, info.rank, info.fixedCount, alg.factor);
     }
-  })
+  });
   return Math.floor(diff);
 }
 
@@ -292,11 +315,9 @@ export const calcDifficultyLabel = (value: number): string => {
 
 export const calcDifficulty = (info: SudokuInfo): void => {
   info.difficultyMap = buildDifficultyMap(info.algorithms);
-  // console.log('DIFFICULTY MAP:', info.difficultyMap);
-  info.difficultyValue = calcDifficultyValue(info.difficultyMap);
-  // console.log('DIFFICULTY VAL:', info.difficultyValue);
+  info.difficultyValue = calcDifficultyValue(info);
   info.difficulty = calcDifficultyLabel(info.difficultyValue);
-  // console.log('DIFFICULTY LAB:', info.difficulty);
-  info.useTryAlgorithm = (info.difficultyMap[TRY_NUMBER_ALGORITHM] || 0) > 0;
+  info.useTryAlgorithm = (info.difficultyMap[TRY_NUMBER_ALGORITHM] || []).length > 0;
   info.compiled = true;
+  debug(() => console.log(...SDK_PREFIX, 'difficulty calculated', info));
 }

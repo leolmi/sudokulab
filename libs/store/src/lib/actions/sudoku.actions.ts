@@ -1,49 +1,69 @@
 import {createAction, props} from '@ngrx/store';
-import { Sudoku, SudokulabPage, SudokuMessage } from '@sudokulab/model';
+import { GoogleCredentials, Sudoku, SudokulabPage, SudokuMessage } from '@sudokulab/model';
 import { Dictionary } from '@ngrx/entity';
 
+export const doGoogleLogin = createAction(
+  '[SudokuLab.sudoku] google login',
+  props<{ credentials: GoogleCredentials }>()
+);
+
+export const setToken = createAction(
+  '[SudokuLab.sudoku] set token',
+  props<{ token?: string }>()
+);
+
 export const setActivePage = createAction(
-  '[SudokuPlay.sudoku] set the active page',
+  '[SudokuLab.sudoku] set the active page',
   props<{ page: SudokulabPage|undefined, data?: any }>()
 );
 
 export const setActiveMessage = createAction(
-  '[SudokuPlay.sudoku] set the active alert',
+  '[SudokuLab.sudoku] set the active alert',
   props<{ message: SudokuMessage }>()
 );
 
 export const updatePageStatus = createAction(
-  '[SudokuPlay.sudoku] update the page status',
+  '[SudokuLab.sudoku] update the page status',
   props<{ status: Dictionary<boolean>|undefined }>()
 );
 
 export const test = createAction(
-  '[SudokuPlay.sudoku] test sudoku action'
+  '[SudokuLab.sudoku] test sudoku action'
 );
 
 export const fillSchemas = createAction(
-  '[SudokuPlay.sudoku] fill the schema list'
+  '[SudokuLab.sudoku] fill the schema list'
 );
 
 export const checkSudoku = createAction(
-  '[SudokuPlay.sudoku] check the sudoku schema',
+  '[SudokuLab.sudoku] check the sudoku schema',
   props<{ schema: Sudoku }>()
 );
 
 export const updateDocumentTitle = createAction(
-  '[SudokuPlay.sudoku] update document title',
+  '[SudokuLab.sudoku] update document title',
   props<{ data?: string }>()
 );
 
 export const saveUserSettings = createAction(
-  '[SudokuPlay.sudoku] save the user settings'
+  '[SudokuLab.sudoku] save the user settings'
 );
 
 export const checkStatus = createAction(
-  '[SudokuPlay.sudoku] check the page status'
+  '[SudokuLab.sudoku] check the page status'
 );
 
 export const setTheme = createAction(
-  '[SudokuPlay.sudoku] set the theme',
+  '[SudokuLab.sudoku] set the theme',
   props<{ theme: string }>()
+);
+
+export const manage = createAction(
+  '[SudokuLab.sudoku] manage operation',
+  props<{ operation: string, args?: any }>()
+);
+
+export const setOperationStatus = createAction(
+  '[SudokuLab.sudoku] set the operation status',
+  props<{ status: number }>()
 );

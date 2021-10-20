@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>MAIN_TITLE</title>
+    <style>
+      [layout-row] {display: flex;flex-flow: row nowrap;align-items: stretch;align-content: stretch;}
+      [layout-row][flex] {flex: 1;}
+      [layout-row] [inverse] {flex-flow: row-reverse nowrap;}
+      [layout-col] {display: flex;flex-flow: column nowrap;align-items: stretch;align-content: stretch;}
+      [layout-col][flex] {flex: 1;}
+      [layout-col] [inverse] {flex-flow: column-reverse nowrap;}
+      [layout-fill] {height: 100%;}
+      [layout-expand] {position: absolute;top: 0;bottom: 0;left: 0;right: 0;}
+      [centered] {display: flex;align-items: center;}
+      [centered-center], [centered-middle] {display: flex;justify-content: center;align-items: center;}
+      [centered-left] {display: flex;justify-content: flex-start;align-items: center;}
+      [centered-right] {display: flex;justify-content: flex-end;align-items: center;}
+      header {height: 60px;}
+      section {}
+      footer {height: 24px;}
+    </style>
+  </head>
+  <body layout-col>
+    <header layout-row centered-left>
+      <div class="title" flex>Supena<span>Lab</span></div>
+      <div class="subtitle">SUBTITLE</div>
+    </header>
+    <section layout-row flex>
+      <div class="schema-container" flex>
+        <div class="schema">SCHEMA_1</div>
+      </div>
+      <div class="schema-info"><div>SCHEMA_1_INFO</div></div>
+    </section>
+    <section layout-row flex>
+      <div class="schema-info"><div>SCHEMA_2_INFO</div></div>
+      <div class="schema-container" flex>
+        <div class="schema">SCHEMA_2</div>
+      </div>
+    </section>
+    <footer>
+      <div class="footer">FOOTER</div>
+    </footer>
+  </body>
+</html>

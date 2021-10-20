@@ -1,6 +1,8 @@
-import {Injectable} from "@angular/core";
-import {GeneratorFacade, SudokuFacade, SudokulabPage} from "@sudokulab/model";
-import {AvailablePages} from "../../model";
+import { Injectable } from '@angular/core';
+import { GeneratorFacade, SudokulabPage } from '@sudokulab/model';
+import { AvailablePages } from '../../model';
+import { GeneratorComponent } from './generator.component';
+import { Routes } from '@angular/router';
 
 @Injectable()
 export class GeneratorManifest extends SudokulabPage {
@@ -43,5 +45,9 @@ export class GeneratorManifest extends SudokulabPage {
       case 'generate':
         return facade.generate();
     }
-  }
+  };
+  static routes = (): Routes => [{
+    path: `${AvailablePages.generator}`,
+    component: GeneratorComponent
+  }];
 }

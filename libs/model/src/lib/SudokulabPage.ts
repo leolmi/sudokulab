@@ -1,6 +1,5 @@
-import {MenuButton} from "./MenuButton";
-import {SudokuFacade} from "./SudokuFacade";
-import {Facade} from "./Facade";
+import { MenuButton } from './MenuButton';
+import { Facade } from './Facade';
 
 export abstract class SudokulabPage {
   default?: boolean;

@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { SudokuService } from './sudoku.service';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
-import { ImgDto, OcrResult } from '@sudokulab/model';
+import { ImgDto, ManageDto, OcrResult } from '@sudokulab/model';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('sudoku')
 export class SudokuController {
@@ -21,5 +22,11 @@ export class SudokuController {
   @Post('ocr')
   async ocr(@Body() img: ImgDto): Promise<OcrResult> {
     return await this.sudokuService.ocr(img);
+  }
+
+  @Post('manage')
+  // @UseGuards(AuthGuard('google'))
+  async manage(@Body() data: ManageDto) {
+    return this.sudokuService.manage(data);
   }
 }

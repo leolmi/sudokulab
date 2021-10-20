@@ -25,12 +25,29 @@
   padding: 24px 0 24px 24px;
   border: rgba(10,10,10,.1) 1px solid;
   margin-bottom: 24px;
+  position: relative;
   .options-group-title {
     font-size: 1.4em;
     font-weight: bold;
     margin-bottom: 16px;
   }
   .options-row {
-    padding: 10px 0;
+    padding: 10px;
+  }
+}
+
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.login-button {
+  padding: 10px;
+  margin: 10px 0;
+  opacity: .9;
+  img {
+    margin-right: 10px;
   }
 }

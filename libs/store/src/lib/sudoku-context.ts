@@ -1,6 +1,6 @@
 import { Injectable, Type } from '@angular/core';
 import {
-  CameraDialogOptions,
+  CameraDialogOptions, GoogleCredentials,
   HandleImageOptions,
   HandleImageResult,
   isCompact,
@@ -36,6 +36,12 @@ export class SudokuContext extends SudokuFacade {
   selectPageStatus$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectPageStatus);
   selectIsCompact$: Observable<boolean> = this._isCompact$.pipe(distinctUntilChanged());
   selectTheme$: Observable<string> = this._store.select(SudokuSelectors.selectTheme);
+  selectToken$: Observable<string> = this._store.select(SudokuSelectors.selectToken);
+  selectOperationStatus$: Observable<number> = this._store.select(SudokuSelectors.selectOperationStatus);
+
+  googleLogin(credentials: GoogleCredentials) {
+    this._store.dispatch(SudokuActions.doGoogleLogin({ credentials }));
+  }
 
   fillDocuments() {
     this._store.dispatch(SudokuActions.fillSchemas());
@@ -120,6 +126,9 @@ export class SudokuContext extends SudokuFacade {
       .subscribe((res) => this.loadSudoku((<HandleImageResult>res).sdk, (<HandleImageResult>res).onlyValues));
   }
 
+  manage(operation: string, args?: any) {
+    this._store.dispatch(SudokuActions.manage({ operation, args }));
+  }
 
   constructor(private _store: Store<SudokuStore>,
               private _dialog: MatDialog,

@@ -7,6 +7,7 @@ import {
   includes as _includes,
   intersection as _intersection,
   isArray as _isArray,
+  isNumber as _isNumber,
   isString as _isString,
   keys as _keys,
   random as _random,
@@ -24,31 +25,29 @@ import {
 } from './lib/Algorithms';
 import { Algorithm } from './lib/Algorithm';
 import { CellInfo } from './lib/CellInfo';
-import { AVAILABLE_DIRECTIONS, AVAILABLE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './lib/consts';
 import {
-  calcDifficulty,
-  Cell,
-  EditSudoku,
-  EditSudokuCell,
-  EditSudokuGenerationMap,
-  EditSudokuGroup,
-  EditSudokuOptions,
-  PlaySudokuGroup,
-  SudokuInfo
-} from '.';
+  AVAILABLE_DIRECTIONS,
+  AVAILABLE_VALUES,
+  SUDOKU_DEFAULT_RANK,
+  SUDOKU_DYNAMIC_VALUE,
+  SUDOKU_EMPTY_VALUE
+} from './lib/consts';
+import { calcDifficulty } from './lib/logic';
+import { Cell } from './lib/Cell';
+import { EditSudoku, EditSudokuGenerationMap } from './lib/EditSudoku';
+import { EditSudokuCell } from './lib/EditSudokuCell';
+import { EditSudokuGroup } from './lib/EditSudokuGroup';
+import { EditSudokuOptions } from './lib/EditSudokuOptions';
+import { PlaySudokuGroup } from './lib/PlaySudokuGroup';
+import { SudokuInfo } from './lib/SudokuInfo';
 import { Dictionary } from '@ngrx/entity';
 import { SudokuSolution } from './lib/SudokuSolution';
-import { getHash } from './global.helper';
+import { calcFixedCount, getHash, isValue } from './global.helper';
 import { ElementRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
-
-export const isValue = (v?: string, acceptX = false): boolean => {
-  const effv = (v || '').trim();
-  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || v !== SUDOKU_DYNAMIC_VALUE);
-}
 
 export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap): boolean => {
   if (!gmap) return !!cell?.fixed && cell.value !== SUDOKU_DYNAMIC_VALUE;
@@ -149,16 +148,26 @@ const _checkAlgorithms = () => {
     _algorithms.push(
       new OneCellForValueAlgorithm(),
       new OneValueForCellAlgorithm(),
-      new AlignmentOnGroupAlgorithm(),
       new TwinsAlgorithm(),
+      new AlignmentOnGroupAlgorithm(),
       new TryNumberAlgorithm());
   }
 }
 
-export const getAlgorithms = (exclude: string[] = []) => {
+export const getAlgorithms = (exclude: string[] = []): Algorithm[] => {
   _checkAlgorithms();
   return _algorithms.filter(a => !_includes(exclude, a.id));
 };
+
+export const getAlgorithmsMap = (exclude: string[] = []): Dictionary<Algorithm> => {
+  _checkAlgorithms();
+  const algs = _algorithms.filter(a => !_includes(exclude, a.id));
+  return _reduce(algs, (as, a) => {
+    as[a.id] = a;
+    return as;
+  }, <Dictionary<Algorithm>>{});
+};
+
 
 export const getAlgorithm = (code: string): Algorithm|undefined => {
   _checkAlgorithms();
@@ -285,7 +294,7 @@ export const getFixedCount = (sdk: Sudoku|EditSudoku|undefined): number => {
   if (_isArray((<EditSudoku>sdk)?.cellList)) {
     counter = ((<EditSudoku>sdk)?.cellList||[]).filter((c: any) => !!c?.fixed).length;
   } else if (_isString(sdk?.fixed)) {
-    _forEach((sdk?.fixed || ''), (v) => isValue(v) ? counter++ : null);
+    counter = calcFixedCount(sdk?.fixed);
   }
   return counter;
 }
@@ -296,6 +305,18 @@ export interface SchemaNameOptions {
   unknown?: string;
 }
 
+export const getTryCount = (sdk: PlaySudoku|Sudoku|undefined): number => {
+  const sudoku: Sudoku|undefined = (<PlaySudoku>sdk)?.sudoku||<Sudoku>sdk;
+  const trymap: any = (sudoku.info?.difficultyMap||{})[TRY_NUMBER_ALGORITHM];
+  if (_isNumber(trymap)) return <number>trymap;
+  return _isArray(trymap||[]) ? (trymap||[]).length : 0;
+}
+
+export const getDiffCount = (diffMap: Dictionary<number[]|number>, aid: string): number => {
+  const algN: any = (diffMap||{})[aid];
+  return _isNumber(algN) ? <number>algN : _isArray(algN) ? algN.length : 0;
+}
+
 export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, o?: SchemaNameOptions): string => {
   const separator = o?.separator||'_';
   const sudoku: Sudoku|undefined = (<PlaySudoku>sdk)?.sudoku||<Sudoku>sdk;
@@ -304,7 +325,7 @@ export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, o?: SchemaNameOp
   const fixc = getFixedCount(sudoku);
   const hash = o?.hideHash ? '' : `(${getHash(sudoku.fixed)})`;
   const diff = sudoku.info?.difficulty||'' ? `${separator}${sudoku.info?.difficulty}` : '';
-  const tryN = (sudoku.info?.difficultyMap||{})[TRY_NUMBER_ALGORITHM];
+  const tryN = getTryCount(sdk);
   const tryd = !!tryN ? `${separator}T${tryN}` : '';
   return `${rank}x${rank}${separator}${fixc}num${diff}${tryd}${separator}${hash}`;
 }
@@ -378,9 +399,12 @@ export const hasXValues = (sdk: EditSudoku|undefined): boolean => {
   return !!(sdk?.cellList || []).find(cid => sdk?.cells[cid]?.value === SUDOKU_DYNAMIC_VALUE);
 }
 
-export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>): SudokuInfo => {
+export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>, deleteCases = false): SudokuInfo => {
   const info = new SudokuInfo(baseinfo);
+  info.rank = sdk.rank || info.rank;
+  info.fixedCount = getFixedCount(sdk);
   calcDifficulty(info);
+  if (deleteCases) (info.algorithms || []).forEach(a => a.cases = []);
   return info;
 }
 
@@ -388,10 +412,10 @@ export const getSolutionSudoku = (sol: SudokuSolution, i?: Partial<SudokuInfo>) 
   const sdk: Sudoku = <Sudoku>_clone(sol.sdk.sudoku);
   const baseinfo = {
     unique: true,
-    algorithms: sol.algorithms
+    algorithms: sol.algorithms,
   };
   _extend(baseinfo, i || {});
-  sdk.info = buildSudokuInfo(sdk, baseinfo);
+  sdk.info = buildSudokuInfo(sdk, baseinfo, true);
   return sdk;
 }
 
@@ -460,4 +484,12 @@ export const getSudokuCells = (sdk: Sudoku): Dictionary<Cell> => {
     }
   }
   return cells;
+}
+
+export const checkImportText = (txt: string, rank = SUDOKU_DEFAULT_RANK): string => {
+  const dim = rank * rank;
+  txt = (txt || '')
+    .replace(/\s/g, '')
+    .replace(/[^x0123456789]/g, '');
+  return txt.length !== dim ? '' : txt;
 }

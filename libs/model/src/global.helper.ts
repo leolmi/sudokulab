@@ -6,7 +6,7 @@ import {
   get as _get,
   isEqual as _isEqual,
   isString as _isString,
-  keys as _keys,
+  keys as _keys, reduce as _reduce,
   set as _set
 } from 'lodash';
 import { SudokulabWindowService } from './lib/services';
@@ -14,11 +14,14 @@ import {
   SDK_PREFIX,
   SDK_PREFIX_DEBUG,
   SUDOKU_COMPACT_WIDTH,
+  SUDOKU_DYNAMIC_VALUE,
+  SUDOKU_EMPTY_VALUE,
   SUDOKULAB_DARK_THEME,
   SUDOKULAB_DEBUG_KEY,
   SUDOKULAB_LIGHT_THEME,
   SUDOKULAB_SETTINGS_KEY
 } from './lib/consts';
+import { Sudoku } from './lib/Sudoku';
 
 export function guid(): string {
   return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, c => {
@@ -101,6 +104,26 @@ export const addLine = (original: string, line: string, separator = '\n'): strin
   return original ? `${original}${separator}${line}` : line;
 }
 
-export const setDebugMode = (on = true) => localStorage.setItem(SUDOKULAB_DEBUG_KEY, on ? 'active' : '');
-export const isDebugMode = () => localStorage.getItem(SUDOKULAB_DEBUG_KEY) === 'active';
+export const setDebugMode = (on = true) => {
+  try {
+    localStorage.setItem(SUDOKULAB_DEBUG_KEY, on ? 'active' : '')
+  } catch (err) {
+    console.log(err)
+  }
+}
+export const isDebugMode = () => {
+  try {
+    return localStorage.getItem(SUDOKULAB_DEBUG_KEY) === 'active'
+  } catch (err) {
+    return false;
+  }
+};
 export const debug = (handler: () => any): void => isDebugMode() ? handler() : null;
+
+export const isValue = (v?: string, acceptX = false): boolean => {
+  const effv = (v || '').trim();
+  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || v !== SUDOKU_DYNAMIC_VALUE);
+}
+
+export const calcFixedCount = (fixed?: string): number =>
+  _reduce((fixed || ''), (c, v) => isValue(v) ? c + 1 : c, 0);

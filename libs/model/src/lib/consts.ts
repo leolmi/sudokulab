@@ -15,12 +15,20 @@ export const SUDOKU_COMPACT_WIDTH = 1450;
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
 export const SUDOKULAB_DEBUG_KEY = 'SUDOKULAB-DEBUG-STATUS';
 export const SUDOKULAB_DEFAULT_THEME = SUDOKULAB_LIGHT_THEME;
+export const SUDOKULAB_BASIC_AUTHORIZATION = 'SUDOKULAB-BASIC';
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
 
 export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];
 export const SDK_PREFIX_DEBUG = ['%cSUDOKULAB', 'color:#ff4081;'];
 export const SDK_PREFIX_W = ['\u001b[34m[SUDOKULAB]\u001b[0m'];
 
+export const SUDOKULAB_MANAGE_OPERATION = {
+  resyncAll: 'resyncAll'
+}
+
+export const OPERATION_NEED_RELOAD_DOCS = {
+  [SUDOKULAB_MANAGE_OPERATION.resyncAll]: true
+}
 
 export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
   ArrowDown: MoveDirection.down,

@@ -27,3 +27,13 @@ export const selectTheme = createSelector(
   selectSudoku,
   (state): string => state.theme
 )
+
+export const selectToken = createSelector(
+  selectSudoku,
+  (state): string => state.token||''
+)
+
+export const selectOperationStatus = createSelector(
+  selectSudoku,
+  (state): number => state.operationStatus||-1
+)

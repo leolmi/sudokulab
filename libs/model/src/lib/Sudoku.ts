@@ -1,8 +1,8 @@
 import { SudokuOptions } from './SudokuOptions';
-import { repeat as _repeat } from 'lodash';
+import { forEach as _forEach, repeat as _repeat, reduce as _reduce } from 'lodash';
 import { SudokuInfo } from './SudokuInfo';
 import { SUDOKU_EMPTY_VALUE } from './consts';
-import { getHash } from '../global.helper';
+import { getHash, calcFixedCount } from '../global.helper';
 
 export class Sudoku {
   constructor(s?: Partial<Sudoku>) {
@@ -14,6 +14,8 @@ export class Sudoku {
     consolidate(this);
     this.options = new SudokuOptions(s?.options);
     this.info = new SudokuInfo(s?.info);
+    this.info.rank = this.rank;
+    this.info.fixedCount = calcFixedCount(this.fixed);
   }
   _id: number;
   rank: number;

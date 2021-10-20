@@ -2,25 +2,35 @@ import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import { AlgorithmResult } from '../AlgorithmResult';
 import { Dictionary } from '@ngrx/entity';
-import { forEach as _forEach, keys as _keys, reduce as _reduce, remove as _remove, includes as _includes } from 'lodash';
-import { checkAvailables, getGroupCouples } from '../logic';
+import {
+  forEach as _forEach,
+  includes as _includes,
+  keys as _keys,
+  reduce as _reduce,
+  remove as _remove
+} from 'lodash';
+import { getGroupCouples } from '../logic';
 import { getGroups } from '../../sudoku.helper';
 import { addLine } from '../../global.helper';
+import { AlgorithmType } from '../enums';
 
 export const TWINS_ALGORITHM = 'Twins';
 
 /**
  * ALGORITMO
- * (OBSOLETO: non viene mai richiamato poiché l'algoritmo "AlignmentOnGroup" ne preclude l'utilizzo)
  * Gemelli
  *
  * se all'interno di un gruppo due celle possono contenere la stessa coppia di valori
  * allora posso escludere questi valori da tutte le altre celle
+ *
+ * fattore: +20
  */
 export class TwinsAlgorithm extends Algorithm {
   id = TWINS_ALGORITHM;
+  factor = '+20';
   name = 'Twins in group';
   icon = 'bookmarks';
+  type = AlgorithmType.support;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     let applied = false;
     let description = '';
@@ -45,7 +55,7 @@ export class TwinsAlgorithm extends Algorithm {
       if (!!couple) {
         const ids = couple.split('|');
         const values = couples_map[couple];
-        // toglie dai valori possibili delle celle gemelle gli altri
+        // toglie dai valori possibili delle celle gemelle gli altri valori
         ids.forEach(id => {
           const removed = _remove(sdk.cells[id]?.availables||[], v => !_includes(values, v));
           if (removed.length > 0) {
@@ -67,8 +77,6 @@ export class TwinsAlgorithm extends Algorithm {
           }));
       }
     });
-
-    if (applied) checkAvailables(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

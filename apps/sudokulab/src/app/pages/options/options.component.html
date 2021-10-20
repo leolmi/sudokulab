@@ -11,6 +11,14 @@
         <mat-slide-toggle [checked]="isDebugMode$|async"
                           (change)="setDebugMode($event)">Debug active</mat-slide-toggle>
       </div>
+
+<!--      <div class="options-row" fxLayout="row" fxLayoutAlign="center">-->
+<!--        <button mat-stroked-button id="google-login-button"-->
+<!--                color="accent" class="login-button contrast-button" *ngIf="googleok$|async">-->
+<!--          <img src="assets/images/google_24.png">-->
+<!--          <span>Authenticate with Google</span>-->
+<!--        </button>-->
+<!--      </div>-->
     </div>
 
     <div class="options-group">
@@ -22,5 +30,16 @@
       </div>
     </div>
 
+    <div class="options-group" *ngIf="isAuthenticated$|async">
+      <mat-progress-bar class="progress-bar"
+                        *ngIf="isOperationActive$|async"
+                        [value]="operationStatus$|async"
+                        mode="indeterminate"></mat-progress-bar>
+      <div class="options-group-title">Management</div>
+      <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
+        <label fxFlex>Opens each schema, resolve it and calc difficulty, than update it</label>
+        <button mat-stroked-button (click)="manage(OPERATION.resyncAll)" [disabled]="isOperationActive$|async">Sync all schemas</button>
+      </div>
+    </div>
   </div>
 </div>

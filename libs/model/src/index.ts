@@ -7,6 +7,7 @@ export * from './lib/SudokuMessage';
 export * from './lib/SudokuOptions';
 export * from './lib/SudokuInfo';
 export * from './lib/SudokulabInfo';
+export * from './lib/SudokuSolution';
 export * from './lib/Algorithm';
 export * from './lib/AlgorithmResult';
 export * from './lib/Algorithms';
@@ -34,6 +35,7 @@ export * from './lib/RectangleDto';
 export * from './lib/OcrOptions';
 export * from './lib/OcrResult';
 export * from './lib/SquareInfo';
+export * from './lib/ManageDto';
 
 export * from './lib/logic';
 export * from './lib/Facade';
@@ -51,6 +53,8 @@ export * from './lib/CameraDialogOptions';
 export * from './lib/CameraDialogResult';
 export * from './lib/HandleImageOptions';
 export * from './lib/HandleImageResult';
+
+export * from './lib/GoogleCredentials';
 
 export * from './lib/services';
 

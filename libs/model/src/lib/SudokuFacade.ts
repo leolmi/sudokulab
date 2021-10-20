@@ -11,6 +11,7 @@ import { HandleImageOptions } from './HandleImageOptions';
 import { HandleImageResult } from './HandleImageResult';
 import { CameraDialogOptions } from './CameraDialogOptions';
 import { CameraDialogResult } from './CameraDialogResult';
+import { GoogleCredentials } from './GoogleCredentials';
 
 
 export abstract class SudokuFacade implements Facade {
@@ -20,7 +21,10 @@ export abstract class SudokuFacade implements Facade {
   abstract selectPageStatus$: Observable<Dictionary<boolean>>;
   abstract selectIsCompact$: Observable<boolean>;
   abstract selectTheme$: Observable<string>;
+  abstract selectToken$: Observable<string>;
+  abstract selectOperationStatus$: Observable<number>;
 
+  abstract googleLogin(credentials: GoogleCredentials): void;
   abstract loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean): void;
   abstract loadSchema(schema: Sudoku): void;
   abstract setActivePage(page: SudokulabPage|undefined, data?: any): void;
@@ -35,6 +39,7 @@ export abstract class SudokuFacade implements Facade {
   abstract setTheme(theme: string): void;
   abstract handleImage(o?: HandleImageOptions): void;
   abstract camera(): void;
+  abstract manage(operation: string, args?: any): void;
 
   abstract onUpload(component: Type<any>, destroyer$: Observable<any>, options?: UploadDialogOptions): Observable<UploadDialogResult|any>;
   abstract onHandleImage(component: Type<any>, destroyer$: Observable<any>): void;

@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
+  checkImportText,
   getHash,
   MessageType,
   Sudoku,
@@ -33,7 +34,7 @@ export class UploadDialogComponent {
     this.text$ = new BehaviorSubject<string>('');
     this.onlyValues$ = new BehaviorSubject<boolean>(false);
 
-    const textLenght$ = this.text$.pipe(map(txt => (txt || '').replace(/\s/g, '').length));
+    const textLenght$ = this.text$.pipe(map(txt => checkImportText(txt).length));
     this.textInfo$ = textLenght$.pipe(map(ln => `${ln} characthers`));
     this.valid$ = textLenght$.pipe(map(ln => ln > 0));
   }
@@ -63,8 +64,8 @@ export class UploadDialogComponent {
   }
 
   upload() {
-    use(this.text$, fixed => {
-      const sudoku = new Sudoku({ fixed });
+    use(this.text$, txt => {
+      const sudoku = new Sudoku({ fixed: checkImportText(txt) });
       this._upload(sudoku);
     });
   }

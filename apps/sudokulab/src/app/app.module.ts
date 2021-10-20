@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BoardComponent } from './components/board/board.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {
@@ -60,6 +60,9 @@ import { ImageHandlerComponent } from './components/image-handler/image-handler.
 import { CameraDialogComponent } from './components/camera-dialog/camera-dialog.component';
 import { CropAreaComponent } from './components/image-handler/crop-area.component';
 import { SchemaCheckComponent } from './components/schema-check/schema-check.component';
+import { PrintComponent } from './pages/print/print.component';
+import { PrintManifest } from './pages/print/print.manifest';
+import { AppInterceptor } from './app.interceptor';
 
 @NgModule({
   declarations: [
@@ -86,7 +89,8 @@ import { SchemaCheckComponent } from './components/schema-check/schema-check.com
     CropAreaComponent,
     ImageHandlerComponent,
     CameraDialogComponent,
-    SchemaCheckComponent
+    SchemaCheckComponent,
+    PrintComponent
   ],
   imports: [
     BrowserModule,
@@ -112,29 +116,16 @@ import { SchemaCheckComponent } from './components/schema-check/schema-check.com
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     BrowserAnimationsModule,
-    RouterModule.forRoot([{
-        path: '',
-        component: LabComponent
-      }, {
-        path: `${AvailablePages.lab}`,
-        component: LabComponent
-      }, {
-        path: `${AvailablePages.lab}/:id`,
-        component: LabComponent
-      }, {
-        path: `${AvailablePages.generator}`,
-        component: GeneratorComponent
-      }, {
-        path: `${AvailablePages.options}`,
-        component: OptionsComponent
-      }, {
-        path: `${AvailablePages.help}`,
-        component: HelpComponent
-      }],
-      { useHash: true }
-    )
+    RouterModule.forRoot([
+      ...LabManifest.routes(),
+      ...GeneratorManifest.routes(),
+      ...OptionsManifest.routes(),
+      ...HelpManifest.routes(),
+      ...PrintManifest.routes()
+      ], { useHash: true })
   ],
   providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AppInterceptor, multi: true },
     SudokulabWindowService,
     SudokulabPagesService,
     { provide: SudokuFacade, useClass: SudokuContext },
@@ -144,7 +135,8 @@ import { SchemaCheckComponent } from './components/schema-check/schema-check.com
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
     { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
     { provide: SudokulabPage, useClass: HelpManifest, multi: true },
-    { provide: SudokulabPage, useClass: OptionsManifest, multi: true }
+    { provide: SudokulabPage, useClass: OptionsManifest, multi: true },
+    { provide: SudokulabPage, useClass: PrintManifest, multi: true }
   ],
   bootstrap: [AppComponent],
 })
