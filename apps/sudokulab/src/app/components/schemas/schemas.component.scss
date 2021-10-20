@@ -55,7 +55,11 @@
     }
     .hash {
       font-family: monospace;
-      opacity: .6;
+      opacity: 0.6;
+      max-width: 30%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
     .schema-name {
       overflow: hidden;

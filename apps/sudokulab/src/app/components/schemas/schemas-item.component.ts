@@ -8,7 +8,8 @@ import { PlaySudoku } from '@sudokulab/model';
                   [ngClass]="{'color-primary': active, 'color-accent': selected && !active}"
                   fxLayout="row" fxLayoutAlign="start center">
     <div class="schema-name" fxFlex>{{schema | schemaName}}</div>
-    <div class="hash">{{schema?.sudoku?._id||''}}</div>
+<!--    <div class="hash">{{schema?.sudoku?._id||''}}</div>-->
+    <div class="hash">{{schema?.sudoku?.fixed||''}}</div>
   </div>`,
   styleUrls: ['./schemas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

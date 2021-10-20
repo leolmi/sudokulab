@@ -2,7 +2,7 @@ import {
   addLine,
   Algorithm,
   AlgorithmResult,
-  AlgorithmType,
+  AlgorithmType, checkAvailables,
   getValuesAlignment,
   PlaySudoku,
   PlaySudokuCellAlignment
@@ -56,6 +56,8 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
         }
       });
     });
+
+    if (applied) checkAvailables(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

@@ -9,7 +9,7 @@ import {
   reduce as _reduce,
   remove as _remove
 } from 'lodash';
-import { getGroupCouples } from '../logic';
+import { checkAvailables, getGroupCouples } from '../logic';
 import { getGroups } from '../../sudoku.helper';
 import { addLine } from '../../global.helper';
 import { AlgorithmType } from '../enums';
@@ -77,6 +77,8 @@ export class TwinsAlgorithm extends Algorithm {
           }));
       }
     });
+
+    if (applied) checkAvailables(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,
