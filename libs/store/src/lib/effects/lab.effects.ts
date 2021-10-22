@@ -12,7 +12,7 @@ import {
   buildSudokuInfo, calcFixedCount,
   cellId,
   checkAvailables,
-  clear,
+  clear, getHash,
   getSchemaName, getSudokuForUserSettings, getUserSetting,
   isValidValue,
   loadValues,
@@ -83,6 +83,8 @@ export class LabEffects {
     withLatestFrom(
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) => {
+      // const hash = getHash(sdk?.sudoku?.fixed||'');
+      // console.log('SUDOKU HASH = ', hash, `\n\t original hash = "${sdk?.sudoku?._id||''}"\n\tfixed "${sdk?.sudoku?.fixed||''}"`);
       if (!!sdk) this._location.go(`/lab/${sdk._id}`);
       const output: Action[] = [SudokuActions.updateDocumentTitle({ data: sdk ? `${sdk._id}` : '' })];
       if (!!sdk) {

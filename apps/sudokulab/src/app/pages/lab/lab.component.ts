@@ -71,7 +71,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
 
   ngAfterViewInit() {
     this._element$.next(this.board);
-    this._lab.selectAllSchemas$
+    this._sudoku.selectAllSchemas$
       .pipe(skip(1), take(1))
       .subscribe(schemas =>
         use(this._route.paramMap, gp => {

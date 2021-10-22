@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
-import { AppService } from './app.service';
-import { SudokulabInfo } from '@sudokulab/model';
+import {Controller, Get} from '@nestjs/common';
+import {AppService} from './app.service';
+import {SudokulabInfo} from '@sudokulab/model';
 
 @Controller()
 export class AppController {

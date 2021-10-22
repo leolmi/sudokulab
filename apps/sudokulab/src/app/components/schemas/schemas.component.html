@@ -29,7 +29,7 @@
   <div class="list-container" fxFlex>
     <cdk-virtual-scroll-viewport
       class="schemas-container"
-      itemSize="30" >
+      itemSize="32" >
       <sudokulab-schemas-item
         *cdkVirtualFor="let schema of schemas$|async"
         [active]="(activeId$|async) === schema._id"

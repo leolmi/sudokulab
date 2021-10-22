@@ -1,9 +1,13 @@
-import { Facade, PrintData, SudokuMessage } from '@sudokulab/model';
+import { Facade, PrintData, PrintPage, SudokuMessage } from '@sudokulab/model';
+import { Observable } from 'rxjs';
 
 export abstract class PrintFacade implements Facade {
   name = 'print';
-  abstract raiseMessage(message: SudokuMessage): void;
+  abstract selectPrintPages$: Observable<PrintPage[]>;
+  abstract selectActivePageArea$: Observable<string>;
 
-  abstract setPrintData(data: PrintData): void;
+  abstract raiseMessage(message: SudokuMessage): void;
+  abstract setPrintPages(pages: PrintPage[]): void;
+  abstract setPrintArea(area: string): void;
   abstract print(): void;
 }

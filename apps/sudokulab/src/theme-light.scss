@@ -30,8 +30,25 @@
     color: $color-accent-contrast !important;
   }
 
+  .background {
+    background-color: $color-background;
+    color: $color-background-contrast;
+
+    .selected {
+      background-color: $color-background-selected;
+    }
+  }
+
   .background2 {
     background-color: $color-background2;
+
+    .selected {
+      background-color: $color-background-selected;
+    }
+  }
+
+  .background3 {
+    background-color: $color-background3;
 
     .selected {
       background-color: $color-background-selected;
@@ -104,5 +121,9 @@
         $color-hover 1px,
         $color-hover 8px);
   }
-
+  .svg-board {
+    .fill-cell {
+      fill: $color-background-contrast;
+    }
+  }
 }

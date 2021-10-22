@@ -12,6 +12,7 @@ export * from './lib/Algorithm';
 export * from './lib/AlgorithmResult';
 export * from './lib/Algorithms';
 export * from './lib/PrintTemplate';
+export * from './lib/PrintPage';
 
 export * from './lib/SudokuSchema';
 

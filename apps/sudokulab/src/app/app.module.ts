@@ -72,6 +72,8 @@ import { PrintComponent } from './pages/print/print.component';
 import { PrintManifest } from './pages/print/print.manifest';
 import { AppInterceptor } from './app.interceptor';
 import { MatCardModule } from '@angular/material/card';
+import { SvgBoardComponent } from './components/svg-board/svg-board.component';
+import { PrintPageComponent } from './pages/print/print-page.component';
 
 @NgModule({
   declarations: [
@@ -99,7 +101,9 @@ import { MatCardModule } from '@angular/material/card';
     ImageHandlerComponent,
     CameraDialogComponent,
     SchemaCheckComponent,
-    PrintComponent
+    PrintPageComponent,
+    PrintComponent,
+    SvgBoardComponent
   ],
   imports: [
     BrowserModule,

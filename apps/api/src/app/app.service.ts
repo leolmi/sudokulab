@@ -1,11 +1,15 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Sudoku, SudokulabInfo } from '@sudokulab/model';
+import { Injectable } from '@nestjs/common';
+import { SUDOKULAB_AUTHOR, SUDOKULAB_SESSION_STANDARD, SUDOKULAB_TITLE, SudokulabInfo } from '@sudokulab/model';
+import { VERSION } from './app.version';
 
 @Injectable()
 export class AppService {
   getData(): SudokulabInfo {
     return new SudokulabInfo({
-      version: '1.0.0'
+      version: VERSION,
+      author: process.env.SUDOKULAB_AUTHOR || SUDOKULAB_AUTHOR,
+      title: process.env.SUDOKULAB_TITLE || SUDOKULAB_TITLE,
+      session: process.env.SUDOKULAB_SESSION || SUDOKULAB_SESSION_STANDARD
     });
   }
 }

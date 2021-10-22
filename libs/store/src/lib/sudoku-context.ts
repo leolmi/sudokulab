@@ -4,9 +4,9 @@ import {
   HandleImageOptions,
   HandleImageResult,
   isCompact,
-  MessageType,
+  MessageType, PlaySudoku,
   Sudoku,
-  SudokuFacade,
+  SudokuFacade, SudokulabInfo,
   SudokulabPage,
   SudokulabWindowService,
   SudokuMessage,
@@ -31,6 +31,8 @@ export class SudokuContext extends SudokuFacade {
   private _handleImage$: BehaviorSubject<HandleImageOptions|undefined> = new BehaviorSubject<HandleImageOptions|undefined>(undefined);
   private _checkSchema$: BehaviorSubject<HandleImageResult|undefined> = new BehaviorSubject<HandleImageResult|undefined>(undefined);
 
+  selectAppInfo$: Observable<SudokulabInfo|undefined> = this._store.select(SudokuSelectors.selectAppInfo);
+  selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
   selectActiveMessage$: Observable<SudokuMessage|undefined> = this._store.select(SudokuSelectors.selectActiveMessage);
   selectActivePage$: Observable<SudokulabPage|undefined> = this._store.select(SudokuSelectors.selectActivePage);
   selectPageStatus$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectPageStatus);
@@ -38,7 +40,6 @@ export class SudokuContext extends SudokuFacade {
   selectTheme$: Observable<string> = this._store.select(SudokuSelectors.selectTheme);
   selectToken$: Observable<string> = this._store.select(SudokuSelectors.selectToken);
   selectOperationStatus$: Observable<number> = this._store.select(SudokuSelectors.selectOperationStatus);
-  selectActiveTemplate$: Observable<string> = this._store.select(SudokuSelectors.selectActiveTemplate);
 
   setEnvironment(env: any) {
     this._store.dispatch(SudokuActions.setEnvironment({ env }));
@@ -133,10 +134,6 @@ export class SudokuContext extends SudokuFacade {
 
   manage(operation: string, args?: any) {
     this._store.dispatch(SudokuActions.manage({ operation, args }));
-  }
-
-  setPrintTemplate(template: string) {
-    this._store.dispatch(SudokuActions.setPrintTemplate({ template }));
   }
 
   constructor(private _store: Store<SudokuStore>,

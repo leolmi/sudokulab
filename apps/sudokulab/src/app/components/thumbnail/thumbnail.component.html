@@ -19,5 +19,5 @@
       </div>
     </div>
   </div>
-  <div class="thumbnail-description">{{description$|async}}</div>
+  <div class="thumbnail-description" *ngIf="!hideDescription">{{description$|async}}</div>
 </div>

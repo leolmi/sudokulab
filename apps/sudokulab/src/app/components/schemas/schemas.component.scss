@@ -17,7 +17,11 @@
   }
 }
 
-
+.thumbnail {
+  height: 30px;
+  width: 30px;
+  margin-right: 20px;
+}
 
 .schemalab-schemas-toolbar {
   height: 60px;
@@ -46,6 +50,7 @@
     cursor: pointer;
     width: 100%;
     overflow: hidden;
+    margin-bottom: 2px;
     &:hover {
       background-color: rgba(10, 10, 10, .1);
       &.color-accent {
@@ -55,13 +60,22 @@
         background-color: $color-primary-transp !important;
       }
     }
+    .hash-container {
+      position: relative;
+      width: 30%;
+      height: 100%;
+    }
     .hash {
+      position: absolute;
+      width: 100%;
+      left: 0;
       font-family: monospace;
       opacity: 0.6;
-      max-width: 30%;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      line-height: 30px;
+      font-size: 18px;
     }
     .schema-name {
       overflow: hidden;

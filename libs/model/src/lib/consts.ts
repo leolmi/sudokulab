@@ -10,15 +10,19 @@ export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
 export const SUDOKULAB_LIGHT_THEME = 'light';
 export const SUDOKULAB_DARK_THEME = 'dark';
 
+export const SUDOKULAB_SESSION_DEVELOP = 'develop';
+export const SUDOKULAB_SESSION_STANDARD = 'standard';
 
-export const SUDOKU_COMPACT_WIDTH = 1450;
+export const SUDOKULAB_TITLE = 'SudokuLab';
+export const SUDOKULAB_AUTHOR = 'leo.olmi 2021';
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
 export const SUDOKULAB_DEBUG_KEY = 'SUDOKULAB-DEBUG-STATUS';
 export const SUDOKULAB_DEFAULT_THEME = SUDOKULAB_LIGHT_THEME;
-export const SUDOKULAB_DEFAULT_TEMPLATE = 'T01';
-export const SUDOKULAB_DEFAULT_TEMPLATE_FILE = 'print-1-schema.html';
 export const SUDOKULAB_BASIC_AUTHORIZATION = 'SUDOKULAB-BASIC';
+
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
+
+export const SUDOKU_COMPACT_WIDTH = 1450;
 
 export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];
 export const SDK_PREFIX_DEBUG = ['%cSUDOKULAB', 'color:#ff4081;'];

@@ -4,6 +4,7 @@ import { StoreModule } from '@ngrx/store';
 import * as sudoku from './reducers/sudoku.reducers';
 import * as lab from './reducers/lab.reducers';
 import * as generator from './reducers/generator.reducers';
+import * as print from './reducers/print.reducers';
 import { EffectsModule } from '@ngrx/effects';
 import { SudokuEffects } from './effects/sudoku.effects';
 import { LabEffects } from './effects/lab.effects';
@@ -19,7 +20,8 @@ import { PrintEffects } from './effects/print.effects';
     StoreModule.forFeature(featureName, {
       sudoku: sudoku.reducer,
       lab: lab.reducer,
-      generator: generator.reducer
+      generator: generator.reducer,
+      print: print.reducer
     }),
     EffectsModule.forFeature([
       SudokuEffects,

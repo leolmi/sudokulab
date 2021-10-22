@@ -6,9 +6,12 @@
   padding: 10px 0;
 }
 
-sudokulab-thumbnail {
+.thumbnail {
   cursor: pointer;
+  width: 100px;
 }
+
+
 
 .output-schemas {
   min-height: 120px;

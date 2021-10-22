@@ -33,7 +33,7 @@
       </button>
     </div>
 
-    <div class="options-group" *ngIf="isAuthenticated$|async">
+    <div class="options-group" *ngIf="isManagement$|async">
       <mat-progress-bar class="progress-bar"
                         *ngIf="isOperationActive$|async"
                         [value]="operationStatus$|async"

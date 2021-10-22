@@ -291,8 +291,8 @@ export const geEditFixedCount = (sdk: EditSudoku|undefined): number => {
 
 export const getFixedCount = (sdk: Sudoku|EditSudoku|undefined): number => {
   let counter = 0;
-  if (_isArray((<EditSudoku>sdk)?.cellList)) {
-    counter = ((<EditSudoku>sdk)?.cellList||[]).filter((c: any) => !!c?.fixed).length;
+  if (_isArray((<EditSudoku>sdk)?.fixed)) {
+    counter = ((<EditSudoku>sdk)?.fixed||[]).length;
   } else if (_isString(sdk?.fixed)) {
     counter = calcFixedCount(sdk?.fixed);
   }

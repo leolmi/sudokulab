@@ -1,22 +1,29 @@
-<div style="padding: 50px;" fxLayout="column">
-  <div>SOON...</div>
-<!--  <div class="templates" fxLayout="row">-->
-<!--    <mat-card class="template-card"-->
-<!--              *ngFor="let tmp of templates$|async"-->
-<!--              [ngClass]="{'active': tmp.code === (activeTemplate$|async)}">-->
-<!--      <mat-card-header>-->
-<!--        <mat-card-title>{{tmp.name}}</mat-card-title>-->
-<!--        <mat-card-subtitle>contains {{tmp.schemaCount}} schemas</mat-card-subtitle>-->
-<!--      </mat-card-header>-->
-<!--      <img mat-card-image [src]="tmp.thumbnail" alt="template thumbnail">-->
-<!--      <mat-card-content>-->
-<!--      </mat-card-content>-->
-<!--      <mat-card-actions>-->
-<!--        <div fxFlex></div>-->
-<!--        <button mat-button (click)="useThisTemplate(tmp)">USE</button>-->
-<!--      </mat-card-actions>-->
-<!--    </mat-card>-->
-<!--  </div>-->
-
-
+<div class="sudokulab-page sudokulab-page-print background3" fxLayout="row">
+  <div class="print-container" fxFlex>
+    <div class="pages-container">
+      <print-page *ngFor="let page of pages$|async"
+                  [alone]="((pages$|async)||[]).length<2"
+                  [page]="page" [activeId]="activeArea$|async"
+                  (clearPage)="clearPage($event)"
+                  (removePage)="removePage($event)"
+                  (activeChanged)="activeArea($event)"></print-page>
+      <print-page mode="add" (addPage)="addPage()"></print-page>
+    </div>
+  </div>
+  <div class="schemas background2">
+    <cdk-virtual-scroll-viewport
+      class="schemas-container"
+      itemSize="54">
+      <div class="schema-item"
+           *ngFor="let sdk of schemas$|async"
+           (click)="addSchema(sdk)"
+           fxLayout="row">
+        <svg-board class="thumbnail background" [sudoku]="sdk?.sudoku"></svg-board>
+        <div class="schema-info" fxLayout="column">
+          <div class="title" fxFlex>{{sdk | schemaName}}</div>
+          <div class="sub-title">{{sdk.sudoku?.info?.difficultyValue||'?'}}</div>
+        </div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+  </div>
 </div>

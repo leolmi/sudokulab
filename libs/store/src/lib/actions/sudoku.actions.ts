@@ -1,10 +1,15 @@
 import {createAction, props} from '@ngrx/store';
-import { GoogleCredentials, PrintData, Sudoku, SudokulabPage, SudokuMessage } from '@sudokulab/model';
+import { GoogleCredentials, PrintData, Sudoku, SudokulabInfo, SudokulabPage, SudokuMessage } from '@sudokulab/model';
 import { Dictionary } from '@ngrx/entity';
 
 export const setEnvironment = createAction(
   '[SudokuLab.sudoku] set the environment',
   props<{ env: any }>()
+);
+
+export const setAppInfo = createAction(
+  '[SudokuLab.sudoku] set the app infos',
+  props<{ info: SudokulabInfo }>()
 );
 
 export const doGoogleLogin = createAction(
@@ -73,16 +78,3 @@ export const setOperationStatus = createAction(
   props<{ status: number }>()
 );
 
-export const setPrintTemplate = createAction(
-  '[SudokuLab.sudoku] set the print template',
-  props<{ template: string }>()
-);
-
-export const setPrintData = createAction(
-  '[SudokuLab.sudoku] set the print data',
-  props<{ data: PrintData }>()
-);
-
-export const print = createAction(
-  '[SudokuLab.sudoku] print'
-);

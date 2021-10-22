@@ -1,11 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import {
   isDebugMode,
   setDebugMode,
   SudokuFacade,
   SUDOKULAB_DARK_THEME,
-  SUDOKULAB_LIGHT_THEME, SUDOKULAB_MANAGE_OPERATION,
+  SUDOKULAB_LIGHT_THEME, SUDOKULAB_MANAGE_OPERATION, SUDOKULAB_SESSION_DEVELOP, SUDOKULAB_SESSION_STANDARD,
   SudokulabWindowService
 } from '@sudokulab/model';
 import { map, skip } from 'rxjs/operators';
@@ -25,7 +25,7 @@ export class OptionsComponent implements AfterViewInit {
   showAvailable$: BehaviorSubject<boolean>;
   googleok$: BehaviorSubject<boolean>;
   googleok_check$: Observable<boolean>;
-  isAuthenticated$: Observable<boolean>;
+  isManagement$: Observable<boolean>;
   operationStatus$: Observable<number>;
   isOperationActive$: Observable<boolean>;
   OPERATION = SUDOKULAB_MANAGE_OPERATION;
@@ -38,7 +38,8 @@ export class OptionsComponent implements AfterViewInit {
     this.googleok$ = new BehaviorSubject<boolean>(true);
     this.googleok_check$ = this.googleok$.pipe(skip(1));
     this.isDarkTheme$ = _sudoku.selectTheme$.pipe(map(theme => theme === SUDOKULAB_DARK_THEME));
-    this.isAuthenticated$ = _sudoku.selectToken$.pipe(map(t => !!t || !environment.production));
+    this.isManagement$ = combineLatest(_sudoku.selectToken$, _sudoku.selectAppInfo$).pipe(
+      map(([t, info]) => !!t || info?.session === SUDOKULAB_SESSION_DEVELOP || !environment.production));
     this.operationStatus$ = _sudoku.selectOperationStatus$;
     this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
   }

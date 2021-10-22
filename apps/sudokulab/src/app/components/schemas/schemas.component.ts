@@ -5,6 +5,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { DestroyComponent } from '../DestroyComponent';
 import { ItemInfo } from '../../model';
 import { get as _get, sortBy as _sortBy } from 'lodash';
+import { filterSchemas } from '../../utils/components.utils';
 
 @Component({
   selector: 'sudokulab-schemas',
@@ -26,7 +27,7 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   constructor(private _lab: LabFacade,
               _sudoku: SudokuFacade) {
     super(_sudoku);
-    this._schemas$ = _lab.selectAllSchemas$.pipe(
+    this._schemas$ = _sudoku.selectAllSchemas$.pipe(
       takeUntil(this._destroy$));
     this.activeId$ = _lab.selectActiveSudoku$.pipe(
       takeUntil(this._destroy$),
@@ -45,13 +46,8 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
       description: 'Added to repository'
     }];
 
-    this.schemas$ = combineLatest(this._schemas$, this.options$).pipe(
-      map(([schemas, options]) => {
-        let sch = (schemas || []).filter(s => options.try || !s.sudoku?.info.useTryAlgorithm);
-        if (!!options.sortBy) sch = _sortBy(sch, s => _get(s, options.sortBy));
-        if (options.asc) sch.reverse();
-        return sch;
-      }));
+    this.schemas$ = combineLatest(this._schemas$, this.options$)
+      .pipe(map(([ss, o]) => filterSchemas(ss, o)));
 
     this.counter$ = this.schemas$.pipe(map(sch => (sch||[]).length));
     this.total$ = this._schemas$.pipe(map(sch => (sch||[]).length));

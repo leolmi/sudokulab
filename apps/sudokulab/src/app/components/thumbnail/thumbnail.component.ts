@@ -44,6 +44,7 @@ export class ThumbnailComponent {
     this.workingMode$.next(wm);
   };
   @Input() unknown: string = 'unknown';
+  @Input() hideDescription: boolean = false;
   constructor(private ele: ElementRef,
               private _generator: GeneratorFacade) {
     this._sdk$ = new BehaviorSubject<Sudoku | undefined>(undefined);

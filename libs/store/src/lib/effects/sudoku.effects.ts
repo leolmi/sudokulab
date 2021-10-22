@@ -15,7 +15,7 @@ import {
   Sudoku,
   OPERATION_NEED_RELOAD_DOCS,
   SudokulabWindowService,
-  SudokuMessage
+  SudokuMessage, SudokulabInfo
 } from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
 import * as SudokuSelectors from '../selectors';
@@ -101,6 +101,12 @@ export class SudokuEffects {
     })
   ), { dispatch: false });
 
+  setEnvironment$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setEnvironment),
+    concatMap(() => this._http.get<SudokulabInfo>('/api/sudokulab').pipe(
+      switchMap(info => [SudokuActions.setAppInfo({ info })])
+    ))
+  ));
 
   _manage$ = createEffect(() => this._actions$.pipe(
     ofType(this._manage),

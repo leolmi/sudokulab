@@ -22,7 +22,6 @@ export class LabContext extends LabFacade {
   selectActiveSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectActiveSudoku);
   selectSelectedSudoku$: Observable<PlaySudoku|undefined> = this._store.select(SudokuSelectors.selectSelectedSudoku);
   selectActiveCell$: Observable<string> = this._store.select(SudokuSelectors.selectActiveCell);
-  selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
   selectSchemasOptions$: Observable<SchemasOptions> = this._store.select(SudokuSelectors.selectActiveSchemasOptions);
   selectStepInfo$: Observable<SolveStepResult|undefined> = this._store.select(SudokuSelectors.selectActiveSchemaStepInfo);
   selectHighlightCells$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectHighlightCells);

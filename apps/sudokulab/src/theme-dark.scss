@@ -30,11 +30,28 @@
     color: $color-accent-contrast-dark !important;
   }
 
+  .background {
+    background-color: $color-background-dark;
+    color: $color-background-contrast-dark;
+
+    .selected {
+      background-color: $color-background-selected-dark;
+    }
+  }
+
   .background2 {
     background-color: $color-background2-dark;
 
     .selected {
       background-color: $color-background-selected-dark;
+    }
+  }
+
+  .background3 {
+    background-color: $color-background3-dark;
+
+    .selected {
+      background-color: $color-background-selected;
     }
   }
 
@@ -138,6 +155,11 @@
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #777;
+    }
+  }
+  .svg-board {
+    .fill-cell {
+      fill: $color-background-contrast-dark;
     }
   }
 }
