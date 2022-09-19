@@ -15,7 +15,8 @@ import {
   Sudoku,
   OPERATION_NEED_RELOAD_DOCS,
   SudokulabWindowService,
-  SudokuMessage, SudokulabInfo
+  SudokuMessage,
+  SudokulabInfo
 } from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
 import * as SudokuSelectors from '../selectors';

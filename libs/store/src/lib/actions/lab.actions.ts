@@ -95,7 +95,7 @@ export const updatePlayerOptions = createAction(
 
 export const setStepInfo = createAction(
   '[SudokuLab.lab] set current step-info',
-  props<{ info?: SolveStepResult }>()
+  props<{ infos?: SolveStepResult[] }>()
 );
 
 export const highlightCells = createAction(

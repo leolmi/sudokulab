@@ -2,7 +2,7 @@ import {
   addLine,
   Algorithm,
   AlgorithmResult,
-  AlgorithmType, checkAvailables,
+  AlgorithmType, checkAvailables, getCellUserCoord,
   getValuesAlignment,
   PlaySudoku,
   PlaySudokuCellAlignment
@@ -48,7 +48,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
             sdk.groups[gid]?.cells.forEach(cid => {
               const removed = _remove(sdk.cells[cid]?.availables||[], av => !_includes(cids, cid) && av === v);
               if (removed.length > 0) {
-                description = addLine(description, `On cell "${cid}" the possible values [${removed.join(',')}] have been removed`);
+                description = addLine(description, `On cell "${getCellUserCoord(cid)}" the possible values [${removed.join(',')}] have been removed`);
                 applied = true;
               }
             });

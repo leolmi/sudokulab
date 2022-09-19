@@ -17,8 +17,8 @@
       <div class="options-group-title">Player</div>
       <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
         <mat-slide-toggle [checked]="showAvailable$|async"
-                          disabled="true"
-                          (change)="apply($event, 'showAvailable')">Show available numbers on cell</mat-slide-toggle>
+                          disabled="false"
+                          (change)="apply($event.checked, 'showAvailables')">Show available numbers on cell</mat-slide-toggle>
       </div>
     </div>
 

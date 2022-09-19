@@ -10,7 +10,7 @@ import {
   remove as _remove
 } from 'lodash';
 import { checkAvailables, getGroupCouples } from '../logic';
-import { getGroups } from '../../sudoku.helper';
+import {getCellUserCoord, getGroups} from '../../sudoku.helper';
 import { addLine } from '../../global.helper';
 import { AlgorithmType } from '../enums';
 
@@ -59,7 +59,7 @@ export class TwinsAlgorithm extends Algorithm {
         ids.forEach(id => {
           const removed = _remove(sdk.cells[id]?.availables||[], v => !_includes(values, v));
           if (removed.length > 0) {
-            description = addLine(description, `On cell "${id}" the possible values [${removed.join(',')}] have been removed`);
+            description = addLine(description, `On cell "${getCellUserCoord(id)}" the possible values [${removed.join(',')}] have been removed`);
             applied = true;
           }
         });
@@ -70,7 +70,7 @@ export class TwinsAlgorithm extends Algorithm {
             if (!_includes(ids, gcid)) {
               const removed = _remove(sdk.cells[gcid]?.availables||[], v => _includes(values, v));
               if (removed.length > 0) {
-                description = addLine(description, `On cell "${gcid}" the possible values [${removed.join(',')}] have been removed`);
+                description = addLine(description, `On cell "${getCellUserCoord(gcid)}" the possible values [${removed.join(',')}] have been removed`);
                 applied = true;
               }
             }

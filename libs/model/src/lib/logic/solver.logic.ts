@@ -223,15 +223,17 @@ export const applyAlgorithm = (sdk: PlaySudoku, aname: string): PlaySudoku|undef
   });
 }
 
-export const solveStepToCell = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult|undefined => {
+export const solveStepToCell = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult[] => {
   let cycles = 0;
+  const infos: SolveStepResult[] = [];
   let info: SolveStepResult | undefined;
   do {
     info = solveStep(sdk, exclude);
     if (!!info?.sdk) sdk = info.sdk;
+    if (info) infos.push(info);
     cycles++;
   } while (!!info && cycles < 10 && _keys(info?.result?.cells || []).length <= 0);
-  return info;
+  return infos;
 }
 
 export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult|undefined => {

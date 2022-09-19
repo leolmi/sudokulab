@@ -16,7 +16,7 @@ export interface LabState extends EntityState<PlaySudoku> {
   selected: number;
   activeCell: string;
   options: SchemasOptions;
-  stepInfo?: SolveStepResult;
+  stepInfos: SolveStepResult[];
   highlight: Dictionary<boolean>;
 }
 
@@ -29,7 +29,7 @@ export const initialState: LabState = adapter.getInitialState({
   selected: 0,
   activeCell: '',
   options: new SchemasOptions(getUserSetting('lab.schemasOptions')),
-  stepInfo: undefined,
+  stepInfos: [],
   highlight: {}
 });
 
@@ -53,7 +53,7 @@ const labReducers = createReducer(
   on(SudokuActions.setActiveSudoku, (state, { active }) => ({ ...state, active, activeCell:'' })),
   on(SudokuActions.setSelectedSudoku, (state, { selected }) => ({ ...state, selected })),
   on(SudokuActions.setActiveCell, (state, { id }) => ({ ...state, activeCell: id })),
-  on(SudokuActions.setStepInfo, (state, { info }) => ({ ...state, stepInfo: info })),
+  on(SudokuActions.setStepInfo, (state, { infos }) => ({ ...state, stepInfos: infos||[] })),
   on(SudokuActions.updateSchemasOptions, (state, { changes }) => ({ ...state, options: update(state.options, changes )})),
   on(SudokuActions.highlightCells, (state, { cells }) => {
     const hl: Dictionary<boolean> = _reduce(cells||[], (hld, c) => { hld[c] = true; return hld;}, <Dictionary<boolean>>{});

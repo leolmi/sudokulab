@@ -28,7 +28,7 @@ import {
   SudokuInfo,
   SudokuMessage, toggleValue
 } from '@sudokulab/model';
-import { cloneDeep as _clone, extend as _extend } from 'lodash';
+import { cloneDeep as _clone, extend as _extend, last as _last } from 'lodash';
 import { saveAs } from 'file-saver';
 import { Router } from '@angular/router';
 
@@ -108,10 +108,11 @@ export class LabEffects {
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     switchMap(([a, sdk]) => {
       const result = solveStepToCell(sdk, [Algorithms.tryNumber]);
-      if (!result) return [];
+      if (result.length<0) return [];
+      const step = _last(result);
       return [
-        SudokuActions.highlightCells({ cells: result.result?.cells } ),
-        SudokuActions.updateSudoku({ changes: result.sdk }),
+        SudokuActions.highlightCells({ cells: step?.result?.cells } ),
+        SudokuActions.updateSudoku({ changes: step?.sdk||{} }),
         SudokuActions.checkState()];
     })
   ));
@@ -322,8 +323,8 @@ export class LabEffects {
     ofType(SudokuActions.stepInfo),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) => {
-      const info = solveStepToCell(sdk, [Algorithms.tryNumber])
-      return [SudokuActions.setStepInfo({ info })];
+      const infos = solveStepToCell(sdk, [Algorithms.tryNumber])
+      return [SudokuActions.setStepInfo({ infos })];
     })
   ));
 

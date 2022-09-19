@@ -74,6 +74,7 @@ import { AppInterceptor } from './app.interceptor';
 import { MatCardModule } from '@angular/material/card';
 import { SvgBoardComponent } from './components/svg-board/svg-board.component';
 import { PrintPageComponent } from './pages/print/print-page.component';
+import {SolverStepDetailsComponent} from "./components/solver-step-details/solver-step-details.component";
 
 @NgModule({
   declarations: [
@@ -103,7 +104,8 @@ import { PrintPageComponent } from './pages/print/print-page.component';
     SchemaCheckComponent,
     PrintPageComponent,
     PrintComponent,
-    SvgBoardComponent
+    SvgBoardComponent,
+    SolverStepDetailsComponent
   ],
   imports: [
     BrowserModule,

@@ -206,6 +206,11 @@ export const getValuesAlignment = (cids: string[], rank: number|undefined): Play
   return PlaySudokuCellAlignment.none;
 }
 
+export const getCellUserCoord = (cid: string): string => {
+  const coord = (cid||'').split('.');
+  return `(${parseInt(coord[0])+1},${parseInt(coord[1])+1})`;
+}
+
 export const getRank = (sdk: PlaySudoku|EditSudoku|undefined): number => {
   if (sdk instanceof PlaySudoku) return (<PlaySudoku>sdk).sudoku?.rank || 9;
   return sdk?.options.rank || 9;

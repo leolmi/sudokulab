@@ -45,9 +45,12 @@ export abstract class SudokuFacade implements Facade {
   abstract handleImage(o?: HandleImageOptions): void;
   abstract camera(): void;
   abstract manage(operation: string, args?: any): void;
+  abstract raiseGenericAction(code: string, data?: any): void;
 
   abstract onUpload(component: Type<any>, destroyer$: Observable<any>, options?: UploadDialogOptions): Observable<UploadDialogResult|any>;
   abstract onHandleImage(component: Type<any>, destroyer$: Observable<any>): void;
   abstract onCamera(component: Type<any>, destroyer$: Observable<any>, options?: CameraDialogOptions): void;
   abstract onCheckSchema(component: Type<any>, destroyer$: Observable<any>): void;
+
+  doGenericAction?: (code: string, data: any) => any;
 }

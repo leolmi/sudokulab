@@ -18,7 +18,7 @@ export abstract class LabFacade implements Facade {
   abstract selectSelectedSudoku$: Observable<PlaySudoku|undefined>;
   abstract selectActiveCell$: Observable<string>;
   abstract selectSchemasOptions$: Observable<SchemasOptions>;
-  abstract selectStepInfo$: Observable<SolveStepResult|undefined>;
+  abstract selectStepInfos$: Observable<SolveStepResult[]>;
   abstract selectHighlightCells$: Observable<Dictionary<boolean>>;
 
   // abstract loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean): void;

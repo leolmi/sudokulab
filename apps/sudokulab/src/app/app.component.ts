@@ -51,10 +51,16 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     _sudoku.selectActiveMessage$
       .pipe(filter(a => !!a?.message))
-      .subscribe(a => this._snack.open(a?.message||'unknown', undefined, {
-        duration: 3000,
-        panelClass: `message-type-${a?.type||'info'}`
-      }));
+      .subscribe(a =>
+        this._snack.open(a?.message||'unknown', a?.action, {
+          duration: a?.duration||3000,
+          panelClass: `message-type-${a?.type||'info'}`,
+        }).afterDismissed()
+          .subscribe(r => {
+            if (r.dismissedByAction && a?.actionCode) {
+              setTimeout(() => _sudoku.raiseGenericAction(a?.actionCode||'', a.data));
+            }
+          }));
 
     _sudoku.selectTheme$.pipe(take(1)).subscribe(theme => setApplicationTheme(_window, theme));
   }

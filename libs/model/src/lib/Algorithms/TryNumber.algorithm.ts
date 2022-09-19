@@ -5,6 +5,7 @@ import { cloneDeep as _clone, minBy as _minBy, values as _values } from 'lodash'
 import { checkAvailables } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
+import {getCellUserCoord} from "../../sudoku.helper";
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 
@@ -69,4 +70,4 @@ export class TryNumberAlgorithm extends Algorithm {
 }
 
 const getDescription = (c?: PlaySudokuCell): string =>
-  c ? `The schema has been split on cell "${c.id}" using the values [${c.availables.join(',')}]` : '';
+  c ? `The schema has been split on cell "${getCellUserCoord(c.id)}" using the values [${c.availables.join(',')}]` : '';

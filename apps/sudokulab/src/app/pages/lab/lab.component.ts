@@ -18,6 +18,8 @@ import { ActivatedRoute } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Dictionary } from '@ngrx/entity';
+import {SOLVER_STEP_DETAILS} from "../../model";
+import {SolverStepDetailsComponent} from "../../components/solver-step-details/solver-step-details.component";
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -67,6 +69,20 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
 
     this.boardStyle$ = combineLatest(this._resize$, this._element$)
       .pipe(map(([r, ele]) => getBoardStyle(ele)));
+
+    _sudoku.doGenericAction = (code: string, data: any) => this._doAction(code, data);
+  }
+
+  private _doAction(code: string, data: any) {
+    switch (code) {
+      case SOLVER_STEP_DETAILS:
+        this._dialog.open(SolverStepDetailsComponent, {
+          width: '600px',
+          panelClass: 'sudokulab-solver-step-details',
+          data
+        });
+        break;
+    }
   }
 
   ngAfterViewInit() {
@@ -78,6 +94,11 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
           const id = parseInt(gp.get('id') || '0', 10);
           setTimeout(() => id ? this._lab.setActiveSudoku(id) : this._sudoku.checkStatus(), 250);
         }));
+  }
+
+  ngOnDestroy() {
+    delete this._sudoku.doGenericAction;
+    super.ngOnDestroy();
   }
 
   keyPressed(num: string) {

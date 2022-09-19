@@ -22,6 +22,7 @@ import * as SudokuSelectors from './selectors';
 import { Dictionary } from '@ngrx/entity';
 import { distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { isFunction as _isFunction } from 'lodash';
 
 @Injectable()
 export class SudokuContext extends SudokuFacade {
@@ -108,6 +109,10 @@ export class SudokuContext extends SudokuFacade {
 
   checkSchema(o: HandleImageResult) {
     this._checkSchema$.next(o);
+  }
+
+  raiseGenericAction(code: string, data?: any) {
+    if (_isFunction(this.doGenericAction)) this.doGenericAction(code, data);
   }
 
   onUpload(component: Type<any>, destroyer$: Observable<any>, options?: UploadDialogOptions): Observable<UploadDialogResult|any> {

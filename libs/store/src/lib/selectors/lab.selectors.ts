@@ -44,9 +44,9 @@ export const selectActiveSchemasOptions = createSelector(
   (state): SchemasOptions => state.options
 )
 
-export const selectActiveSchemaStepInfo = createSelector(
+export const selectActiveSchemaStepInfos = createSelector(
   selectLab,
-  (state): SolveStepResult|undefined => state.stepInfo
+  (state): SolveStepResult[] => state.stepInfos
 )
 
 export const selectHighlightCells = createSelector(

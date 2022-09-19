@@ -6,6 +6,7 @@ import { checkAvailables } from '../logic';
 import { isValue } from '../../global.helper';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
+import {getCellUserCoord} from "../../sudoku.helper";
 
 export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
 
@@ -54,4 +55,4 @@ export class OneCellForValueAlgorithm extends Algorithm {
 }
 
 const getDescription = (applied: boolean, cell?: PlaySudokuCell): string =>
-  (cell && applied) ? `Cell "${cell.id}" has been assigned the value "${cell.value}"` : ''
+  (cell && applied) ? `Cell "${getCellUserCoord(cell.id)}" has been assigned the value "${cell.value}"` : ''

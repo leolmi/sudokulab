@@ -1,0 +1,29 @@
+.details-container {
+  white-space: pre-wrap;
+  overflow: auto;
+}
+
+.lines-header {
+  text-align: center;
+  img {
+    width: 100px;
+  }
+}
+
+.lines-container {
+  .detail-line {
+    background-color: rgba(1,1,1,.1);
+    .line-text {
+      font-family: monospace;
+      background-color: white;
+      padding: 3px 10px;
+    }
+    .line-number {
+      text-align: right;
+      padding: 0 10px;
+      border-right: rgba(1,1,1,.2) 1px solid;
+      opacity: .5;
+      font-size: .8em;
+    }
+  }
+}

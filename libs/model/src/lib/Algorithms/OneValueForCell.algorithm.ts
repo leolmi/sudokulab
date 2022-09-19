@@ -5,6 +5,7 @@ import { find as _find } from 'lodash';
 import { checkAvailables } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
+import {getCellUserCoord} from "../../sudoku.helper";
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
 
@@ -40,4 +41,4 @@ export class OneValueForCellAlgorithm extends Algorithm {
 }
 
 const getDescription = (cell?: PlaySudokuCell): string =>
-  cell ? `Cell "${cell.id}" has been assigned the value "${cell.value}"` : '';
+  cell ? `Cell "${getCellUserCoord(cell.id)}" has been assigned the value "${cell.value}"` : '';

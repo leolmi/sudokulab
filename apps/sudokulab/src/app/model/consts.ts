@@ -5,3 +5,5 @@ export enum AvailablePages {
   print = 'print',
   help = 'help'
 }
+
+export const SOLVER_STEP_DETAILS = 'solver-step-details';

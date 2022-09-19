@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import {
-  isDebugMode,
+  isDebugMode, LabFacade,
   setDebugMode,
   SudokuFacade,
   SUDOKULAB_DARK_THEME,
@@ -22,7 +22,7 @@ declare const gapi: any;
 export class OptionsComponent implements AfterViewInit {
   isDebugMode$: BehaviorSubject<boolean>;
   isDarkTheme$: Observable<boolean>;
-  showAvailable$: BehaviorSubject<boolean>;
+  showAvailable$: Observable<boolean>;
   googleok$: BehaviorSubject<boolean>;
   googleok_check$: Observable<boolean>;
   isManagement$: Observable<boolean>;
@@ -31,10 +31,14 @@ export class OptionsComponent implements AfterViewInit {
   OPERATION = SUDOKULAB_MANAGE_OPERATION;
 
   constructor(private _sudoku: SudokuFacade,
+              private _lab: LabFacade,
               private _window: SudokulabWindowService,
               private _zone: NgZone) {
+
+
+
+
     this.isDebugMode$ = new BehaviorSubject<boolean>(isDebugMode());
-    this.showAvailable$ = new BehaviorSubject<boolean>(false);
     this.googleok$ = new BehaviorSubject<boolean>(true);
     this.googleok_check$ = this.googleok$.pipe(skip(1));
     this.isDarkTheme$ = _sudoku.selectTheme$.pipe(map(theme => theme === SUDOKULAB_DARK_THEME));
@@ -42,6 +46,7 @@ export class OptionsComponent implements AfterViewInit {
       map(([t, info]) => !!t || info?.session === SUDOKULAB_SESSION_DEVELOP || !environment.production));
     this.operationStatus$ = _sudoku.selectOperationStatus$;
     this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
+    this.showAvailable$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
   }
 
   private _initGoogleApi() {
@@ -78,8 +83,8 @@ export class OptionsComponent implements AfterViewInit {
     this._sudoku.setTheme(e.checked ? SUDOKULAB_DARK_THEME : SUDOKULAB_LIGHT_THEME);
   }
 
-  apply(e: any, target: string) {
-    // TODO: applica l'opzione
+  apply(v: any, target: string) {
+    this._lab.updatePlayerOptions({ [target]: v });
   }
 
   manage(operation: string, args?: any) {
