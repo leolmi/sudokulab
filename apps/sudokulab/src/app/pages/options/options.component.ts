@@ -70,10 +70,10 @@ export class OptionsComponent implements AfterViewInit {
           }),
         (error: any) =>
           this._zone.run(() =>
-            this._error(error))),
+            this._error('error while try to attach google autentication', error, true))),
         (err: any) =>
           this._zone.run(() =>
-            this._error(err))));
+            this._error('error while try to attach google autentication', err, true))));
   }
 
   setDebugMode(e: any) {
@@ -91,11 +91,12 @@ export class OptionsComponent implements AfterViewInit {
     this._sudoku.manage(operation, args);
   }
 
-  private _error(err: any, hidden = false) {
+  private _error(message: string, err: any, hidden = false) {
     if (!hidden) {
       this._sudoku.raiseError(err);
     }
     this.googleok$.next(false);
+    console.error(message, err);
   }
 
   ngAfterViewInit() {
