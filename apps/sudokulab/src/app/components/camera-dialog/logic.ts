@@ -7,6 +7,7 @@ import { flatten as _flatten} from 'lodash';
 const cv: any = {};
 
 export const CAMERA_CONSTRAINTS: any = {
+  audio: false,
   video: {
     width: {
       max: 720,

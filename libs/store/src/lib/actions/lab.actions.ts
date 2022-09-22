@@ -102,3 +102,7 @@ export const highlightCells = createAction(
   '[SudokuLab.lab] highlight cells',
   props<{ cells?: string[] }>()
 );
+
+export const copyAvailableToPencil = createAction(
+  '[SudokuLab.lab] copy availables to pencil'
+)

@@ -3,11 +3,17 @@
      fxLayout="row" fxLayoutAlign="start center">
   <div class="key-number"
        [ngClass]="{'filled': !!((status$|async)||{})[kn]}"
+       matTooltip="clear cell"
+       [matTooltipDisabled]="kn!=='x'"
        *ngFor="let kn of numbers$|async"
        (click)="clickOnNumber(kn)"
-       fxFlex>{{kn}}</div>
+       fxFlex>
+    <mat-icon *ngIf="kn==='x'">check_box_outline_blank</mat-icon>
+    <span *ngIf="kn!=='x'">{{kn}}</span>
+  </div>
   <div class="key-number"
        *ngIf="usePencil"
+       matTooltip="pencil mode"
        (click)="togglePencil()"
        [ngClass]="{'color-accent': isPencil$|async}"
        fxFlex>

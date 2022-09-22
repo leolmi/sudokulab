@@ -2,8 +2,8 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestro
 import {
   Cell,
   getBoardStyle,
-  HandleImageResult,
-  LabFacade, Sudoku,
+  HandleImageResult, isPencilEmpty,
+  LabFacade, PlaySudoku, Sudoku,
   SUDOKU_DEFAULT_RANK,
   SudokuFacade,
   use
@@ -20,6 +20,8 @@ import { filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Dictionary } from '@ngrx/entity';
 import {SOLVER_STEP_DETAILS} from "../../model";
 import {SolverStepDetailsComponent} from "../../components/solver-step-details/solver-step-details.component";
+import {AskDialogComponent} from "../../components/ask-dialog/ask-dialog.component";
+import {copyAvailableToPencil} from "../../../../../../libs/store/src/lib/actions";
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -29,6 +31,8 @@ import {SolverStepDetailsComponent} from "../../components/solver-step-details/s
 })
 export class LabComponent extends DestroyComponent implements OnDestroy, AfterViewInit {
   @ViewChild('board') board: ElementRef|undefined = undefined;
+
+  private _sudoku$: Observable<PlaySudoku|undefined>;
   progress$: Observable<number>;
   layout$: Observable<string>;
   layoutAlign$: Observable<string>;
@@ -44,10 +48,11 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
               private _dialog: MatDialog,
               _sudoku: SudokuFacade) {
     super(_sudoku);
-    this.cells$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.cells||{}));
+    this._sudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
+    this.cells$ = this._sudoku$.pipe(map(sdk => sdk?.cells||{}));
+    this.isPencil$ = this._sudoku$.pipe(map(sdk => !!sdk?.options?.usePencil));
+    this.rank$ = this._sudoku$.pipe(map(sdk => sdk?.sudoku?.rank||SUDOKU_DEFAULT_RANK));
     this.isActiveCell$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$), map(cell => !!cell));
-    this.isPencil$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => !!sdk?.options?.usePencil));
-    this.rank$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.sudoku?.rank||SUDOKU_DEFAULT_RANK));
 
     _sudoku
       .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true, allowImages: true, allowEditOnGrid: true })
@@ -106,6 +111,19 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   }
 
   pencilChanged(pencil: boolean) {
-    this._lab.updatePlayerOptions({ usePencil: pencil });
+    use(combineLatest([this.cells$, this._sudoku$]), ([cells, sdk]) => {
+      if (pencil && isPencilEmpty(cells) && sdk?.options?.showAvailables) {
+        console.log('ASK IF WANT TO PASS AVAILABLES TO PENCIL');
+        this._dialog
+          .open(AskDialogComponent, {
+            width: '600px',
+            data: { message: 'Do you want to copy all possible values into the pencils?' }
+          })
+          .afterClosed()
+          .pipe(filter(res => !!res))
+          .subscribe(() => this._lab.copyAvailableToPencil())
+      }
+      this._lab.updatePlayerOptions({usePencil: pencil});
+    });
   }
 }

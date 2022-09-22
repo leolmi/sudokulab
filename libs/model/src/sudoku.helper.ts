@@ -45,6 +45,7 @@ import { SudokuSolution } from './lib/SudokuSolution';
 import { calcFixedCount, getHash, isValue } from './global.helper';
 import { ElementRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import {PlaySudokuCell} from "./lib/PlaySudokuCell";
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -497,4 +498,10 @@ export const checkImportText = (txt: string, rank = SUDOKU_DEFAULT_RANK): string
     .replace(/\s/g, '')
     .replace(/[^x0123456789]/g, '');
   return txt.length !== dim ? '' : txt;
+}
+
+export const isPencilEmpty = (cells: Dictionary<Cell>): boolean => {
+  let pencil = false;
+  _forEach(cells, (c) => ((<PlaySudokuCell>c)?.pencil || []).length > 0 ? pencil = true : null);
+  return !pencil;
 }

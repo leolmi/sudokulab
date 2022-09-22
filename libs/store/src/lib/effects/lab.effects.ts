@@ -28,9 +28,10 @@ import {
   SudokuInfo,
   SudokuMessage, toggleValue
 } from '@sudokulab/model';
-import { cloneDeep as _clone, extend as _extend, last as _last } from 'lodash';
+import { cloneDeep as _clone, extend as _extend, last as _last, forEach as _forEach } from 'lodash';
 import { saveAs } from 'file-saver';
 import { Router } from '@angular/router';
+import {copyAvailableToPencil} from "../actions";
 
 @Injectable()
 export class LabEffects {
@@ -134,7 +135,7 @@ export class LabEffects {
     switchMap(([a, sdk]) => {
       if (!sdk) return [];
       const changes = clear(sdk);
-      checkAvailables(changes, true);
+      if (!sdk.options.usePencil) checkAvailables(changes, true);
       return [
         SudokuActions.updateSudoku({ changes }),
         SudokuActions.saveUserSettings()];
@@ -355,6 +356,18 @@ export class LabEffects {
       saveUserSetting('lab.activeSudoku', getSudokuForUserSettings(sdk))
     })
   ), { dispatch: false });
+
+  copyAvailableToPencil$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.copyAvailableToPencil),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    switchMap(([a, sdk]) => {
+      if (!sdk) return [];
+      const changes = { _id: sdk._id, cells: _clone(sdk.cells) };
+      _forEach(changes.cells, c => c ? c.pencil = _clone(c.availables) : null);
+      return [SudokuActions.updateSudoku({ changes })];
+    })
+  ));
 
   constructor(private _actions$: Actions,
               private _location: Location,

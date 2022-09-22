@@ -11,6 +11,7 @@ import {
 } from '@sudokulab/model';
 import { Facade } from './Facade';
 import { Dictionary } from '@ngrx/entity';
+import {copyAvailableToPencil} from "../../../store/src/lib/actions";
 
 export abstract class LabFacade implements Facade {
   name = 'lab';
@@ -44,4 +45,5 @@ export abstract class LabFacade implements Facade {
   abstract updatePlayerOptions(changes: Partial<PlaySudokuOptions>): void;
   abstract clesrHighlightCells(): void;
   abstract camera(): void;
+  abstract copyAvailableToPencil(): void;
 }

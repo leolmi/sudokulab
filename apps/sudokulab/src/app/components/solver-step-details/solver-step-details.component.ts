@@ -2,6 +2,13 @@ import {ChangeDetectionStrategy, Component, Inject} from "@angular/core";
 import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 import {BehaviorSubject} from "rxjs";
 import {SolveStepResult} from "@sudokulab/model";
+import {reduce as _reduce, startsWith as _startsWith} from 'lodash';
+
+interface Line {
+  num: number;
+  text: string;
+  title: boolean;
+}
 
 @Component({
   selector: 'sudokulab-solver-step-details',
@@ -10,11 +17,11 @@ import {SolveStepResult} from "@sudokulab/model";
       <img src="assets/images/board_num.png">
     </div>
     <div class="lines-container">
-      <div *ngFor="let line of lines$|async; let index = index"
+      <div *ngFor="let line of lines$|async"
            class="detail-line"
            fxLayout="row" fxLayoutAlign="start center">
-        <div class="line-number">{{(index+1)}}</div>
-        <div class="line-text" fxFlex>{{line}}</div>
+        <div class="line-number" *ngIf="!line.title">{{line.num}}</div>
+        <div class="line-text" [class.title]="line.title" fxFlex>{{line.text}}</div>
       </div>
     </div>
   </div>
@@ -26,13 +33,26 @@ import {SolveStepResult} from "@sudokulab/model";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SolverStepDetailsComponent {
-  lines$: BehaviorSubject<string[]>;
+  lines$: BehaviorSubject<Line[]>;
 
   constructor(@Inject(MAT_DIALOG_DATA) private _steps: SolveStepResult[]) {
-    this.lines$ = new BehaviorSubject<string[]>((this._steps||[])
-      .map(s => s.result?.description)
-      .join('\n')
-      .split('\n'));
+    this.lines$ = new BehaviorSubject<Line[]>(getLines((this._steps||[])
+      .map(s => `>${s.result?.algorithm}\n${s.result?.description}`)
+      .join('\n')));
   }
 
+}
+
+const getLines = (txt: string): Line[] => {
+  const lines = txt.split('\n');
+  let counter = 0;
+  return _reduce(lines, (cll, l) => {
+    const isTitle = _startsWith(l, '>');
+    counter = counter + (isTitle ? 0 : 1);
+    return cll.concat({
+      num: counter,
+      text: isTitle ? l.substr(1) : l,
+      title: isTitle
+    });
+  }, <Line[]>[]);
 }

@@ -17,6 +17,7 @@ import { SudokuStore } from './sudoku-store';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@ngrx/entity';
 import {selectActiveSchemaStepInfos} from "./selectors";
+import {copyAvailableToPencil} from "./actions";
 
 @Injectable()
 export class LabContext extends LabFacade {
@@ -113,6 +114,10 @@ export class LabContext extends LabFacade {
 
   camera() {
     this._sudoku.camera();
+  }
+
+  copyAvailableToPencil() {
+    this._store.dispatch(SudokuActions.copyAvailableToPencil());
   }
 
   constructor(private _store: Store<SudokuStore>,

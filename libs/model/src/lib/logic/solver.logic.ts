@@ -196,16 +196,22 @@ export const getGroupCouples = (g: PlaySudokuGroup|undefined, handler?: (ids: st
 
 export const clear = (sdk: PlaySudoku): PlaySudoku => {
   return _onSudoku(sdk, (ps) => {
-    _forEach(ps?.cells || {}, (c) => {
-      if (!!c) {
-        c.value = (c.fixed ? c.value : '');
-        if (!c.fixed) c.availables = getAvailables(ps.sudoku?.rank);
-      }
-    });
-    ps.state.complete = false;
-    ps.state.error = '';
-    ps.state.percent = 0;
-    checkAvailables(ps);
+    if (ps.options.usePencil) {
+      _forEach(ps?.cells || {}, (c) => {
+        if (c) c.pencil = [];
+      });
+    } else {
+      _forEach(ps?.cells || {}, (c) => {
+        if (!!c) {
+          c.value = (c.fixed ? c.value : '');
+          if (!c.fixed) c.availables = getAvailables(ps.sudoku?.rank);
+        }
+      });
+      ps.state.complete = false;
+      ps.state.error = '';
+      ps.state.percent = 0;
+      checkAvailables(ps);
+    }
     return ps;
   });
 }
