@@ -34,7 +34,7 @@ export class UploadDialogComponent {
     this.text$ = new BehaviorSubject<string>('');
     this.onlyValues$ = new BehaviorSubject<boolean>(false);
 
-    const textLenght$ = this.text$.pipe(map(txt => checkImportText(txt).length));
+    const textLenght$ = this.text$.pipe(map(txt => checkImportText(txt, { partial: true }).length));
     this.textInfo$ = textLenght$.pipe(map(ln => `${ln} characthers`));
     this.valid$ = textLenght$.pipe(map(ln => ln > 0));
   }
@@ -79,10 +79,12 @@ export class UploadDialogComponent {
     reader.onload = () => {
       try {
         const json: Sudoku = <Sudoku>JSON.parse(<string>reader.result);
+        const fixed = checkImportText(json.fixed);
+        const values = checkImportText(json.values);
         const sudoku = new Sudoku({
-          _id: json._id||getHash(json.fixed),
-          fixed: json.fixed,
-          values: json.values||'',
+          _id: json._id||getHash(fixed),
+          fixed,
+          values,
           rank: json.rank,
           options: json.options,
           info: json.info

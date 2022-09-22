@@ -492,12 +492,19 @@ export const getSudokuCells = (sdk: Sudoku): Dictionary<Cell> => {
   return cells;
 }
 
-export const checkImportText = (txt: string, rank = SUDOKU_DEFAULT_RANK): string => {
+export interface CheckImportTextOptions {
+  rank?: number;
+  partial?: boolean;
+}
+
+export const checkImportText = (txt: string, o?: CheckImportTextOptions): string => {
+  const rank = o?.rank || SUDOKU_DEFAULT_RANK;
   const dim = rank * rank;
   txt = (txt || '')
     .replace(/\s/g, '')
     .replace(/[^x0123456789]/g, '');
-  return txt.length !== dim ? '' : txt;
+  if (o?.partial) return txt.length <= dim ? txt : '';
+  return txt.length === dim ? txt : '';
 }
 
 export const isPencilEmpty = (cells: Dictionary<Cell>): boolean => {

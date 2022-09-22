@@ -7,6 +7,7 @@ import {
   getAlgorithms,
   getAlgorithmsMap,
   getAvailables,
+  getRank,
   getValues,
   isSolved
 } from '../../sudoku.helper';
@@ -90,6 +91,8 @@ export class Solver {
 
   solve(): SolveAllResult {
     // return this._solveParallel();
+    if ((this._sdks||[]).length<1) return new SolveAllResult([], new Date().getTime(),'no available schema');
+    if (!isSolvable(this._sdks[0].sdk)) return new SolveAllResult([], new Date().getTime(),'no solvable schema');
     return this._solveSerial();
   }
 
@@ -99,6 +102,15 @@ export class Solver {
     if (this._sdks[0]?.sdk.state.fixedCount<11) return 'Too few fixed number to try solve it!';
     return '';
   }
+}
+
+/**
+ * Verifica che lo schema sia risolvibile
+ * @param sdk
+ */
+export const isSolvable = (sdk: PlaySudoku): boolean => {
+  validateValues(sdk);
+  return _canSolveOne(sdk);
 }
 
 /**
@@ -178,6 +190,47 @@ export const checkAvailables = (sdk: PlaySudoku|undefined, resetBefore = false) 
   });
   // percentuale di riempimento calcolata sul numero di valori da inserirre
   sdk.state.percent = ((sdk.state.valuesCount - sdk.state.fixedCount) / (81 - sdk.state.fixedCount)) * 100;
+}
+
+/**
+ * Verifica il valore
+ * @param sdk
+ * @param v
+ * @param useX
+ */
+export const isRightValue = (sdk: PlaySudoku|undefined, v: string, useX = false): boolean => {
+  if (!sdk) return false;
+  if (v === 'x') return useX;
+  const nValue = parseInt(v, 10);
+  const rank = getRank(sdk);
+  return (nValue >= 0 && nValue <= rank);
+}
+
+/**
+ * Verifica i valori presenti
+ * @param sdk
+ */
+export const validateValues = (sdk: PlaySudoku|undefined) => {
+  if (!sdk) return;
+  //verifica per ogni gruppo la presenza di valori coerenti
+  _forEach(sdk.groups || {}, (g) => {
+    if (!g) return;
+    const gc: Dictionary<number> = {};
+    g.cells.forEach(cid => {
+      const value = sdk.cells[cid]?.value;
+      if (value) {
+        const key = `${value}`;
+        gc[key] = (gc[key] || 0) + 1;
+        if (!isRightValue(sdk, key)) pushError(sdk, `Group ${g.id} has a wrong value "${key}"`);
+      }
+    });
+    if (_values(gc).find(v => (v || 0) > 1)) pushError(sdk, `Group ${g.id} has some wrong values`);
+  });
+}
+
+export const pushError = (sdk: PlaySudoku|undefined, error: string) => {
+  if (!sdk || !error) return;
+  sdk.state.error = `${sdk.state.error ? `${sdk.state.error}\n` : ''}${error}`;
 }
 
 /**
@@ -265,7 +318,15 @@ export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): So
     return new SolveStepResult(ps, result);
   });
 }
-
+/**
+ * Mappa degli algoritmi utilizzati per step
+ * {
+ *   alg-1: [1,4,...],
+ *   alg-2: [2,3,...]
+ *   ...
+ * }
+ * @param algs
+ */
 export const buildDifficultyMap = (algs: AlgorithmResult[]): Dictionary<number[]> => {
   return _reduce(algs || [], (m, alg, i) => {
     m[alg.algorithm] = m[alg.algorithm] || [];
@@ -279,6 +340,7 @@ export const buildDifficultyMap = (algs: AlgorithmResult[]): Dictionary<number[]
  * @param v     valore della difficoltà provvisorio
  * @param N     numero di valori considerati
  * @param rank  rank dello schema
+ * @param fxC   numero di valori fissi
  * @param f     fattore incrementante (come porzione d'espressione)
  */
 const calcIncrement = (v: number, N: number, rank: number, fxC: number, f: string): number => {
@@ -289,7 +351,8 @@ const calcIncrement = (v: number, N: number, rank: number, fxC: number, f: strin
     N,                    // numero di valori considerati (posizione del ciclo)
     NU: nums,             // numeri necessari al riempimento
     NE: nums-N,           // numeri mancanti al riempimento
-    NEP: (nums-N)/nums    // percentuale di numeri mancanti al riempimento
+    NEP: (nums-N)/nums,   // percentuale di numeri mancanti al riempimento
+    NP: N/nums            // percentuale di numeri inseriti
   };
   const exp = `return ${v} ${f};`;
   try {
@@ -303,6 +366,10 @@ const calcIncrement = (v: number, N: number, rank: number, fxC: number, f: strin
   }
 }
 
+/**
+ * Calcola il valore della difficoltà
+ * @param info
+ */
 export const calcDifficultyValue = (info: SudokuInfo): number => {
   let diff = 0;
   let N = 0;

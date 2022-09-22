@@ -19,7 +19,9 @@ export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
  */
 export class OneValueForCellAlgorithm extends Algorithm {
   id = ONE_VALUE_FOR_CELL_ALGORITHM;
-  factor = '+25';
+  // Questo metodo è più difficile da vedere e usare se sono
+  // molti i numeri mancanti
+  factor = '+25+(NEP*15)';
   name = 'One value for cell';
   icon = 'center_focus_strong';
   type = AlgorithmType.solver;

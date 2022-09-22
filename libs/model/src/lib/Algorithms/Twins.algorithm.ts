@@ -27,7 +27,8 @@ export const TWINS_ALGORITHM = 'Twins';
  */
 export class TwinsAlgorithm extends Algorithm {
   id = TWINS_ALGORITHM;
-  factor = '+20';
+  // il twins è più difficile da vedere e usare se sono molti i numeri mancanti
+  factor = '+20+(NEP*10)';
   name = 'Twins in group';
   icon = 'bookmarks';
   type = AlgorithmType.support;
