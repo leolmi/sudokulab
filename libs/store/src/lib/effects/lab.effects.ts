@@ -1,19 +1,22 @@
-import { Injectable } from '@angular/core';
-import { Location } from '@angular/common';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { SudokuStore } from '../sudoku-store';
-import { concatMap, debounceTime, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Location} from '@angular/common';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Action, Store} from '@ngrx/store';
+import {SudokuStore} from '../sudoku-store';
+import {concatMap, debounceTime, delay, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import * as SudokuSelectors from '../selectors';
 import * as SudokuActions from '../actions';
 import {
   Algorithms,
   applyAlgorithm,
-  buildSudokuInfo, calcFixedCount,
+  buildSudokuInfo,
+  calcFixedCount,
   cellId,
   checkAvailables,
-  clear, getHash,
-  getSchemaName, getSudokuForUserSettings, getUserSetting,
+  clear,
+  getSchemaName,
+  getSudokuForUserSettings,
+  getUserSetting,
   isValidValue,
   loadValues,
   MessageType,
@@ -26,12 +29,12 @@ import {
   solveStepToCell,
   Sudoku,
   SudokuInfo,
-  SudokuMessage, toggleValue
+  SudokuMessage,
+  toggleValue
 } from '@sudokulab/model';
-import { cloneDeep as _clone, extend as _extend, last as _last, forEach as _forEach } from 'lodash';
-import { saveAs } from 'file-saver';
-import { Router } from '@angular/router';
-import {copyAvailableToPencil} from "../actions";
+import {cloneDeep as _clone, extend as _extend, forEach as _forEach, last as _last} from 'lodash';
+import {saveAs} from 'file-saver';
+import {Router} from '@angular/router';
 
 @Injectable()
 export class LabEffects {
@@ -310,12 +313,14 @@ export class LabEffects {
 
   calcLabStatus$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.setActivePage, SudokuActions.setActiveSudoku, SudokuActions.checkStatus),
+    delay(250),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) =>
       [SudokuActions.updatePageStatus({
         status: {
           has_no_lab_schema: !sdk,
-          not_available_camera: !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices
+          not_available_camera: !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices,
+          available_visible: !!sdk?.options?.showAvailables
         }
       })])
   ));
@@ -367,6 +372,15 @@ export class LabEffects {
       _forEach(changes.cells, c => c ? c.pencil = _clone(c.availables) : null);
       return [SudokuActions.updateSudoku({ changes })];
     })
+  ));
+
+  toggleAvailable$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.toggleAvailable),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    switchMap(([a, sdk]) => [
+      SudokuActions.updatePlayerOptions({ changes: { showAvailables: !sdk?.options?.showAvailables } }),
+      SudokuActions.checkStatus()])
   ));
 
   constructor(private _actions$: Actions,

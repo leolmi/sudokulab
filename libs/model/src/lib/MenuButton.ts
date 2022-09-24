@@ -10,4 +10,5 @@ export class MenuButton {
   tooltip?: string;
   disabledKey?: string;
   invisibleKey?: string;
+  checkedKey?: string;
 }

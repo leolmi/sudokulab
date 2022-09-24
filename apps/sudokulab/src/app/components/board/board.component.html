@@ -8,6 +8,7 @@
          *ngFor="let row of rows$|async"
          fxLayout="row" fxLayoutAlign="start center">
       <div class="sudokulab-board-cell"
+           [class.pencil-mode]="!!(playSudoku$|async)?.options?.usePencil"
            *ngFor="let col of cols$|async">
         <div class="cell-container"
              [ngStyle]="cellStyle$|async"

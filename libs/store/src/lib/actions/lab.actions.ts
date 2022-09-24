@@ -106,3 +106,7 @@ export const highlightCells = createAction(
 export const copyAvailableToPencil = createAction(
   '[SudokuLab.lab] copy availables to pencil'
 )
+
+export const toggleAvailable = createAction(
+  '[SudokuLab.lab] toggle available'
+)

@@ -28,6 +28,7 @@
         <div class="button-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
         <button mat-icon-button
                 *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
+                [class.color-accent]="!!((status$|async)||{})[pgbtn?.checkedKey||'']"
                 [matTooltip]="pgbtn.tooltip||''"
                 [disabled]="!!((status$|async)||{})[pgbtn?.disabledKey||'']"
                 [matTooltipDisabled]="!pgbtn.tooltip"
@@ -47,6 +48,7 @@
         <div class="button-menu-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
         <button mat-menu-item
                 *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
+                [class.color-accent]="!!((status$|async)||{})[pgbtn?.checkedKey||'']"
                 [disabled]="!!((status$|async)||{})[pgbtn?.disabledKey||'']"
                 (click)="execute(pgbtn.code||'')">
           <mat-icon>{{pgbtn.icon}}</mat-icon>

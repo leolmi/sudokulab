@@ -1,27 +1,29 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import {
   Cell,
   getBoardStyle,
-  HandleImageResult, isPencilEmpty,
-  LabFacade, PlaySudoku, Sudoku,
+  HandleImageResult,
+  isPencilEmpty,
+  LabFacade,
+  PlaySudoku,
+  Sudoku,
   SUDOKU_DEFAULT_RANK,
   SudokuFacade,
   use
 } from '@sudokulab/model';
-import { MatDialog } from '@angular/material/dialog';
-import { DestroyComponent } from '../../components/DestroyComponent';
-import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
-import { ImageHandlerComponent } from '../../components/image-handler/image-handler.component';
-import { CameraDialogComponent } from '../../components/camera-dialog/camera-dialog.component';
-import { SchemaCheckComponent } from '../../components/schema-check/schema-check.component';
-import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, skip, take, takeUntil } from 'rxjs/operators';
-import { Dictionary } from '@ngrx/entity';
+import {MatDialog} from '@angular/material/dialog';
+import {DestroyComponent} from '../../components/DestroyComponent';
+import {UploadDialogComponent} from '../../components/upload-dialog/upload-dialog.component';
+import {ImageHandlerComponent} from '../../components/image-handler/image-handler.component';
+import {CameraDialogComponent} from '../../components/camera-dialog/camera-dialog.component';
+import {SchemaCheckComponent} from '../../components/schema-check/schema-check.component';
+import {ActivatedRoute} from '@angular/router';
+import {combineLatest, Observable} from 'rxjs';
+import {filter, map, skip, take, takeUntil} from 'rxjs/operators';
+import {Dictionary} from '@ngrx/entity';
 import {SOLVER_STEP_DETAILS} from "../../model";
 import {SolverStepDetailsComponent} from "../../components/solver-step-details/solver-step-details.component";
 import {AskDialogComponent} from "../../components/ask-dialog/ask-dialog.component";
-import {copyAvailableToPencil} from "../../../../../../libs/store/src/lib/actions";
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -117,7 +119,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
         this._dialog
           .open(AskDialogComponent, {
             width: '600px',
-            data: { message: 'Do you want to copy all possible values into the pencils?' }
+            data: { message: 'Do you want to copy all available values into the pencils?' }
           })
           .afterClosed()
           .pipe(filter(res => !!res))

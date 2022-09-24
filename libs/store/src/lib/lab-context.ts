@@ -120,6 +120,10 @@ export class LabContext extends LabFacade {
     this._store.dispatch(SudokuActions.copyAvailableToPencil());
   }
 
+  toggleAvailable() {
+    this._store.dispatch(SudokuActions.toggleAvailable());
+  }
+
   constructor(private _store: Store<SudokuStore>,
               private _sudoku: SudokuFacade) {
     super();

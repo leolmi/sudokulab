@@ -19,7 +19,8 @@ export class LabManifest extends SudokulabPage {
     {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: 'has_no_lab_schema'},
     {icon: 'apps_outage', code: 'upload', tooltip: 'Open schema'},
     {icon: 'camera', code: 'camera', tooltip: 'Acquire by camera', invisibleKey: 'not_available_camera' },
-    {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: 'has_no_lab_schema'}
+    {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: 'has_no_lab_schema'},
+    {icon: 'apps', code: 'available', tooltip: 'Show available numbers', disabledKey: 'has_no_lab_schema', checkedKey: 'available_visible'},
   ];
   title = 'Player';
   execute = (facade: LabFacade, code: string) => {
@@ -32,6 +33,7 @@ export class LabManifest extends SudokulabPage {
       case 'upload': return facade.upload();
       case 'stepinfo': return facade.stepInfo();
       case 'camera': return facade.camera();
+      case 'available': return facade.toggleAvailable();
     }
   }
   static routes = (): Routes => [{

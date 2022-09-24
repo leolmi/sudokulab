@@ -46,4 +46,5 @@ export abstract class LabFacade implements Facade {
   abstract clesrHighlightCells(): void;
   abstract camera(): void;
   abstract copyAvailableToPencil(): void;
+  abstract toggleAvailable(): void;
 }

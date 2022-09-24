@@ -101,6 +101,17 @@
     }
   }
 
+  .pencil-mode {
+    .cell-container {
+      &.bottom-line {
+        border-bottom-color: $color-accent !important;
+      }
+      &.right-line {
+        border-right-color: $color-accent !important;
+      }
+    }
+  }
+
   .logo-lab {
     color: $color-primary-highlight;
   }

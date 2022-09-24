@@ -88,7 +88,7 @@
       }
     }
     &.fixed {
-      background-color: $color-hover-dark;
+      // background-color: $color-hover-dark;
     }
 
     &.bottom-line {
@@ -101,6 +101,17 @@
 
     &.error {
       color: $color-error2-dark !important;
+    }
+  }
+
+  .pencil-mode {
+    .cell-container {
+      &.bottom-line {
+        border-bottom-color: $color-accent !important;
+      }
+      &.right-line {
+        border-right-color: $color-accent !important;
+      }
     }
   }
 

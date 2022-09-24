@@ -28,5 +28,5 @@ const stateText = (sdk: PlaySudoku|undefined): string => {
   const rank = getRank(sdk);
   const dimension = rank * rank;
   const remain = dimension - sdk.state.valuesCount;
-  return `<b>${inserted}</b> inserted numbers (<b>${percent}%</b>), <b>${remain}</b> numbers remain`;
+  return `<b>${inserted>0 ? inserted : 'no'}</b> inserted numbers (<b>${percent}%</b>)${remain>0 ? `, <b>${remain}</b> to fill` : ''}`;
 }
