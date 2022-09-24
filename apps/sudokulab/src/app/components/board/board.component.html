@@ -16,7 +16,7 @@
              fxLayout="row" fxLayoutAlign="center center"
              *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
              [ngClass]="{
-                'fixed': cell?.fixed,
+                'fixed': cell.fixed,
                 'selected': cell.id === (selected$|async),
                 'right-line': ((grline$|async)||{})[col],
                 'bottom-line': ((grline$|async)||{})[row],
@@ -25,12 +25,15 @@
                 'highlight-cell': ((highlightsCell$|async)||{})[cell.id]
              }">
           <div class="cell-value" [ngClass]="{'pulse': ((highlightStep$|async)||{})[cell.id]}">{{cell?.value}}</div>
-          <div class="cell-pencil-values" *ngIf="!cell?.value && !!!(showAvailable$|async)">
-            <div class="cell-available-value" *ngFor="let pv of cell?.pencil">{{pv}}</div>
-          </div>
-          <div class="cell-available-values" *ngIf="(showAvailable$|async) && !cell?.value">
-            <div class="cell-available-value" *ngFor="let av of cell.availables">{{av}}</div>
-          </div>
+          <sudokulab-cell-values
+            *ngIf="!cell?.value"
+            [class.pencil-values]="true"
+            [rank]="(playSudoku$|async)?.sudoku?.rank"
+            [values]="cell.pencil"></sudokulab-cell-values>
+          <sudokulab-cell-values
+            *ngIf="(showAvailable$|async) && !cell?.value && (cell?.pencil||[]).length<=0"
+            [rank]="(playSudoku$|async)?.sudoku?.rank"
+            [values]="cell.availables"></sudokulab-cell-values>
         </div>
       </div>
     </div>

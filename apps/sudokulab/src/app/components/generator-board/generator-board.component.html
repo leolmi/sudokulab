@@ -14,12 +14,18 @@
              (click)="select(col, row)"
              fxLayout="row" fxLayoutAlign="center center"
              *ngIf="((editSudoku$|async)?.cells||{})[col+'.'+row] as cell"
-             [ngClass]="{'fixed': cell?.fixed, 'selected': cell.id === (selected$|async), 'right-line': ((grline$|async)||{})[col], 'bottom-line': ((grline$|async)||{})[row]}">
+             [ngClass]="{
+                'fixed': cell.fixed,
+                'selected': cell.id === (selected$|async),
+                'right-line': ((grline$|async)||{})[col],
+                'bottom-line': ((grline$|async)||{})[row],
+                'dynamic': cell.value === DYNAMIC
+             }">
           <div class="cell-value">{{PROXYVALUE[cell?.value||'']||cell?.value}}</div>
-          <div class="cell-available-values">
-            <div class="cell-available-value"
-                 *ngFor="let av of cell.availables">{{av}}</div>
-          </div>
+          <sudokulab-cell-values
+            *ngIf="!cell?.value||cell?.value===DYNAMIC"
+            [rank]="(editSudoku$|async)?.options?.rank"
+            [values]="cell.availables"></sudokulab-cell-values>
         </div>
       </div>
     </div>

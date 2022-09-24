@@ -11,6 +11,15 @@
         <mat-slide-toggle [checked]="isDebugMode$|async"
                           (change)="setDebugMode($event)">Debug active</mat-slide-toggle>
       </div>
+      <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Values mode</mat-label>
+          <mat-select [value]="valuesMode$|async"
+                      (valueChange)="setValuesMode($event)">
+            <mat-option *ngFor="let vm of availableValuesModes" [value]="vm">{{vm}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
 
     <div class="options-group">

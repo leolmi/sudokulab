@@ -173,4 +173,10 @@
       fill: $color-background-contrast-dark;
     }
   }
+
+  .pencil-values {
+    .cell-available-value {
+      color: $color-accent;
+    }
+  }
 }

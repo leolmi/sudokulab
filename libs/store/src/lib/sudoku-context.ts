@@ -39,6 +39,7 @@ export class SudokuContext extends SudokuFacade {
   selectPageStatus$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectPageStatus);
   selectIsCompact$: Observable<boolean> = this._isCompact$.pipe(distinctUntilChanged());
   selectTheme$: Observable<string> = this._store.select(SudokuSelectors.selectTheme);
+  selectValuesMode$: Observable<string> = this._store.select(SudokuSelectors.selectValuesMode);
   selectToken$: Observable<string> = this._store.select(SudokuSelectors.selectToken);
   selectOperationStatus$: Observable<number> = this._store.select(SudokuSelectors.selectOperationStatus);
 
@@ -97,6 +98,10 @@ export class SudokuContext extends SudokuFacade {
 
   setTheme(theme: string) {
     this._store.dispatch(SudokuActions.setTheme({ theme }));
+  }
+
+  setValuesMode(valuesMode: string) {
+    this._store.dispatch(SudokuActions.setValuesMode({ valuesMode }));
   }
 
   handleImage(o?: HandleImageOptions) {

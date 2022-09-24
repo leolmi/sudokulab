@@ -38,22 +38,3 @@
   }
 }
 
-.cell-pencil-values,
-.cell-available-values {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-size: 0.4em;
-  padding: 4px 1px;
-  font-weight: normal;
-  opacity: .5;
-  .cell-available-value {
-    width: 0.3em;
-    display: inline-block;
-    margin: 0.4em;
-    line-height: 0.3em;
-  }
-}

@@ -72,7 +72,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
       getSchemaCellStyle(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
     this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)));
     this.showPencil$ = this.playSudoku$.pipe(map(s => !!s?.options.usePencil));
-    this.showAvailable$ = this.playSudoku$.pipe(map(s => !s?.options.usePencil && !!s?.options.showAvailables));
+    this.showAvailable$ = this.playSudoku$.pipe(map(s => !!s?.options.showAvailables));
     this.highlights$ = this.stepInfos$.pipe(map(r => getHighlight(_last(r))));
     this.highlightsCell$ = this.stepInfos$.pipe(map(r => getCellHighlight(_last(r))));
 

@@ -1,6 +1,6 @@
 import {
   getUserSetting,
-  SUDOKULAB_DEFAULT_THEME,
+  SUDOKULAB_DEFAULT_THEME, SUDOKULAB_DEFAULT_VALUES_MODE,
   SudokulabInfo,
   SudokulabPage,
   SudokuMessage,
@@ -9,6 +9,7 @@ import {
 import { Action, createReducer, on } from '@ngrx/store';
 import * as SudokuActions from '../actions';
 import { Dictionary } from '@ngrx/entity';
+import {Observable} from "rxjs";
 
 export interface SudokuState {
   info?: SudokulabInfo,
@@ -16,6 +17,7 @@ export interface SudokuState {
   message?: SudokuMessage;
   status: Dictionary<boolean>;
   theme: string;
+  valuesMode: string;
   token?: string;
   operationStatus?: number;
   env?: any
@@ -27,6 +29,7 @@ export const initialState: SudokuState = {
   message: undefined,
   status: {},
   theme: getUserSetting('sudoku.theme')||SUDOKULAB_DEFAULT_THEME,
+  valuesMode: getUserSetting('sudoku.valuesMode')||SUDOKULAB_DEFAULT_VALUES_MODE,
   token: undefined,
   operationStatus: -1,
   env: {}
@@ -39,6 +42,7 @@ const sudokuReducers = createReducer(
   on(SudokuActions.setActivePage, (state, { page }) => ({ ...state, activePage: page })),
   on(SudokuActions.updatePageStatus, (state, { status }) => ({ ...state, status: update(state.status, status) })),
   on(SudokuActions.setTheme, (state, { theme }) => ({ ...state, theme })),
+  on(SudokuActions.setValuesMode, (state, { valuesMode }) => ({ ...state, valuesMode })),
   on(SudokuActions.setToken, (state, { token }) => ({ ...state, token })),
   on(SudokuActions.setOperationStatus, (state, { status }) => ({ ...state, operationStatus: status })),
   on(SudokuActions.setEnvironment, (state, { env }) => ({ ...state, env }))

@@ -102,6 +102,11 @@ export class SudokuEffects {
     })
   ), { dispatch: false });
 
+  setValuesMode$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setValuesMode),
+    map((a) => saveUserSetting('sudoku.valuesMode', a.valuesMode))
+  ), { dispatch: false });
+
   setEnvironment$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.setEnvironment),
     concatMap(() => this._http.get<SudokulabInfo>('/api/sudokulab').pipe(

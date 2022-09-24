@@ -33,6 +33,11 @@ export const selectTheme = createSelector(
   (state): string => state.theme
 )
 
+export const selectValuesMode = createSelector(
+  selectSudoku,
+  (state): string => state.valuesMode
+)
+
 export const selectToken = createSelector(
   selectSudoku,
   (state): string => state.token||''

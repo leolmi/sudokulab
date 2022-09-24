@@ -9,6 +9,7 @@ export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
 
 export const SUDOKULAB_LIGHT_THEME = 'light';
 export const SUDOKULAB_DARK_THEME = 'dark';
+export const SUDOKULAB_NUMBER_VALUES_MODE = 'number';
 
 export const SUDOKULAB_SESSION_DEVELOP = 'develop';
 export const SUDOKULAB_SESSION_STANDARD = 'standard';
@@ -18,6 +19,7 @@ export const SUDOKULAB_AUTHOR = 'leo.olmi 2021';
 export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
 export const SUDOKULAB_DEBUG_KEY = 'SUDOKULAB-DEBUG-STATUS';
 export const SUDOKULAB_DEFAULT_THEME = SUDOKULAB_LIGHT_THEME;
+export const SUDOKULAB_DEFAULT_VALUES_MODE = SUDOKULAB_NUMBER_VALUES_MODE;
 export const SUDOKULAB_BASIC_AUTHORIZATION = 'SUDOKULAB-BASIC';
 
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';

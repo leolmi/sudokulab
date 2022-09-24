@@ -28,16 +28,14 @@ export class OptionsComponent implements AfterViewInit {
   isManagement$: Observable<boolean>;
   operationStatus$: Observable<number>;
   isOperationActive$: Observable<boolean>;
+  valuesMode$: Observable<string>;
   OPERATION = SUDOKULAB_MANAGE_OPERATION;
+  availableValuesModes: string[] = ['number', 'dot'];
 
   constructor(private _sudoku: SudokuFacade,
               private _lab: LabFacade,
               private _window: SudokulabWindowService,
               private _zone: NgZone) {
-
-
-
-
     this.isDebugMode$ = new BehaviorSubject<boolean>(isDebugMode());
     this.googleok$ = new BehaviorSubject<boolean>(true);
     this.googleok_check$ = this.googleok$.pipe(skip(1));
@@ -47,6 +45,7 @@ export class OptionsComponent implements AfterViewInit {
     this.operationStatus$ = _sudoku.selectOperationStatus$;
     this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
     this.showAvailable$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
+    this.valuesMode$ = _sudoku.selectValuesMode$;
   }
 
   private _initGoogleApi() {
@@ -81,6 +80,9 @@ export class OptionsComponent implements AfterViewInit {
   }
   setDarkTheme(e: any) {
     this._sudoku.setTheme(e.checked ? SUDOKULAB_DARK_THEME : SUDOKULAB_LIGHT_THEME);
+  }
+  setValuesMode(e: any) {
+    this._sudoku.setValuesMode(e);
   }
 
   apply(v: any, target: string) {

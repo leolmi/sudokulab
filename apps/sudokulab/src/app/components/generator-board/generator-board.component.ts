@@ -7,7 +7,7 @@ import {
   GeneratorFacade,
   cellId,
   isDirectionKey,
-  use, getDimension, SudokuFacade, getSchemaCellStyle, SUDOKU_DEFAULT_RANK
+  use, getDimension, SudokuFacade, getSchemaCellStyle, SUDOKU_DEFAULT_RANK, SUDOKU_DYNAMIC_VALUE
 } from '@sudokulab/model';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
@@ -27,6 +27,7 @@ export class GeneratorBoardComponent extends GeneratorBaseComponent implements O
   cols$: Observable<number[]>;
   grline$: Observable<{[id: number]: boolean}>;
   hasFocus$: BehaviorSubject<boolean>;
+  DYNAMIC = SUDOKU_DYNAMIC_VALUE;
   PROXYVALUE: any = {x: '?'};
   constructor(private ele: ElementRef,
               private _generator: GeneratorFacade,

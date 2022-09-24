@@ -25,6 +25,7 @@ export abstract class SudokuFacade implements Facade {
   abstract selectPageStatus$: Observable<Dictionary<boolean>>;
   abstract selectIsCompact$: Observable<boolean>;
   abstract selectTheme$: Observable<string>;
+  abstract selectValuesMode$: Observable<string>;
   abstract selectToken$: Observable<string>;
   abstract selectOperationStatus$: Observable<number>;
 
@@ -42,6 +43,7 @@ export abstract class SudokuFacade implements Facade {
   abstract saveUserSettings(): void;
   abstract checkStatus(): void;
   abstract setTheme(theme: string): void;
+  abstract setValuesMode(valuesMode: string): void;
   abstract handleImage(o?: HandleImageOptions): void;
   abstract camera(): void;
   abstract manage(operation: string, args?: any): void;

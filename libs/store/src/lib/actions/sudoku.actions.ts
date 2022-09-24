@@ -68,6 +68,11 @@ export const setTheme = createAction(
   props<{ theme: string }>()
 );
 
+export const setValuesMode = createAction(
+  '[SudokuLab.sudoku] set the values mode',
+  props<{ valuesMode: string }>()
+);
+
 export const manage = createAction(
   '[SudokuLab.sudoku] manage operation',
   props<{ operation: string, args?: any }>()
