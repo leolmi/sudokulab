@@ -1,16 +1,27 @@
 import { Algorithm, PlaySudoku } from '@sudokulab/model';
 
+export class AlgorithmResultLine {
+  constructor(l?: Partial<AlgorithmResultLine>) {
+    this.description = '';
+    this.cell = '';
+    Object.assign(this, l || {});
+  }
+  description: string;
+  cell: string;
+}
+
+
 export class AlgorithmResult {
   constructor(r?: Partial<AlgorithmResult>) {
     this.algorithm = '';
-    this.description = '';
+    this.descLines = [];
     this.cases = [];
     this.cells = [];
     this.applied = false;
     Object.assign(this, r || {});
   }
   algorithm: string;
-  description: string;
+  descLines: AlgorithmResultLine[];
   cases: PlaySudoku[];
   cells: string[];
   applied: boolean;

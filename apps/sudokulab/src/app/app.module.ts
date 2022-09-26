@@ -77,6 +77,7 @@ import {PrintPageComponent} from './pages/print/print-page.component';
 import {SolverStepDetailsComponent} from "./components/solver-step-details/solver-step-details.component";
 import {AskDialogComponent} from "./components/ask-dialog/ask-dialog.component";
 import {CellValuesComponent} from "./components/cell-values/cell-values.component";
+import {SolverStepDetailsPopupComponent} from "./components/solver-step-details/solver-step-details-popup.component";
 
 @NgModule({
   declarations: [
@@ -109,6 +110,7 @@ import {CellValuesComponent} from "./components/cell-values/cell-values.componen
     PrintComponent,
     SvgBoardComponent,
     SolverStepDetailsComponent,
+    SolverStepDetailsPopupComponent,
     CellValuesComponent
   ],
   imports: [

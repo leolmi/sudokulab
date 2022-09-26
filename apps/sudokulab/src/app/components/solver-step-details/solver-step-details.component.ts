@@ -1,58 +1,74 @@
-import {ChangeDetectionStrategy, Component, Inject} from "@angular/core";
-import {MAT_DIALOG_DATA} from "@angular/material/dialog";
-import {BehaviorSubject} from "rxjs";
-import {SolveStepResult} from "@sudokulab/model";
-import {reduce as _reduce, startsWith as _startsWith} from 'lodash';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
+import {BehaviorSubject, Observable} from "rxjs";
+import {AlgorithmResultLine, getAlgorithm, SolveStepResult} from "@sudokulab/model";
+import {reduce as _reduce} from 'lodash';
+import {map} from "rxjs/operators";
 
 interface Line {
-  num: number;
+  num?: number;
   text: string;
-  title: boolean;
+  line?: AlgorithmResultLine;
 }
 
 @Component({
   selector: 'sudokulab-solver-step-details',
-  template: `<div mat-dialog-content class="details-container">
-    <div class="lines-header">
-      <img src="assets/images/board_num.png">
+  template: `<div class="details-container">
+    <div class="lines-header" [class.allow-close]="allowClose && ((lines$|async)||[]).length>0">
+      <img *ngIf="showHelpImage" src="assets/images/board_num.png" alt="description image">
+      <button *ngIf="allowClose && ((lines$|async)||[]).length>0" class="close-button"
+              (click)="closeDetails()" mat-icon-button>
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
     <div class="lines-container">
       <div *ngFor="let line of lines$|async"
            class="detail-line"
+           (click)="clickOnLine(line)"
+           [class.result-line]="!!line.line && handleLines"
            fxLayout="row" fxLayoutAlign="start center">
-        <div class="line-number" *ngIf="!line.title">{{line.num}}</div>
-        <div class="line-text" [class.title]="line.title" fxFlex>{{line.text}}</div>
+        <div class="line-number" *ngIf="!!line.line">{{line.num}}</div>
+        <div class="line-text" [class.title]="!line.line" fxFlex>{{line.text}}</div>
       </div>
     </div>
-  </div>
-  <mat-dialog-actions>
-    <div fxFlex></div>
-    <button mat-button mat-dialog-close>OK</button>
-  </mat-dialog-actions>`,
+  </div>`,
   styleUrls: ['./solver-step-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SolverStepDetailsComponent {
-  lines$: BehaviorSubject<Line[]>;
+  steps$: BehaviorSubject<SolveStepResult[]>;
+  lines$: Observable<Line[]>;
 
-  constructor(@Inject(MAT_DIALOG_DATA) private _steps: SolveStepResult[]) {
-    this.lines$ = new BehaviorSubject<Line[]>(getLines((this._steps||[])
-      .map(s => `>${s.result?.algorithm}\n${s.result?.description}`)
-      .join('\n')));
+  @Input() handleLines: boolean = false;
+  @Input() showHelpImage: boolean = true;
+  @Input() allowClose: boolean = false;
+  @Input() set steps(s: SolveStepResult[]) {
+     this.steps$.next(s);
   }
 
-}
+  @Output() onLineCLick: EventEmitter<AlgorithmResultLine> = new EventEmitter<AlgorithmResultLine>();
+  @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
 
-const getLines = (txt: string): Line[] => {
-  const lines = txt.split('\n');
-  let counter = 0;
-  return _reduce(lines, (cll, l) => {
-    const isTitle = _startsWith(l, '>');
-    counter = counter + (isTitle ? 0 : 1);
-    return cll.concat({
-      num: counter,
-      text: isTitle ? l.substr(1) : l,
-      title: isTitle
-    });
-  }, <Line[]>[]);
+  constructor() {
+    let counter = 0;
+    this.steps$ = new BehaviorSubject<SolveStepResult[]>([])
+
+    this.lines$ = this.steps$.pipe(map(steps => _reduce(steps||[], (lns, step) => {
+      const alg = getAlgorithm(step.result?.algorithm||'');
+      return lns.concat([
+        {text: alg?.name||'undefined',},
+        ...(step.result?.descLines||[]).map(ln => ({
+          num: ++counter,
+          text: ln.description,
+          line: ln
+        }))]);
+    }, <Line[]>[])));
+  }
+
+  closeDetails() {
+    this.onClose.emit({});
+  }
+
+  clickOnLine(line: Line) {
+    if (line.line && this.handleLines) this.onLineCLick.emit(line.line);
+  }
 }

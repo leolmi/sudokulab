@@ -1,19 +1,18 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 import {Facade} from "./Facade";
 import {SudokuMessage} from "./SudokuMessage";
 import {SudokulabPage} from "./SudokulabPage";
-import { Dictionary } from '@ngrx/entity';
-import { Type } from '@angular/core';
-import { Sudoku } from './Sudoku';
-import { UploadDialogOptions } from './UploadDialogOptions';
-import { UploadDialogResult } from './UploadDialogResult';
-import { HandleImageOptions } from './HandleImageOptions';
-import { HandleImageResult } from './HandleImageResult';
-import { CameraDialogOptions } from './CameraDialogOptions';
-import { CameraDialogResult } from './CameraDialogResult';
-import { GoogleCredentials } from './GoogleCredentials';
-import { SudokulabInfo } from './SudokulabInfo';
-import { PlaySudoku } from './PlaySudoku';
+import {Dictionary} from '@ngrx/entity';
+import {Type} from '@angular/core';
+import {Sudoku} from './Sudoku';
+import {UploadDialogOptions} from './UploadDialogOptions';
+import {UploadDialogResult} from './UploadDialogResult';
+import {HandleImageOptions} from './HandleImageOptions';
+import {HandleImageResult} from './HandleImageResult';
+import {CameraDialogOptions} from './CameraDialogOptions';
+import {GoogleCredentials} from './GoogleCredentials';
+import {SudokulabInfo} from './SudokulabInfo';
+import {PlaySudoku} from './PlaySudoku';
 
 
 export abstract class SudokuFacade implements Facade {

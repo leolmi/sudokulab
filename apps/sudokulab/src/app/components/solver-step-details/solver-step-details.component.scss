@@ -4,15 +4,31 @@
 }
 
 .lines-header {
+  position: relative;
   text-align: center;
+  &.allow-close {
+    min-height: 24px;
+  }
   img {
     width: 100px;
+  }
+  .close-button {
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 }
 
 .lines-container {
   .detail-line {
-    background-color: rgba(1,1,1,.1);
+    background-color: rgba(1,1,1,.05);
+    &.result-line {
+      cursor: pointer;
+      &:hover {
+        background-color: rgba(1,1,1,.1);
+        font-weight: bold;
+      }
+    }
     .line-text {
       font-family: monospace;
       background-color: white;

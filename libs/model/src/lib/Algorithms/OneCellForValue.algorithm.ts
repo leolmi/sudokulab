@@ -1,6 +1,6 @@
 import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
-import { AlgorithmResult } from '../AlgorithmResult';
+import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import { find as _find, keys as _keys } from 'lodash';
 import { checkAvailables } from '../logic';
 import { isValue } from '../../global.helper';
@@ -48,11 +48,13 @@ export class OneCellForValueAlgorithm extends Algorithm {
     return new AlgorithmResult({
       algorithm: this.id,
       applied,
-      description: getDescription(applied, cell),
+      //description: getDescription(applied, cell),
+      descLines: [new AlgorithmResultLine({
+        cell: cell?.id,
+        description: `Cell ${getCellUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`
+      })],
       cells: [ocid]
     });
   }
 }
 
-const getDescription = (applied: boolean, cell?: PlaySudokuCell): string =>
-  (cell && applied) ? `Cell "${getCellUserCoord(cell.id)}" has been assigned the value "${cell.value}"` : ''

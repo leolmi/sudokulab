@@ -1,23 +1,19 @@
 import {
-  HandleImageOptions, HandleImageResult,
   LabFacade,
   PlaySudoku,
   PlaySudokuOptions,
   SchemasOptions,
   SolveStepResult,
-  Sudoku,
   SudokuFacade,
   SudokuMessage
 } from '@sudokulab/model';
-import { Observable, of } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import * as SudokuSelectors from './selectors';
 import * as SudokuActions from './actions';
-import { Store } from '@ngrx/store';
-import { SudokuStore } from './sudoku-store';
-import { Injectable } from '@angular/core';
-import { Dictionary } from '@ngrx/entity';
-import {selectActiveSchemaStepInfos} from "./selectors";
-import {copyAvailableToPencil} from "./actions";
+import {Store} from '@ngrx/store';
+import {SudokuStore} from './sudoku-store';
+import {Injectable} from '@angular/core';
+import {Dictionary} from '@ngrx/entity';
 
 @Injectable()
 export class LabContext extends LabFacade {
@@ -27,9 +23,11 @@ export class LabContext extends LabFacade {
   selectSchemasOptions$: Observable<SchemasOptions> = this._store.select(SudokuSelectors.selectActiveSchemasOptions);
   selectStepInfos$: Observable<SolveStepResult[]> = this._store.select(SudokuSelectors.selectActiveSchemaStepInfos);
   selectHighlightCells$: Observable<Dictionary<boolean>> = this._store.select(SudokuSelectors.selectHighlightCells);
+  schemaChanged$: BehaviorSubject<any>;
 
   setActiveSudoku(active: number) {
     this._store.dispatch(SudokuActions.setActiveSudoku({ active }));
+    this.schemaChanged$.next({});
   }
 
   setSelectedSudoku(selected: number) {
@@ -39,14 +37,6 @@ export class LabContext extends LabFacade {
   setActiveCell(id: string) {
     this._store.dispatch(SudokuActions.setActiveCell({ id }));
   }
-
-  // loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean) {
-  //   if (!!sudoku) this._sudoku.loadSudoku(sudoku, onlyValues);
-  // }
-  //
-  // handleImage(o?: HandleImageOptions) {
-  //   this._sudoku.handleImage(o);
-  // }
 
   applyAlgorithm(algorithm: string) {
     this._store.dispatch(SudokuActions.applyAlgorithm({ algorithm }));
@@ -62,10 +52,12 @@ export class LabContext extends LabFacade {
 
   solveStep() {
     this._store.dispatch(SudokuActions.solveStep());
+    this.schemaChanged$.next({});
   }
 
   solve() {
     this._store.dispatch(SudokuActions.solve());
+    this.schemaChanged$.next({});
   }
 
   analyze() {
@@ -74,10 +66,12 @@ export class LabContext extends LabFacade {
 
   setValue(value: string) {
     this._store.dispatch(SudokuActions.setValue({ value }));
+    this.schemaChanged$.next({});
   }
 
   clear() {
     this._store.dispatch(SudokuActions.clear());
+    this.schemaChanged$.next({});
   }
 
   move(direction: string) {
@@ -110,6 +104,7 @@ export class LabContext extends LabFacade {
 
   openSelectedSudoku() {
     this._store.dispatch(SudokuActions.openSelectedSudoku());
+    this.schemaChanged$.next({});
   }
 
   camera() {
@@ -127,5 +122,6 @@ export class LabContext extends LabFacade {
   constructor(private _store: Store<SudokuStore>,
               private _sudoku: SudokuFacade) {
     super();
+    this.schemaChanged$ = new BehaviorSubject<any>(null);
   }
 }

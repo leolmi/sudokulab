@@ -1,18 +1,12 @@
-import { Algorithm } from '../Algorithm';
-import { PlaySudoku } from '../PlaySudoku';
-import { AlgorithmResult } from '../AlgorithmResult';
-import { Dictionary } from '@ngrx/entity';
-import {
-  forEach as _forEach,
-  includes as _includes,
-  keys as _keys,
-  reduce as _reduce,
-  remove as _remove
-} from 'lodash';
-import { checkAvailables, getGroupCouples } from '../logic';
+import {Algorithm} from '../Algorithm';
+import {PlaySudoku} from '../PlaySudoku';
+import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
+import {Dictionary} from '@ngrx/entity';
+import {forEach as _forEach, includes as _includes, keys as _keys, reduce as _reduce, remove as _remove} from 'lodash';
+import {checkAvailables, getGroupCouples} from '../logic';
 import {getCellUserCoord, getGroups} from '../../sudoku.helper';
-import { addLine } from '../../global.helper';
-import { AlgorithmType } from '../enums';
+import {AlgorithmType} from '../enums';
+import {isValue} from '../../global.helper';
 
 export const TWINS_ALGORITHM = 'Twins';
 
@@ -34,7 +28,7 @@ export class TwinsAlgorithm extends Algorithm {
   type = AlgorithmType.support;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     let applied = false;
-    let description = '';
+    const descLines: AlgorithmResultLine[] = [];
 
     _forEach(sdk.groups, (g) => {
       // ricerca i valori che sono presenti solo in due celle
@@ -57,25 +51,34 @@ export class TwinsAlgorithm extends Algorithm {
         const ids = couple.split('|');
         const values = couples_map[couple];
         // toglie dai valori possibili delle celle gemelle gli altri valori
-        ids.forEach(id => {
-          const removed = _remove(sdk.cells[id]?.availables||[], v => !_includes(values, v));
-          if (removed.length > 0) {
-            description = addLine(description, `On cell "${getCellUserCoord(id)}" the possible values [${removed.join(',')}] have been removed`);
-            applied = true;
-          }
-        });
+        ids.filter(id => !isValue(sdk.cells[id]?.value))
+          .forEach(id => {
+            const removed = _remove(sdk.cells[id]?.availables||[], v => !_includes(values, v));
+            if (removed.length > 0) {
+              applied = true;
+              descLines.push(new AlgorithmResultLine({
+                cell: id,
+                description: getDescription(sdk, id, removed)
+              }));
+            }
+          });
         // elimina la coppia di valori dagli availables delle altre celle presenti
         // nei gruppi comuni alle celle della coppia
-        getGroups(sdk, ids).forEach(g =>
-          g.cells.forEach(gcid => {
-            if (!_includes(ids, gcid)) {
-              const removed = _remove(sdk.cells[gcid]?.availables||[], v => _includes(values, v));
-              if (removed.length > 0) {
-                description = addLine(description, `On cell "${getCellUserCoord(gcid)}" the possible values [${removed.join(',')}] have been removed`);
-                applied = true;
+        getGroups(sdk, ids)
+          .forEach(g => g.cells
+            .filter(gcid => !isValue(sdk.cells[gcid]?.value))
+            .forEach(gcid => {
+              if (!_includes(ids, gcid)) {
+                const removed = _remove(sdk.cells[gcid]?.availables||[], v => _includes(values, v));
+                if (removed.length > 0) {
+                  applied = true;
+                  descLines.push(new AlgorithmResultLine({
+                    cell: gcid,
+                    description: getDescription(sdk, gcid, removed)
+                  }));
+                }
               }
-            }
-          }));
+            }));
       }
     });
 
@@ -84,7 +87,11 @@ export class TwinsAlgorithm extends Algorithm {
     return new AlgorithmResult({
       algorithm: this.id,
       applied,
-      description
+      descLines
     });
   }
+}
+
+const getDescription = (sdk: PlaySudoku, cid: string, removed: string[]): string => {
+  return `On cell ${getCellUserCoord(cid)} only available are [${sdk.cells[cid]?.availables}], so [${removed.join(',')}] have been removed`;
 }

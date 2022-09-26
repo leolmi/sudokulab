@@ -1,11 +1,11 @@
-import { Algorithm } from '../Algorithm';
-import { PlaySudoku } from '../PlaySudoku';
-import { AlgorithmResult } from '../AlgorithmResult';
-import { find as _find } from 'lodash';
-import { checkAvailables } from '../logic';
-import { PlaySudokuCell } from '../PlaySudokuCell';
-import { AlgorithmType } from '../enums';
+import {Algorithm} from '../Algorithm';
+import {PlaySudoku} from '../PlaySudoku';
+import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
+import {find as _find} from 'lodash';
+import {checkAvailables} from '../logic';
+import {AlgorithmType} from '../enums';
 import {getCellUserCoord} from "../../sudoku.helper";
+import {isValue} from '../../global.helper';
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
 
@@ -26,7 +26,7 @@ export class OneValueForCellAlgorithm extends Algorithm {
   icon = 'center_focus_strong';
   type = AlgorithmType.solver;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    const cell = _find(sdk.cells, c => (!c?.value && c?.availables || []).length === 1);
+    const cell = _find(sdk.cells, c => (!isValue(c?.value) && c?.availables || []).length === 1);
 
     if (!!cell) {
       cell.value = cell.availables[0];
@@ -36,11 +36,11 @@ export class OneValueForCellAlgorithm extends Algorithm {
     return new AlgorithmResult({
       algorithm: this.id,
       applied: !!cell,
-      description: getDescription(cell),
+      descLines: [new AlgorithmResultLine({
+        cell: cell?.id,
+        description: `Cell ${getCellUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`
+      })],
       cells: !!cell ? [cell.id] : undefined
     });
   }
 }
-
-const getDescription = (cell?: PlaySudokuCell): string =>
-  cell ? `Cell "${getCellUserCoord(cell.id)}" has been assigned the value "${cell.value}"` : '';

@@ -1,11 +1,13 @@
 import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import {
+  AlgorithmResultLine,
   Cell,
   getBoardStyle,
   HandleImageResult,
   isPencilEmpty,
   LabFacade,
   PlaySudoku,
+  SolveStepResult,
   Sudoku,
   SUDOKU_DEFAULT_RANK,
   SudokuFacade,
@@ -18,12 +20,12 @@ import {ImageHandlerComponent} from '../../components/image-handler/image-handle
 import {CameraDialogComponent} from '../../components/camera-dialog/camera-dialog.component';
 import {SchemaCheckComponent} from '../../components/schema-check/schema-check.component';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, Observable} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {filter, map, skip, take, takeUntil} from 'rxjs/operators';
 import {Dictionary} from '@ngrx/entity';
 import {SOLVER_STEP_DETAILS} from "../../model";
-import {SolverStepDetailsComponent} from "../../components/solver-step-details/solver-step-details.component";
 import {AskDialogComponent} from "../../components/ask-dialog/ask-dialog.component";
+import {SolverStepDetailsPopupComponent} from "../../components/solver-step-details/solver-step-details-popup.component";
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -43,7 +45,10 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   cells$: Observable<Dictionary<Cell>>;
   isActiveCell$: Observable<boolean>;
   isPencil$: Observable<boolean>;
+  isShowDetails$: Observable<boolean>;
   rank$: Observable<number>;
+  activeSteps$: BehaviorSubject<SolveStepResult[]>;
+  highlight$: BehaviorSubject<Dictionary<boolean>>;
 
   constructor(private _lab: LabFacade,
               private _route: ActivatedRoute,
@@ -51,16 +56,23 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
               _sudoku: SudokuFacade) {
     super(_sudoku);
     this._sudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
-    this.cells$ = this._sudoku$.pipe(map(sdk => sdk?.cells||{}));
+    this.cells$ = this._sudoku$.pipe(map(sdk => sdk?.cells || {}));
     this.isPencil$ = this._sudoku$.pipe(map(sdk => !!sdk?.options?.usePencil));
-    this.rank$ = this._sudoku$.pipe(map(sdk => sdk?.sudoku?.rank||SUDOKU_DEFAULT_RANK));
+    this.isShowDetails$ = this._sudoku$.pipe(map(sdk => !sdk?.options?.showPopupDetails));
+    this.rank$ = this._sudoku$.pipe(map(sdk => sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK));
     this.isActiveCell$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$), map(cell => !!cell));
+    this.activeSteps$ = new BehaviorSubject<SolveStepResult[]>([]);
+    this.highlight$ = new BehaviorSubject<Dictionary<boolean>>({});
 
     _sudoku
-      .onUpload(UploadDialogComponent, this._destroy$, { allowOnlyValues: true, allowImages: true, allowEditOnGrid: true })
+      .onUpload(UploadDialogComponent, this._destroy$, {
+        allowOnlyValues: true,
+        allowImages: true,
+        allowEditOnGrid: true
+      })
       .pipe(filter(res => res.editOnGrid || !!res?.sdk || !!res?.image))
       .subscribe(res => res.editOnGrid ?
-        _sudoku.checkSchema(new HandleImageResult({ sdk: new Sudoku(), onlyValues: res.onlyValues })) :
+        _sudoku.checkSchema(new HandleImageResult({sdk: new Sudoku(), onlyValues: res.onlyValues})) :
         res.sdk ?
           _sudoku.loadSudoku(res.sdk, res.onlyValues) :
           _sudoku.handleImage(res));
@@ -72,18 +84,27 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
     this.topToolFlex$ = this.compact$.pipe(map(iscompact => iscompact ? 'none' : '50'));
-    this.progress$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.state.percent||0));
+    this.progress$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.state.percent || 0));
 
     this.boardStyle$ = combineLatest(this._resize$, this._element$)
       .pipe(map(([r, ele]) => getBoardStyle(ele)));
 
     _sudoku.doGenericAction = (code: string, data: any) => this._doAction(code, data);
+
+    _lab.selectStepInfos$.pipe(
+      takeUntil(this._destroy$),
+      filter(steps => (steps || []).length > 0))
+      .subscribe(steps => this.activeSteps$.next(steps));
+
+    _lab.schemaChanged$.pipe(
+      takeUntil(this._destroy$))
+      .subscribe(() => this.closeDetails());
   }
 
   private _doAction(code: string, data: any) {
     switch (code) {
       case SOLVER_STEP_DETAILS:
-        this._dialog.open(SolverStepDetailsComponent, {
+        this._dialog.open(SolverStepDetailsPopupComponent, {
           width: '600px',
           panelClass: 'sudokulab-solver-step-details',
           data
@@ -127,5 +148,13 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
       }
       this._lab.updatePlayerOptions({usePencil: pencil});
     });
+  }
+
+  stepLineClick(line: AlgorithmResultLine) {
+    if (!!line?.cell) this.highlight$.next({ [line?.cell]: true });
+  }
+
+  closeDetails() {
+    this.activeSteps$.next([]);
   }
 }

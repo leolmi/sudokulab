@@ -1,28 +1,31 @@
-import { Injectable, Type } from '@angular/core';
+import {Injectable, Type} from '@angular/core';
 import {
-  CameraDialogOptions, GoogleCredentials,
+  CameraDialogOptions,
+  GoogleCredentials,
   HandleImageOptions,
   HandleImageResult,
   isCompact,
-  MessageType, PlaySudoku,
+  MessageType,
+  PlaySudoku,
   Sudoku,
-  SudokuFacade, SudokulabInfo,
+  SudokuFacade,
+  SudokulabInfo,
   SudokulabPage,
   SudokulabWindowService,
   SudokuMessage,
   UploadDialogOptions,
   UploadDialogResult
 } from '@sudokulab/model';
-import { Store } from '@ngrx/store';
-import { SudokuStore } from './sudoku-store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {Store} from '@ngrx/store';
+import {SudokuStore} from './sudoku-store';
+import {BehaviorSubject, Observable} from 'rxjs';
 import * as SudokuActions from './actions';
 import * as GeneratorActions from './actions';
 import * as SudokuSelectors from './selectors';
-import { Dictionary } from '@ngrx/entity';
-import { distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { isFunction as _isFunction } from 'lodash';
+import {Dictionary} from '@ngrx/entity';
+import {distinctUntilChanged, filter, switchMap, takeUntil} from 'rxjs/operators';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {isFunction as _isFunction} from 'lodash';
 
 @Injectable()
 export class SudokuContext extends SudokuFacade {
@@ -145,6 +148,7 @@ export class SudokuContext extends SudokuFacade {
   manage(operation: string, args?: any) {
     this._store.dispatch(SudokuActions.manage({ operation, args }));
   }
+
 
   constructor(private _store: Store<SudokuStore>,
               private _dialog: MatDialog,

@@ -1,8 +1,10 @@
 import {
-  addLine,
   Algorithm,
   AlgorithmResult,
-  AlgorithmType, checkAvailables, getCellUserCoord,
+  AlgorithmResultLine,
+  AlgorithmType,
+  checkAvailables,
+  getCellUserCoord,
   getValuesAlignment,
   PlaySudoku,
   PlaySudokuCellAlignment
@@ -14,7 +16,8 @@ import {
   keys as _keys,
   remove as _remove
 } from 'lodash';
-import { Dictionary } from '@ngrx/entity';
+import {Dictionary} from '@ngrx/entity';
+import {isValue} from '../../global.helper';
 
 export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
 
@@ -35,7 +38,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
 
     const cells: Dictionary<boolean> = {};
     let applied = false;
-    let description = '';
+    const descLines: AlgorithmResultLine[] = [];
     _forEach(sdk.groups, (g) => {
       // ricerca i valori che sono presenti solo in celle allineate
       _forEach(g?.availableOnCells||{}, (cls, v) => {
@@ -44,15 +47,19 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
           // ricerca i gruppi comuni a tutte le celle allineate
           const groups = _intersection(...cids.map(id => sdk.groupsForCell[id]));
           // rimuove dai valori possibili per le celle dei gruppi comuni il valore dell'allineamento
-          groups.forEach(gid => {
-            sdk.groups[gid]?.cells.forEach(cid => {
-              const removed = _remove(sdk.cells[cid]?.availables||[], av => !_includes(cids, cid) && av === v);
-              if (removed.length > 0) {
-                description = addLine(description, `On cell "${getCellUserCoord(cid)}" the possible values [${removed.join(',')}] have been removed`);
-                applied = true;
-              }
-            });
-          });
+          groups.forEach(gid =>
+            sdk.groups[gid]?.cells
+              .filter(cid => !isValue(sdk.cells[cid]?.value))
+              .forEach(cid => {
+                const removed = _remove(sdk.cells[cid]?.availables || [], av => !_includes(cids, cid) && av === v);
+                if (removed.length > 0) {
+                  applied = true;
+                  descLines.push(new AlgorithmResultLine({
+                    cell: cid,
+                    description: `On cell ${getCellUserCoord(cid)} the possible values [${removed.join(',')}] have been removed`
+                  }));
+                }
+              }));
         }
       });
     });
@@ -62,7 +69,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
     return new AlgorithmResult({
       algorithm: this.id,
       applied,
-      description,
+      descLines,
       cells: _keys(cells)
     });
   }

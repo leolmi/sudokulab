@@ -3,10 +3,21 @@
      [fxLayoutAlign]="layoutAlign$|async">
   <div class="tools tools-left compact-auto-height" [fxFlex]="topToolFlex$|async">
     <sudokulab-info></sudokulab-info>
+    <div class="details-container"
+         *ngIf="!!!(compact$|async)">
+      <sudokulab-solver-step-details
+        *ngIf="isShowDetails$|async"
+        [handleLines]="true"
+        [showHelpImage]="false"
+        [allowClose]="true"
+        [steps]="(activeSteps$|async)||[]"
+        (onClose)="closeDetails()"
+        (onLineCLick)="stepLineClick($event)"></sudokulab-solver-step-details>
+    </div>
   </div>
   <div class="board-container" fxLayout="column">
     <div class="board" #board [ngStyle]="boardStyle$|async">
-      <sudokulab-board emptyText="select a schema"></sudokulab-board>
+      <sudokulab-board emptyText="select a schema" [highLight]="highlight$|async"></sudokulab-board>
     </div>
     <div class="bottom-board compact-size-600" fxFlex>
       <mat-progress-bar [value]="progress$|async"
@@ -24,6 +35,17 @@
     </div>
   </div>
   <div class="tools tools-right" fxFlex="50">
+    <div class="details-container"
+         *ngIf="!!(compact$|async)">
+      <sudokulab-solver-step-details
+        *ngIf="isShowDetails$|async"
+        [handleLines]="true"
+        [showHelpImage]="false"
+        [allowClose]="true"
+        [steps]="(activeSteps$|async)||[]"
+        (onClose)="closeDetails()"
+        (onLineCLick)="stepLineClick($event)"></sudokulab-solver-step-details>
+    </div>
     <sudokulab-schemas></sudokulab-schemas>
   </div>
 </div>

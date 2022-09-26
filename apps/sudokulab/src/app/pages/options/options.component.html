@@ -22,11 +22,14 @@
       </div>
     </div>
 
-    <div class="options-group">
+    <div class="options-group" *ngIf="playerOptions$|async as opt">
       <div class="options-group-title">Player</div>
       <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
-        <mat-slide-toggle [checked]="showAvailable$|async"
-                          disabled="false"
+        <mat-slide-toggle [checked]="opt.showPopupDetails"
+                          (change)="apply($event.checked, 'showPopupDetails')">Show popup details</mat-slide-toggle>
+      </div>
+      <div class="options-row" fxLayout="row" fxLayoutAlign="start center">
+        <mat-slide-toggle [checked]="opt.showAvailables"
                           (change)="apply($event.checked, 'showAvailables')">Show available numbers on cell</mat-slide-toggle>
       </div>
     </div>

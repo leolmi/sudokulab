@@ -1,6 +1,6 @@
 import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
-import { AlgorithmResult } from '../AlgorithmResult';
+import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import { cloneDeep as _clone, minBy as _minBy, values as _values } from 'lodash';
 import { checkAvailables } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
@@ -56,18 +56,18 @@ export class TryNumberAlgorithm extends Algorithm {
           const clone = _clone(template);
           cases.push(_valorize(clone, minc, av));
         }
-      })
+      });
     }
 
     return new AlgorithmResult({
       algorithm: this.id,
       applied: (!!minc && cases.length > 0),
       cells: !!minc ? [minc.id] : [],
-      description: getDescription(minc),
+      descLines: [new AlgorithmResultLine({
+        description: `The schema has been split on cell ${getCellUserCoord(minc?.id||'unknown')} using the values [${(minc?.availables||[]).join(',')}]`,
+        cell: minc?.id
+      })],
       cases
     });
   }
 }
-
-const getDescription = (c?: PlaySudokuCell): string =>
-  c ? `The schema has been split on cell "${getCellUserCoord(c.id)}" using the values [${c.availables.join(',')}]` : '';

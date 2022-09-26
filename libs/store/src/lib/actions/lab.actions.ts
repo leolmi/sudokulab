@@ -110,3 +110,8 @@ export const copyAvailableToPencil = createAction(
 export const toggleAvailable = createAction(
   '[SudokuLab.lab] toggle available'
 )
+
+export const setStepDetails = createAction(
+  '[SudokuLab.lab] set current step-info',
+  props<{ steps?: SolveStepResult[] }>()
+);

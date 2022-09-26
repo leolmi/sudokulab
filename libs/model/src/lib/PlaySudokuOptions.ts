@@ -6,10 +6,12 @@ export class PlaySudokuOptions {
     this.showAvailables = false;
     this.maxSplitSchema = SUDOKU_DEFAULT_MAXSPLIT;
     this.excludeTryAlgorithm = false;
+    this.showPopupDetails = true;
     Object.assign(this, o || {});
   }
   usePencil: boolean;
   showAvailables: boolean;
   maxSplitSchema: number;
   excludeTryAlgorithm: boolean;
+  showPopupDetails: boolean;
 }

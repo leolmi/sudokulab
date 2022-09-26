@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import {
-  isDebugMode, LabFacade,
+  isDebugMode, LabFacade, PlaySudokuOptions,
   setDebugMode,
   SudokuFacade,
   SUDOKULAB_DARK_THEME,
@@ -22,7 +22,9 @@ declare const gapi: any;
 export class OptionsComponent implements AfterViewInit {
   isDebugMode$: BehaviorSubject<boolean>;
   isDarkTheme$: Observable<boolean>;
-  showAvailable$: Observable<boolean>;
+  playerOptions$: Observable<PlaySudokuOptions|undefined>;
+  // showAvailable$: Observable<boolean>;
+  // showPopupDetails$: Observable<boolean>;
   googleok$: BehaviorSubject<boolean>;
   googleok_check$: Observable<boolean>;
   isManagement$: Observable<boolean>;
@@ -44,7 +46,9 @@ export class OptionsComponent implements AfterViewInit {
       map(([t, info]) => !!t || info?.session === SUDOKULAB_SESSION_DEVELOP || !environment.production));
     this.operationStatus$ = _sudoku.selectOperationStatus$;
     this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
-    this.showAvailable$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
+    this.playerOptions$ = _lab.selectActiveSudoku$.pipe(map(sdk => sdk?.options));
+    // this.showAvailable$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
+    // this.showPopupDetails$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
     this.valuesMode$ = _sudoku.selectValuesMode$;
   }
 
@@ -72,7 +76,7 @@ export class OptionsComponent implements AfterViewInit {
             this._error('error while try to attach google autentication', error, true))),
         (err: any) =>
           this._zone.run(() =>
-            this._error('error while try to attach google autentication', err, true))));
+            this._error('error while try to init google autentication', err, true))));
   }
 
   setDebugMode(e: any) {

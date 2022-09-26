@@ -9,10 +9,6 @@
   height: 16px;
 }
 
-::ng-deep {
-  .compact {
-    .bottom-board {
-      margin-bottom: 50px;
-    }
-  }
+.details-container {
+  padding: 20px 0 40px;
 }

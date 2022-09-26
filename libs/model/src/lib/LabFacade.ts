@@ -1,17 +1,7 @@
-import { Observable } from 'rxjs';
-import {
-  HandleImageOptions,
-  HandleImageResult,
-  PlaySudoku,
-  PlaySudokuOptions,
-  SchemasOptions,
-  SolveStepResult,
-  Sudoku,
-  SudokuMessage
-} from '@sudokulab/model';
-import { Facade } from './Facade';
-import { Dictionary } from '@ngrx/entity';
-import {copyAvailableToPencil} from "../../../store/src/lib/actions";
+import {BehaviorSubject, Observable} from 'rxjs';
+import {PlaySudoku, PlaySudokuOptions, SchemasOptions, SolveStepResult, SudokuMessage} from '@sudokulab/model';
+import {Facade} from './Facade';
+import {Dictionary} from '@ngrx/entity';
 
 export abstract class LabFacade implements Facade {
   name = 'lab';
@@ -21,6 +11,7 @@ export abstract class LabFacade implements Facade {
   abstract selectSchemasOptions$: Observable<SchemasOptions>;
   abstract selectStepInfos$: Observable<SolveStepResult[]>;
   abstract selectHighlightCells$: Observable<Dictionary<boolean>>;
+  abstract schemaChanged$: BehaviorSubject<any>;
 
   // abstract loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean): void;
   // abstract handleImage(o?: HandleImageOptions): void;
