@@ -4,7 +4,6 @@ import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { ImgDto, ManageDto, OcrResult } from '@sudokulab/model';
 import { AuthGuard } from '@nestjs/passport';
-import { environment } from '../../environments/environment';
 import { DevelopGuard } from '../app.develop.guard';
 
 @Controller('sudoku')

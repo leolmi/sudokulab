@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ocr } from '../ocr/ocr';
 import { manage } from './sudoku.management';
+import {environment} from "../../environments/environment";
 
 @Injectable()
 export class SudokuService implements OnModuleInit {
@@ -19,18 +20,20 @@ export class SudokuService implements OnModuleInit {
   }
 
   async check(sudokuDto: SudokuDto): Promise<SudokuDoc|undefined> {
+    if (environment.debug) console.log(...SDK_PREFIX_W, 'check schema', sudokuDto);
     if (!validate(sudokuDto)) return Promise.resolve(undefined);
     return new Promise<SudokuDoc|undefined>((resolve, reject) => {
       this.sudokuModel
         .updateOne({ _id: sudokuDto._id }, { $setOnInsert: sudokuDto }, { upsert: true })
         .then(resp => {
+          if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result', resp);
           resolve(resp.upsertedCount>0 ? <SudokuDoc>sudokuDto : undefined);
         }, err => reject(err));
     })
   }
 
   onModuleInit(): any {
-    console.log(...SDK_PREFIX_W, 'check static schemas...');
+    if (environment.debug) console.log(...SDK_PREFIX_W, 'check static schemas...');
     const schemasFolder = path.resolve(__dirname, `./assets/schemas`);
     fs.readdir(schemasFolder, (err, files) => {
       (files||[])

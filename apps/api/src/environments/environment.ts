@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  debug: process.env.SUDOKULAB_DEBUG,
   google: {
     mail: process.env.GOOGLE_MAIL || 'leo.olmi@gmail.com',
     clientID: process.env.GOOGLE_CLIENT_ID || 'xxxxxxxxxxxxx',
