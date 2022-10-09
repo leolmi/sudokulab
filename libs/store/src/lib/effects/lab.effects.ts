@@ -320,7 +320,8 @@ export class LabEffects {
         status: {
           has_no_lab_schema: !sdk,
           not_available_camera: !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices,
-          available_visible: !!sdk?.options?.showAvailables
+          available_visible: !!sdk?.options?.showAvailables,
+          popup_details: !!sdk?.options?.showPopupDetails,
         }
       })])
   ));
@@ -380,6 +381,15 @@ export class LabEffects {
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     switchMap(([a, sdk]) => [
       SudokuActions.updatePlayerOptions({ changes: { showAvailables: !sdk?.options?.showAvailables } }),
+      SudokuActions.checkStatus()])
+  ));
+
+  togglePopupDetails$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.togglePopupDetails),
+    withLatestFrom(
+      this._store.select(SudokuSelectors.selectActiveSudoku)),
+    switchMap(([a, sdk]) => [
+      SudokuActions.updatePlayerOptions({ changes: { showPopupDetails: !sdk?.options?.showPopupDetails } }),
       SudokuActions.checkStatus()])
   ));
 

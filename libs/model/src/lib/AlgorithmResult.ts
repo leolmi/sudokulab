@@ -4,10 +4,12 @@ export class AlgorithmResultLine {
   constructor(l?: Partial<AlgorithmResultLine>) {
     this.description = '';
     this.cell = '';
+    this.withValue = false;
     Object.assign(this, l || {});
   }
   description: string;
   cell: string;
+  withValue: boolean;
 }
 
 

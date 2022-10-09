@@ -78,6 +78,7 @@ import {SolverStepDetailsComponent} from "./components/solver-step-details/solve
 import {AskDialogComponent} from "./components/ask-dialog/ask-dialog.component";
 import {CellValuesComponent} from "./components/cell-values/cell-values.component";
 import {SolverStepDetailsPopupComponent} from "./components/solver-step-details/solver-step-details-popup.component";
+import {ManagementKeyDialogComponent} from "./components/management-key-dialog/management-key-dialog.component";
 
 @NgModule({
   declarations: [
@@ -111,7 +112,8 @@ import {SolverStepDetailsPopupComponent} from "./components/solver-step-details/
     SvgBoardComponent,
     SolverStepDetailsComponent,
     SolverStepDetailsPopupComponent,
-    CellValuesComponent
+    CellValuesComponent,
+    ManagementKeyDialogComponent
   ],
   imports: [
     BrowserModule,

@@ -51,7 +51,8 @@ export class OneCellForValueAlgorithm extends Algorithm {
       //description: getDescription(applied, cell),
       descLines: [new AlgorithmResultLine({
         cell: cell?.id,
-        description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`
+        description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`,
+        withValue: true
       })],
       cells: [ocid]
     });

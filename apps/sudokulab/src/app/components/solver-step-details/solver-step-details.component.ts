@@ -1,13 +1,15 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
 import {BehaviorSubject, Observable} from "rxjs";
-import {AlgorithmResultLine, getAlgorithm, SolveStepResult} from "@sudokulab/model";
+import {AlgorithmResultLine, getAlgorithm, SolveStepResult, update} from "@sudokulab/model";
 import {reduce as _reduce} from 'lodash';
-import {map} from "rxjs/operators";
+import {map, tap} from "rxjs/operators";
+import {Dictionary} from "@ngrx/entity";
 
 interface Line {
   num?: number;
   text: string;
   line?: AlgorithmResultLine;
+  hidden?: boolean;
 }
 
 @Component({
@@ -25,6 +27,8 @@ interface Line {
            class="detail-line"
            (click)="clickOnLine(line)"
            [class.result-line]="!!line.line && handleLines"
+           [class.hidden-line]="!!line.line && line.hidden"
+           [class.visible-line]="((visibles$|async)||{})[''+(line.num||'')]"
            fxLayout="row" fxLayoutAlign="start center">
         <div class="line-number" *ngIf="!!line.line">{{line.num}}</div>
         <div class="line-text" [class.title]="!line.line" fxFlex>{{line.text}}</div>
@@ -37,31 +41,38 @@ interface Line {
 export class SolverStepDetailsComponent {
   steps$: BehaviorSubject<SolveStepResult[]>;
   lines$: Observable<Line[]>;
+  visibles$: BehaviorSubject<Dictionary<boolean>>;
 
   @Input() handleLines: boolean = false;
   @Input() showHelpImage: boolean = true;
   @Input() allowClose: boolean = false;
   @Input() set steps(s: SolveStepResult[]) {
      this.steps$.next(s);
+     this.visibles$.next({});
   }
 
   @Output() onLineCLick: EventEmitter<AlgorithmResultLine> = new EventEmitter<AlgorithmResultLine>();
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
 
   constructor() {
-    let counter = 0;
+    this.visibles$ = new BehaviorSubject<any>({});
     this.steps$ = new BehaviorSubject<SolveStepResult[]>([])
 
-    this.lines$ = this.steps$.pipe(map(steps => _reduce(steps||[], (lns, step) => {
-      const alg = getAlgorithm(step.result?.algorithm||'');
-      return lns.concat([
-        {text: alg?.name||'undefined',},
-        ...(step.result?.descLines||[]).map(ln => ({
-          num: ++counter,
-          text: ln.description,
-          line: ln
-        }))]);
-    }, <Line[]>[])));
+    this.lines$ = this.steps$.pipe(
+      map(steps => {
+        let counter = 0;
+        return _reduce(steps||[], (lns, step) => {
+          const alg = getAlgorithm(step.result?.algorithm||'');
+          return lns.concat([
+            {text: alg?.name||'undefined',},
+            ...(step.result?.descLines||[]).map(ln => ({
+              num: ++counter,
+              text: ln.description,
+              line: ln,
+              hidden: ln.withValue
+            }))]);
+        }, <Line[]>[])
+      }));
   }
 
   closeDetails() {
@@ -69,6 +80,7 @@ export class SolverStepDetailsComponent {
   }
 
   clickOnLine(line: Line) {
+    this.visibles$.next({ ...this.visibles$.value, [`${line.num||''}`]: true });
     if (line.line && this.handleLines) this.onLineCLick.emit(line.line);
   }
 }

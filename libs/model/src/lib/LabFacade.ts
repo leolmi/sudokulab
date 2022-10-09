@@ -38,4 +38,5 @@ export abstract class LabFacade implements Facade {
   abstract camera(): void;
   abstract copyAvailableToPencil(): void;
   abstract toggleAvailable(): void;
+  abstract togglePopupDetails(): void;
 }

@@ -1,15 +1,20 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import {AfterViewInit, ChangeDetectionStrategy, Component, NgZone} from '@angular/core';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {
-  isDebugMode, LabFacade, PlaySudokuOptions,
+  isDebugMode,
+  LabFacade,
+  PlaySudokuOptions,
   setDebugMode,
   SudokuFacade,
   SUDOKULAB_DARK_THEME,
-  SUDOKULAB_LIGHT_THEME, SUDOKULAB_MANAGE_OPERATION, SUDOKULAB_SESSION_DEVELOP, SUDOKULAB_SESSION_STANDARD,
+  SUDOKULAB_LIGHT_THEME,
+  SUDOKULAB_MANAGE_OPERATION,
+  SUDOKULAB_SESSION_DEVELOP,
   SudokulabWindowService
 } from '@sudokulab/model';
-import { map, skip } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import {map, skip} from 'rxjs/operators';
+import {environment} from '../../../environments/environment';
+import {ManagementKeyDialogComponent} from "../../components/management-key-dialog/management-key-dialog.component";
 
 declare const gapi: any;
 
@@ -94,7 +99,7 @@ export class OptionsComponent implements AfterViewInit {
   }
 
   manage(operation: string, args?: any) {
-    this._sudoku.manage(operation, args);
+    this._sudoku.manage(ManagementKeyDialogComponent, operation, args);
   }
 
   private _error(message: string, err: any, hidden = false) {

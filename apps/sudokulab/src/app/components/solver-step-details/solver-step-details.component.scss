@@ -48,3 +48,11 @@
     }
   }
 }
+
+.hidden-line {
+  &:not(.visible-line) {
+    .line-text {
+      filter: blur(4px);
+    }
+  }
+}

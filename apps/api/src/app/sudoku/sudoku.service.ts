@@ -58,6 +58,8 @@ export class SudokuService implements OnModuleInit {
   }
 
   async manage(data: ManageDto): Promise<any> {
+    if (data.key !== environment.managementKey)
+      return Promise.reject('Management needs enter the valid key!');
     const func = manage[data.operation];
     return func ? func(this.sudokuModel, data.args) : Promise.reject('Unknown operation');
   }

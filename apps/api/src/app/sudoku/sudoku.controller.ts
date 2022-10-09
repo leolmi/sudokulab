@@ -26,7 +26,7 @@ export class SudokuController {
   }
 
   @Post('manage')
-  @UseGuards(AuthGuard('google'))
+  // @UseGuards(AuthGuard('google'))
   async manage(@Body() data: ManageDto) {
     return this.sudokuService.manage(data);
   }

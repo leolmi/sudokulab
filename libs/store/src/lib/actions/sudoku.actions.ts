@@ -75,7 +75,7 @@ export const setValuesMode = createAction(
 
 export const manage = createAction(
   '[SudokuLab.sudoku] manage operation',
-  props<{ operation: string, args?: any }>()
+  props<{ operation: string, key: string, args?: any }>()
 );
 
 export const setOperationStatus = createAction(

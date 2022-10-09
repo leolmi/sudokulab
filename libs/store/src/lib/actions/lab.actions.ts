@@ -111,6 +111,10 @@ export const toggleAvailable = createAction(
   '[SudokuLab.lab] toggle available'
 )
 
+export const togglePopupDetails = createAction(
+  '[SudokuLab.lab] toggle popup details'
+)
+
 export const setStepDetails = createAction(
   '[SudokuLab.lab] set current step-info',
   props<{ steps?: SolveStepResult[] }>()

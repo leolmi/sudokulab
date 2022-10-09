@@ -145,8 +145,11 @@ export class SudokuContext extends SudokuFacade {
       .subscribe((res) => this.loadSudoku((<HandleImageResult>res).sdk, (<HandleImageResult>res).onlyValues));
   }
 
-  manage(operation: string, args?: any) {
-    this._store.dispatch(SudokuActions.manage({ operation, args }));
+  manage(component: Type<any>, operation: string, args?: any) {
+    this._dialog.open(component, { width: '400px' })
+      .afterClosed()
+      .pipe(filter(key => !!key))
+      .subscribe(key => this._store.dispatch(SudokuActions.manage({ operation, key, args })));
   }
 
 

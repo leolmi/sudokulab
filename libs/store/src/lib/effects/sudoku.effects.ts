@@ -26,7 +26,7 @@ import { SudokuStore } from '../sudoku-store';
 
 @Injectable()
 export class SudokuEffects {
-  _manage = createAction('[SudokuLab.sudoku.private] manage', props<{ operation: string, args?: any }>());
+  _manage = createAction('[SudokuLab.sudoku.private] manage', props<{ operation: string, key: string, args?: any }>());
 
 
   doGoogleLogin = createEffect(() => this._actions$.pipe(

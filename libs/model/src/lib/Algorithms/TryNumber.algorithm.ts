@@ -65,7 +65,8 @@ export class TryNumberAlgorithm extends Algorithm {
       cells: !!minc ? [minc.id] : [],
       descLines: [new AlgorithmResultLine({
         description: `The schema has been split on cell ${getUserCoord(minc?.id||'unknown')} using the values [${(minc?.availables||[]).join(',')}]`,
-        cell: minc?.id
+        cell: minc?.id,
+        withValue: true
       })],
       cases
     });
