@@ -4,7 +4,7 @@ import {
   AlgorithmResultLine,
   AlgorithmType,
   checkAvailables,
-  getCellUserCoord,
+  getUserCoord,
   getValuesAlignment,
   PlaySudoku,
   PlaySudokuCellAlignment
@@ -56,7 +56,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
                   applied = true;
                   descLines.push(new AlgorithmResultLine({
                     cell: cid,
-                    description: `On cell ${getCellUserCoord(cid)} the possible values [${removed.join(',')}] have been removed`
+                    description: `On cell ${getUserCoord(cid)} the possible values [${removed.join(',')}] have been removed`
                   }));
                 }
               }));

@@ -207,10 +207,14 @@ export const getValuesAlignment = (cids: string[], rank: number|undefined): Play
   return PlaySudokuCellAlignment.none;
 }
 
-export const getCellUserCoord = (cid: string): string => {
+export const getUserCoord = (cid: string): string => {
   const coord = (cid||'').split('.');
-  return `(${parseInt(coord[0])+1},${parseInt(coord[1])+1})`;
+  const cx = _isNumber(coord[0]) ? parseInt(coord[0])+1 : coord[0];
+  const cy = _isNumber(coord[1]) ? parseInt(coord[1])+1 : coord[1];
+  return `(${cx},${cy})`;
 }
+
+
 
 export const getRank = (sdk: PlaySudoku|EditSudoku|undefined): number => {
   if (sdk instanceof PlaySudoku) return (<PlaySudoku>sdk).sudoku?.rank || 9;

@@ -247,6 +247,30 @@ export const getGroupCouples = (g: PlaySudokuGroup|undefined, handler?: (ids: st
   }, <Dictionary<string[]>>{});
 }
 
+/**
+ * Restituisce un dictionary con i valori a cui sono associate le coppie di celle che li possono ospitare
+ * @param sdk
+ * @param g
+ */
+export const getGroupExplicitCouples = (sdk: PlaySudoku, g: PlaySudokuGroup|undefined): Dictionary<string[]> => {
+  const res: Dictionary<string[]> = {};
+  // contiene
+  // { 'x,y': [ cellid1, cellid2 ] }
+  const cvmap: any = {};
+  (g?.cells || []).forEach(id => {
+    const cell = sdk.cells[id];
+    if (!cell?.fixed && (cell?.availables || []).length === 2) {
+      const k = cell?.availables.join(',') || '';
+      cvmap[k] = cvmap[k] || [];
+      cvmap[k].push(cell?.id);
+    }
+  });
+  // aggiunge al risultato
+  _forEach(cvmap, (ids, v) =>
+    (ids.length === 2) ? res[ids.join('|')] = v.split(',') : null);
+  return res;
+}
+
 export const clear = (sdk: PlaySudoku): PlaySudoku => {
   return _onSudoku(sdk, (ps) => {
     if (ps.options.usePencil) {
@@ -282,19 +306,34 @@ export const applyAlgorithm = (sdk: PlaySudoku, aname: string): PlaySudoku|undef
   });
 }
 
+/**
+ * Utilizzata per la risoluzione step to step
+ * @param sdk
+ * @param exclude
+ */
 export const solveStepToCell = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult[] => {
   let cycles = 0;
   const infos: SolveStepResult[] = [];
-  let info: SolveStepResult | undefined;
+  let res: SolveStepResult | undefined;
+  // il ciclo continua fintanto che l'applicazione di un algoritmo
+  // ha successo ma non aggiunge valori nuovi
+  // quindi termina quando non trova alcun algoritmo da applicare
   do {
-    info = solveStep(sdk, exclude);
-    if (!!info?.sdk) sdk = info.sdk;
-    if (info) infos.push(info);
+    res = solveStep(sdk, exclude);
+    debug(() => console.log(...SDK_PREFIX_DEBUG, `cycle n°${(cycles+1)} result:`, res));
+    if (!!res?.sdk) sdk = res.sdk;
+    if (res) infos.push(res);
     cycles++;
-  } while (!!info && cycles < 10 && _keys(info?.result?.cells || []).length <= 0);
+  } while (!!res && cycles < 10 && _keys(res?.result?.cells || []).length <= 0);
   return infos;
 }
 
+/**
+ * singolo step di risoluzione
+ * - se un algoritmo è stato applicato con successo restituisce un result.applied = true
+ * @param sdk
+ * @param exclude
+ */
 export const solveStep = (sdk: PlaySudoku|undefined, exclude: string[] = []): SolveStepResult|undefined => {
   if (sdk?.state.error) {
     debug(() => console.warn(...SDK_PREFIX_DEBUG, 'No algorithm can be applied!'));

@@ -4,7 +4,7 @@ import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import {find as _find} from 'lodash';
 import {checkAvailables} from '../logic';
 import {AlgorithmType} from '../enums';
-import {getCellUserCoord} from "../../sudoku.helper";
+import {getUserCoord} from "../../sudoku.helper";
 import {isValue} from '../../global.helper';
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
@@ -38,7 +38,7 @@ export class OneValueForCellAlgorithm extends Algorithm {
       applied: !!cell,
       descLines: [new AlgorithmResultLine({
         cell: cell?.id,
-        description: `Cell ${getCellUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`
+        description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`
       })],
       cells: !!cell ? [cell.id] : undefined
     });

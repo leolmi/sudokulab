@@ -5,7 +5,7 @@ import { cloneDeep as _clone, minBy as _minBy, values as _values } from 'lodash'
 import { checkAvailables } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
-import {getCellUserCoord} from "../../sudoku.helper";
+import {getUserCoord} from "../../sudoku.helper";
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 
@@ -64,7 +64,7 @@ export class TryNumberAlgorithm extends Algorithm {
       applied: (!!minc && cases.length > 0),
       cells: !!minc ? [minc.id] : [],
       descLines: [new AlgorithmResultLine({
-        description: `The schema has been split on cell ${getCellUserCoord(minc?.id||'unknown')} using the values [${(minc?.availables||[]).join(',')}]`,
+        description: `The schema has been split on cell ${getUserCoord(minc?.id||'unknown')} using the values [${(minc?.availables||[]).join(',')}]`,
         cell: minc?.id
       })],
       cases
