@@ -26,9 +26,12 @@ export class SudokuService implements OnModuleInit {
       this.sudokuModel
         .updateOne({ _id: sudokuDto._id }, { $setOnInsert: sudokuDto }, { upsert: true })
         .then(resp => {
-          if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result', resp);
+          if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result:', resp, '\n\rfor schema:', sudokuDto.fixed);
           resolve(resp.upsertedCount>0 ? <SudokuDoc>sudokuDto : undefined);
-        }, err => reject(err));
+        }, err => {
+          if (environment.debug) console.error(...SDK_PREFIX_W, 'uploaded schema error', err);
+          reject(err);
+        });
     });
   }
 

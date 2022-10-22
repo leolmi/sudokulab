@@ -50,6 +50,7 @@
     }
   }
   .upload-canvas-info {
+    user-select: none;
     opacity: .4;
     font-size: 1.3em;
     pointer-events: none;

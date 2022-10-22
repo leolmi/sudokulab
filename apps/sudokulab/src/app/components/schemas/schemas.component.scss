@@ -66,6 +66,7 @@
       height: 100%;
     }
     .hash {
+      user-select: none;
       position: absolute;
       width: 100%;
       left: 0;
@@ -80,6 +81,7 @@
     .schema-name {
       overflow: hidden;
       text-overflow: ellipsis;
+      user-select: none;
       > * {
         display: inline-block;
       }
