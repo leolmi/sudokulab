@@ -1,9 +1,18 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Cell, getSudokuCells, HandleImageResult, Sudoku, updateSudokuCellValue } from '@sudokulab/model';
+import {
+  Cell,
+  consolidate,
+  getHash,
+  getSudokuCells,
+  HandleImageResult,
+  Sudoku,
+  updateSudokuCellValue
+} from '@sudokulab/model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Dictionary } from '@ngrx/entity';
 import { map } from 'rxjs/operators';
+import { cloneDeep as _clone } from 'lodash';
 
 @Component({
   selector: 'sudokulab-schema-check',
@@ -32,10 +41,8 @@ export class SchemaCheckComponent {
   }
 
   done() {
-    this._dialogRef.close(new HandleImageResult({
-      sdk: this.schema$.getValue(),
-      onlyValues: this.data.onlyValues
-    }));
+    const sdk = new Sudoku(this.schema$.value);
+    this._dialogRef.close(new HandleImageResult({sdk, onlyValues: this.data.onlyValues}));
   }
 
   keyPressed(value: string) {

@@ -1,9 +1,9 @@
 import { SudokuDto } from '../../model/sudoku.dto';
 
-export const validate = (sdk: SudokuDto): boolean => {
-  if ((sdk?._id||0) === 0) return false;
-  if ((sdk?.fixed||'') === '') return false;
+export const validate = (sdk: SudokuDto): string => {
+  if ((sdk?._id||0) === 0) return `wrong identity`;
+  if ((sdk?.fixed||'') === '') return `empty fixed string`;
   // check logics...
 
-  return true;
+  return null;
 }

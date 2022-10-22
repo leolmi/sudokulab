@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { validate } from './sudoku.logic';
-import { ImgDto, ManageDto, OcrOptions, OcrResult, SDK_PREFIX_W, Sudoku } from '@sudokulab/model';
+import {ImgDto, ManageDto, OcrOptions, OcrResult, SDK_PREFIX, SDK_PREFIX_W, Sudoku} from '@sudokulab/model';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ocr } from '../ocr/ocr';
@@ -21,7 +21,11 @@ export class SudokuService implements OnModuleInit {
 
   async check(sudokuDto: SudokuDto): Promise<SudokuDoc|undefined> {
     if (environment.debug) console.log(...SDK_PREFIX_W, 'check schema', sudokuDto);
-    if (!validate(sudokuDto)) return Promise.resolve(undefined);
+    const validation_error = validate(sudokuDto);
+    if (!!validation_error) {
+      console.error(...SDK_PREFIX, validation_error, sudokuDto);
+      return Promise.resolve(undefined);
+    }
     return new Promise<SudokuDoc|undefined>((resolve, reject) => {
       this.sudokuModel
         .updateOne({ _id: sudokuDto._id }, { $setOnInsert: sudokuDto }, { upsert: true })
