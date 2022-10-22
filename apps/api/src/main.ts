@@ -14,7 +14,7 @@ import {DEFAULT_API_PORT, DEFAULT_CONTEXT, DEFAULT_REQUEST_LIMIT} from "./model/
 // };
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: !!process.env.ENABLED_CORS });
+  const app = await NestFactory.create(AppModule, { cors: !process.env.DISABLED_CORS });
   const context = DEFAULT_CONTEXT;
   app.setGlobalPrefix(context);
   app.use(json({limit: DEFAULT_REQUEST_LIMIT}));
