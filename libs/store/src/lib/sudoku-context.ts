@@ -1,12 +1,14 @@
 import {Injectable, Type} from '@angular/core';
 import {
   CameraDialogOptions,
+  debug,
   GoogleCredentials,
   HandleImageOptions,
   HandleImageResult,
   isCompact,
   MessageType,
   PlaySudoku,
+  SDK_PREFIX_DEBUG,
   Sudoku,
   SudokuFacade,
   SudokulabInfo,
@@ -80,6 +82,7 @@ export class SudokuContext extends SudokuFacade {
   }
 
   loadSudoku(sudoku: Sudoku|undefined, onlyValues?: boolean) {
+    debug(() => console.log(...SDK_PREFIX_DEBUG, 'loading sudoku', sudoku));
     if (!!sudoku) this._store.dispatch(SudokuActions.loadSudokuRequest({ sudoku, onlyValues }));
   }
 

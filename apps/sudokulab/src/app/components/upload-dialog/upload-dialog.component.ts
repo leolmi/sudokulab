@@ -41,17 +41,17 @@ export class UploadDialogComponent {
 
   private _upload(sdk: Sudoku) {
     this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult({ sdk, onlyValues: this.onlyValues$.getValue() }));
+    this._dialogRef.close(new UploadDialogResult({ sdk, onlyValues: this.onlyValues$.value }));
   }
 
   private _image(image: string) {
     this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult({ image, onlyValues: this.onlyValues$.getValue() }));
+    this._dialogRef.close(new UploadDialogResult({ image, onlyValues: this.onlyValues$.value }));
   }
 
   editOnGrid() {
     this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult({ editOnGrid: true, onlyValues: this.onlyValues$.getValue() }));
+    this._dialogRef.close(new UploadDialogResult({ editOnGrid: true, onlyValues: this.onlyValues$.value }));
   }
 
   applyText(e: any) {

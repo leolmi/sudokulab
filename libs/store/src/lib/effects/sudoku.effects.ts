@@ -1,27 +1,30 @@
-import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import {Injectable} from '@angular/core';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import * as SudokuActions from '../actions';
-import {catchError, concatMap, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import {catchError, concatMap, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
 import {
   checkAvailables,
+  debug,
   getHash,
   GoogleCredentials,
   MessageType,
+  OPERATION_NEED_RELOAD_DOCS,
   PlaySudoku,
   saveUserSetting,
+  SDK_PREFIX,
+  SDK_PREFIX_DEBUG,
   setApplicationTheme,
   Sudoku,
-  OPERATION_NEED_RELOAD_DOCS,
+  SudokulabInfo,
   SudokulabWindowService,
-  SudokuMessage,
-  SudokulabInfo, SDK_PREFIX
+  SudokuMessage
 } from '@sudokulab/model';
-import { cloneDeep as _clone } from 'lodash';
+import {cloneDeep as _clone} from 'lodash';
 import * as SudokuSelectors from '../selectors';
-import { Action, createAction, props, Store } from '@ngrx/store';
-import { SudokuStore } from '../sudoku-store';
+import {Action, createAction, props, Store} from '@ngrx/store';
+import {SudokuStore} from '../sudoku-store';
 
 
 @Injectable()
@@ -61,6 +64,7 @@ export class SudokuEffects {
       sdk._id = sdk._id || getHash(sdk.fixed);
       sdk.values = sdk.fixed;
       (sdk.info?.algorithms || []).forEach(a => a.cases = []);
+      debug(() => console.log(...SDK_PREFIX_DEBUG, 'check sudoku starting', sdk));
       return this._http.post<Sudoku>('/api/sudoku/check', sdk).pipe(
         catchError((err, caught) => [
           SudokuActions.setActiveMessage({
@@ -72,7 +76,7 @@ export class SudokuEffects {
           })
         ]),
         switchMap((res) => {
-          console.log(...SDK_PREFIX, 'check result', res);
+          debug(() => console.log(...SDK_PREFIX_DEBUG, 'check result', res));
           return !!res ? [SudokuActions.fillSchemas()] : [];
         }));
     })
@@ -99,7 +103,7 @@ export class SudokuEffects {
     ofType(SudokuActions.resetOptions),
     map(() => {
       // TODO: reset options...
-      console.log(...SDK_PREFIX, 'reset user options...');
+      debug(() => console.log(...SDK_PREFIX_DEBUG, 'reset user options...'));
     })
   ), { dispatch: false });
 
