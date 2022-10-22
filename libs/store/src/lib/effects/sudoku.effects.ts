@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as SudokuActions from '../actions';
-import { catchError, concatMap, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import {catchError, concatMap, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -16,7 +16,7 @@ import {
   OPERATION_NEED_RELOAD_DOCS,
   SudokulabWindowService,
   SudokuMessage,
-  SudokulabInfo
+  SudokulabInfo, SDK_PREFIX
 } from '@sudokulab/model';
 import { cloneDeep as _clone } from 'lodash';
 import * as SudokuSelectors from '../selectors';
@@ -62,8 +62,17 @@ export class SudokuEffects {
       sdk.values = sdk.fixed;
       (sdk.info?.algorithms || []).forEach(a => a.cases = []);
       return this._http.post<Sudoku>('/api/sudoku/check', sdk).pipe(
+        catchError((err, caught) => [
+          SudokuActions.setActiveMessage({
+            message: new SudokuMessage({
+              message: `Error while check schema`,
+              type: MessageType.error,
+              data: err
+            })
+          })
+        ]),
         switchMap((res) => {
-          console.log('CHECK RESULT', res);
+          console.log(...SDK_PREFIX, 'check result', res);
           return !!res ? [SudokuActions.fillSchemas()] : [];
         }));
     })
@@ -90,7 +99,7 @@ export class SudokuEffects {
     ofType(SudokuActions.resetOptions),
     map(() => {
       // TODO: reset options...
-      console.log('reset user options...');
+      console.log(...SDK_PREFIX, 'reset user options...');
     })
   ), { dispatch: false });
 
@@ -151,6 +160,13 @@ export class SudokuEffects {
     ])
   ));
 
+  errors$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.setActiveMessage),
+    filter(a => a.message?.type === MessageType.error),
+    map(a => a.message?.data ?
+      console.error(...SDK_PREFIX, a.message.message, a.message.data) :
+      console.error(...SDK_PREFIX, a.message.message))
+  ), { dispatch: false });
 
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>,

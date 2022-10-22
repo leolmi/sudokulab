@@ -29,7 +29,7 @@ export class SudokuService implements OnModuleInit {
           if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result', resp);
           resolve(resp.upsertedCount>0 ? <SudokuDoc>sudokuDto : undefined);
         }, err => reject(err));
-    })
+    });
   }
 
   onModuleInit(): any {

@@ -7,7 +7,9 @@ import {
   isEqual as _isEqual,
   isString as _isString,
   keys as _keys, reduce as _reduce,
-  set as _set
+  set as _set,
+  trimEnd as _trimEnd,
+  trimStart as _trimStart
 } from 'lodash';
 import { SudokulabWindowService } from './lib/services';
 import {
@@ -127,3 +129,12 @@ export const isValue = (v?: string, acceptX = false): boolean => {
 
 export const calcFixedCount = (fixed?: string): number =>
   _reduce((fixed || ''), (c, v) => isValue(v) ? c + 1 : c, 0);
+
+export const combine = (...args: string[]): string => {
+  args.forEach((a, i) => {
+    if (i < args.length - 1) a = _trimEnd(a, '/');
+    if (i > 0) a = _trimStart(a, '/');
+    args[i] = a;
+  });
+  return args.join('/');
+}
