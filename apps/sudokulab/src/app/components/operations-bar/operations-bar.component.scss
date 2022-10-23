@@ -1,0 +1,17 @@
+.operations-bar {
+  min-height: 40px;
+  width: 100%;
+}
+
+.icon-button {
+  margin: 0 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(1,1,1,.1);
+  }
+  &.disabled {
+    opacity: .6;
+    pointer-events: none;
+  }
+}

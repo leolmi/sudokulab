@@ -4,7 +4,9 @@
       <div class="info-fixed color-primary" matTooltip="Number of fixed numbers">{{(fixed$|async)||''}}</div>
       <div class="info-t-type color-accent" matTooltip="Number of try-algorithm usage" *ngIf="((useTry$|async)||0)>0">T{{useTry$|async}}</div>
       <div fxFlex fxLayout="column">
-        <div class="difficulty">{{difficulty$|async}}</div>
+        <div class="difficulty">
+          <div class="difficulty-text">{{difficulty$|async}}</div>
+        </div>
         <div class="difficulty-value" *ngIf="!!(difficulty$|async)">{{difficultyValue$|async}}</div>
       </div>
       <button mat-icon-button

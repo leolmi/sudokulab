@@ -7,6 +7,7 @@
 .list-container {
   position: relative;
   min-height: 400px;
+
   .schemas-container {
     height: 100%;
   }
@@ -51,6 +52,9 @@
     width: 100%;
     overflow: hidden;
     margin-bottom: 2px;
+    > * {
+      user-select: none;
+    }
     &:hover {
       background-color: rgba(10, 10, 10, .1);
       &.color-accent {
@@ -78,17 +82,21 @@
       line-height: 30px;
       font-size: 18px;
     }
+    .difficulty {
+      opacity: .5;
+      font-size: .8em;
+      margin: 0 10px;
+    }
     .schema-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      user-select: none;
-      > * {
-        display: inline-block;
-      }
-      .difficulty {
-        opacity: .5;
-        font-size: .8em;
-        margin-left: 10px;
+      position: relative;
+      height: 100%;
+      .name {
+        position: absolute;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+        line-height: 30px;
       }
     }
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LabFacade, SudokulabPage } from '@sudokulab/model';
-import { AvailablePages } from '../../model';
+import {AvailablePages, DEFAULT_BUTTONS, DEFAULT_LAB_BUTTONS} from '../../model';
 import { LabComponent } from './lab.component';
 import { Routes } from '@angular/router';
 
@@ -10,19 +10,18 @@ export class LabManifest extends SudokulabPage {
   code = AvailablePages.lab;
   icon = 'grid_on';
   buttons = [
-    {icon: 'support', code: 'stepinfo', tooltip: 'Info next step', disabledKey: 'has_no_lab_schema'},
-    {icon: 'skip_next', code: 'step', tooltip: 'Solve next step', disabledKey: 'has_no_lab_schema'},
-    {separator: true},
-    {icon: 'auto_fix_high', code: 'solve', tooltip: 'Solve all schema', disabledKey: 'has_no_lab_schema'},
-    // {icon: 'play_circle_outline', code: 'analyze', tooltip: 'Analyze schema', disabledKey: 'has_no_lab_schema'},
-    {separator: true},
-    {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: 'has_no_lab_schema'},
-    {icon: 'apps_outage', code: 'upload', tooltip: 'Open schema'},
-    {icon: 'camera', code: 'camera', tooltip: 'Acquire by camera', invisibleKey: 'not_available_camera' },
-    {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: 'has_no_lab_schema'},
-    {separator: true},
-    {icon: 'apps', code: 'available', tooltip: 'Show available numbers', disabledKey: 'has_no_lab_schema', checkedKey: 'available_visible'},
-    {icon: 'backup_table', code: 'popupdetails', tooltip: 'Show popup details', disabledKey: 'has_no_lab_schema', checkedKey: 'popup_details'},
+    DEFAULT_LAB_BUTTONS.stepinfo,
+    DEFAULT_LAB_BUTTONS.step,
+    DEFAULT_BUTTONS.separator,
+    DEFAULT_LAB_BUTTONS.solve,
+    DEFAULT_BUTTONS.separator,
+    DEFAULT_LAB_BUTTONS.download,
+    DEFAULT_LAB_BUTTONS.upload,
+    DEFAULT_LAB_BUTTONS.camera,
+    DEFAULT_LAB_BUTTONS.clear,
+    DEFAULT_BUTTONS.separator,
+    DEFAULT_LAB_BUTTONS.available,
+    DEFAULT_LAB_BUTTONS.popupdetails
   ];
   title = 'Player';
   execute = (facade: LabFacade, code: string) => {

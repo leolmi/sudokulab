@@ -79,6 +79,7 @@ import {AskDialogComponent} from "./components/ask-dialog/ask-dialog.component";
 import {CellValuesComponent} from "./components/cell-values/cell-values.component";
 import {SolverStepDetailsPopupComponent} from "./components/solver-step-details/solver-step-details-popup.component";
 import {ManagementKeyDialogComponent} from "./components/management-key-dialog/management-key-dialog.component";
+import {OperationsBarComponent} from "./components/operations-bar/operations-bar.component";
 
 @NgModule({
   declarations: [
@@ -113,7 +114,8 @@ import {ManagementKeyDialogComponent} from "./components/management-key-dialog/m
     SolverStepDetailsComponent,
     SolverStepDetailsPopupComponent,
     CellValuesComponent,
-    ManagementKeyDialogComponent
+    ManagementKeyDialogComponent,
+    OperationsBarComponent
   ],
   imports: [
     BrowserModule,

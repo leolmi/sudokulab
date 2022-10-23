@@ -18,6 +18,14 @@
 .difficulty {
   font-size: 40px;
   padding: 0 10px;
+  position: relative;
+  height: 1.1em;
+  .difficulty-text {
+    position: absolute;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
 }
 
 .difficulty-value {

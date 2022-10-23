@@ -10,9 +10,8 @@ import { PlaySudoku } from '@sudokulab/model';
     <svg-board class="thumbnail" [sudoku]="schema?.sudoku"></svg-board>
     <div class="schema-name" fxFlex>
       <div class="name">{{schema | schemaName}}</div>
-      <div class="difficulty">{{schema?.sudoku?.info?.difficultyValue||''}}</div>
     </div>
-<!--    <div class="hash">{{schema?.sudoku?._id||''}}</div>-->
+    <div class="difficulty">{{schema?.sudoku?.info?.difficultyValue||''}}</div>
     <div class="hash-container">
       <div class="hash">{{schema?.sudoku?.fixed||''}}</div>
     </div>

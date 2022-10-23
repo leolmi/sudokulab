@@ -19,7 +19,7 @@ interface Line {
       <img *ngIf="showHelpImage" src="assets/images/board_num.png" alt="description image">
       <button *ngIf="allowClose && ((lines$|async)||[]).length>0" class="close-button"
               (click)="closeDetails()" mat-icon-button>
-        <mat-icon>close</mat-icon>
+        <mat-icon>highlight_off</mat-icon>
       </button>
     </div>
     <div class="lines-container">
