@@ -47,6 +47,7 @@ export class SudokuContext extends SudokuFacade {
   selectValuesMode$: Observable<string> = this._store.select(SudokuSelectors.selectValuesMode);
   selectToken$: Observable<string> = this._store.select(SudokuSelectors.selectToken);
   selectOperationStatus$: Observable<number> = this._store.select(SudokuSelectors.selectOperationStatus);
+  selectUserSettings$: Observable<any> = this._store.select(SudokuSelectors.selectUserSettings);
 
   setEnvironment(env: any) {
     this._store.dispatch(SudokuActions.setEnvironment({ env }));
@@ -96,6 +97,10 @@ export class SudokuContext extends SudokuFacade {
 
   saveUserSettings() {
     this._store.dispatch(SudokuActions.saveUserSettings());
+  }
+
+  clearUserSettings() {
+    this._store.dispatch(SudokuActions.clearUserSettings());
   }
 
   checkStatus() {

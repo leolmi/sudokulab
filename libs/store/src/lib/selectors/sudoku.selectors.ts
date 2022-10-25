@@ -53,4 +53,7 @@ export const selectEnvironment = createSelector(
   (state): any => state.env
 )
 
-
+export const selectUserSettings = createSelector(
+  selectSudoku,
+  (state): any => state.settings
+)

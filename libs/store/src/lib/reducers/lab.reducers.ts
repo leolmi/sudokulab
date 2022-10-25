@@ -3,7 +3,7 @@ import {
   getUserSetting,
   PlaySudoku,
   SchemasOptions,
-  SolveStepResult,
+  SolveStepResult, Sudoku,
   update
 } from '@sudokulab/model';
 import { createEntityAdapter, Dictionary, EntityAdapter, EntityState } from '@ngrx/entity';
@@ -25,7 +25,7 @@ export const adapter: EntityAdapter<PlaySudoku> = createEntityAdapter<PlaySudoku
 });
 
 export const initialState: LabState = adapter.getInitialState({
-  active: getUserSetting<PlaySudoku>('lab.activeSudoku')?._id||0,
+  active: parseInt(getUserSetting<string>('lab.activeSudokuId')||'0')||0,
   selected: 0,
   activeCell: '',
   options: new SchemasOptions(getUserSetting('lab.schemasOptions')),
@@ -36,12 +36,12 @@ export const initialState: LabState = adapter.getInitialState({
 const labReducers = createReducer(
   initialState,
   on(SudokuActions.loadSchemas, (state, { schemas }) => {
-    const userschema = getUserSetting<PlaySudoku>('lab.activeSudoku');
-    if (!!userschema) {
-      schemas = _clone(schemas);
-      const xs = schemas.find(s => s._id === userschema._id);
-      if (!!xs) _extend(xs, userschema);
-    }
+    const usersettings: any = getUserSetting<PlaySudoku>('lab.activeSudoku');
+    schemas = _clone(schemas);
+    schemas.forEach(sch => {
+      const userschema = (usersettings || {})[sch._id];
+      if (userschema) _extend(sch, userschema);
+    });
     return adapter.upsertMany(schemas, state);
   }),
   on(SudokuActions.loadSudoku, (state, { sudoku }) => {

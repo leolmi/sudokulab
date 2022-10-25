@@ -27,6 +27,7 @@ export abstract class SudokuFacade implements Facade {
   abstract selectValuesMode$: Observable<string>;
   abstract selectToken$: Observable<string>;
   abstract selectOperationStatus$: Observable<number>;
+  abstract selectUserSettings$: Observable<any>;
 
   abstract setEnvironment(env: any): void;
   abstract googleLogin(credentials: GoogleCredentials): void;
@@ -40,6 +41,7 @@ export abstract class SudokuFacade implements Facade {
   abstract fillDocuments(): void;
   abstract checkCompactStatus(): void;
   abstract saveUserSettings(): void;
+  abstract clearUserSettings(): void;
   abstract checkStatus(): void;
   abstract setTheme(theme: string): void;
   abstract setValuesMode(valuesMode: string): void;

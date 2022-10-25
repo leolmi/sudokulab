@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import * as SudokuActions from '../actions';
-import {catchError, concatMap, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, concatMap, debounceTime, filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {
@@ -16,7 +16,7 @@ import {
   SDK_PREFIX,
   SDK_PREFIX_DEBUG,
   setApplicationTheme,
-  Sudoku,
+  Sudoku, SUDOKULAB_SETTINGS_KEY,
   SudokulabInfo,
   SudokulabWindowService,
   SudokuMessage
@@ -25,6 +25,7 @@ import {cloneDeep as _clone} from 'lodash';
 import * as SudokuSelectors from '../selectors';
 import {Action, createAction, props, Store} from '@ngrx/store';
 import {SudokuStore} from '../sudoku-store';
+import {clearUserSettings} from "../actions";
 
 
 @Injectable()
@@ -111,13 +112,13 @@ export class SudokuEffects {
     ofType(SudokuActions.setTheme),
     map((a) => {
       setApplicationTheme(this._window, a.theme);
-      saveUserSetting('sudoku.theme', a.theme);
+      saveUserSetting([{ path: 'sudoku.theme', data: a.theme}]);
     })
   ), { dispatch: false });
 
   setValuesMode$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.setValuesMode),
-    map((a) => saveUserSetting('sudoku.valuesMode', a.valuesMode))
+    map((a) => saveUserSetting([{ path: 'sudoku.valuesMode', data: a.valuesMode }]))
   ), { dispatch: false });
 
   setEnvironment$ = createEffect(() => this._actions$.pipe(
@@ -171,6 +172,28 @@ export class SudokuEffects {
       console.error(...SDK_PREFIX, a.message.message, a.message.data) :
       console.error(...SDK_PREFIX, a.message.message))
   ), { dispatch: false });
+
+  onUpdateSudoku$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.updateSudoku),
+    concatMap(() => [SudokuActions.saveUserSettings()])
+  ));
+
+  onSaveUserSettings$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.saveUserSettings),
+    debounceTime(250),
+    concatMap(() => [SudokuActions.updateUserSettings()])
+  ));
+
+  clearUserSettings$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.clearUserSettings),
+    concatMap(() => {
+      localStorage.removeItem(SUDOKULAB_SETTINGS_KEY);
+      return [
+        SudokuActions.saveUserSettings(),
+        SudokuActions.fillSchemas()
+      ]
+    })
+  ));
 
   constructor(private _actions$: Actions,
               private _store: Store<SudokuStore>,

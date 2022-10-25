@@ -35,6 +35,7 @@
         [active]="(activeId$|async) === schema._id"
         [selected]="(selectedId$|async) === schema._id"
         (onClick)="select($event)"
+        [hasChanges]="!!((userChanges$|async)||{})[schema._id]"
         [schema]="schema"></sudokulab-schemas-item>
     </cdk-virtual-scroll-viewport>
     <button mat-fab

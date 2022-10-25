@@ -1,8 +1,8 @@
 export class SchemasOptions {
   constructor(o?: Partial<SchemasOptions>) {
-    this.sortBy = '';
-    this.asc = false;
-    this.try = true;
+    this.sortBy = 'sudoku.info.difficultyValue';
+    this.asc = true;
+    this.try = false;
     Object.assign(this, o || {});
   }
   sortBy: string;

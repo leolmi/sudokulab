@@ -203,14 +203,14 @@ export class GeneratorEffects {
 
   updateOptions$ = createEffect(() => this._actions$.pipe(
     ofType(GeneratorActions.updateGeneratorSchema),
-    debounceTime(2000),
+    debounceTime(1000),
     concatMap(() => [GeneratorActions.saveUserSettings()])
   ));
 
   saveUserSettings$ = createEffect(() => this._actions$.pipe(
     ofType(GeneratorActions.saveUserSettings),
     withLatestFrom(this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
-    map(([a, schema]) => saveUserSetting('generator.schema', schema))
+    map(([a, schema]) => saveUserSetting([{ path: 'generator.schema', data: schema }]))
   ), { dispatch: false });
 
   constructor(private _actions$: Actions,

@@ -55,6 +55,9 @@
     > * {
       user-select: none;
     }
+    &.has-changes {
+      border-left: orangered 4px solid;
+    }
     &:hover {
       background-color: rgba(10, 10, 10, .1);
       &.color-accent {

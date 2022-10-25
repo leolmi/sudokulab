@@ -3,6 +3,7 @@ import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {
   isDebugMode,
   LabFacade,
+  MessageType,
   PlaySudokuOptions,
   setDebugMode,
   SudokuFacade,
@@ -10,7 +11,7 @@ import {
   SUDOKULAB_LIGHT_THEME,
   SUDOKULAB_MANAGE_OPERATION,
   SUDOKULAB_SESSION_DEVELOP,
-  SudokulabWindowService
+  SudokulabWindowService, SudokuMessage
 } from '@sudokulab/model';
 import {map, skip} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
@@ -100,6 +101,14 @@ export class OptionsComponent implements AfterViewInit {
 
   manage(operation: string, args?: any) {
     this._sudoku.manage(ManagementKeyDialogComponent, operation, args);
+  }
+
+  clearUserSettings() {
+    this._sudoku.clearUserSettings();
+    setTimeout(() => this._sudoku.raiseMessage(new SudokuMessage({
+      message: 'User settings has been deleted!',
+      type: MessageType.success
+    })));
   }
 
   private _error(message: string, err: any, hidden = false) {

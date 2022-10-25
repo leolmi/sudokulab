@@ -20,7 +20,8 @@ export interface SudokuState {
   valuesMode: string;
   token?: string;
   operationStatus?: number;
-  env?: any
+  env?: any;
+  settings?: any;
 }
 
 export const initialState: SudokuState = {
@@ -32,7 +33,8 @@ export const initialState: SudokuState = {
   valuesMode: getUserSetting('sudoku.valuesMode')||SUDOKULAB_DEFAULT_VALUES_MODE,
   token: undefined,
   operationStatus: -1,
-  env: {}
+  env: {},
+  settings: getUserSetting('lab.activeSudoku')||{}
 };
 
 const sudokuReducers = createReducer(
@@ -45,7 +47,8 @@ const sudokuReducers = createReducer(
   on(SudokuActions.setValuesMode, (state, { valuesMode }) => ({ ...state, valuesMode })),
   on(SudokuActions.setToken, (state, { token }) => ({ ...state, token })),
   on(SudokuActions.setOperationStatus, (state, { status }) => ({ ...state, operationStatus: status })),
-  on(SudokuActions.setEnvironment, (state, { env }) => ({ ...state, env }))
+  on(SudokuActions.setEnvironment, (state, { env }) => ({ ...state, env })),
+  on(SudokuActions.updateUserSettings, (state) => ({ ...state, settings: getUserSetting('lab.activeSudoku')||{} })),
 );
 
 export function reducer(state: SudokuState | undefined, action: Action) {

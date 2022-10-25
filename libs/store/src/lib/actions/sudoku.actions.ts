@@ -59,6 +59,10 @@ export const saveUserSettings = createAction(
   '[SudokuLab.sudoku] save the user settings'
 );
 
+export const clearUserSettings = createAction(
+  '[SudokuLab.sudoku] clear the user settings'
+);
+
 export const checkStatus = createAction(
   '[SudokuLab.sudoku] check the page status'
 );
@@ -83,3 +87,6 @@ export const setOperationStatus = createAction(
   props<{ status: number }>()
 );
 
+export const updateUserSettings = createAction(
+  '[SudokuLab.sudoku] updates user setings'
+);

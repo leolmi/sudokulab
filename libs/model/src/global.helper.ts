@@ -90,11 +90,16 @@ export const getUserSetting = <T>(path: string): T|undefined => {
   return undefined;
 }
 
-export const saveUserSetting = (path: string, data: any) => {
+export interface SettingsChanges {
+  path: string;
+  data: any;
+}
+
+export const saveUserSetting = (changes: SettingsChanges[]) => {
   const userdata = localStorage.getItem(SUDOKULAB_SETTINGS_KEY);
   try {
     const udata: any = userdata ? JSON.parse(userdata||'{}') : {};
-    _set(udata, path, data);
+    changes.forEach(c => _set(udata, c.path, c.data));
     debug(() => console.log(...SDK_PREFIX_DEBUG, 'SAVE USER SETTINGS', udata));
     localStorage.setItem(SUDOKULAB_SETTINGS_KEY, JSON.stringify(udata));
   } catch (err) {

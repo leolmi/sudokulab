@@ -24,7 +24,7 @@ import {
   PlaySudoku,
   resetAvailables,
   saveUserSetting,
-  SDK_PREFIX,
+  SDK_PREFIX, SettingsChanges,
   Solver,
   solveStepToCell,
   Sudoku,
@@ -87,15 +87,11 @@ export class LabEffects {
     withLatestFrom(
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     concatMap(([a, sdk]) => {
-      // const hash = getHash(sdk?.sudoku?.fixed||'');
-      // console.log('SUDOKU HASH = ', hash, `\n\t original hash = "${sdk?.sudoku?._id||''}"\n\tfixed "${sdk?.sudoku?.fixed||''}"`);
-      if (!!sdk) this._location.go(`/lab/${sdk._id}`);
-      const output: Action[] = [SudokuActions.updateDocumentTitle({ data: sdk ? `${sdk._id}` : '' })];
       if (!!sdk) {
-        const userschema = getUserSetting<PlaySudoku>('lab.activeSudoku');
-        if (!!userschema && userschema._id !== sdk._id) output.push(SudokuActions.saveUserSettings());
+        this._location.go(`/lab/${sdk._id}`);
+        saveUserSetting([{ path: `lab.activeSudokuId`, data: sdk._id }]);
       }
-      return output;
+      return [SudokuActions.updateDocumentTitle({ data: sdk ? `${sdk._id}` : '' })];
     })
   ));
 
@@ -139,9 +135,7 @@ export class LabEffects {
       if (!sdk) return [];
       const changes = clear(sdk);
       if (!sdk.options.usePencil) checkAvailables(changes, true);
-      return [
-        SudokuActions.updateSudoku({ changes }),
-        SudokuActions.saveUserSettings()];
+      return [SudokuActions.updateSudoku({ changes })];
     })
   ));
 
@@ -177,8 +171,7 @@ export class LabEffects {
       }
       return [
         SudokuActions.updateSudoku({ changes }),
-        SudokuActions.checkState(),
-        SudokuActions.saveUserSettings()
+        SudokuActions.checkState()
       ];
     })
   ));
@@ -335,12 +328,6 @@ export class LabEffects {
     })
   ));
 
-  updateOptions$ = createEffect(() => this._actions$.pipe(
-    ofType(SudokuActions.updateSchemasOptions),
-    debounceTime(2000),
-    concatMap(() => [SudokuActions.saveUserSettings()])
-  ));
-
   updatePlayerOptions$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.updatePlayerOptions),
     withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
@@ -353,13 +340,14 @@ export class LabEffects {
   ));
 
   saveUserSettings$ = createEffect(() => this._actions$.pipe(
-    ofType(SudokuActions.saveUserSettings),
+    ofType(SudokuActions.saveUserSettings, SudokuActions.updateSchemasOptions),
     withLatestFrom(
       this._store.select(SudokuSelectors.selectActiveSchemasOptions),
       this._store.select(SudokuSelectors.selectActiveSudoku)),
     map(([a, options, sdk]) => {
-      saveUserSetting('lab.schemasOptions', options);
-      saveUserSetting('lab.activeSudoku', getSudokuForUserSettings(sdk))
+      const changes: SettingsChanges[] = [{ path: 'lab.schemasOptions', data: options }];
+      if (sdk) changes.push({ path: `lab.activeSudoku.${sdk._id}`, data: getSudokuForUserSettings(sdk) });
+      saveUserSetting(changes);
     })
   ), { dispatch: false });
 
