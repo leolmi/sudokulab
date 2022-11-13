@@ -208,9 +208,9 @@ export const getValuesAlignment = (cids: string[], rank: number|undefined): Play
 }
 
 export const getUserCoord = (cid: string): string => {
-  const coord = (cid||'').split('.');
-  const cx = _isNumber(coord[0]) ? parseInt(coord[0])+1 : coord[0];
-  const cy = _isNumber(coord[1]) ? parseInt(coord[1])+1 : coord[1];
+  const coord = (cid||'').split('.').map(v => parseInt(v));
+  const cx = _isNumber(coord[0]) ? coord[0]+1 : coord[0];
+  const cy = _isNumber(coord[1]) ? coord[1]+1 : coord[1];
   return `(${cx},${cy})`;
 }
 

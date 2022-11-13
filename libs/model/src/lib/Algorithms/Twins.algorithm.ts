@@ -46,11 +46,14 @@ export class TwinsAlgorithm extends Algorithm {
         return inv;
       }, <Dictionary<string[]>>{});
 
-      // cerca le coppie di fatto: ossia quelle coppie già formate
+      // Ricerca le coppie di fatto: ossia quelle coppie già formate.
+      // Dalla precedente ricerca non emergono quelle coppie che sono già
+      // presenti per normale esclusione di valori dalle regole fondamentali
+      // del sudoku.
       _extend(couples_map, getGroupExplicitCouples(sdk, g));
-
       // ricerca quindi le coppie di celle che possono contenere i due numeri
       const couple = _keys(couples_map).find(ids => (couples_map[ids] || []).length === 2);
+
       if (!!couple) {
         const ids = couple.split('|');
         const values = couples_map[couple];
@@ -60,9 +63,10 @@ export class TwinsAlgorithm extends Algorithm {
             const removed = _remove(sdk.cells[id]?.availables||[], v => !_includes(values, v));
             if (removed.length > 0) {
               applied = true;
+              // console.log(`TWINS DATA couple:`, couple, '\n\tvalues:', values, '\n\tids:', ids, '\n\tcouples map:', couples_map);
               descLines.push(new AlgorithmResultLine({
                 cell: id,
-                description: getDescription(sdk, id, removed, ' on twins')
+                description: getDescription(sdk, ids, values, id, removed, ' on twins')
               }));
             }
           });
@@ -76,9 +80,12 @@ export class TwinsAlgorithm extends Algorithm {
                 const removed = _remove(sdk.cells[gcid]?.availables||[], v => _includes(values, v));
                 if (removed.length > 0) {
                   applied = true;
+                  // gcid: id del gruppo da cui vengono tolti dei valori possibili
+                  // removed: eleneco dei valori rimossi
+                  // console.log(`TWINS DATA group:`, g, '\n\tvalues:', values, '\n\tids:', ids, '\n\tcouples map:', couples_map);
                   descLines.push(new AlgorithmResultLine({
                     cell: gcid,
-                    description: getDescription(sdk, gcid, removed, ' by twins')
+                    description: getDescription(sdk, ids, values, gcid, removed, ' by twins')
                   }));
                 }
               }
@@ -96,6 +103,7 @@ export class TwinsAlgorithm extends Algorithm {
   }
 }
 
-const getDescription = (sdk: PlaySudoku, cid: string, removed: string[], postfix?: string): string => {
-  return `On cell ${getUserCoord(cid)} only available are [${sdk.cells[cid]?.availables}], so [${removed.join(',')}] have been removed${postfix}`;
+const getDescription = (sdk: PlaySudoku, tcls: string[], tvls: string[]|undefined, cid: string, removed: string[], postfix?: string): string => {
+  return `Found twins ${tcls.map(tid => getUserCoord(tid)).join(' ')} per i valori [${tvls||'?'}].
+  On cell ${getUserCoord(cid)} only available are [${sdk.cells[cid]?.availables}], so [${removed.join(',')}] have been removed${postfix}`;
 }
