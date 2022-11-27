@@ -66,7 +66,9 @@ export class TwinsAlgorithm extends Algorithm {
               // console.log(`TWINS DATA couple:`, couple, '\n\tvalues:', values, '\n\tids:', ids, '\n\tcouples map:', couples_map);
               descLines.push(new AlgorithmResultLine({
                 cell: id,
-                description: getDescription(sdk, ids, values, id, removed, ' on twins')
+                others: ids,
+                description: `Found twins ${ids.map(tid => getUserCoord(tid)).join(' ')} per i valori [${values||'?'}].
+  On cell ${getUserCoord(id)} only available are [${sdk.cells[id]?.availables}], so [${removed.join(',')}] have been removed on twins`
               }));
             }
           });
@@ -85,7 +87,9 @@ export class TwinsAlgorithm extends Algorithm {
                   // console.log(`TWINS DATA group:`, g, '\n\tvalues:', values, '\n\tids:', ids, '\n\tcouples map:', couples_map);
                   descLines.push(new AlgorithmResultLine({
                     cell: gcid,
-                    description: getDescription(sdk, ids, values, gcid, removed, ' by twins')
+                    others: ids,
+                    description: `Found twins ${ids.map(tid => getUserCoord(tid)).join(' ')} per i valori [${values||'?'}].
+  On cell ${getUserCoord(gcid)} only available are [${sdk.cells[gcid]?.availables}], so [${removed.join(',')}] have been removed by twins`
                   }));
                 }
               }
@@ -101,9 +105,4 @@ export class TwinsAlgorithm extends Algorithm {
       descLines
     });
   }
-}
-
-const getDescription = (sdk: PlaySudoku, tcls: string[], tvls: string[]|undefined, cid: string, removed: string[], postfix?: string): string => {
-  return `Found twins ${tcls.map(tid => getUserCoord(tid)).join(' ')} per i valori [${tvls||'?'}].
-  On cell ${getUserCoord(cid)} only available are [${sdk.cells[cid]?.availables}], so [${removed.join(',')}] have been removed${postfix}`;
 }

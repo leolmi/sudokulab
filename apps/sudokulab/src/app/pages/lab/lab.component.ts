@@ -26,6 +26,7 @@ import {Dictionary} from '@ngrx/entity';
 import {SOLVER_STEP_DETAILS} from "../../model";
 import {AskDialogComponent} from "../../components/ask-dialog/ask-dialog.component";
 import {SolverStepDetailsPopupComponent} from "../../components/solver-step-details/solver-step-details-popup.component";
+import {reduce as _reduce} from 'lodash';
 
 @Component({
   selector: 'sudokulab-lab-page',
@@ -49,6 +50,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   rank$: Observable<number>;
   activeSteps$: BehaviorSubject<SolveStepResult[]>;
   highlight$: BehaviorSubject<Dictionary<boolean>>;
+  otherHighlight$: BehaviorSubject<Dictionary<boolean>>;
 
   constructor(private _lab: LabFacade,
               private _route: ActivatedRoute,
@@ -63,6 +65,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
     this.isActiveCell$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$), map(cell => !!cell));
     this.activeSteps$ = new BehaviorSubject<SolveStepResult[]>([]);
     this.highlight$ = new BehaviorSubject<Dictionary<boolean>>({});
+    this.otherHighlight$ = new BehaviorSubject<Dictionary<boolean>>({});
 
     _sudoku
       .onUpload(UploadDialogComponent, this._destroy$, {
@@ -152,6 +155,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
 
   stepLineClick(line: AlgorithmResultLine) {
     if (!!line?.cell) this.highlight$.next({ [line?.cell]: true });
+    this.otherHighlight$.next(_reduce(line?.others||[], (d, os) => ({ ...d, [os]: true }) , {}));
   }
 
   closeDetails() {

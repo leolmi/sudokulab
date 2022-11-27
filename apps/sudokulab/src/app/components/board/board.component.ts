@@ -54,6 +54,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
   stepInfos$: Observable<SolveStepResult[]>;
   highlights$: Observable<Dictionary<boolean>>;
   highlightsCell$: BehaviorSubject<Dictionary<boolean>>;
+  otherHighlightsCells$: BehaviorSubject<Dictionary<boolean>>;
   highlightStep$: Observable<Dictionary<boolean>>;
 
 
@@ -63,8 +64,12 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
     if (c) {
       if (this._hlTimeout) clearTimeout(this._hlTimeout);
       this.highlightsCell$.next(c);
-      this._hlTimeout = setTimeout(() => this.highlightsCell$.next({}), SHOW_INFO_TIMEOUT);
+      this._hlTimeout = setTimeout(() => this._clearHighlights(), SHOW_INFO_TIMEOUT);
     }
+  };
+
+  @Input() set otherHighLight(c: Dictionary<boolean>|null) {
+    this.otherHighlightsCells$.next(c||{});
   };
 
   constructor(private ele: ElementRef,
@@ -73,6 +78,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
     super(_sudoku);
 
     this.highlightsCell$ = new BehaviorSubject<Dictionary<boolean>>({});
+    this.otherHighlightsCells$ = new BehaviorSubject<Dictionary<boolean>>({});
     this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
     this.stepInfos$ = _lab.selectStepInfos$.pipe(takeUntil(this._destroy$));
@@ -100,6 +106,11 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
     this.highlightStep$
       .pipe(filter(hls => _keys(hls).length>0), delay(2000))
       .subscribe(() => _lab.clesrHighlightCells());
+  }
+
+  private _clearHighlights() {
+    this.highlightsCell$.next({});
+    this.otherHighlightsCells$.next({});
   }
 
   private _showInfo(stis: SolveStepResult[], isAction: boolean) {

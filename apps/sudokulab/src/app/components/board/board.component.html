@@ -22,6 +22,7 @@
                 'bottom-line': ((grline$|async)||{})[row],
                 'error': cell.error,
                 'highlight': ((highlights$|async)||{})[cell.id],
+                'highlight-secondary': ((otherHighlightsCells$|async)||{})[cell.id],
                 'highlight-cell': ((highlightsCell$|async)||{})[cell.id]
              }">
           <div class="cell-value" [ngClass]="{'pulse': ((highlightStep$|async)||{})[cell.id]}">{{cell?.value}}</div>

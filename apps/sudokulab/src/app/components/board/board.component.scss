@@ -30,7 +30,8 @@
     outline-width: 1px;
   }
   transition: background-color ease-in-out .5s;
-  &.highlight {
+  &.highlight,
+  &.highlight-secondary {
     background-color: rgba(255, 64, 129, 0.2);
   }
   &.highlight-cell {
