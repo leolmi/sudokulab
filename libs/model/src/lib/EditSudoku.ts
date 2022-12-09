@@ -8,28 +8,51 @@ import { remove as _remove } from 'lodash';
 import { SDK_PREFIX, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
 import { guid, isValue } from '../global.helper';
 
+/**
+ * Informazioni di cella per il generatore
+ */
 export class GenerationMapCellInfo {
   constructor(sdk: EditSudoku, cid: string) {
     this.id = cid;
     const position = sdk.cells[cid]?.position||0;
-    this.isValueX = [SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE].indexOf(sdk.originalSchema?.charAt(position)||'')>-1;
+    const original_char = sdk.originalSchema?.charAt(position)||'';
+    this.isValueX = [SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE].indexOf(original_char)>-1;
     this.index = -1;
   }
+
+  /**
+   * Identificativo della cella a cui riferisce
+   */
   id: string;
+  /**
+   * Vero se NON è un valore fisso reale
+   * (quindi se è "0" o "?"))
+   */
   isValueX: boolean;
+  /**
+   * Posizione di lettura degli available
+   */
   index: number;
 }
 
+/**
+ * Mappa per il generatore
+ */
 export class EditSudokuGenerationMap {
   constructor(sdk: EditSudoku) {
     this.cellsX = {};
     this.fixedCells = sdk.fixed.map(fcid => new GenerationMapCellInfo(sdk, fcid));
-    this.fixedCellsX = this.fixedCells.filter(c => c.isValueX);
-    this.fixedCellsX.forEach(cx => this.cellsX[cx.id] = cx);
+    this.fixedCells.forEach(c => c.isValueX ? this.cellsX[c.id] = true : null);
   }
-  cellsX: Dictionary<GenerationMapCellInfo>;
+
+  /**
+   * Dizionario delle celle dinamiche
+   */
+  cellsX: Dictionary<boolean>;
+  /**
+   * Tutte le celle fisse (dinamiche e non)
+   */
   fixedCells: GenerationMapCellInfo[];
-  fixedCellsX: GenerationMapCellInfo[];
 }
 
 export class EditSudoku {
@@ -37,6 +60,7 @@ export class EditSudoku {
     this.cells = {};
     this.cellList = [];
     this.fixed = [];
+    this.fixedMap = {};
     this.groups = {};
     this.groupsForCell = {};
     this.fixedCount = 0;
@@ -50,6 +74,7 @@ export class EditSudoku {
   options: EditSudokuOptions;
   fixedCount: number;
   fixed: string[];
+  fixedMap: Dictionary<boolean>;
   cells: Dictionary<EditSudokuCell>;
   cellList: string[];
   groups: Dictionary<EditSudokuGroup>;
@@ -61,12 +86,18 @@ export class EditSudoku {
   checkFixedCell(cell: EditSudokuCell) {
     if (!!cell.value && !cell.fixed) {
       cell.fixed = true;
-      this.fixedCount++;
-      this.fixed.push(cell.id);
+      if (!this.fixedMap[cell.id]) {
+        this.fixedCount++;
+        this.fixed.push(cell.id);
+        this.fixedMap[cell.id] = true;
+      }
     } else if (!cell.value && cell.fixed) {
       cell.fixed = false;
-      this.fixedCount--;
-      _remove(this.fixed, cid => cid === cell.id);
+      if (this.fixedMap[cell.id]) {
+        delete this.fixedMap[cell.id];
+        _remove(this.fixed, cid => cid === cell.id);
+        this.fixedCount--;
+      }
     }
   }
 

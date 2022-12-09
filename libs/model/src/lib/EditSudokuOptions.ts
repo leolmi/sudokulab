@@ -21,4 +21,5 @@ export class EditSudokuOptions {
   maxDiff = 1000000;
   maxSplitSchema = 500;
   maxSchemaCycles = 100;
+  maxValueCycles = 10000;
 }

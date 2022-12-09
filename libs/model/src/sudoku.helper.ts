@@ -1,5 +1,5 @@
-import { Sudoku } from './lib/Sudoku';
-import { PlaySudoku } from './lib/PlaySudoku';
+import {Sudoku} from './lib/Sudoku';
+import {PlaySudoku} from './lib/PlaySudoku';
 import {
   cloneDeep as _clone,
   extend as _extend,
@@ -8,13 +8,14 @@ import {
   intersection as _intersection,
   isArray as _isArray,
   isNumber as _isNumber,
+  isObject as _isObject,
   isString as _isString,
   keys as _keys,
   random as _random,
   reduce as _reduce,
   remove as _remove
 } from 'lodash';
-import { EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType } from './lib/enums';
+import {EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType} from './lib/enums';
 import {
   AlignmentOnGroupAlgorithm,
   OneCellForValueAlgorithm,
@@ -23,8 +24,8 @@ import {
   TryNumberAlgorithm,
   TwinsAlgorithm
 } from './lib/Algorithms';
-import { Algorithm } from './lib/Algorithm';
-import { CellInfo } from './lib/CellInfo';
+import {Algorithm} from './lib/Algorithm';
+import {CellInfo} from './lib/CellInfo';
 import {
   AVAILABLE_DIRECTIONS,
   AVAILABLE_VALUES,
@@ -32,27 +33,32 @@ import {
   SUDOKU_DYNAMIC_VALUE,
   SUDOKU_EMPTY_VALUE
 } from './lib/consts';
-import { calcDifficulty } from './lib/logic';
-import { Cell } from './lib/Cell';
-import { EditSudoku, EditSudokuGenerationMap } from './lib/EditSudoku';
-import { EditSudokuCell } from './lib/EditSudokuCell';
-import { EditSudokuGroup } from './lib/EditSudokuGroup';
-import { EditSudokuOptions } from './lib/EditSudokuOptions';
-import { PlaySudokuGroup } from './lib/PlaySudokuGroup';
-import { SudokuInfo } from './lib/SudokuInfo';
-import { Dictionary } from '@ngrx/entity';
-import { SudokuSolution } from './lib/SudokuSolution';
-import { calcFixedCount, getHash, isValue } from './global.helper';
-import { ElementRef } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {calcDifficulty} from './lib/logic';
+import {Cell} from './lib/Cell';
+import {EditSudoku, EditSudokuGenerationMap} from './lib/EditSudoku';
+import {EditSudokuCell} from './lib/EditSudokuCell';
+import {EditSudokuGroup} from './lib/EditSudokuGroup';
+import {EditSudokuOptions} from './lib/EditSudokuOptions';
+import {PlaySudokuGroup} from './lib/PlaySudokuGroup';
+import {SudokuInfo} from './lib/SudokuInfo';
+import {Dictionary} from '@ngrx/entity';
+import {SudokuSolution} from './lib/SudokuSolution';
+import {calcFixedCount, getHash, isValue} from './global.helper';
+import {ElementRef} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
 import {PlaySudokuCell} from "./lib/PlaySudokuCell";
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
 
+/**
+ * Vero se la cella è fissa e non dinamica
+ * @param cell
+ * @param gmap
+ */
 export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap): boolean => {
   if (!gmap) return !!cell?.fixed && cell.value !== SUDOKU_DYNAMIC_VALUE;
-  return !!cell?.fixed && !gmap.cellsX[cell.id]?.isValueX;
+  return !!cell?.fixed && !gmap.cellsX[cell.id];
 }
 
 export const parseValue = (raw: string, rank?: number, acceptX = false): string => {
@@ -61,6 +67,11 @@ export const parseValue = (raw: string, rank?: number, acceptX = false): string 
   return value;
 }
 
+/**
+ * Restituisce il dizionario
+ * @param sdk
+ * @param g
+ */
 const _getGroupCellValuesMap = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<string> => {
   return _reduce(g.cells, (m, cid) => {
     const v = cid ? sdk?.cells[cid]?.value : '';
@@ -69,25 +80,56 @@ const _getGroupCellValuesMap = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySud
   }, <Dictionary<string>>{});
 }
 
+export interface ResetSchemaOptions {
+  simpleFixed?: boolean;
+  onlyRealFixed?: boolean;
+  allNotValue?: boolean;
+  resetBefore?: boolean;
+}
+
+/**
+ * Tutte le celle non realmente fisse vengono resettate sugli availables (acquisiscono tutti i valori)
+ * @param sdk
+ * @param o
+ */
+export const resetAvailable = (sdk: PlaySudoku|EditSudoku|undefined, o?: ResetSchemaOptions) => {
+  if (!sdk) return;
+  const gmap: EditSudokuGenerationMap|undefined = (<EditSudoku>sdk).generationMap;
+  const rank_av = getAvailables(getRank(sdk));
+  if (o?.onlyRealFixed) {
+    _forEach(sdk.cells, (c) => c ? c.availables = (isFixedNotX(c, gmap) ? [] : _clone(rank_av)) : null);
+  } else if (o?.allNotValue) {
+    _forEach(sdk.cells, (c) => c ? c.availables = (isValue(c.value) ? [] : _clone(rank_av)) : null);
+  } else {
+    // ==> o?.simpleFixed
+    _forEach(sdk.cells, (c) => c ? c.availables = (c.fixed ? [] : _clone(rank_av)) : null);
+  }
+}
+
 /**
  * aaplica la regola base del sudoku:
  * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
  * @param sdk
  * @param resetBefore
  */
-export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefore = false) => {
+export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefore: boolean|ResetSchemaOptions = false) => {
   if (!sdk) return;
-  const gmap: EditSudokuGenerationMap|undefined = (<EditSudoku>sdk).generationMap;
   if (resetBefore) {
-    _forEach(sdk.cells, (c) => c ? c.availables = (isFixedNotX(c, gmap) ? [] : getAvailables(getRank(sdk))) : null);
+    const o: ResetSchemaOptions = _isObject(resetBefore) ? resetBefore : { onlyRealFixed: true };
+    resetAvailable(sdk, o);
   }
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
-    // vettore valori di gruppo
+    // vettore valori di gruppo con tutti i valori reali (quelli numerici)
+    // { v1: cid1..cidN, v2:.... }
     const values = _getGroupCellValuesMap(sdk, g);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
     // g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
-    g.cells.forEach(cid => _remove(sdk.cells[cid]?.availables||[], av => av !== sdk.cells[cid]?.value && !!values[av]));
+    g.cells.forEach(cid => {
+      const cell: any = sdk.cells[cid]||{};
+      // elimina dagli availables i valori già presenti e diversi dal valore della cella stessa
+      _remove(cell.availables||[], (av: string) => av !== cell.value && !!values[av]);
+    });
   });
 }
 
@@ -221,11 +263,13 @@ export const getRank = (sdk: PlaySudoku|EditSudoku|undefined): number => {
   return sdk?.options.rank || 9;
 }
 
-export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined, handler: (cid: string) => any) => {
+export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined,
+                               handler: (cid: string, cell: PlaySudokuCell|EditSudokuCell|undefined) => any) => {
   const rank = getRank(sdk);
   for (let r = 0; r < rank; r++) {
     for (let c = 0; c < rank; c++) {
-      handler(cellId(c, r));
+      const cid = cellId(c, r);
+      handler(cid, (sdk?.cells||{})[cid]);
     }
   }
 }
@@ -269,12 +313,6 @@ export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string):
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
   const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || 9);
   return (value.length === 1 && isvalue) || ['Delete', SUDOKU_DYNAMIC_VALUE, ' ', '?'].indexOf(value) > -1;
-}
-
-export const resetAvailables = (sdk: PlaySudoku|undefined) => {
-  _forEach(sdk?.cells||{}, (c) => {
-    if (!!c) c.availables = c.fixed ? [] : getAvailables(sdk?.sudoku?.rank);
-  });
 }
 
 export const toggleValue = (vls: string[], value: string): string[] => {
@@ -418,7 +456,8 @@ export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>, del
   return info;
 }
 
-export const getSolutionSudoku = (sol: SudokuSolution, i?: Partial<SudokuInfo>) => {
+export const getSolutionSudoku = (sol?: SudokuSolution, i?: Partial<SudokuInfo>) => {
+  if (!sol) return undefined;
   const sdk: Sudoku = <Sudoku>_clone(sol.sdk.sudoku);
   const baseinfo = {
     unique: true,

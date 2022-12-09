@@ -64,7 +64,7 @@ export class SudokuSchemaCell {
     this.prevalue$ = new BehaviorSubject<string>('');
     this.availables$ = new BehaviorSubject<string[]>([]);
     Object.assign(this, c || {});
-    this.resetAvailables();
+    this.resetAvailable();
   }
 
   id: string;
@@ -74,7 +74,7 @@ export class SudokuSchemaCell {
   value$: BehaviorSubject<string>;
   prevalue$: BehaviorSubject<string>;
   availables$: BehaviorSubject<string[]>;
-  resetAvailables() {
+  resetAvailable() {
     this.availables$.next(getAvailables(this.rank));
   }
   setValue(v: string, fixed = false) {
@@ -85,7 +85,7 @@ export class SudokuSchemaCell {
   clear() {
     this.prevalue$.next('');
     this.value$.next('');
-    this.resetAvailables();
+    this.resetAvailable();
   }
   isValueX(): boolean {
     return this.value$.getValue() === SUDOKU_DYNAMIC_VALUE && this.fixed;

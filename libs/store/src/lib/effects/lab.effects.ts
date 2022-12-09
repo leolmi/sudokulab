@@ -22,7 +22,7 @@ import {
   MessageType,
   moveOnDirection,
   PlaySudoku,
-  resetAvailables,
+  resetAvailable,
   saveUserSetting,
   SDK_PREFIX, SettingsChanges,
   Solver,
@@ -160,13 +160,13 @@ export class LabEffects {
           cell.pencil = toggleValue(cell.pencil, value);
         }
         if (!!prev && cell.value !== prev) {
-          resetAvailables(changes);
+          resetAvailable(changes);
           checkAvailables(changes);
         }
       } else {
         cell.pencil = [];
         cell.value = (value || '').trim();
-        if (!!prev && cell.value !== prev) resetAvailables(changes);
+        if (!!prev && cell.value !== prev) resetAvailable(changes);
         checkAvailables(changes);
       }
       return [

@@ -9,7 +9,7 @@ import {
   EditSudokuOptions,
   EditSudokuValorizationMode,
   GenerationMapCellInfo,
-  Generator,
+  Generator_old,
   getAvailables,
   getMinNumbers,
   getValues,
@@ -17,6 +17,7 @@ import {
   MessageType,
   PlaySudoku,
   PlaySudokuOptions,
+  resetAvailable,
   SDK_PREFIX,
   SolveAllResult,
   Solver,
@@ -140,7 +141,7 @@ const _addFixed = (sdk: EditSudoku): boolean => {
  * @param G
  * @param handler
  */
-export const isOnEnd = (G: Generator, handler: (ended: boolean) => any) =>
+export const isOnEnd = (G: Generator_old, handler: (ended: boolean) => any) =>
   use(combineLatest(G.facade.selectGeneratorIsStopping$, G.facade.selectGeneratorIsRunning$), ([stopping, running]) => {
     const stopped = stopping || !running;
     if (stopped) return handler(true);
@@ -263,17 +264,17 @@ export const checkNumbers = (sdk: EditSudoku): boolean => {
  * @param startIndex
  */
 const resetCellsX = (sdk: EditSudoku, startIndex = 0) => {
-  const xcells = (sdk.generationMap?.fixedCellsX || []);
-  xcells.forEach((c, index) => {
-    if (c.isValueX && index >= startIndex) {
-      const cell = sdk.cells[c.id];
+  const fxcells = (sdk.generationMap?.fixedCells || []);
+  fxcells.forEach((fc, index) => {
+    if (fc.isValueX && index >= startIndex) {
+      const cell = sdk.cells[fc.id];
       if (cell) {
         cell.value = SUDOKU_DYNAMIC_VALUE;
-        c.index = -1;
+        fc.index = -1;
       }
     }
   });
-  applySudokuRules(sdk);
+  applySudokuRules(sdk, { allNotValue: true });
 }
 
 const hasNoValorizations = (sdk: EditSudoku): boolean => {
@@ -283,21 +284,39 @@ const hasNoValorizations = (sdk: EditSudoku): boolean => {
       return !!sdk.valorizations[valorization];
     case EditSudokuValorizationMode.sequential:
     default:
-      return !(sdk.generationMap?.fixedCellsX || []).find(c => c.index < ((sdk.cells[c.id]?.availables||[]).length - 1))
+      return !(sdk.generationMap?.fixedCells || []).find(c => c.isValueX && c.index < ((sdk.cells[c.id]?.availables||[]).length - 1));
   }
 }
 
 const isFirstValorization = (xcells: GenerationMapCellInfo[]): boolean => {
-  return !xcells.find(c => c.index >= 0);
+  // ricerca la prima x-cella che ha già subito una valorizzazione
+  const vc = xcells.find(c => c.index >= 0);
+  console.log('Just value on x-cell:', vc);
+  return !vc;
 }
 
+/**
+ * Restituisce l'indice dell'ultima cella dove sia possibile aumentare l'indice del valore possibile
+ * e resetta tutte quelle di indice maggiore
+ * @param sdk
+ */
 const findLastIncrementableIndex = (sdk: EditSudoku): number => {
-  const xcells = (sdk.generationMap?.fixedCellsX || []);
-  const index = _findLastIndex(xcells, c => c.index < (sdk.cells[c.id]?.availables||[]).length - 1);
+  const fxcells = (sdk.generationMap?.fixedCells || []);
+
+  // TODO: sdk.cells[c.id]?.availables||[] ha sempre tutti i valori possibili!!!
+
+  const index = _findLastIndex(fxcells, c => c.isValueX && c.index < (sdk.cells[c.id]?.availables||[]).length - 1);
+  // se trova l'indice resetta (cancella il valore ed aggiorna gli available)
+  // tutte le celle con indice superiore a quella trovata
   if (index > -1) resetCellsX(sdk, index + 1);
   return index;
 }
 
+/**
+ * avanza il valore per la cella
+ * @param sdk
+ * @param xcell
+ */
 const upgradeXCell = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
   const cell = sdk.cells[xcell.id];
   switch (sdk.options.valorizationMode) {
@@ -309,7 +328,8 @@ const upgradeXCell = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
       break;
   }
   if (!!cell) cell.value = cell.availables[xcell.index];
-  applySudokuRules(sdk, true);
+  // aggiorna gli availables per ogni cella
+  applySudokuRules(sdk);
 }
 
 /**
@@ -319,25 +339,45 @@ const upgradeXCell = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
 export const checkValues = (sdk: EditSudoku): boolean => {
   // se non contiene celle fisse dinamiche esce
   let values: string = '';
-  const xcells = (sdk.generationMap?.fixedCellsX || []);
-  const xcells_count = xcells.length;
+  const fxcells = (sdk.generationMap?.fixedCells || []);
+  const xcells = fxcells.filter(c => c.isValueX);
+  const xcells_count = fxcells.filter(c => c.isValueX).length;
   if (xcells_count <= 0) return true;
 
   // la prima valorizzazione inserisce per ogni cella il primo valore disponibile
   if (isFirstValorization(xcells)) {
+    // resetta tutti gli available per le celle non realmente fixed
+    applySudokuRules(sdk, { onlyRealFixed: true });
+    console.log('FIRST VALORIZATION [1] FOR ', getFixedValues(sdk, true));
+    // assegna i valori alle celle dimaniche
+    // ogni valorizzazione aggiorna gli available per le celle non valorizzate
     xcells.forEach(xc => upgradeXCell(sdk, xc));
+    console.log('FIRST VALORIZATION [2] FOR ', getFixedValues(sdk));
   } else if (hasNoValorizations(sdk)) {
+    console.log('NO VALORIZATIONS FOR ', getFixedValues(sdk));
     return false;
   } else {
+    console.log('OTHER VALORIZATION [1] FOR ', getFixedValues(sdk, true));
     values = getValues(sdk);
     sdk.valorizations[values] = true;
     switch (sdk.options.valorizationMode) {
       case EditSudokuValorizationMode.sequential:
-        const index = findLastIncrementableIndex(sdk);
+        // ricerca l'indice dell'ultima cella dove sia possibile aggiornare il valore'
+        let index = findLastIncrementableIndex(sdk);
         if (index < 0) return false;
-        for (let i = index; i < xcells_count; i++) {
-          upgradeXCell(sdk, xcells[i])
+        upgradeXCell(sdk, xcells[index]);
+        for (let i = index + 1; i < xcells_count; i++) {
+          xcells[i].index = 0;
+          setXCellValue(sdk, xcells[i]);
+          applySudokuRules(sdk);
         }
+        // if (!setXSchemaValues(sdk, index)) return false;
+        // // 3 - arrivato all'index valore prova a incrementarlo di 1 se può altrimenti lo svuota e torna al precedente (index = index - 1) e riprova
+        // console.log(`Aggiorna le celle da index=${index} in su (${xcells_count})`);
+        // for (let i = index; i < xcells_count; i++) {
+        //   upgradeXCell(sdk, xcells[i])
+        // }
+        console.log('OTHER VALORIZATION [2] FOR ', getFixedValues(sdk));
         break;
       case EditSudokuValorizationMode.random:
         xcells.forEach(xc => upgradeXCell(sdk, xc));
@@ -348,16 +388,77 @@ export const checkValues = (sdk: EditSudoku): boolean => {
   values = getValues(sdk);
   let invalidValues = !!xcells.find(c => !isValue(sdk.cells[c.id]?.value || ''));
   if (invalidValues) console.warn(...SDK_PREFIX, 'Invalid values', values);
+  // ricerca la prima cella non fissa senza valori possibili
   const errorcell = sdk.cellList.map(cid => sdk.cells[cid]).find(c => !c?.fixed && (c?.availables || []).length <= 0);
   if (!!errorcell) invalidValues = true;
   return !invalidValues;
 }
 
-const getFixedValues = (sdk: EditSudoku): string => {
+// const forEachIndexXCells = (sdk: EditSudoku, index: number, handler: (c: EditSudokuCell|undefined, x: GenerationMapCellInfo, i: number) => any) => {
+//   const xcells = (sdk.generationMap?.fixedCellsX || []);
+//   const xcells_count = xcells.length;
+//   for (let i = index; i < xcells_count; i++) {
+//     const xcell = xcells[i];
+//     handler((sdk.cells || {})[xcell?.id || ''], xcell, i);
+//   }
+// }
+
+const setXCellValue = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
+  const cell = sdk.cells[xcell.id];
+  if (cell) cell.value = cell.availables[xcell.index] || '';
+}
+
+/**
+ * Annulla tutti i valori nelle X-Celle
+ * @param sdk
+ */
+const resetXSchema = (sdk: EditSudoku) => {
+  (sdk.generationMap?.fixedCells || []).forEach(xc => xc.isValueX ?
+    ((sdk.cells || {})[xc?.id || ''] || <any>{}).value = '' : null);
+  applySudokuRules(sdk);
+}
+
+/**
+ * Valorizza le prime index X-Celle applicando le regole del sudoku
+ * @param sdk
+ * @param index
+ */
+const setXSchemaValues = (sdk: EditSudoku, index: number): boolean => {
+  const fxcells = (sdk.generationMap?.fixedCells || []);
+  for (let i = 0; i < index; i++) {
+    const xcell = fxcells[i];
+    if (xcell.isValueX) {
+      const cell = sdk.cells[xcell.id];
+      if (cell) cell.value = cell.availables[xcell.index];
+      if (!cell?.value) return false;
+      applySudokuRules(sdk);
+    }
+  }
+  return true;
+}
+
+// /**
+//  *
+//  * @param sdk
+//  * @param index
+//  */
+// const setValues = (sdk: EditSudoku, index: number): boolean => {
+//   let done = false;
+//   do {
+//     if (!done) {
+//       done = setXSchemaValues(sdk, index);
+//       if (!done) index = index - 1;
+//     }
+//   } while (index>=0 && !done);
+//   return done;
+// }
+
+const getFixedValues = (sdk: EditSudoku, allowX = false): string => {
   let fixed = '';
   traverseSchema(sdk, (cid) => {
     const raw_value = sdk.cells[cid]?.value || '';
-    const value = isValue(raw_value) ? raw_value : SUDOKU_EMPTY_VALUE;
+    const value = isValue(raw_value) ? raw_value :
+      (raw_value === SUDOKU_DYNAMIC_VALUE && allowX ? SUDOKU_DYNAMIC_VALUE : SUDOKU_EMPTY_VALUE);
     fixed = `${fixed || ''}${value}`;
   });
   return fixed;

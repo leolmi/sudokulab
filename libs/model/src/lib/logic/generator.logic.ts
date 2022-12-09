@@ -1,7 +1,7 @@
-import { EditSudoku } from '../EditSudoku';
-import { Sudoku } from '../Sudoku';
-import { GeneratorFacade } from '../GeneratorFacade';
-import { cloneDeep as _clone } from 'lodash';
+import {EditSudoku} from '../EditSudoku';
+import {Sudoku} from '../Sudoku';
+import {GeneratorFacade} from '../GeneratorFacade';
+import {cloneDeep as _clone} from 'lodash';
 import {
   checkNumbers,
   checkSchema,
@@ -13,14 +13,15 @@ import {
   resetSchemaMap,
   solveSchema
 } from './generator.helper';
-import { getSolutionSudoku, getValues } from '../../sudoku.helper';
-import { WorkingInfo } from '../WorkingInfo';
-import { Dictionary } from '@ngrx/entity';
-import { SDK_PREFIX } from '../consts';
-import { debug } from '../../global.helper';
+import {getSolutionSudoku, getValues} from '../../sudoku.helper';
+import {WorkingInfo} from '../WorkingInfo';
+import {Dictionary} from '@ngrx/entity';
+import {SDK_PREFIX} from '../consts';
+import {debug} from '../../global.helper';
+import {EditSudokuValorizationMode} from "../enums";
 
 
-export class Generator {
+export class Generator_old {
   schemas: Dictionary<Sudoku>;
   private _workSdk: EditSudoku;
   private _counter: number;
@@ -63,7 +64,7 @@ export class Generator {
     // console.log(...SDK_PREFIX, 'initialized schema', _clone(this._workSdk.cells));
     // 2. aggiunge nuovi fixed se il numero di quelli inseriti è minore dell numero previsto
     if (checkNumbers(this._workSdk)) {
-      // potrebbe aver aggiunto celle fisse dinamiche > aggiornare la mappa
+      // potrebbe aver aggiunto celle fisse dinamiche > rigenera la mappa
       resetSchemaMap(this._workSdk);
     }
     checkSchema(this._workSdk);
@@ -74,6 +75,7 @@ export class Generator {
       counter: this._counter,
       startedAt: this.generating
     }));
+    // verifica i valori
     if (this._cycles < this._workSdk.options.maxSchemaCycles && checkValues(this._workSdk)) {
       // console.log(...SDK_PREFIX, 'checked values schema', _clone(this._workSdk.cells));
       // console.log(...SDK_PREFIX, 'SCHEMA', getValues(this._workSdk));
@@ -88,7 +90,7 @@ export class Generator {
         });
         if (!!schema && this._isRightSolution(schema)) {
           this._facade.addSchema(schema);
-          this.schemas[`${schema._id||0}`] = schema;
+          this.schemas[`${schema._id || 0}`] = schema;
           this._counter = 0;
           this._cycles = 0;
         }
@@ -97,7 +99,7 @@ export class Generator {
       }
       // resetSchema(this._workSdk);
       // console.log(...SDK_PREFIX, 'resetted schema', _clone(this._workSdk.cells));
-    } else {
+    } else if (this._workSdk.options.valorizationMode !== EditSudokuValorizationMode.sequential) {
       resetSchema(this._workSdk);
       this._cycles = 0;
     }

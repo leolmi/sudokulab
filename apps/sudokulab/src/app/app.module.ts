@@ -161,9 +161,9 @@ import {OperationsBarComponent} from "./components/operations-bar/operations-bar
     { provide: OptionsFacade, useClass: OptionsContext },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
     { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
-    { provide: SudokulabPage, useClass: HelpManifest, multi: true },
     { provide: SudokulabPage, useClass: PrintManifest, multi: true },
-    { provide: SudokulabPage, useClass: OptionsManifest, multi: true }
+    { provide: SudokulabPage, useClass: OptionsManifest, multi: true },
+    { provide: SudokulabPage, useClass: HelpManifest, multi: true }
   ],
   bootstrap: [AppComponent],
 })
