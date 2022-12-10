@@ -124,6 +124,7 @@ const _addGroup = (es: EditSudoku, type: SudokuGroupType, pos: number) => {
 
 const _loadSudoku = (es: EditSudoku, esx?: Partial<EditSudoku>) => {
   es.fixed = [];
+  es.fixedMap = {};
   es.groups = {};
   es.cells = {};
   es.cellList = [];

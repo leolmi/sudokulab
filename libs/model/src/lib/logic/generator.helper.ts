@@ -1,457 +1,135 @@
 import {
-  applySudokuRules,
-  cellId,
-  decodeCellId,
-  EditSudoku,
-  EditSudokuCell,
-  EditSudokuEndGenerationMode,
-  EditSudokuGenerationMap,
-  EditSudokuOptions,
-  EditSudokuValorizationMode,
-  GenerationMapCellInfo,
-  Generator_old,
-  getAvailables,
-  getMinNumbers,
-  getValues,
-  isValue,
-  MessageType,
-  PlaySudoku,
-  PlaySudokuOptions,
-  resetAvailable,
-  SDK_PREFIX,
-  SolveAllResult,
-  Solver,
-  Sudoku,
-  SUDOKU_DYNAMIC_VALUE,
-  SUDOKU_EMPTY_VALUE,
-  SudokuMessage,
-  SudokuSymmetry,
-  traverseSchema
-} from '@sudokulab/model';
-import {
-  extend as _extend,
+  cloneDeep as _clone,
   findLastIndex as _findLastIndex,
-  forEach as _forEach,
   keys as _keys,
   random as _random,
   reduce as _reduce,
   remove as _remove
-} from 'lodash';
-import { combineLatest } from 'rxjs';
-import { use } from '../../global.helper';
-
-
-const _getSymmetryCells = (id: string|undefined, sdk: EditSudoku): EditSudokuCell[] => {
-  if (!id) return [];
-  const info = decodeCellId(id);
-  let other_ids: string[] = [];
-  const last = sdk.options.rank - 1;
-  switch (sdk.options.symmetry) {
-    case SudokuSymmetry.central:  //+1
-      other_ids = [cellId(last - info.col, last - info.row)];
-      break;
-    case SudokuSymmetry.diagonalNWSE:  //+1
-      other_ids = [cellId(info.row, info.col)];
-      break;
-    case SudokuSymmetry.diagonalNESW:  //+1
-      other_ids = [cellId(last - info.row, last - info.col)];
-      break;
-    case SudokuSymmetry.doubleDiagonal:  //+3
-      other_ids = [
-        cellId(last - info.col, last - info.row),
-        cellId(info.row, info.col),
-        cellId(last - info.row, last - info.col)]
-      break;
-    case SudokuSymmetry.horizontal:  //+1
-      other_ids = [cellId(last - info.col, info.row)];
-      break;
-    case SudokuSymmetry.vertical:  //+1
-      other_ids = [cellId(info.col, last - info.row)];
-      break;
-    case SudokuSymmetry.doubleMedian:  //+3
-      other_ids = [
-        cellId(last - info.col, last - info.row),
-        cellId(last - info.col, info.row),
-        cellId(info.col, last - info.row)]
-      break;
-    case SudokuSymmetry.none:  //+0
-    default:
-      break;
-  }
-  _remove(other_ids, cid => cid === id);
-  return <EditSudokuCell[]>(other_ids.map(oid => sdk.cells[oid]).filter(c => !!c));
-}
+} from "lodash";
+import {Dictionary} from "@ngrx/entity";
+import {EditSudoku, EditSudokuGenerationMap, GenerationMapCellInfo} from "../EditSudoku";
+import {SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE} from "../consts";
+import {EditSudokuCell} from "../EditSudokuCell";
+import {
+  applySudokuRules,
+  cellId,
+  decodeCellId,
+  getAvailables,
+  getRank,
+  getSolutionSudoku,
+  traverseSchema
+} from "../../sudoku.helper";
+import {EditSudokuEndGenerationMode, EditSudokuValorizationMode, SudokuSymmetry} from "../enums";
+import {SolveAllResult} from "./SolveAllResult";
+import {PlaySudokuOptions} from "../PlaySudokuOptions";
+import {Solver} from "./solver.logic";
+import {PlaySudoku} from "../PlaySudoku";
+import {isValue} from "../../global.helper";
+import {Sudoku} from "../Sudoku";
 
 /**
- * restituisce una cella a caso tra quelle vuote
+ * verifica la consistenza dello schema
  * @param sdk
  */
-const _randomEmptyCell = (sdk: EditSudoku): EditSudokuCell|undefined => {
-  const emptyCells = _keys(sdk.cells)
-    .filter(k => !sdk.cells[k]?.value);
-
-  const rnd_pos = _random(0, emptyCells.length - 1);
-
-  return sdk.cells[emptyCells[rnd_pos]];
-}
-
-/**
- * lo schema è processabile se il numero minimo di celle fisse è garantito e
- * se esiste almeno un valore fisso dinamico
- * @param sdk
- */
-export const solvable = (sdk: EditSudoku): boolean => {
-  return (sdk.options.fixedCount >= getMinNumbers(sdk.options?.rank) &&
-    (sdk.fixedCount < sdk.options.fixedCount || !!(sdk.cellList||[]).find(fcid => {
-      const cell = sdk.cells[fcid];
-      return !!cell && cell.fixed && cell.value === SUDOKU_DYNAMIC_VALUE;
-    })));
-}
-
-/**
- * Aggiunge le celle fisse (dinamiche ossia valorizzate con "x") allo schema
- * rispettando la simmetria specificata
- *
- * @param sdk
- */
-const _addFixed = (sdk: EditSudoku): boolean => {
-  // numero di celle fisse mancanti rispetto al numero obiettivo
-  // definito dall'utente
-  const availablesCount = sdk.options.fixedCount - sdk.fixedCount;
-  if (availablesCount <= 0) return false;
-  // prima cella disponibile casuale tra quelle non fisse
-  const first_cell = _randomEmptyCell(sdk);
-  let cells: EditSudokuCell[] = first_cell ? [first_cell] : [];
-  // aggiunge quelle necessarie secondo la simmetria scelta
-  cells = cells.concat(_getSymmetryCells(first_cell?.id, sdk));
-  // prende solo quelle che è possibile inserire senza superare
-  // il numero di celle fisse obiettivo definito dall'utente
-  const toaddcount = Math.min(cells.length, availablesCount);
-  for(let i=0; i<toaddcount; i++) {
-    const cell = cells[i];
-    if (!cell.value) cell.value = SUDOKU_DYNAMIC_VALUE;
-    sdk.checkFixedCell(cell);
-  }
-  if (sdk.fixed.length !== sdk.fixedCount) console.warn('Fixed count not coerent!', sdk);
-  return true;
-}
-
-/**
- * rileva, al termine di ogni ciclo lo stato di fine procedura
- * @param G
- * @param handler
- */
-export const isOnEnd = (G: Generator_old, handler: (ended: boolean) => any) =>
-  use(combineLatest(G.facade.selectGeneratorIsStopping$, G.facade.selectGeneratorIsRunning$), ([stopping, running]) => {
-    const stopped = stopping || !running;
-    if (stopped) return handler(true);
-    if (!solvable(G.sdk)) {
-      G.facade.raiseMessage(new SudokuMessage({
-        message: 'Not solvable schema!',
-        type: MessageType.warning
-      }));
-      return handler(true);
-    }
-    switch (G.sdk.options.generationEndMode) {
-      case EditSudokuEndGenerationMode.afterN:
-        return handler(stopped || _keys(G.schemas).length >= (G.sdk.options.generationEndValue || 1));
-      case EditSudokuEndGenerationMode.afterTime:
-        const elapsed = performance.now() - G.generating;
-        return handler(stopped || elapsed >= ((G.sdk.options.generationEndValue || 60) * 1000));
-      case EditSudokuEndGenerationMode.manual:
-      default:
-        return handler(stopped);
-    }
-  });
-
-
-export const loadSchema = (sdk: EditSudoku, sch: string) => {
-  const rank2 = (sch || '').length;
-  const rank = Math.sqrt(rank2);
-  if ([4, 9, 16].indexOf(rank) < 0) return console.warn('Cannot load schema!', sch);
-  const esdk = new EditSudoku({
-    originalSchema: sch,
-    options: new EditSudokuOptions({ ...sdk.options, rank })
-  });
-  esdk.cellList.forEach((cid, index) => {
-    const v = sch.charAt(index) || '';
-    const cell = esdk.cells[cid];
-    if (cell) {
-      cell.value = isValue(v, true) ? v : '';
-      esdk.checkFixedCell(cell);
-    }
-  });
-  _checkOriginalSchema(esdk);
-  _extend(sdk, esdk);
-  delete sdk.generationMap;
-}
-
-export const loadOriginalSchema = (sdk: EditSudoku) => loadSchema(sdk, sdk.originalSchema || '');
-
 const _checkSchema = (sdk: EditSudoku) => {
   sdk.fixed = _reduce(sdk.cells, (cll, c) => c?.fixed ? cll.concat(c?.id||'') : cll, <string[]>[]);
-}
-
-/**
- * Persiste lo schema originale
- * @param sdk
- */
-const _checkOriginalSchema = (sdk: EditSudoku) => {
   if (!sdk.originalSchema)
     sdk.originalSchema = sdk.cellList.map(cid => sdk.cells[cid]).map(c => c?.value||SUDOKU_EMPTY_VALUE).join('');
-}
-
-/**
- * Genera la mappa per la generazione se non è presente
- * @param sdk
- */
-const _checkGenerationMap = (sdk: EditSudoku, force = false) => {
-  if (!sdk.generationMap || force) sdk.generationMap = new EditSudokuGenerationMap(sdk);
-}
-
-const _checkAvailables = (sdk: EditSudoku) => {
-  _forEach(sdk.cells || {}, (c) => {
-    if (!!c) {
-      // viene popolata la collezione dei valori possibili se la cella non è
-      // una di quelle realmente fisse
-      c.availables = (c.fixed && !(sdk.generationMap?.cellsX||{})[c.id]) ? [] : getAvailables(sdk.options?.rank);
-    }
-  });
-}
-
-export const resetSchemaMap = (sdk: EditSudoku) => {
-  _checkGenerationMap(sdk, true);
 }
 
 /**
  * Inizializza lo schema
  * @param sdk
  */
-export const initSchema = (sdk: EditSudoku) => {
-  _checkSchema(sdk);
-  _checkOriginalSchema(sdk);
-  _checkGenerationMap(sdk);
-}
-
-export const checkSchema = (sdk: EditSudoku) => {
-  _checkAvailables(sdk);
+export const initSchema = (sdk: EditSudoku): EditSudoku => {
+  const csdk = _clone(sdk);
+  _checkSchema(csdk);
+  return csdk;
 }
 
 /**
- * Resetta i valori dinamici dello schema
- * @param sdk
+ * aggiunge i valori fissi mancanti (non valorizza i dinamici)
+ * @param info
  */
-export const resetSchema = (sdk: EditSudoku, alsoIndex = false) => {
-  loadOriginalSchema(sdk);
-}
-
-/**
- * aggiunge nuovi fixed se il numero di quelli inseriti è minore dell numero previsto
- *  - rispetta la simmetria se specificata
- * @private
- */
-export const checkNumbers = (sdk: EditSudoku): boolean => {
-  let added = false;
-  while (sdk.fixedCount < sdk.options.fixedCount) {
-    if (_addFixed(sdk)) added = true;
-  }
-  return added;
-}
-
-/**
- * Resetta lo stato delle x-celle con indice maggiore uguale a quello passato
- * @param sdk
- * @param startIndex
- */
-const resetCellsX = (sdk: EditSudoku, startIndex = 0) => {
-  const fxcells = (sdk.generationMap?.fixedCells || []);
-  fxcells.forEach((fc, index) => {
-    if (fc.isValueX && index >= startIndex) {
-      const cell = sdk.cells[fc.id];
-      if (cell) {
-        cell.value = SUDOKU_DYNAMIC_VALUE;
-        fc.index = -1;
+export const fillSchema = (info: GeneratorInfo): void => {
+  if (info.monoCycle) return;
+  while (!info.isFixedComplete()) {
+    // adds fixed numbers
+    const first_cell = info.getRandomEmptyCell();
+    const availableCount = info.getDeltaFixed();
+    if (!first_cell) {
+      info.stopped = true;
+    } else {
+      let cells: EditSudokuCell[] = first_cell ? [first_cell] : [];
+      // aggiunge quelle necessarie secondo la simmetria scelta
+      cells = cells.concat(info.getSymmetricalCells(first_cell.id));
+      // prende solo quelle che è possibile inserire senza superare
+      // il numero di celle fisse obiettivo definito dall'utente
+      const toAddCount = Math.min(cells.length, availableCount);
+      for (let i = 0; i < toAddCount; i++) {
+        const cell = cells[i];
+        if (!cell.value) cell.value = SUDOKU_DYNAMIC_VALUE;
+        info.checkFixedCell(cell);
       }
     }
-  });
-  applySudokuRules(sdk, { allNotValue: true });
-}
-
-const hasNoValorizations = (sdk: EditSudoku): boolean => {
-  switch (sdk.options.valorizationMode) {
-    case EditSudokuValorizationMode.random:
-      const valorization = getValues(sdk);
-      return !!sdk.valorizations[valorization];
-    case EditSudokuValorizationMode.sequential:
-    default:
-      return !(sdk.generationMap?.fixedCells || []).find(c => c.isValueX && c.index < ((sdk.cells[c.id]?.availables||[]).length - 1));
   }
 }
 
-const isFirstValorization = (xcells: GenerationMapCellInfo[]): boolean => {
-  // ricerca la prima x-cella che ha già subito una valorizzazione
-  const vc = xcells.find(c => c.index >= 0);
-  console.log('Just value on x-cell:', vc);
-  return !vc;
+/**
+ * FInalizza lo schema
+ * @param info
+ */
+const finalizeSchema = (info: GeneratorInfo): void => {
+  if (info.schema && !info.schema.generationMap)
+    info.schema.generationMap = new EditSudokuGenerationMap(info.schema);
 }
 
 /**
- * Restituisce l'indice dell'ultima cella dove sia possibile aumentare l'indice del valore possibile
- * e resetta tutte quelle di indice maggiore
- * @param sdk
+ * Valorizza i valori fissi dinamici secondo le regole del sudoku
+ * @param info
  */
-const findLastIncrementableIndex = (sdk: EditSudoku): number => {
-  const fxcells = (sdk.generationMap?.fixedCells || []);
+export const valorise = (info: GeneratorInfo): void => {
 
-  // TODO: sdk.cells[c.id]?.availables||[] ha sempre tutti i valori possibili!!!
+  // applica le regole del sudoku
+  applySudokuRules(info.schema, { onlyRealFixed: true });
 
-  const index = _findLastIndex(fxcells, c => c.isValueX && c.index < (sdk.cells[c.id]?.availables||[]).length - 1);
-  // se trova l'indice resetta (cancella il valore ed aggiorna gli available)
-  // tutte le celle con indice superiore a quella trovata
-  if (index > -1) resetCellsX(sdk, index + 1);
-  return index;
-}
-
-/**
- * avanza il valore per la cella
- * @param sdk
- * @param xcell
- */
-const upgradeXCell = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
-  const cell = sdk.cells[xcell.id];
-  switch (sdk.options.valorizationMode) {
-    case EditSudokuValorizationMode.sequential:
-      xcell.index++;
-      break;
+  // valorizza le celle dinamiche secondo la modalità definita
+  switch(info.original.options.valorizationMode) {
     case EditSudokuValorizationMode.random:
-      xcell.index = _random(0, (cell?.availables || []).length - 1);
-      break;
-  }
-  if (!!cell) cell.value = cell.availables[xcell.index];
-  // aggiorna gli availables per ogni cella
-  applySudokuRules(sdk);
-}
-
-/**
- * valorizzazione sequenziale dei fixed dinamici (valorizzati con "x")
- * @param sdk
- */
-export const checkValues = (sdk: EditSudoku): boolean => {
-  // se non contiene celle fisse dinamiche esce
-  let values: string = '';
-  const fxcells = (sdk.generationMap?.fixedCells || []);
-  const xcells = fxcells.filter(c => c.isValueX);
-  const xcells_count = fxcells.filter(c => c.isValueX).length;
-  if (xcells_count <= 0) return true;
-
-  // la prima valorizzazione inserisce per ogni cella il primo valore disponibile
-  if (isFirstValorization(xcells)) {
-    // resetta tutti gli available per le celle non realmente fixed
-    applySudokuRules(sdk, { onlyRealFixed: true });
-    console.log('FIRST VALORIZATION [1] FOR ', getFixedValues(sdk, true));
-    // assegna i valori alle celle dimaniche
-    // ogni valorizzazione aggiorna gli available per le celle non valorizzate
-    xcells.forEach(xc => upgradeXCell(sdk, xc));
-    console.log('FIRST VALORIZATION [2] FOR ', getFixedValues(sdk));
-  } else if (hasNoValorizations(sdk)) {
-    console.log('NO VALORIZATIONS FOR ', getFixedValues(sdk));
-    return false;
-  } else {
-    console.log('OTHER VALORIZATION [1] FOR ', getFixedValues(sdk, true));
-    values = getValues(sdk);
-    sdk.valorizations[values] = true;
-    switch (sdk.options.valorizationMode) {
-      case EditSudokuValorizationMode.sequential:
-        // ricerca l'indice dell'ultima cella dove sia possibile aggiornare il valore'
-        let index = findLastIncrementableIndex(sdk);
-        if (index < 0) return false;
-        upgradeXCell(sdk, xcells[index]);
-        for (let i = index + 1; i < xcells_count; i++) {
-          xcells[i].index = 0;
-          setXCellValue(sdk, xcells[i]);
-          applySudokuRules(sdk);
+      _keys(info.schema?.generationMap?.cellsX||{}).forEach((cid) => {
+        const cell = info.schema?.cells[cid];
+        if (cell) {
+          const vindex = _random(0, (cell.availables || []).length - 1);
+          cell.value = cell.availables[vindex];
+          applySudokuRules(info.schema);
         }
-        // if (!setXSchemaValues(sdk, index)) return false;
-        // // 3 - arrivato all'index valore prova a incrementarlo di 1 se può altrimenti lo svuota e torna al precedente (index = index - 1) e riprova
-        // console.log(`Aggiorna le celle da index=${index} in su (${xcells_count})`);
-        // for (let i = index; i < xcells_count; i++) {
-        //   upgradeXCell(sdk, xcells[i])
-        // }
-        console.log('OTHER VALORIZATION [2] FOR ', getFixedValues(sdk));
-        break;
-      case EditSudokuValorizationMode.random:
-        xcells.forEach(xc => upgradeXCell(sdk, xc));
-        break;
-    }
+      });
+      break;
+    case EditSudokuValorizationMode.sequential:
+      info.fromLastIncrementableIndex((xcell, cell) => {
+        xcell.index++;
+        cell.value = cell.availables[xcell.index];
+        // console.log('XCELL VALORIZATION xcell:', xcell, '\n\tCELL:', cell);
+        applySudokuRules(info.schema);
+        // console.log('AFTER VALORIZATION AND APPLY SUDOKU RULES:', _clone(info.schema));
+      });
+      break;
   }
-
-  values = getValues(sdk);
-  let invalidValues = !!xcells.find(c => !isValue(sdk.cells[c.id]?.value || ''));
-  if (invalidValues) console.warn(...SDK_PREFIX, 'Invalid values', values);
-  // ricerca la prima cella non fissa senza valori possibili
-  const errorcell = sdk.cellList.map(cid => sdk.cells[cid]).find(c => !c?.fixed && (c?.availables || []).length <= 0);
-  if (!!errorcell) invalidValues = true;
-  return !invalidValues;
-}
-
-// const forEachIndexXCells = (sdk: EditSudoku, index: number, handler: (c: EditSudokuCell|undefined, x: GenerationMapCellInfo, i: number) => any) => {
-//   const xcells = (sdk.generationMap?.fixedCellsX || []);
-//   const xcells_count = xcells.length;
-//   for (let i = index; i < xcells_count; i++) {
-//     const xcell = xcells[i];
-//     handler((sdk.cells || {})[xcell?.id || ''], xcell, i);
-//   }
-// }
-
-const setXCellValue = (sdk: EditSudoku, xcell: GenerationMapCellInfo) => {
-  const cell = sdk.cells[xcell.id];
-  if (cell) cell.value = cell.availables[xcell.index] || '';
 }
 
 /**
- * Annulla tutti i valori nelle X-Celle
- * @param sdk
+ * Riosolve lo schema corrente
+ * @param info
  */
-const resetXSchema = (sdk: EditSudoku) => {
-  (sdk.generationMap?.fixedCells || []).forEach(xc => xc.isValueX ?
-    ((sdk.cells || {})[xc?.id || ''] || <any>{}).value = '' : null);
-  applySudokuRules(sdk);
+export const resolve = (info: GeneratorInfo): SolveAllResult => {
+  const sudoku = info.getSudoku();
+  const options = new PlaySudokuOptions({
+    maxSplitSchema: info.original.options.maxSplitSchema || 500,
+    excludeTryAlgorithm: info.original.options.excludeTryAlgorithm
+  });
+  const solver = new Solver(new PlaySudoku({ sudoku, options }));
+  return solver.solve();
 }
-
-/**
- * Valorizza le prime index X-Celle applicando le regole del sudoku
- * @param sdk
- * @param index
- */
-const setXSchemaValues = (sdk: EditSudoku, index: number): boolean => {
-  const fxcells = (sdk.generationMap?.fixedCells || []);
-  for (let i = 0; i < index; i++) {
-    const xcell = fxcells[i];
-    if (xcell.isValueX) {
-      const cell = sdk.cells[xcell.id];
-      if (cell) cell.value = cell.availables[xcell.index];
-      if (!cell?.value) return false;
-      applySudokuRules(sdk);
-    }
-  }
-  return true;
-}
-
-// /**
-//  *
-//  * @param sdk
-//  * @param index
-//  */
-// const setValues = (sdk: EditSudoku, index: number): boolean => {
-//   let done = false;
-//   do {
-//     if (!done) {
-//       done = setXSchemaValues(sdk, index);
-//       if (!done) index = index - 1;
-//     }
-//   } while (index>=0 && !done);
-//   return done;
-// }
 
 const getFixedValues = (sdk: EditSudoku, allowX = false): string => {
   let fixed = '';
@@ -471,19 +149,328 @@ export const getSudoku = (sdk: EditSudoku): Sudoku => {
   });
 }
 
+
+
 /**
- * risolve lo schema > se unica salva schema altrimenti skippa
- * @param sdk
+ * COntesto del generatore di schemi
  */
-export const solveSchema = (sdk: EditSudoku): SolveAllResult => {
-  const sudoku = getSudoku(sdk);
-  const options = new PlaySudokuOptions({
-    maxSplitSchema: sdk.options.maxSplitSchema || 500,
-    excludeTryAlgorithm: sdk.options.excludeTryAlgorithm
-  });
-  const solver = new Solver(new PlaySudoku({ sudoku, options }));
-  return solver.solve();
+export class GeneratorInfo {
+  constructor(private sdk: EditSudoku) {
+    this.startedAt = Date.now();
+    this.schemas = {};
+    this.schemaCycles = 0;
+    this.valueCycles = 0;
+    this.original = _clone(sdk);
+    this.fixed = [];
+    this.fixedMap = {};
+    this.deltaNumbers = 0;
+    this.minDiff = Math.min(this.original.options.minDiff, this.original.options.maxDiff);
+    this.maxDiff = Math.max(this.original.options.minDiff, this.original.options.maxDiff);
+    this._parseSchema();
+  }
+  // Schema template
+  original: EditSudoku;
+  // cache degli schemi generati
+  schemas: Dictionary<Sudoku>;
+  // elenco degli identificativi delle celle con valori fissati (non ci sono le dinamiche)
+  fixed: string[];
+  fixedMap: Dictionary<boolean>;
+  // numeri di numeri utili per raggiungere la quota richiesta
+  deltaNumbers: number;
+  // cicli di schemi
+  schemaCycles: number;
+  // cicli di valorizzazione
+  valueCycles: number;
+  // il monociclico si verifica quando _numbers è >= EditSudokuOptions.fixedCount
+  // quindi quando lo schema non cambia
+  monoCycle = false;
+  // valore minino richiesto della difficolta
+  minDiff: number;
+  // valore massimo richiesto della difficolta
+  maxDiff: number;
+  // ferma la generazione
+  stopped = false;
+  // contatore dei cicli totali
+  cycles = 0;
+  // contatore degli schemi generati
+  counter = 0;
+  // data-ora di avvio
+  startedAt: number;
+
+  schema?: EditSudoku;
+
+  checkFixedCell(cell: EditSudokuCell) {
+    this.schema?.checkFixedCell(cell);
+    if (isValue(cell?.value, true)) {
+      if (!this.fixedMap[cell.id]) {
+        this.fixedMap[cell?.id || ''] = true;
+        this.fixed.push(cell?.id || '');
+      }
+    }
+  }
+
+  private _parseSchema() {
+    this.original.cellList.forEach(cid => {
+      const cell = this.original.cells[cid];
+      if (isValue(cell?.value, true)) {
+        this.fixed.push(cell?.id||'');
+        this.fixedMap[cell?.id||''] = true;
+      }
+    });
+    const numbers = this.fixed.length;
+    this.monoCycle = numbers >= this.original.options.fixedCount;
+    this.deltaNumbers = this.monoCycle ? this.original.options.fixedCount - numbers : 0;
+  }
+
+  getFixedAndXCells(sdk?: EditSudoku): EditSudokuCell[] {
+    sdk = sdk || this.schema;
+    const cells: EditSudokuCell[] = [];
+    traverseSchema(sdk, (cid, cell) =>
+      (cell?.fixed || cell?.value === SUDOKU_DYNAMIC_VALUE) ? cells.push(cell) : null);
+    return cells;
+  }
+
+  /**
+   * Vero quando il numero di valori fissi (fissi+dinamici) raggiunge
+   * quello impostato
+   */
+  isFixedComplete(): boolean {
+    const rank = getRank(this.original);
+    const count = this.original.options.fixedCount;
+    const fax = this.getFixedAndXCells();
+    return this.stopped || !this.schema || count <= 0 || count > (rank * rank) || fax.length >= count;
+  }
+
+  private _isEnded(): boolean {
+    // ha raggiunto lo scopo della generazione
+    switch (this.original.options.generationEndMode) {
+      case EditSudokuEndGenerationMode.afterN:
+        if (this.counter >= (this.original.options.generationEndValue || 1)) return true;
+        break;
+      case EditSudokuEndGenerationMode.afterTime:
+        const elapsed = performance.now() - this.startedAt;
+        if (elapsed >= ((this.original.options.generationEndValue || 60) * 1000)) return true;
+        break;
+    }
+    // ha superato i cicli per schema
+    if (this.schemaCycles >= this.original.options.maxSchemaCycles) return true;
+    // è stato stoppato
+    if (this.stopped) return true;
+
+    return false;
+  }
+
+  /**
+   * Ritorna vero se lo schema può essere valorizzato
+   */
+  canBeValorised(): boolean {
+    // non deve aver raggiunto lo scopo della generazione
+    if (this._isEnded()) return false;
+    // deve avere numeri fissi dinamici
+    if (this.fixed.length >= this.original.options.fixedCount) return false;
+    // deve avere possibilità di valorizzazione secondo la generationMap
+    switch (this.original.options.valorizationMode) {
+      case EditSudokuValorizationMode.sequential:
+        return !!(this.schema?.generationMap?.fixedCells||[]).find(c => c.isValueX && c.index < (((this.schema?.cells||{})[c.id]?.availables||[]).length - 1));
+      case EditSudokuValorizationMode.random:
+        // non deve avere raggiunto il limite dei cicli di valorizzazione
+        if (this.valueCycles >= this.original.options.maxValueCycles) return false;
+
+        // TODO: termine della valorizzazione casuale sulla ripetizione di schemi già fatti
+
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Ritorna vero se lo schema può essere ciclato
+   */
+  canBeCycled(): boolean {
+    // non deve aver raggiunto lo scopo della generazione
+    if (this._isEnded()) return false;
+    // l'originale deve avere un numero di (valori fissi + dinamici) inferiore all'opzione original.options.fixedCount
+    const fax = this.getFixedAndXCells(this.original);
+    return fax.length < this.original.options.fixedCount;
+  }
+
+  /**
+   * Inizializza un nuovo ciclo
+   */
+  newCycle() {
+    this.schemaCycles++;
+    this.valueCycles = 0;
+    // inizializza lo schema di lavoro
+    this.schema = initSchema(this.original);
+    // aggiunge i valori mancanti (come celle dinamiche)
+    fillSchema(this);
+    // finalizza la costruzione dello schema
+    finalizeSchema(this);
+  }
+
+  /**
+   * Resituisce la stringa con i valori fissi (anche le celle dinamiche devono essere fisse)
+   */
+  getSchemaFixedValues() {
+    let fixed = '';
+    traverseSchema(this.schema, (cid, cell) =>
+      fixed = `${fixed}${this.fixedMap[cell?.id || ''] ? cell?.value||'' : SUDOKU_EMPTY_VALUE}`);
+    return fixed;
+  }
+
+  /**
+   * Restituisce il numero di celle fisse necessarie per arrivare
+   * al numero di valori richiesto
+   */
+  getDeltaFixed(): number {
+    const fixedCount = this.getFixedAndXCells().length;
+    if (this.original.options.fixedCount > fixedCount) return this.original.options.fixedCount - fixedCount;
+    return 0;
+  }
+
+  /**
+   * restituisce una cella a caso tra quelle vuote
+   */
+  getRandomEmptyCell(): EditSudokuCell|undefined {
+    const cells = this.schema?.cells||{};
+    const emptyCells = _keys(cells).filter(k => !cells[k]?.value);
+    const rnd_pos = _random(0, emptyCells.length - 1);
+    return cells[emptyCells[rnd_pos]];
+  }
+
+  /**
+   * Restituisce le celle simmetriche rispetto a quella passata
+   * secondo le impostazioni utente
+   * @param cid
+   */
+  getSymmetricalCells(cid: string): EditSudokuCell[] {
+    if (!cid) return [];
+    const cells = this.schema?.cells||{};
+    const info = decodeCellId(cid);
+    let other_ids: string[] = [];
+    const last = this.original.options.rank - 1;
+    switch (this.original.options.symmetry) {
+      case SudokuSymmetry.central:  //+1
+        other_ids = [cellId(last - info.col, last - info.row)];
+        break;
+      case SudokuSymmetry.diagonalNWSE:  //+1
+        other_ids = [cellId(info.row, info.col)];
+        break;
+      case SudokuSymmetry.diagonalNESW:  //+1
+        other_ids = [cellId(last - info.row, last - info.col)];
+        break;
+      case SudokuSymmetry.doubleDiagonal:  //+3
+        other_ids = [
+          cellId(last - info.col, last - info.row),
+          cellId(info.row, info.col),
+          cellId(last - info.row, last - info.col)]
+        break;
+      case SudokuSymmetry.horizontal:  //+1
+        other_ids = [cellId(last - info.col, info.row)];
+        break;
+      case SudokuSymmetry.vertical:  //+1
+        other_ids = [cellId(info.col, last - info.row)];
+        break;
+      case SudokuSymmetry.doubleMedian:  //+3
+        other_ids = [
+          cellId(last - info.col, last - info.row),
+          cellId(last - info.col, info.row),
+          cellId(info.col, last - info.row)]
+        break;
+      case SudokuSymmetry.none:  //+0
+      default:
+        break;
+    }
+    _remove(other_ids, oid => oid === cid);
+    return <EditSudokuCell[]>(other_ids.map(oid => cells[oid]).filter(c => !!c));
+  }
+
+  /**
+   * Restituisce lo schema per il solver
+   */
+  getSudoku() {
+    return new Sudoku({
+      rank: this.original.options.rank,
+      fixed: this.getSchemaFixedValues()
+    });
+  }
+
+  /**
+   * Restituisce lo schema dalla soluzione
+   * @param result
+   */
+  getSolutionSudoku(result: SolveAllResult): Sudoku|undefined {
+    return getSolutionSudoku(result?.unique, {
+      sudokulab: true,
+      symmetry: this.original.options.symmetry
+    });
+  }
+
+  /**
+   * Verifica lo schema risultato del solver
+   * @param schema
+   */
+  isARightSolution(schema?: Sudoku): boolean {
+    if (!schema) return false;
+    if (!!this.schemas[`${schema?._id||0}`]) return false;
+    if (!schema?.info) return false;
+    // verifica l'utilizzo del try-algorithm
+    if (this.original.options.excludeTryAlgorithm && schema.info.useTryAlgorithm) return false;
+    // verifica del livello di difficoltà
+    if (schema.info.difficultyValue > this.maxDiff || schema.info.difficultyValue < this.minDiff) return false;
+    return true;
+  }
+
+  /**
+   * Aggiunge la soluzione alla cache
+   * @param sol
+   */
+  addSchema(sol: Sudoku) {
+    this.schemas[`${sol._id || 0}`] = sol;
+    this.counter++;
+  }
+
+  /**
+   * Cicla dall'ultima cella dove sia possibile aumentare l'indice del valore possibile
+   */
+  fromLastIncrementableIndex(handler: (xCell: GenerationMapCellInfo, cell: EditSudokuCell) => any) {
+    const fxCells = (this.schema?.generationMap?.fixedCells || []);
+    const xCells = fxCells.filter(c => c.isValueX);
+    let index: number;
+    const vc = xCells.find(c => c.index >= 0);
+    if (!vc) {
+      // console.log('FIRST VALORIZATION ');
+      index = 0;
+    } else {
+      index = _findLastIndex(xCells, c => c.index < (this.schema?.cells[c.id]?.availables || []).length - 1);
+      const xCell = xCells[index];
+      const cell = this.schema?.cells[xCell.id]||{};
+      // console.log('FIND LAST INDEX = ', index, '\n\rXCELL', xCells[index], '\n\rCELL', cell);
+      if (index > -1) {
+        const rank = getRank(this.schema);
+        // resetta tutte le x-celle dopo l'indice
+        if (index < xCells.length - 1) {
+          for (let i = index + 1; i < xCells.length; i++) {
+            const xCell = xCells[i];
+            const cell = this.schema?.cells[xCell.id];
+            if (cell) {
+              cell.value = SUDOKU_DYNAMIC_VALUE;
+              cell.availables = getAvailables(rank);
+              xCell.index = -1;
+            }
+          }
+        }
+        // applica le regole del sudoku per ripristinare
+        // i valori ammissibili nelle x-celle resettate
+        applySudokuRules(this.schema);
+      }
+    }
+    // effettua il ciclo
+    for (let i = index; i < xCells.length; i++) {
+      const xCell = xCells[i];
+      const cell = this.schema?.cells[xCell.id];
+      if (cell) handler(xCell, cell);
+    }
+  }
 }
-
-
-

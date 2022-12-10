@@ -9,7 +9,7 @@ import * as GeneratorSelectors from '../selectors';
 import {
   applySudokuRules,
   cellId,
-  checkNumbers,
+  fillSchemaNumbers,
   EditSudoku,
   EditSudokuOptions,
   geEditFixedCount,
@@ -17,7 +17,8 @@ import {
   GeneratorFacade,
   getSchemaName,
   getValues,
-  isValidGeneratorValue, isValue,
+  isValidGeneratorValue,
+  isValue,
   moveOnDirection,
   saveUserSetting,
   Sudoku,
@@ -27,6 +28,7 @@ import {
 import { cloneDeep as _clone, forEach as _forEach } from 'lodash';
 import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+
 
 @Injectable()
 export class GeneratorEffects {
@@ -114,7 +116,7 @@ export class GeneratorEffects {
     withLatestFrom(
       this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
     map(([a, sch]) => {
-      const generator = new Generator(sch, this._generator);
+      const generator = new Generator(new EditSudoku(sch), this._generator);
       generator.generate();
     })
   ), { dispatch: false });
@@ -196,7 +198,7 @@ export class GeneratorEffects {
     withLatestFrom(this._store.select(GeneratorSelectors.selectActiveGeneratorSchema)),
     switchMap(([a, schema]) => {
       const changes: EditSudoku = <EditSudoku>_clone(schema);
-      checkNumbers(changes);
+      fillSchemaNumbers(changes);
       return [GeneratorActions.updateGeneratorSchema({ changes })];
     })
   ));

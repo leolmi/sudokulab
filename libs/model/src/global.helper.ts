@@ -129,7 +129,7 @@ export const debug = (handler: () => any): void => isDebugMode() ? handler() : n
 
 export const isValue = (v?: string, acceptX = false): boolean => {
   const effv = (v || '').trim();
-  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || v !== SUDOKU_DYNAMIC_VALUE);
+  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || effv !== SUDOKU_DYNAMIC_VALUE);
 }
 
 export const calcFixedCount = (fixed?: string): number =>

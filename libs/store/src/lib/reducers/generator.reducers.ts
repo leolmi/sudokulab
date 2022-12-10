@@ -1,5 +1,5 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { EditSudoku, getUserSetting, loadSchema, Sudoku, update, WorkingInfo } from '@sudokulab/model';
+import { EditSudoku, getUserSetting, Sudoku, update, WorkingInfo } from '@sudokulab/model';
 import * as GeneratorActions from '../actions';
 import { cloneDeep as _clone } from 'lodash';
 
