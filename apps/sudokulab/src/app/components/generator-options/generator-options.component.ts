@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
+import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {Observable} from 'rxjs';
 import {
   DIFFICULTY_RANGES,
   EditSudoku,
@@ -16,10 +16,10 @@ import {
   update,
   use
 } from '@sudokulab/model';
-import { map, takeUntil } from 'rxjs/operators';
-import { has as _has, keys as _keys } from 'lodash';
-import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
-import { ItemInfo } from '../../model';
+import {map, takeUntil} from 'rxjs/operators';
+import {has as _has, keys as _keys} from 'lodash';
+import {GeneratorBaseComponent} from '../GeneratorBaseComponent';
+import {ItemInfo} from '../../model';
 
 @Component({
   selector: 'sudokulab-generator-options',
@@ -39,6 +39,7 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
   availableValorizationModes: ItemInfo[];
   options$: Observable<EditSudokuOptions>;
   editSudoku$: Observable<EditSudoku|undefined>;
+  stopModeCOuntLabel$: Observable<string>;
 
   constructor(private _generator: GeneratorFacade,
               _sudoku: SudokuFacade) {
@@ -46,6 +47,8 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
 
     this.editSudoku$ = _generator.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
     this.isStopModeCount$ = this.editSudoku$.pipe(map(es => hasEndGenerationValue(es?.options)));
+    this.stopModeCOuntLabel$ = this.editSudoku$.pipe(map(es =>
+      es?.options.generationEndMode === EditSudokuEndGenerationMode.afterTime ? 'Seconds' : 'Builded schemas'));
     this.minNumbers$ = this.editSudoku$.pipe(map(es => getMinNumbers(es?.options?.rank)));
     this.maxNumbers$ = this.editSudoku$.pipe(map(es => getMaxNumbers(es?.options?.rank)));
     this.hasXValues$ = this.editSudoku$.pipe(map(es => hasXValues(es)));

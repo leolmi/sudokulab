@@ -17,6 +17,7 @@ import {
   getAvailables,
   getRank,
   getSolutionSudoku,
+  getValues,
   traverseSchema
 } from "../../sudoku.helper";
 import {EditSudokuEndGenerationMode, EditSudokuValorizationMode, SudokuSymmetry} from "../enums";
@@ -256,8 +257,8 @@ export class GeneratorInfo {
         if (this.counter >= (this.original.options.generationEndValue || 1)) return true;
         break;
       case EditSudokuEndGenerationMode.afterTime:
-        const elapsed = performance.now() - this.startedAt;
-        if (elapsed >= ((this.original.options.generationEndValue || 60) * 1000)) return true;
+        const elapsed = Date.now() - this.startedAt;
+        if (elapsed >= ((this.original.options.generationEndValue || 600) * 1000)) return true;
         break;
     }
     // ha superato i cicli per schema
@@ -316,8 +317,7 @@ export class GeneratorInfo {
     // finalizza la costruzione dello schema
     finalizeSchema(this);
     // log schemacreato
-    const sudoku = getSudoku(this.schema);
-    console.log('NEW SCHEMA >>>> ', sudoku?.fixed);
+    console.log('NEW SCHEMA >>>> ', getValues(this.schema));
   }
 
   /**

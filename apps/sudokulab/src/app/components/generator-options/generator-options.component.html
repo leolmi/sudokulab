@@ -1,3 +1,4 @@
+<script src="generator-options.component.ts"></script>
 <div class="schemalab-tool options-tool compact-size-600" fxLayout="column">
   <!-- DIMESION -->
   <mat-form-field appearance="fill">
@@ -94,7 +95,7 @@
     <div class="space" *ngIf="(isStopModeCount$|async)"></div>
     <!-- NUMBER OF STOP SCHEMA -->
     <mat-form-field appearance="fill" *ngIf="(isStopModeCount$|async)" fxFlex>
-      <mat-label>Builded schemas</mat-label>
+      <mat-label>{{stopModeCOuntLabel$|async}}</mat-label>
       <input matInput
              type="number"
              [disabled]="running$|async"
