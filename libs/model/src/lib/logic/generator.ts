@@ -28,7 +28,7 @@ export class Generator {
     valorise(this._info);
     // imposta lo schema da risolvere
     const sudoku = this._info.schema ? getSudoku(this._info.schema) : undefined;
-    this._facade.setWorkingInfo(new WorkingInfo({sudoku, counter: this._info.cycles, startedAt: this._info.startedAt}));
+    this._facade.setWorkingInfo(new WorkingInfo({sudoku, counter: this._info.valueCycles, startedAt: this._info.startedAt}));
     // prova a risolverlo
     const result = resolve(this._info);
     // se lo ha risolto...
@@ -52,8 +52,7 @@ export class Generator {
 
     // 1. valorizza lo schema se richiede valorizzazione e tenta di risolverlo
     this._valoriseAndResolve();
-    this._info.valueCycles++;
-    this._info.cycles++;
+
     use(combineLatest([this._facade.selectGeneratorIsStopping$, this._facade.selectGeneratorIsRunning$]),
       ([stopping, running]) => {
         this._info.stopped = stopping || !running;

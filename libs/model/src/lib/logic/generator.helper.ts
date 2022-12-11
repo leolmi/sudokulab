@@ -48,7 +48,7 @@ export const initSchema = (sdk: EditSudoku): EditSudoku => {
 }
 
 /**
- * aggiunge i valori fissi mancanti (non valorizza i dinamici)
+ * aggiunge i valori dinamici mancanti
  * @param info
  */
 export const fillSchema = (info: GeneratorInfo): void => {
@@ -89,6 +89,9 @@ const finalizeSchema = (info: GeneratorInfo): void => {
  * @param info
  */
 export const valorise = (info: GeneratorInfo): void => {
+
+  info.valueCycles++;
+  info.cycles++;
 
   // applica le regole del sudoku
   applySudokuRules(info.schema, { onlyRealFixed: true });
@@ -161,8 +164,10 @@ export class GeneratorInfo {
     this.schemaCycles = 0;
     this.valueCycles = 0;
     this.original = _clone(sdk);
+    this.originalFixed = 0;
     this.fixed = [];
     this.fixedMap = {};
+    this.dynamicMap = {};
     this.deltaNumbers = 0;
     this.minDiff = Math.min(this.original.options.minDiff, this.original.options.maxDiff);
     this.maxDiff = Math.max(this.original.options.minDiff, this.original.options.maxDiff);
@@ -170,11 +175,14 @@ export class GeneratorInfo {
   }
   // Schema template
   original: EditSudoku;
+  // numero di valori fissi originali
+  originalFixed: number;
   // cache degli schemi generati
   schemas: Dictionary<Sudoku>;
   // elenco degli identificativi delle celle con valori fissati (non ci sono le dinamiche)
   fixed: string[];
   fixedMap: Dictionary<boolean>;
+  dynamicMap: Dictionary<boolean>;
   // numeri di numeri utili per raggiungere la quota richiesta
   deltaNumbers: number;
   // cicli di schemi
@@ -199,27 +207,27 @@ export class GeneratorInfo {
 
   schema?: EditSudoku;
 
-  checkFixedCell(cell: EditSudokuCell) {
-    this.schema?.checkFixedCell(cell);
-    if (isValue(cell?.value, true)) {
+  private _checkSchemaCell(cell?: EditSudokuCell) {
+    if (!cell) return;
+    if (isValue(cell.value, true)) {
       if (!this.fixedMap[cell.id]) {
         this.fixedMap[cell?.id || ''] = true;
         this.fixed.push(cell?.id || '');
+        if (cell.value === SUDOKU_DYNAMIC_VALUE) this.dynamicMap[cell?.id || ''] = true;
       }
     }
   }
 
   private _parseSchema() {
-    this.original.cellList.forEach(cid => {
-      const cell = this.original.cells[cid];
-      if (isValue(cell?.value, true)) {
-        this.fixed.push(cell?.id||'');
-        this.fixedMap[cell?.id||''] = true;
-      }
-    });
-    const numbers = this.fixed.length;
-    this.monoCycle = numbers >= this.original.options.fixedCount;
-    this.deltaNumbers = this.monoCycle ? this.original.options.fixedCount - numbers : 0;
+    this.original.cellList.forEach(cid => this._checkSchemaCell(this.original.cells[cid]));
+    this.originalFixed = this.fixed.length;
+    this.monoCycle = this.originalFixed >= this.original.options.fixedCount;
+    this.deltaNumbers = this.monoCycle ? this.original.options.fixedCount - this.originalFixed : 0;
+  }
+
+  checkFixedCell(cell: EditSudokuCell) {
+    this.schema?.checkFixedCell(cell);
+    this._checkSchemaCell(cell);
   }
 
   getFixedAndXCells(sdk?: EditSudoku): EditSudokuCell[] {
@@ -267,7 +275,7 @@ export class GeneratorInfo {
     // non deve aver raggiunto lo scopo della generazione
     if (this._isEnded()) return false;
     // deve avere numeri fissi dinamici
-    if (this.fixed.length >= this.original.options.fixedCount) return false;
+    if (this.monoCycle) return false;
     // deve avere possibilità di valorizzazione secondo la generationMap
     switch (this.original.options.valorizationMode) {
       case EditSudokuValorizationMode.sequential:
@@ -307,6 +315,9 @@ export class GeneratorInfo {
     fillSchema(this);
     // finalizza la costruzione dello schema
     finalizeSchema(this);
+    // log schemacreato
+    const sudoku = getSudoku(this.schema);
+    console.log('NEW SCHEMA >>>> ', sudoku?.fixed);
   }
 
   /**

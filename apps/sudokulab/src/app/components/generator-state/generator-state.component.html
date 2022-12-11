@@ -16,6 +16,7 @@
 <!--                         (click)="openInLab(sdk)"></sudokulab-thumbnail>-->
     <sudokulab-thumbnail [workingMode]="true"
                          *ngIf="!!(running$|async)"
+                         [sudoku]="sudoku$|async"
                          unknown="generating..."></sudokulab-thumbnail>
   </div>
 </div>

@@ -37,8 +37,8 @@ export class ThumbnailComponent {
   grline$: Observable<{[id: number]: boolean}>;
   cellStyle$: Observable<any>;
 
-  @Input() set sudoku(sdk: Sudoku|undefined) {
-    this._sdk$.next(sdk);
+  @Input() set sudoku(sdk: Sudoku|undefined|null) {
+    if (sdk) this._sdk$.next(sdk);
   };
   @Input() set workingMode(wm: boolean) {
     this.workingMode$.next(wm);
@@ -47,7 +47,7 @@ export class ThumbnailComponent {
   @Input() hideDescription: boolean = false;
   constructor(private ele: ElementRef,
               private _generator: GeneratorFacade) {
-    this._sdk$ = new BehaviorSubject<Sudoku | undefined>(undefined);
+    this._sdk$ = new BehaviorSubject<Sudoku|undefined>(undefined);
     this.workingMode$ = new BehaviorSubject<boolean>(false);
     this.rows$ = this._sdk$.pipe(map(s => getDimension(s?.rank)));
     this.cols$ = this._sdk$.pipe(map(s => getDimension(s?.rank)));

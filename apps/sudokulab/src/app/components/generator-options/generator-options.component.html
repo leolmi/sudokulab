@@ -123,4 +123,16 @@
              (input)="apply($event, 'maxSchemaCycles')">
     </mat-form-field>
   </div>
+  <div fxLayout="row" fxLayoutAlign="start center">
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Max value cycless</mat-label>
+      <input matInput
+             [disabled]="running$|async"
+             type="number"
+             [value]="(options$|async)?.maxValueCycles"
+             (input)="apply($event, 'maxValueCycles')">
+    </mat-form-field>
+    <div class="space"></div>
+    <div fxFlex></div>
+  </div>
 </div>

@@ -6,9 +6,11 @@
     </div>
     <div class="thumbnail-row"
          *ngFor="let row of rows$|async"
+
          fxLayout="row" fxLayoutAlign="start center">
       <div class="thumbnail-cell"
            *ngFor="let col of cols$|async">
+
         <div class="thumbnail-cell-value-container"
              fxLayout="row" fxLayoutAlign="center center"
              *ngIf="((cells$|async)||{})[col+'.'+row] as cell"
