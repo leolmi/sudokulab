@@ -22,6 +22,7 @@ export interface SudokuState {
   operationStatus?: number;
   env?: any;
   settings?: any;
+  loadedSchemas: boolean
 }
 
 export const initialState: SudokuState = {
@@ -34,11 +35,13 @@ export const initialState: SudokuState = {
   token: undefined,
   operationStatus: -1,
   env: {},
-  settings: getUserSetting('lab.activeSudoku')||{}
+  settings: getUserSetting('lab.activeSudoku')||{},
+  loadedSchemas: false
 };
 
 const sudokuReducers = createReducer(
   initialState,
+  on(SudokuActions.loadedSchemas, (state) => state.loadedSchemas ? state : { ...state, loadedSchemas: true }),
   on(SudokuActions.setAppInfo, (state, { info }) => ({ ...state, info })),
   on(SudokuActions.setActiveMessage, (state, { message }) => ({ ...state, message })),
   on(SudokuActions.setActivePage, (state, { page }) => ({ ...state, activePage: page })),

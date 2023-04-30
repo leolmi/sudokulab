@@ -13,7 +13,7 @@ import {
   use
 } from '@sudokulab/model';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, take} from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AvailablePages } from './model';
@@ -30,6 +30,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   pages$: BehaviorSubject<SudokulabPage[]>;
   status$: Observable<Dictionary<boolean>>;
   compact$: Observable<boolean>;
+  isLoadedSchemas$: Observable<boolean>;
 
   constructor(private _http: HttpClient,
               private _pagesProvider: SudokulabPagesService,
@@ -45,6 +46,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.page$ = _sudoku.selectActivePage$;
     this.status$ = _sudoku.selectPageStatus$;
     this.compact$ = _sudoku.selectIsCompact$;
+    this.isLoadedSchemas$ = _sudoku.selectIsLoadedSchemas$
+      .pipe(distinctUntilChanged(), debounceTime(1000));
 
     _sudoku.setEnvironment(environment);
     _sudoku.fillDocuments();
@@ -72,9 +75,9 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     const codes = location.hash.substr(2).split('/');
-    let page = this._pagesProvider.pages.find(page => page.code===codes[0]);
+    let page = this._pagesProvider.pages.find(page => page.code === codes[0]);
     if (!page) page = this._pagesProvider.pages.find(page => page.default);
-    if (!!page) setTimeout(() => this._sudoku.setActivePage(page, { id: codes[1] }));
+    if (!!page) setTimeout(() => this._sudoku.setActivePage(page, {id: codes[1]}));
   }
 
   ngOnDestroy() {

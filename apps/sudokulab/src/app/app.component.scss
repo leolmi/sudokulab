@@ -16,6 +16,19 @@
     height: 100%;
   }
 }
+
+.opacity-0 {
+  opacity: 0;
+  //-webkit-transition: opacity 2s ease-in;
+  //-moz-transition: opacity 2s ease-in;
+  //-ms-transition: opacity 2s ease-in;
+  //-o-transition: opacity 2s ease-in;
+  transition: opacity 2s ease-in;
+  &.active {
+    opacity: 1;
+  }
+}
+
 .title {
   padding: 0 20px;
   font-weight: 100;
@@ -51,4 +64,25 @@
       font-size: 13px;
     }
   }
+}
+
+.main-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.page-container-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+}
+
+.initial-message {
+  font-size: 2.4em;
+  opacity: .5;
 }

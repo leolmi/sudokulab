@@ -91,7 +91,10 @@ export class SudokuEffects {
         checkAvailables(ps);
         return ps;
       })),
-      switchMap((schemas) => [SudokuActions.loadSchemas({ schemas })])))
+      switchMap((schemas) => [
+        SudokuActions.loadSchemas({ schemas }),
+        SudokuActions.loadedSchemas()
+      ])))
   ));
 
   updateDocumentTitle$ = createEffect(() => this._actions$.pipe(

@@ -28,6 +28,7 @@ import {Dictionary} from '@ngrx/entity';
 import {distinctUntilChanged, filter, switchMap, takeUntil} from 'rxjs/operators';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {isFunction as _isFunction} from 'lodash';
+import {isLoadedSchemas} from "./selectors";
 
 @Injectable()
 export class SudokuContext extends SudokuFacade {
@@ -37,6 +38,7 @@ export class SudokuContext extends SudokuFacade {
   private _handleImage$: BehaviorSubject<HandleImageOptions|undefined> = new BehaviorSubject<HandleImageOptions|undefined>(undefined);
   private _checkSchema$: BehaviorSubject<HandleImageResult|undefined> = new BehaviorSubject<HandleImageResult|undefined>(undefined);
 
+  selectIsLoadedSchemas$: Observable<boolean> = this._store.select(SudokuSelectors.isLoadedSchemas);
   selectAppInfo$: Observable<SudokulabInfo|undefined> = this._store.select(SudokuSelectors.selectAppInfo);
   selectAllSchemas$: Observable<PlaySudoku[]> = this._store.select(SudokuSelectors.selectAllSudoku);
   selectActiveMessage$: Observable<SudokuMessage|undefined> = this._store.select(SudokuSelectors.selectActiveMessage);

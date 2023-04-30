@@ -35,6 +35,10 @@ export const loadSchemas = createAction(
   props<{ schemas: PlaySudoku[] }>()
 );
 
+export const loadedSchemas = createAction(
+  '[SudokuLab.lab] schemas loaded'
+);
+
 export const clear = createAction(
   '[SudokuLab.lab] clear the sudoku'
 );

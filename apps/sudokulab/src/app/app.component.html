@@ -65,6 +65,7 @@
       </button>
     </mat-menu>
   </mat-toolbar>
+  <mat-progress-bar *ngIf="!(isLoadedSchemas$|async)" class="main-progress-bar" color="accent" mode="indeterminate"></mat-progress-bar>
   <div class="central-container" fxFlex fxLayout="row" fxLayoutAlign="center start">
     <div class="vertical-toolbar background2 compact-hidden" fxLayout="column">
       <button *ngFor="let pag of (pages$|async)||[]"
@@ -75,7 +76,13 @@
         <mat-icon>{{pag.icon}}</mat-icon>
       </button>
     </div>
-    <div class="page-container" fxFlex>
+    <div *ngIf="!(isLoadedSchemas$|async)"
+         class="page-container-overlay"
+         fxLayout="row" fxLayoutAlign="center center">
+      <div class="initial-message">opening...</div>
+    </div>
+    <div class="page-container opacity-0"
+         [class.active]="!!(isLoadedSchemas$|async)" fxFlex>
       <router-outlet></router-outlet>
     </div>
   </div>

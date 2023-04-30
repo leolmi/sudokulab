@@ -57,3 +57,8 @@ export const selectUserSettings = createSelector(
   selectSudoku,
   (state): any => state.settings
 )
+
+export const isLoadedSchemas = createSelector(
+  selectSudoku,
+  (state): any => state.loadedSchemas
+)

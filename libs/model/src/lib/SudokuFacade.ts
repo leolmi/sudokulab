@@ -17,6 +17,7 @@ import {PlaySudoku} from './PlaySudoku';
 
 export abstract class SudokuFacade implements Facade {
   name = 'sudoku';
+  abstract selectIsLoadedSchemas$: Observable<boolean>;
   abstract selectAppInfo$: Observable<SudokulabInfo|undefined>;
   abstract selectAllSchemas$: Observable<PlaySudoku[]>;
   abstract selectActiveMessage$: Observable<SudokuMessage|undefined>;
