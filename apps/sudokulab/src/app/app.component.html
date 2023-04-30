@@ -79,7 +79,7 @@
     <div *ngIf="!(isLoadedSchemas$|async)"
          class="page-container-overlay"
          fxLayout="row" fxLayoutAlign="center center">
-      <div class="initial-message">opening...</div>
+      <div class="initial-message">starting...</div>
     </div>
     <div class="page-container opacity-0"
          [class.active]="!!(isLoadedSchemas$|async)" fxFlex>
