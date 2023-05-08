@@ -3,6 +3,7 @@ import { join } from 'path';
 import { createWorker, Rectangle } from 'tesseract.js';
 import * as Jimp from 'jimp';
 import * as Tesseract from 'tesseract.js';
+import {CellDef} from "@angular/cdk/table";
 
 interface CellInfo {
   buffer: Buffer;
@@ -31,44 +32,77 @@ const translateShape = (sh: ShapeDto, rs: AreaDto, rt: AreaDto): ShapeDto => {
 
 export const ocr = async (img: ImgDto, o?: OcrOptions): Promise<OcrResult> => {
   const options = new OcrOptions(o);
+  const dim = options.rank * options.rank;
   // estrae l'immagine
   const _img = Buffer.from(img.data.replace(/data:image\/.*;base64,/g, ''), 'base64');
-
   // carica l'immagine
   let image = await Jimp.read(_img);
-
-  // await image.resize(500, 500);
-
-
-  // info sull'immagine
-  const w = image.getWidth();
-  const h = image.getHeight();
-
-  // const shape = translateShape(img.shape, img.area, {w,h});
-
-  //console.log('crop info\n\tshape:', img.shape, '\n\tarea:', img.area, '\n\timage rect:', {w,h}, '\n\tcrop shape:', shape);
-
-  console.log(`IMAGE INFO  size width=${w}  height=${h}`);
-
+  let confidence = 0;
   // scala di grigi
   image.grayscale();
   // più chiara
   image.brightness(0.3);
   // aumenta contrasto
   image.contrast(0.5);
-
-
-
-  await image.writeAsync(`${Date.now()}.png`);
+  let values = '';
+  try {
+    const cells = await splitCells(image, options);
+    values = await readCells(cells, options);
+  } catch (err) {
+    console.error('Error while elaborating image', err);
+    return new OcrResult({ cells: {}, values: '', confidence });
+  }
+  //await image.writeAsync(`${Date.now()}.png`);
+  if (values.length === dim) confidence = 100;
 
   return <OcrResult>{
-    data: {
-      width: w,
-      height: h
-    }
+    values,  //: '490010005800004000002000300060403000700000009000102080001000400000600002500040098'
+    confidence
   }
 }
 
+const splitCells = async (image: any, o: OcrOptions): Promise<CellInfo[]> => {
+  const maskPath = join(__dirname, 'assets/cell-mask.png');
+  const mask = await Jimp.read(maskPath);
+
+  const w = image.getWidth();
+  const h = image.getHeight();
+  const cells: CellInfo[] = [];
+  const cell_size = (w / o.rank);
+  const cell_padding = cell_size * o.cell_padding_perc;
+  await onCells(o.rank, async (col, row, id, i) => {
+    const cCrop: Rectangle = {
+      top: (row * cell_size) + cell_padding,
+      left: (col * cell_size) + cell_padding,
+      height: cell_size - (2 * cell_padding),
+      width: cell_size - (2 * cell_padding)
+    };
+    let cellImage = await Jimp.read(image);
+    cellImage = await cellImage.crop(cCrop.left, cCrop.top, cCrop.width, cCrop.height);
+    cellImage = await cellImage.mask(mask, 0, 0);
+    const cellBuffer = await cellImage.getBufferAsync(Jimp.MIME_PNG);
+    cells.push({buffer: cellBuffer, id});
+  });
+  return cells;
+}
+
+
+const readCells = async (cells: CellInfo[], o: OcrOptions): Promise<string> => {
+  const langPath = join(__dirname, 'assets');
+  const worker = createWorker({ langPath });
+  await worker.load();
+  await worker.loadLanguage('eng');
+  await worker.initialize('eng');
+  await worker.setParameters({ tessedit_char_whitelist: '123456789' });
+
+  let result = '';
+  await onCells(o.rank, async (col, row, id, i) => {
+    const { data } = await worker.recognize(cells[i].buffer);
+    const value = getCellValue(data, o);
+    result = `${result}${value || '0'}`;
+  });
+  return result; // '490010005800004000002000300060403000700000009000102080001000400000600002500040098';
+}
 
 
 export const ocr2 = async (img: ImgDto, o?: OcrOptions): Promise<OcrResult> => {
