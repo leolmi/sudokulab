@@ -102,6 +102,7 @@ export class UploadDialogComponent {
     const reader = new FileReader();
     reader.onload = () => {
       try {
+        //console.log('IMAGE DATA', <string>reader.result);
         this._image(<string>reader.result);
       } catch (err) {
         this._sudoku.raiseError(err);

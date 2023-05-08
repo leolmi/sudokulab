@@ -8,4 +8,6 @@ export class OcrResult {
   cells: any;
   values: string;
   confidence: number;
+  image?: string;
+  data?: any;
 }

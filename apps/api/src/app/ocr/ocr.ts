@@ -1,4 +1,4 @@
-import { ImgDto, OcrOptions, OcrResult } from '@sudokulab/model';
+import {AreaDto, ImgDto, OcrOptions, OcrResult, ShapeDto} from '@sudokulab/model';
 import { join } from 'path';
 import { createWorker, Rectangle } from 'tesseract.js';
 import * as Jimp from 'jimp';
@@ -17,7 +17,61 @@ interface Elaboration {
 const CELL_SIZE = 80;
 const BOARD_SIZE = 720;
 
+const translateShape = (sh: ShapeDto, rs: AreaDto, rt: AreaDto): ShapeDto => {
+  const dw = rt.w / rs.w;
+  const dh = rt.h / rs.h;
+  return  <ShapeDto>{
+    tl: {x: (sh.tl.x * dw), y: (sh.tl.y * dh)},
+    tr: {x: (sh.tr.x * dw), y: (sh.tr.y * dh)},
+    br: {x: (sh.br.x * dw), y: (sh.br.y * dh)},
+    bl: {x: (sh.bl.x * dw), y: (sh.bl.y * dh)},
+  }
+}
+
+
 export const ocr = async (img: ImgDto, o?: OcrOptions): Promise<OcrResult> => {
+  const options = new OcrOptions(o);
+  // estrae l'immagine
+  const _img = Buffer.from(img.data.replace(/data:image\/.*;base64,/g, ''), 'base64');
+
+  // carica l'immagine
+  let image = await Jimp.read(_img);
+
+  // await image.resize(500, 500);
+
+
+  // info sull'immagine
+  const w = image.getWidth();
+  const h = image.getHeight();
+
+  // const shape = translateShape(img.shape, img.area, {w,h});
+
+  //console.log('crop info\n\tshape:', img.shape, '\n\tarea:', img.area, '\n\timage rect:', {w,h}, '\n\tcrop shape:', shape);
+
+  console.log(`IMAGE INFO  size width=${w}  height=${h}`);
+
+  // scala di grigi
+  image.grayscale();
+  // più chiara
+  image.brightness(0.3);
+  // aumenta contrasto
+  image.contrast(0.5);
+
+
+
+  await image.writeAsync(`${Date.now()}.png`);
+
+  return <OcrResult>{
+    data: {
+      width: w,
+      height: h
+    }
+  }
+}
+
+
+
+export const ocr2 = async (img: ImgDto, o?: OcrOptions): Promise<OcrResult> => {
   const options = new OcrOptions(o);
   let confidence = 0;
   const elaboration: Elaboration = { img, cells: [] };
@@ -70,18 +124,18 @@ const elaborate = async (elaboration: Elaboration, o: OcrOptions) => {
   const w = image.getWidth();
   const h = image.getHeight();
   console.log(`ORIGINAL IMAGE SIZE width:${w}   height:${h}`);
-  console.log(`ROTATION `, elaboration.img.rotation);
-  if (elaboration.img.rotation !== 0) {
-    image = await image.rotate(-elaboration.img.rotation, false);
-  }
-  const crop = {
-    left: Math.floor(elaboration.img.rect.left * w),
-    top: Math.floor(elaboration.img.rect.top * h),
-    width: Math.floor(elaboration.img.rect.width * w),
-    height: Math.floor(elaboration.img.rect.height * h)
-  }
-  console.log(`CROP RECT `, crop);
-  image = await image.crop(crop.left, crop.top, crop.width, crop.height);
+  // console.log(`ROTATION `, elaboration.img.rotation);
+  // if (elaboration.img.rotation !== 0) {
+  //   image = await image.rotate(-elaboration.img.rotation, false);
+  // }
+  // const crop = {
+  //   left: Math.floor(elaboration.img.rect.left * w),
+  //   top: Math.floor(elaboration.img.rect.top * h),
+  //   width: Math.floor(elaboration.img.rect.width * w),
+  //   height: Math.floor(elaboration.img.rect.height * h)
+  // }
+  // console.log(`CROP RECT `, crop);
+  // image = await image.crop(crop.left, crop.top, crop.width, crop.height);
   image = await image.resize(BOARD_SIZE, BOARD_SIZE);
   image = await image.grayscale();
 

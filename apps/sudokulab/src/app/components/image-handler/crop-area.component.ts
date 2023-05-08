@@ -8,38 +8,19 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, map, skip } from 'rxjs/operators';
-import { cloneDeep as _clone } from 'lodash';
+import {BehaviorSubject, combineLatest, Observable, Subject} from 'rxjs';
+import {CropInfo, CropPointPosition, PADDING, Shape, Vector} from "./image-handler.model";
+import {
+  calcAreaPoints,
+  calcPointMovement, getAreaRect, getAreaSize,
+  getCurrentPoint,
+  getElementShape,
+  getPointsStyle,
+  getTouchMoovement,
+  isEmptyShape
+} from "./image-handler.helper";
+import {map} from "rxjs/operators";
 
-const RADIUS = 12;
-const PADDING = 50;
-
-type CropPointPosition = 'TopLeft'|'TopRight'|'BottomLeft'|'BottomRight'|'none';
-
-interface Vector {
-  x: number;
-  y: number;
-}
-
-interface Size {
-  w: number,
-  h: number
-}
-
-export interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-interface RectPos {
-  l: number;
-  t: number;
-  r: number;
-  b: number;
-}
 
 @Component({
   selector: 'crop-area',
@@ -66,14 +47,9 @@ interface RectPos {
     <div class="crop-point"
          [ngClass]="{'active': (currentPoint$|async) === 'BottomRight'}"
          [ngStyle]="((cropPointStyle$|async)||{})['BottomRight']"></div>
-    <div class="crop-area-inner" [ngStyle]="cropAreaStyle$|async" #area>
+    <div class="crop-area-inner" #area>
       <svg width="100%" height="100%" viewBox="0 0 90 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        <polygon [attr.points]="points$|async" class="crop-area-polygon" />
       </svg>
     </div>
 
@@ -81,14 +57,14 @@ interface RectPos {
   styleUrls: ['./image-handler.component.scss']
 })
 export class CropAreaComponent implements AfterViewInit {
-  private _winresize$: BehaviorSubject<any>;
+  private _winresize$: Subject<void>;
   private _refresh$: BehaviorSubject<any>;
   mooving$: BehaviorSubject<boolean>;
-  cropAreaStyle$: Observable<any>;
   cropPointStyle$: Observable<any>;
   currentPoint$: BehaviorSubject<CropPointPosition>;
-  cropRect$: BehaviorSubject<Rect>;
-  userMove$: BehaviorSubject<RectPos>;
+  userMove$: BehaviorSubject<Vector>;
+  cropShape$: BehaviorSubject<Shape>;
+  points$: BehaviorSubject<string>;
 
   @ViewChild('area') area: ElementRef|undefined = undefined;
 
@@ -96,34 +72,40 @@ export class CropAreaComponent implements AfterViewInit {
     this._refresh$.next(s);
   }
 
-  @Output() cropChanged: EventEmitter<Rect> = new EventEmitter<Rect>();
+  @Output() cropChanged: EventEmitter<CropInfo> = new EventEmitter<CropInfo>();
 
   constructor(protected _ele: ElementRef) {
-    this._winresize$ = new BehaviorSubject<any>({});
+    this._winresize$ = new Subject<void>();
     this._refresh$ = new BehaviorSubject<any>({});
     this.mooving$ = new BehaviorSubject<boolean>(false);
     this.currentPoint$ = new BehaviorSubject<CropPointPosition>('none');
-    this.cropRect$ = new BehaviorSubject<Rect>({ x:0, y:0, w:0, h:0 });
-    this.userMove$ = new BehaviorSubject<RectPos>({ l:0, t:0, r:0, b:0 });
+    this.cropShape$ = new BehaviorSubject<Shape>(new Shape());
+    this.userMove$ = new BehaviorSubject<Vector>({ x:0, y:0 });
+    this.points$ = new BehaviorSubject<string>('');
+    this.cropPointStyle$ = this.cropShape$.pipe(map(sh => getPointsStyle(sh)));
 
-    this.cropPointStyle$ = this.cropRect$.pipe(map(p => getPointsStyle(p)));
-    this.cropAreaStyle$ = this.cropRect$.pipe(map(p => getAreaStyle(p)));
-
-    this._refresh$.pipe(skip(1)).subscribe(() => this.userMove$.next({ l:0, t:0, r:0, b:0 }))
-
-    combineLatest(this._winresize$, this.userMove$).subscribe(([r, um]) => {
-      const position = calcPointPositions(um, _ele.nativeElement.parentElement);
-      this.cropRect$.next(position);
+    this.cropShape$.subscribe(shape => {
+      const area = getAreaSize(this._ele.nativeElement, PADDING);
+      this.cropChanged.emit({ area, shape });
     });
 
-    this.cropRect$
-      .pipe(skip(1), filter(cr => !!cr))
-      .subscribe(cr => this.cropChanged.emit(getCropRect(cr, _ele.nativeElement.parentElement)));
+    this._winresize$.subscribe(() => {
+      let sh = this.cropShape$.value;
+      if (isEmptyShape(sh)) {
+        sh = getElementShape(_ele.nativeElement, PADDING);
+        return this.cropShape$.next(sh);
+      }
+    })
+
+    combineLatest([this.cropShape$, this._winresize$]).subscribe(([sh]) => {
+      const points = calcAreaPoints(sh, _ele.nativeElement);
+      this.points$.next(points);
+    });
   }
 
   @HostListener('window:resize')
   resize() {
-    this._winresize$.next({});
+    this._winresize$.next();
   }
 
   leave() {
@@ -132,166 +114,41 @@ export class CropAreaComponent implements AfterViewInit {
   }
 
   mousedown(e: any) {
-    console.log('MOUSE DOWN ORIGINAL', e);
-    this.mooving$.next(this.currentPoint$.getValue() !== 'none');
+    this.mooving$.next(this.currentPoint$.value !== 'none');
   }
 
   touchstart(e: any) {
-    console.log('TOUCH DOWN ORIGINAL', e);
     const movement = getTouchMoovement(e);
-    const point = getCurrentPoint(this.cropRect$.getValue(), movement);
+    const point = getCurrentPoint(this.cropShape$.value, movement);
     this.currentPoint$.next(point);
     this.mooving$.next(point !== 'none');
   }
 
   mousemoove(e: any) {
     const movement = <Vector>{ x: e.offsetX, y: e.offsetY};
-    if (this.mooving$.getValue()) {
-      const point = this.currentPoint$.getValue();
+    if (this.mooving$.value) {
+      const point = this.currentPoint$.value;
       if (point === 'none') return;
-      const position = this.userMove$.getValue();
-      const move = calcMovement(position, movement, point, this._ele.nativeElement.parentElement);
-      this.userMove$.next(move);
+      const position = this.cropShape$.value;
+      const shape = calcPointMovement(position, movement, point);
+      this.cropShape$.next(shape);
     } else {
-      this.currentPoint$.next(getCurrentPoint(
-        this.cropRect$.getValue(), movement));
+      this.currentPoint$.next(getCurrentPoint(this.cropShape$.value, movement));
     }
   }
 
   touchmove(e: any) {
-    const point = this.currentPoint$.getValue();
+    const point = this.currentPoint$.value;
     if (point === 'none') return;
     e.stopPropagation();
     e.preventDefault();
     const movement = getTouchMoovement(e);
-    const position = this.userMove$.getValue();
-    const move = calcMovement(position, movement, point, this._ele.nativeElement.parentElement);
-    this.userMove$.next(move);
+    const position = this.cropShape$.value;
+    const shape = calcPointMovement(position, movement, point);
+    this.cropShape$.next(shape);
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this._winresize$.next({}), 250);
-  }
-}
-
-const getTouchMoovement = (e: any): Vector => {
-  const rect = e.target.getBoundingClientRect();
-  const evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
-  const touch = evt.touches[0] || evt.changedTouches[0];
-  return <Vector>{ x: touch.pageX - rect.left, y: touch.pageY - rect.top};
-}
-
-const getSize = (ele: HTMLElement): Size => {
-  return {
-    w: ele.clientWidth - (2*PADDING),
-    h: ele.clientHeight - (2*PADDING)
-  }
-}
-
-const calcPointPositions = (move: RectPos, ele: HTMLElement): Rect => {
-  const size = getSize(ele);
-  return {
-    x: ele.clientLeft + PADDING + (size.w * move.l),
-    y: ele.clientTop + PADDING + (size.h * move.t),
-    w: size.w * (1 - move.l - move.r),
-    h: size.h * (1 - move.t - move.b)
-  }
-}
-
-const getPointsStyle = (p: Rect): any => {
-  const x1 = p.x||0
-  const y1 = p.y||0;
-  const x2 = (p.w||0) + (p.x||0);
-  const y2 = (p.h||0) + (p.y||0);
-  return {
-    TopLeft: { left:`${x1-RADIUS}px`, top: `${y1-RADIUS}px` },
-    TopRight: { left:`${x2-RADIUS}px`, top: `${y1-RADIUS}px` },
-    BottomLeft: { left:`${x1-RADIUS}px`, top: `${y2-RADIUS}px` },
-    BottomRight: { left:`${x2-RADIUS}px`, top: `${y2-RADIUS}px` }
-  }
-}
-
-const getAreaStyle = (p: Rect): any => {
-  return {
-    left: `${p.x || 0}px`,
-    top: `${p.y || 0}px`,
-    width: `${p.w || 0}px`,
-    height: `${p.h || 0}px`
-  }
-}
-
-const getCurrentPoint = (crop: Rect, e: any): CropPointPosition => {
-  if (e.x < (crop.x + RADIUS)) {
-     if (e.x > (crop.x - RADIUS)) {
-       // allineamento sinistro
-       if (e.y < (crop.y + RADIUS)) {
-         if (e.y > (crop.y - RADIUS)) {
-           return 'TopLeft';
-         }
-       } else if (e.y < (crop.y + crop.h + RADIUS)) {
-         if (e.y > (crop.y + crop.h - RADIUS)) {
-           return 'BottomLeft';
-         }
-       }
-     }
-  } else if (e.x < (crop.x + crop.w + RADIUS)) {
-    if (e.x > (crop.x + crop.w - RADIUS)) {
-      if (e.y < (crop.y + RADIUS)) {
-        if (e.y > (crop.y - RADIUS)) {
-          return 'TopRight';
-        }
-      } else if (e.y < (crop.y + crop.h + RADIUS)) {
-        if (e.y > (crop.y + crop.h - RADIUS)) {
-          return 'BottomRight';
-        }
-      }
-    }
-  }
-  return 'none';
-}
-
-const calcMovement = (position: RectPos,
-                      movement: Vector,
-                      point: CropPointPosition,
-                      ele: HTMLElement): RectPos => {
-  const size = getSize(ele);
-  const m = _clone(position);
-  const mv: RectPos = {
-    l: (movement.x - PADDING) / size.w,
-    t: (movement.y - PADDING) / size.h,
-    r: (size.w - (movement.x - PADDING)) / size.w,
-    b: (size.h - (movement.y - PADDING)) / size.h
-  }
-  switch (point) {
-    case 'TopLeft':
-      m.t = mv.t
-      m.l = mv.l;
-      break;
-    case 'TopRight':
-      m.t = mv.t;
-      m.r = mv.r;
-      break;
-    case 'BottomLeft':
-      m.b = mv.b;
-      m.l = mv.l;
-      break;
-    case 'BottomRight':
-      m.b = mv.b;
-      m.r = mv.r;
-      break;
-  }
-  return m;
-}
-
-const getCropRect = (cr: Rect, ele: HTMLElement): Rect => {
-  const size = getSize(ele);
-  console.log('CROP RECT', cr);
-  console.log('IMAGE SIZE', size);
-
-  return {
-    x: (cr.x - PADDING) / size.w,
-    y: (cr.y - PADDING) / size.h,
-    w: cr.w / size.w,
-    h: cr.h / size.h
+    setTimeout(() => this._winresize$.next(), 250);
   }
 }

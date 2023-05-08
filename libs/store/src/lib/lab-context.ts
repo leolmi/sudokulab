@@ -123,6 +123,10 @@ export class LabContext extends LabFacade {
     this._store.dispatch(SudokuActions.togglePopupDetails());
   }
 
+  test() {
+    this._sudoku.raiseGenericAction('test');
+  }
+
   constructor(private _store: Store<SudokuStore>,
               private _sudoku: SudokuFacade) {
     super();

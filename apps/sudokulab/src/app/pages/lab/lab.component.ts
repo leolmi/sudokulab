@@ -20,7 +20,7 @@ import {ImageHandlerComponent} from '../../components/image-handler/image-handle
 import {CameraDialogComponent} from '../../components/camera-dialog/camera-dialog.component';
 import {SchemaCheckComponent} from '../../components/schema-check/schema-check.component';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {filter, map, skip, take, takeUntil} from 'rxjs/operators';
 import {Dictionary} from '@ngrx/entity';
 import {SOLVER_STEP_DETAILS} from "../../model";
@@ -76,9 +76,9 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
       .pipe(filter(res => res.editOnGrid || !!res?.sdk || !!res?.image))
       .subscribe(res => res.editOnGrid ?
         _sudoku.checkSchema(new HandleImageResult({sdk: new Sudoku(), onlyValues: res.onlyValues})) :
-        res.sdk ?
+        (res.sdk ?
           _sudoku.loadSudoku(res.sdk, res.onlyValues) :
-          _sudoku.handleImage(res));
+          _sudoku.handleImage(res)));
 
     _sudoku.onCamera(CameraDialogComponent, this._destroy$);
     _sudoku.onHandleImage(ImageHandlerComponent, this._destroy$);
@@ -139,7 +139,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   pencilChanged(pencil: boolean) {
     use(combineLatest([this.cells$, this._sudoku$]), ([cells, sdk]) => {
       if (pencil && isPencilEmpty(cells) && sdk?.options?.showAvailables) {
-        console.log('ASK IF WANT TO PASS AVAILABLES TO PENCIL');
+        // console.log('ASK IF WANT TO PASS AVAILABLES TO PENCIL');
         this._dialog
           .open(AskDialogComponent, {
             width: '600px',

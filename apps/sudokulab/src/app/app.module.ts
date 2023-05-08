@@ -80,6 +80,7 @@ import {CellValuesComponent} from "./components/cell-values/cell-values.componen
 import {SolverStepDetailsPopupComponent} from "./components/solver-step-details/solver-step-details-popup.component";
 import {ManagementKeyDialogComponent} from "./components/management-key-dialog/management-key-dialog.component";
 import {OperationsBarComponent} from "./components/operations-bar/operations-bar.component";
+import {CropPointComponent} from "./components/image-handler/crop-point.component";
 
 @NgModule({
   declarations: [
@@ -115,7 +116,8 @@ import {OperationsBarComponent} from "./components/operations-bar/operations-bar
     SolverStepDetailsPopupComponent,
     CellValuesComponent,
     ManagementKeyDialogComponent,
-    OperationsBarComponent
+    OperationsBarComponent,
+    CropPointComponent,
   ],
   imports: [
     BrowserModule,

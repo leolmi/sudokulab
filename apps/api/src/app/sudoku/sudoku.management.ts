@@ -84,14 +84,14 @@ const getSudokuDoc = (sol: SudokuSolution): Sudoku => {
 
 const solveSchema = (s: SudokuDoc): SolveAllResult|undefined => {
   if (s.fixed !== checkImportText(s.fixed, { rank: s.rank })) return undefined;
-  console.log('create play-sudoku');
+  // console.log('create play-sudoku');
   const sdk = new PlaySudoku({ sudoku: _clone(s) });
-  console.log('create solver');
+  // console.log('create solver');
   const solver = new Solver(sdk);
   try {
-    console.log('launch solve');
+    // console.log('launch solve');
     const result = solver.solve();
-    console.log('end solve');
+    // console.log('end solve');
     return result;
   } catch(err_s) {
     console.error('Errors while solve schema');

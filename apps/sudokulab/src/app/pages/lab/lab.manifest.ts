@@ -10,6 +10,7 @@ export class LabManifest extends SudokulabPage {
   code = AvailablePages.lab;
   icon = 'grid_on';
   buttons = [
+    // DEFAULT_BUTTONS.test,
     DEFAULT_LAB_BUTTONS.stepinfo,
     DEFAULT_LAB_BUTTONS.step,
     DEFAULT_BUTTONS.separator,
@@ -17,7 +18,7 @@ export class LabManifest extends SudokulabPage {
     DEFAULT_BUTTONS.separator,
     DEFAULT_LAB_BUTTONS.download,
     DEFAULT_LAB_BUTTONS.upload,
-    DEFAULT_LAB_BUTTONS.camera,
+    // DEFAULT_LAB_BUTTONS.camera,
     DEFAULT_LAB_BUTTONS.clear,
     DEFAULT_BUTTONS.separator,
     DEFAULT_LAB_BUTTONS.available,
@@ -26,6 +27,7 @@ export class LabManifest extends SudokulabPage {
   title = 'Player';
   execute = (facade: LabFacade, code: string) => {
     switch (code) {
+      case 'test': return facade.test();
       case 'step': return facade.solveStep();
       case 'clear': return facade.clear();
       case 'solve': return facade.solve();

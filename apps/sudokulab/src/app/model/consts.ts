@@ -9,6 +9,7 @@ export enum AvailablePages {
 export const SOLVER_STEP_DETAILS = 'solver-step-details';
 
 export const DEFAULT_BUTTONS = {
+  test: {icon: 'bug_report', code: 'test', tooltip: 'run test', disabledKey: 'has_no_lab_test'},
   separator: {separator: true},
 }
 

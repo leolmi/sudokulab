@@ -1,20 +1,19 @@
 <h1 mat-dialog-title>Handle Image</h1>
 <div class="dialog-container" mat-dialog-content>
-  <div class="image-container"
-       *ngIf="!!data?.image" fxLayout="column">
-    <img [src]="data?.image" [ngStyle]="style$|async">
+  <div class="image-container" *ngIf="!!data?.image" fxLayout="column">
+    <img [src]="data?.image"  alt="camera image"/>
     <crop-area (cropChanged)="cropChanged($event)" class="crop-area"></crop-area>
   </div>
+<!--  <div fxLayout="row" fxLayoutAlign="center center" class="correctors">-->
+<!--    <input [value]="(correction$|async)?.c1" (change)="onValueChange($event, 'c1')">-->
+<!--    <input [value]="(correction$|async)?.cx" (change)="onValueChange($event, 'cx')">-->
+<!--    <input [value]="(correction$|async)?.cy" (change)="onValueChange($event, 'cy')">-->
+<!--  </div>-->
+  <canvas class="target-context" #context width="500" height="500"></canvas>
 </div>
 <div class="wait-overlay" *ngIf="!!(working$|async)">
   <mat-spinner class="loader" diameter="100"></mat-spinner>
 </div>
-<mat-slider *ngIf="!!data?.image"
-            class="rotation-slider"
-            [max]="maxRotation"
-            [step]="1"
-            [value]="rotationValue$|async"
-            (input)="setRotation($event)"></mat-slider>
 <mat-dialog-actions *ngIf="!!!(working$|async)">
   <div fxFlex></div>
   <button mat-stroked-button (click)="done()">LOAD</button>

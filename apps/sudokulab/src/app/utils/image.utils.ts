@@ -1,14 +1,21 @@
-import { Rect } from '../components/image-handler/crop-area.component';
-import { RectangleDto } from '@sudokulab/model';
-import { Observable } from 'rxjs';
-import { fromPromise } from 'rxjs/internal-compatibility';
+import {CropInfo} from '../components/image-handler/image-handler.model';
+import {AreaDto, ShapeDto} from '@sudokulab/model';
+import {Observable} from 'rxjs';
+import {fromPromise} from 'rxjs/internal-compatibility';
 
 export const MAX_IMAGE_SIZE = 1240;
 
-export const checkImageSize = (image: string, max = MAX_IMAGE_SIZE): Observable<string> =>
+
+export interface ResizeImageResult {
+  img: any,
+  data: string;
+}
+
+export const checkImageSize = (image: string, max = MAX_IMAGE_SIZE): Observable<ResizeImageResult> =>
   fromPromise(resizeImage(image, max))
 
-export const resizeImage = (base64: string, max = MAX_IMAGE_SIZE): Promise<string> => {
+
+export const resizeImage = (base64: string, max = MAX_IMAGE_SIZE): Promise<ResizeImageResult> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = base64;
@@ -16,28 +23,37 @@ export const resizeImage = (base64: string, max = MAX_IMAGE_SIZE): Promise<strin
       const w = img.width||0;
       const h = img.height||0;
       const rdm = w/h;
+      // console.log('IMAGE SIZE w=', w, '   h=', h, '  rdm=', rdm);
       if (Math.max(w, h)>max) {
         const nw = rdm > 1 ? max : Math.floor(max * rdm);
         const nh = rdm > 1 ? Math.floor(max / rdm) : max;
         const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.createElement('canvas');
         canvas.width = nw;
         canvas.height = nh;
+        // console.log('IMAGE SIZE w=', w, '   h=', h, '  rdm=', rdm);
         const ctx: CanvasDrawImage = <CanvasDrawImage>canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, nw, nh);
-        resolve(canvas.toDataURL());
+        resolve({img, data: canvas.toDataURL()});
       } else {
-        resolve(base64);
+        resolve({img, data: base64});
       }
     }
     img.onerror = err => reject(err);
   })
 }
 
-export const getRectDto = (crop: Rect): RectangleDto => {
+export const getShapeDto = (crop: CropInfo): ShapeDto => {
   return {
-    left: crop.x,
-    top: crop.y,
-    width: crop.w,
-    height: crop.h
+    tl: crop.shape.tl,
+    tr: crop.shape.tr,
+    bl: crop.shape.bl,
+    br: crop.shape.br
+  }
+}
+
+export const getAreaDto = (crop: CropInfo): AreaDto => {
+  return {
+    w: crop.area.w,
+    h: crop.area.h
   }
 }
