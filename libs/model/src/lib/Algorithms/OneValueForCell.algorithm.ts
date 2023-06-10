@@ -25,6 +25,8 @@ export class OneValueForCellAlgorithm extends Algorithm {
   name = 'One value for cell';
   icon = 'center_focus_strong';
   type = AlgorithmType.solver;
+  title = 'esiste un solo valore possibile per la cella nel gruppo';
+  description = 'Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un punteggio più alto rispetto al precedente';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     const cell = _find(sdk.cells, c => (!isValue(c?.value) && c?.availables || []).length === 1);
 
@@ -36,12 +38,13 @@ export class OneValueForCellAlgorithm extends Algorithm {
     return new AlgorithmResult({
       algorithm: this.id,
       applied: !!cell,
+      value: cell?.value,
       descLines: [new AlgorithmResultLine({
         cell: cell?.id,
         description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`,
         withValue: true
       })],
       cells: !!cell ? [cell.id] : undefined
-    });
+    }, sdk);
   }
 }

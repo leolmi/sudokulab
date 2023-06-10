@@ -1,4 +1,6 @@
-import { Algorithm, PlaySudoku } from '@sudokulab/model';
+import {PlaySudoku} from "./PlaySudoku";
+import {getValues} from "../sudoku.helper";
+
 
 export class AlgorithmResultLine {
   constructor(l?: Partial<AlgorithmResultLine>) {
@@ -16,8 +18,9 @@ export class AlgorithmResultLine {
 
 
 export class AlgorithmResult {
-  constructor(r?: Partial<AlgorithmResult>) {
+  constructor(r?: Partial<AlgorithmResult>, sdk?: PlaySudoku) {
     this.algorithm = '';
+    this.values = sdk ? getValues(sdk) : '';
     this.descLines = [];
     this.cases = [];
     this.cells = [];
@@ -25,6 +28,8 @@ export class AlgorithmResult {
     Object.assign(this, r || {});
   }
   algorithm: string;
+  values: string;
+  value?: string;
   descLines: AlgorithmResultLine[];
   cases: PlaySudoku[];
   cells: string[];

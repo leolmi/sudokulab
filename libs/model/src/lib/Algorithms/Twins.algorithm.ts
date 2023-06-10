@@ -27,6 +27,8 @@ export class TwinsAlgorithm extends Algorithm {
   name = 'Twins in group';
   icon = 'bookmarks';
   type = AlgorithmType.support;
+  title = 'quando una coppia di celle all\'interno di un gruppo può contenere la stessa coppia di valori questi possono essere esclusi da tutte le altre celle del gruppo e dagli altri gruppi che le contengono';
+  description = 'Complesso poco più del precedente non risolve un valore di una cella ma contribuisce con i precedenti. Per questo ha un punteggio leggermente più alto del precedente';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     let applied = false;
     const descLines: AlgorithmResultLine[] = [];
@@ -103,6 +105,6 @@ export class TwinsAlgorithm extends Algorithm {
       algorithm: this.id,
       applied,
       descLines
-    });
+    }, sdk);
   }
 }

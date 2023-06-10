@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {Algorithm, AlgorithmType, getAlgorithms} from "@sudokulab/model";
 
 @Component({
   selector: 'sudokulab-help-page',
@@ -7,5 +8,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HelpComponent {
-
+  algorithms: Algorithm[];
+  TYPEDESC: any;
+  constructor() {
+    this.TYPEDESC = {
+      [AlgorithmType.solver]: 'risulutivo',
+      [AlgorithmType.support]: 'contributivo'
+    }
+    this.algorithms = getAlgorithms();
+  }
 }

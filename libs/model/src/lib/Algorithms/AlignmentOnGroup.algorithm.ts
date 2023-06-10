@@ -1,15 +1,4 @@
 import {
-  Algorithm,
-  AlgorithmResult,
-  AlgorithmResultLine,
-  AlgorithmType,
-  checkAvailables,
-  getUserCoord,
-  getValuesAlignment,
-  PlaySudoku,
-  PlaySudokuCellAlignment
-} from '@sudokulab/model';
-import {
   forEach as _forEach,
   includes as _includes,
   intersection as _intersection,
@@ -18,6 +7,12 @@ import {
 } from 'lodash';
 import {Dictionary} from '@ngrx/entity';
 import {isValue} from '../../global.helper';
+import {Algorithm} from "../Algorithm";
+import {AlgorithmType, PlaySudokuCellAlignment} from "../enums";
+import {PlaySudoku} from "../PlaySudoku";
+import {AlgorithmResult, AlgorithmResultLine} from "../AlgorithmResult";
+import {getUserCoord, getValuesAlignment} from "../../sudoku.helper";
+import {checkAvailables} from "../logic";
 
 export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
 
@@ -34,11 +29,14 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
   name = 'Alignment on group';
   icon = 'padding';
   type = AlgorithmType.support;
+  title = 'quando alcune celle all\'interno di un gruppo sono le uniche a poter contenere un determinato valore e generano un allineamento che coinvolge altri gruppi, in questi secondi è possibile escludere quel valore da quelli possibili';
+  description = 'Poco più complesso del precedente, anche questo non risolve un valore di una cella ma contribuisce con i precedenti';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
 
-    const cells: Dictionary<boolean> = {};
     let applied = false;
     const descLines: AlgorithmResultLine[] = [];
+    const cells: Dictionary<boolean> = {};
+
     _forEach(sdk.groups, (g) => {
       // ricerca i valori che sono presenti solo in celle allineate
       _forEach(g?.availableOnCells||{}, (cls, v) => {
@@ -71,6 +69,6 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
       applied,
       descLines,
       cells: _keys(cells)
-    });
+    }, sdk);
   }
 }

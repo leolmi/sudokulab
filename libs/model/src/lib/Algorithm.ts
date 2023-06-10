@@ -8,6 +8,8 @@ export abstract class Algorithm {
   abstract icon: string;
   abstract type: AlgorithmType;
   abstract factor: string;
+  abstract title: string;
+  abstract description: string;
   abstract apply(sdk: PlaySudoku): AlgorithmResult;
 }
 

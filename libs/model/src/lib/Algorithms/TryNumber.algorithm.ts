@@ -18,7 +18,7 @@ const _valorize = (sdk: PlaySudoku, cell: PlaySudokuCell, av: string): PlaySudok
 
 /**
  * ALGORITMO
- * Tenta la valorizzazione
+ * Tenta la valorizzazione (brutal force)
  *
  * algoritmo a tentativi, genera tanti schemi quanti valori disponibili affre la
  * cella scelta
@@ -41,6 +41,8 @@ export class TryNumberAlgorithm extends Algorithm {
   name = 'Try number in cell';
   icon = 'generating_tokens';
   type = AlgorithmType.solver;
+  title = 'se una determinata cella può ospitare N numeri, si divide la soluzione in N schemi, uno per ogni valore';
+  description = 'Rappresenta l\'applicazione del metodo "brutal force". Questo algoritmo sceglie la prima cella con il numero di valori possibili più basso. Ovviamente rappresenta la difficolta maggiore tra tutti gli algoritmi poiché nella pratica si traduce nell\'andare per tentativi';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     // ricerca la cella con minor numero di valori possibili fra quelle non valorizzate
     const minc = _minBy(_values(sdk.cells), (c) => c?.value ? 1000 : c?.availables.length || 1000);
@@ -69,6 +71,6 @@ export class TryNumberAlgorithm extends Algorithm {
         withValue: true
       })],
       cases
-    });
+    }, sdk);
   }
 }

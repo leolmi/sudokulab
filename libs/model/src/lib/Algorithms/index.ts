@@ -2,5 +2,8 @@ export * from './AlignmentOnGroup.algorithm';
 export * from './OneValueForCell.algorithm';
 export * from './OneCellForValue.algorithm';
 export * from './Twins.algorithm';
+export * from './Chains.algorithm';
+export * from './Couples.algorithm';
 export * from './TryNumber.algorithm';
 export * from './factors';
+export * from './factory';

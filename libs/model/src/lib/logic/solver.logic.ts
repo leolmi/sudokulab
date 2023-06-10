@@ -3,8 +3,6 @@ import { AlgorithmResult } from '../AlgorithmResult';
 import { SolveStepResult } from './SolveStepResult';
 import {
   applySudokuRules,
-  getAlgorithm,
-  getAlgorithms,
   getAlgorithmsMap,
   getAvailables,
   getRank,
@@ -25,7 +23,7 @@ import { Dictionary } from '@ngrx/entity';
 import { SolveAllResult } from './SolveAllResult';
 import { SudokuSolution } from '../SudokuSolution';
 import { SudokuInfo } from '../SudokuInfo';
-import { DIFFICULTY_MAX, DIFFICULTY_RANGES, TRY_NUMBER_ALGORITHM } from '../Algorithms';
+import {DIFFICULTY_MAX, DIFFICULTY_RANGES, getAlgorithm, getAlgorithms, TRY_NUMBER_ALGORITHM} from '../Algorithms';
 import { Algorithms, AlgorithmType } from '../enums';
 import { PlaySudokuGroup } from '../PlaySudokuGroup';
 import { addLine, debug, isValue } from '../../global.helper';

@@ -16,14 +16,7 @@ import {
   remove as _remove
 } from 'lodash';
 import {EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType} from './lib/enums';
-import {
-  AlignmentOnGroupAlgorithm,
-  OneCellForValueAlgorithm,
-  OneValueForCellAlgorithm,
-  TRY_NUMBER_ALGORITHM,
-  TryNumberAlgorithm,
-  TwinsAlgorithm
-} from './lib/Algorithms';
+import {getAlgorithms, TRY_NUMBER_ALGORITHM} from './lib/Algorithms';
 import {Algorithm} from './lib/Algorithm';
 import {CellInfo} from './lib/CellInfo';
 import {
@@ -133,7 +126,12 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefo
   });
 }
 
-export const decodeCellId = (id: string, rank?: number): CellInfo => {
+/**
+ * Decodifica l'identificativo della cella fornendo un oggetto CellInfo
+ * @param id
+ * @param rank
+ */
+export const decodeCellId = (id: string, rank: number = SUDOKU_DEFAULT_RANK): CellInfo => {
   const parts = (id || '').split('.');
   const col = parseInt(parts[0] || '-1', 10);
   const row = parseInt(parts[1] || '-1', 10);
@@ -184,38 +182,13 @@ export const getLinesGroups = (rank: number|undefined): {[id: number]: boolean} 
   return res;
 }
 
-const _algorithms: Algorithm[] = [];
-
-const _checkAlgorithms = () => {
-  if (_algorithms.length<1) {
-    _algorithms.push(
-      new OneCellForValueAlgorithm(),
-      new OneValueForCellAlgorithm(),
-      new TwinsAlgorithm(),
-      new AlignmentOnGroupAlgorithm(),
-      new TryNumberAlgorithm());
-  }
-}
-
-export const getAlgorithms = (exclude: string[] = []): Algorithm[] => {
-  _checkAlgorithms();
-  return _algorithms.filter(a => !_includes(exclude, a.id));
-};
-
 export const getAlgorithmsMap = (exclude: string[] = []): Dictionary<Algorithm> => {
-  _checkAlgorithms();
-  const algs = _algorithms.filter(a => !_includes(exclude, a.id));
+  const algs = getAlgorithms().filter(a => !_includes(exclude, a.id));
   return _reduce(algs, (as, a) => {
     as[a.id] = a;
     return as;
   }, <Dictionary<Algorithm>>{});
 };
-
-
-export const getAlgorithm = (code: string): Algorithm|undefined => {
-  _checkAlgorithms();
-  return _algorithms.find(a => a.id === code);
-}
 
 export const getAlignment = (cid1: string, cid2: string): PlaySudokuCellAlignment => {
   const id1 = cid1.split('.');
@@ -492,6 +465,55 @@ export const getGroups = (sdk: PlaySudoku, cids: string[]): PlaySudokuGroup[] =>
   return <PlaySudokuGroup[]>groups
     .map(gid => sdk.groups[gid])
     .filter(g => !!g);
+}
+
+/**
+ * Restituisce l'elenco dei gruppi a cui appartengono almeno una delle celle passate
+ * @param sdk
+ * @param cids
+ */
+export const getAllGroups = (sdk: PlaySudoku, cids: string[]): PlaySudokuGroup[] => {
+  const gids: any = {};
+  (cids||[]).forEach(cid => {
+    const idi = decodeCellId(cid);
+    gids[groupId(SudokuGroupType.row, idi.row)] = true;
+    gids[groupId(SudokuGroupType.column, idi.col)] = true;
+    gids[groupId(SudokuGroupType.square, idi.sqr)] = true;
+  });
+  return <PlaySudokuGroup[]>_keys(gids)
+    .map(gid => sdk.groups[gid])
+    .filter(g => !!g);
+}
+
+export const isTheSame = (i1: CellInfo, i2: CellInfo): boolean => {
+  return i1.col === i2.col && i1.row === i2.row && i1.sqr === i2.sqr;
+}
+
+export const canView = (i1: CellInfo, i2: CellInfo): boolean => {
+  return i1.col === i2.col || i1.row === i2.row || i1.sqr === i2.sqr && !isTheSame(i1, i2);
+}
+
+/**
+ * restituisce tutte le celle non valorizzate che "vedono" contemporaneamente tutte quelle passate
+ * @param sdk
+ * @param cids
+ */
+export const getByVisibles = (sdk: PlaySudoku, cids: string[]): PlaySudokuCell[] => {
+  const infos = cids.map(cid => decodeCellId(cid));
+  const excl: any = _reduce(cids, (x, cid) => ({...x, [cid]: true}), {});
+  const res: any = {};
+  const rescell: PlaySudokuCell[] = [];
+  traverseSchema(sdk, (cid, cell) => {
+    if (!parseValue(cell?.value||'')) {
+      const info = decodeCellId(cid);
+      if (!infos.find(i => !canView(info, i)) && !excl[cid]) {
+        // console.log('la cella', cid, 'può "vedere" contemporaneamente', cids);
+        if (!res[cid]) rescell.push(<PlaySudokuCell>cell);
+        res[cid] = true;
+      }
+    }
+  });
+  return rescell;
 }
 
 export const getSudokuForUserSettings = (sdk: PlaySudoku|undefined): Partial<PlaySudoku>|undefined => {

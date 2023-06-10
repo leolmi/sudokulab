@@ -22,6 +22,8 @@ export class OneCellForValueAlgorithm extends Algorithm {
   name = 'One cell for value';
   icon = 'crop_free';
   type = AlgorithmType.solver;
+  title = 'esiste una sola cella nel gruppo che possa ospitare quel determinato valore';
+  description = 'Rappresenta l\'approccio più basico e più immediato al quale è stato associato un punteggio minimo';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
     let ocid = '';
     let ocvl = '';
@@ -48,6 +50,7 @@ export class OneCellForValueAlgorithm extends Algorithm {
     return new AlgorithmResult({
       algorithm: this.id,
       applied,
+      value: cell?.value,
       //description: getDescription(applied, cell),
       descLines: [new AlgorithmResultLine({
         cell: cell?.id,
@@ -55,7 +58,7 @@ export class OneCellForValueAlgorithm extends Algorithm {
         withValue: true
       })],
       cells: [ocid]
-    });
+    }, sdk);
   }
 }
 

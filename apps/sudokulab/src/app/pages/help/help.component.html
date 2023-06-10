@@ -58,30 +58,14 @@
       risoluzione che utilizzasse una serie di algoritmi classificabili, la cui applicazione contribuisse a definire una
       valutazione finale quindi un grado di difficoltà.</p>
 
-    <p>Si sono individuati quindi 5 algoritmi al momento, dividendoli in due famiglie: </p>
+    <p>Si sono individuati quindi {{algorithms.length}} algoritmi al momento, dividendoli in due famiglie: </p>
     <ul>
       <li><b>risolutivi</b>: portano alla valorizzazione di una cella;</li>
-      <li><b>contributivi</b>: contribuiscono alla ricerca delle celle da valorizzare generalmente eliminando valori possibili;</li>
+      <li><b>contributivi</b>: contribuiscono alla ricerca delle celle da valorizzare eliminando valori possibili;</li>
     </ul>
     <p>Quindi gli algoritmi:</p>
     <ul>
-      <li><b>One Cell For Value</b>: <i>(risulutivo) esiste una sola cella nel gruppo che possa ospitare quel determinato valore</i>.<br>
-        Rappresenta l'approccio più basico e più immediato al quale è stato associato un punteggio minimo;</li>
-      <li><b>One Value For Cell</b>: <i>(risulutivo) esiste un solo valore possibile per la cella nel gruppo</i>.<br>
-        Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un
-        punteggio più alto rispetto al precedente;</li>
-      <li><b>Twins</b>: <i>(contributivo) quando una coppia di celle all'interno di un gruppo può contenere la stessa coppia di valori
-        questi possono essere esclusi da tutte le altre celle del gruppo e dagli altri gruppi che le contengono</i>.<br>
-        Complesso poco più del precedente non risolve un valore di una cella ma contribuisce con i precedenti.
-        Per questo ha un punteggio leggermente più alto del precedente;</li>
-      <li><b>Alignment on group</b>: <i>(contributivo) quando alcune celle all'interno di un gruppo sono le uniche a poter contenere un
-        determinato valore e generano un allineamento che coinvolge altri gruppi, in questi secondi è possibile escludere
-        quel valore da quelli possibili</i>.<br>Poco più complesso del precedente, anche questo non risolve un valore di
-        una cella ma contribuisce con i precedenti.</li>
-      <li><b>Try Number</b>: <i>(risulutivo) se una determinata cella può ospitare N numeri, si divide la soluzione in N schemi, uno
-        per ogni valore</i>.<br>Come si è già detto, rappresenta l'applicazione del metodo <i>brutal force</i>.
-        Questo algoritmo sceglie la prima cella con il numero di valori possibili più basso. Ovviamente rappresenta la
-        difficolta maggiore tra tutti gli algoritmi poiché nella pratica si traduce nell'andare per tentativi.</li>
+      <li *ngFor="let alg of algorithms"><b>{{alg.name}}</b>: <i>({{TYPEDESC[alg.type]}}) {{alg.title}}</i>.<br>{{alg.description}};</li>
     </ul>
     <p>Il risolutore quindi applica gli algoritmi visti in maniera sequenziale fino a raggiungere la soluzione ed ogni
       algoritmo applicato incrementa il punteggio dello schema fino al raggiungimento di un valore che ne determina
