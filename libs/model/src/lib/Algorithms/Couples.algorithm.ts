@@ -21,7 +21,7 @@ export const COUPLES_ALGORITHM = 'Couples';
  */
 export class CouplesAlgorithm extends Algorithm {
   id = COUPLES_ALGORITHM;
-  factor = '+80';
+  factor = '+150';
   name = 'Couples over groups';
   icon = 'move_down';
   type = AlgorithmType.support;
@@ -36,7 +36,7 @@ export class CouplesAlgorithm extends Algorithm {
     const done: Dictionary<boolean> = {};
 
     // TODO: eclusione
-    if (applied) {
+    //if (applied) {
       _forEach(sdk.groups, (g_XYZ) => {
         // ricerca le coppie di valori nel gruppo
         g_XYZ?.cells.forEach((cid_XY) => {
@@ -82,6 +82,7 @@ export class CouplesAlgorithm extends Algorithm {
                                   applied = true;
                                   descLines.push(new AlgorithmResultLine({
                                     cell: c.id,
+                                    others: [cid_XY, cid_YZ, cid_ZX],
                                     description: `On cell ${getUserCoord(c.id)} the possible values [${removed.join(',')}] have been removed`
                                   }));
                                   applied_now = true;
@@ -103,7 +104,7 @@ export class CouplesAlgorithm extends Algorithm {
           }
         });
       });
-    }
+    //}
 
     return new AlgorithmResult({
       algorithm: this.id,
