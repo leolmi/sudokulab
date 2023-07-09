@@ -1,14 +1,15 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { SudokuDto } from '../../model/sudoku.dto';
-import { SudokuDoc } from '../../model/sudoku.interface';
-import { validate } from './sudoku.logic';
-import {ImgDto, ManageDto, OcrOptions, OcrResult, SDK_PREFIX, SDK_PREFIX_W, Sudoku} from '@sudokulab/model';
+import {Inject, Injectable, OnModuleInit} from '@nestjs/common';
+import {Model} from 'mongoose';
+import {SudokuDto} from '../../model/sudoku.dto';
+import {SudokuDoc} from '../../model/sudoku.interface';
+import {validate} from './sudoku.logic';
+import {ImgDto, isMutation, ManageDto, OcrOptions, OcrResult, SDK_PREFIX, SDK_PREFIX_W, Sudoku} from '@sudokulab/model';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ocr } from '../ocr/ocr';
-import { manage } from './sudoku.management';
+import {ocr} from '../ocr/ocr';
+import {manage} from './sudoku.management';
 import {environment} from "../../environments/environment";
+import {cloneDeep as _clone} from 'lodash';
 
 @Injectable()
 export class SudokuService implements OnModuleInit {
@@ -21,21 +22,37 @@ export class SudokuService implements OnModuleInit {
 
   async check(sudokuDto: SudokuDto): Promise<SudokuDoc|undefined> {
     if (environment.debug) console.log(...SDK_PREFIX_W, 'check schema', sudokuDto);
-    const validation_error = validate(sudokuDto);
-    if (!!validation_error) {
-      console.error(...SDK_PREFIX, validation_error, sudokuDto);
-      return Promise.resolve(undefined);
-    }
     return new Promise<SudokuDoc|undefined>((resolve, reject) => {
-      this.sudokuModel
-        .updateOne({ _id: sudokuDto._id }, { $setOnInsert: sudokuDto }, { upsert: true })
-        .then(resp => {
-          if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result:', resp, '\n\rfor schema:', sudokuDto.fixed);
-          resolve(resp.upsertedCount>0 ? <SudokuDoc>sudokuDto : undefined);
-        }, err => {
-          if (environment.debug) console.error(...SDK_PREFIX_W, 'uploaded schema error', err);
-          reject(err);
-        });
+      const validation_error = validate(sudokuDto);
+      if (!!validation_error) {
+        handleError(reject, validation_error);
+      } else {
+        this.sudokuModel.findOne({ _id: sudokuDto._id })
+          .then(sdk_byid => {
+            if (!sdk_byid) {
+              this.sudokuModel.create(sudokuDto).then(
+                () => handleSuccess(resolve, sudokuDto, 'schema created successfully'),
+                (err) => handleError(reject, err))
+            } else if (isMutation(sdk_byid, sudokuDto)) {
+              this.sudokuModel.findOneAndUpdate({ _id: sdk_byid._id }, {
+                $set: {info: _clone(sdk_byid.info)}
+              }).then(
+                () => handleSuccess(resolve, sudokuDto, 'schema updated successfully'),
+                (err) => handleError(reject, err))
+            } else {
+              handleError(reject, 'no mutations found')
+            }
+          }, err => handleError(reject, err));
+        // this.sudokuModel
+        //   .updateOne({_id: sudokuDto._id}, {$setOnInsert: sudokuDto}, {upsert: true})
+        //   .then(resp => {
+        //     if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result:', resp, '\n\rfor schema:', sudokuDto.fixed);
+        //     resolve((resp.upsertedCount > 0) ? <SudokuDoc>sudokuDto : undefined);
+        //   }, err => {
+        //     if (environment.debug) console.error(...SDK_PREFIX_W, 'uploaded schema error', err);
+        //     reject(err);
+        //   });
+      }
     });
   }
 
@@ -71,3 +88,13 @@ export class SudokuService implements OnModuleInit {
     return func ? func(this.sudokuModel, data.args) : Promise.reject('Unknown operation');
   }
 }
+
+const handleSuccess = (handler: (doc: SudokuDoc) => any, sdk: SudokuDto, message?: string) => {
+  if (environment.debug) console.log(...SDK_PREFIX_W, message||'document saved', sdk);
+  handler(<SudokuDoc>sdk);
+};
+
+const handleError = (handler: (e: any) => any, err: any, args?: any) => {
+  console.error(...SDK_PREFIX_W, err, args||'');
+  handler(err);
+};
