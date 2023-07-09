@@ -33,16 +33,20 @@ export class SudokuService implements OnModuleInit {
               this.sudokuModel.create(sudokuDto).then(
                 () => handleSuccess(resolve, sudokuDto, 'schema created successfully'),
                 (err) => handleError(reject, err))
-            } else if (isMutation(sdk_byid, sudokuDto)) {
-              this.sudokuModel.findOneAndUpdate({ _id: sdk_byid._id }, {
-                $set: {info: _clone(sdk_byid.info)}
-              }).then(
-                () => handleSuccess(resolve, sudokuDto, 'schema updated successfully'),
-                (err) => handleError(reject, err))
+            } else if (isMutation(sdk_byid.info, sudokuDto.info)) {
+              this.sudokuModel.findOneAndUpdate(
+                { _id: sdk_byid._id },
+                { $set: { info: _clone(sdk_byid.info) } },
+                { new: true, upsert: false, remove: false, projection: {} },
+                (err, u) => err ?
+                  handleError(reject, err) :
+                  handleSuccess(resolve, u, 'schema updated successfully'));
             } else {
               handleError(reject, 'no mutations found')
             }
           }, err => handleError(reject, err));
+
+
         // this.sudokuModel
         //   .updateOne({_id: sudokuDto._id}, {$setOnInsert: sudokuDto}, {upsert: true})
         //   .then(resp => {

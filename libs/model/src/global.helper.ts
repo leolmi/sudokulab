@@ -74,7 +74,7 @@ export const updateBehaviorSubject = <T>(bs$: BehaviorSubject<T>, handler: (c: T
   });
 
 export const isMutation = (o: any, c: any): boolean =>
-  !!o && !!c && !!_keys(c||{}).find(k => !_isEqual(c[k],o[k]));
+  !!o && !!c && JSON.stringify(o) !== JSON.stringify(c);
 
 export const isCompact = (ws: SudokulabWindowService): boolean => (ws.nativeWindow?.innerWidth || 2000) < SUDOKU_COMPACT_WIDTH;
 
