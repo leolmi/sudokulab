@@ -40,6 +40,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
     _forEach(sdk.groups, (g) => {
       // ricerca i valori che sono presenti solo in celle allineate
       _forEach(g?.availableOnCells||{}, (cls, v) => {
+        // cids = identificativi delle celle con valore "v" allineato
         const cids = _keys(cls);
         if (getValuesAlignment(cids, sdk?.sudoku?.rank) !== PlaySudokuCellAlignment.none) {
           // ricerca i gruppi comuni a tutte le celle allineate
@@ -54,6 +55,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
                   applied = true;
                   descLines.push(new AlgorithmResultLine({
                     cell: cid,
+                    others: cids,
                     description: `On cell ${getUserCoord(cid)} the possible values [${removed.join(',')}] have been removed`
                   }));
                 }

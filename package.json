@@ -5,7 +5,8 @@
   "scripts": {
     "ng": "nx",
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
-    "start": "node dist/apps/api/main.js",
+    "start": "nx serve",
+    "start-api": "node dist/apps/api/main.js",
     "build": "gulp deploy"
   },
   "private": true,

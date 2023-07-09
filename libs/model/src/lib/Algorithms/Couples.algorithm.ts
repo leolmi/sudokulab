@@ -35,76 +35,73 @@ export class CouplesAlgorithm extends Algorithm {
 
     const done: Dictionary<boolean> = {};
 
-    // TODO: eclusione
-    //if (applied) {
-      _forEach(sdk.groups, (g_XYZ) => {
-        // ricerca le coppie di valori nel gruppo
-        g_XYZ?.cells.forEach((cid_XY) => {
-          if (!done[cid_XY]) {
-            // cella 1 (SINISTRA)
-            const cell_XY = sdk.cells[cid_XY];
-            const XY = cell_XY?.availables || [];
-            if (XY.length === 2) {
-              // ricerca una seconda cella con una coppia che contenga uno dei due valori (non entrambi)
-              // data la coppia XY, trovati i complementari YZ, per ognuno ricerca il
-              // complementare (ZX) destro o sinitro cioè
-              // - su un gruppo che "vede" solo XY (sinistro) o
-              // - su uno che "vede" solo YZ (destro)
-              g_XYZ?.cells.forEach((cid_YZ) => {
-                const cell_YZ = sdk.cells[cid_YZ];
-                const YZ = cell_YZ?.availables || [];
-                const Y = _intersection(XY, YZ);
-                if (!done[cid_YZ] && cid_YZ !== cid_XY && YZ.length === 2 && Y.length === 1) {
-                  const X = _difference(XY, YZ);
-                  // ricerca del complementare destro (su ZX):
-                  getAllGroups(sdk, [cid_YZ]).find(g_YZX => {
-                    if (g_YZX.id !== g_XYZ.id) {
-                      // elenco delle celle che rispondono ai requisiti:
-                      // tutte quelle che generano una tripletta XY - YZ - ZH
-                      g_YZX.cells.forEach(cid_ZX => {
-                        const cell_ZX = sdk.cells[cid_ZX];
-                        const ZX = cell_ZX?.availables || [];
-                        const Z = _intersection(YZ, ZX);
-                        if (!done[cid_ZX] && cid_ZX !== cid_YZ && YZ.length === 2 && Z.length === 1) {
-                          const X2 = _difference(ZX, YZ);
-                          if (X2.length === 1 && X2[0] === X[0] && Y[0] !== Z[0] && X[0] !== Z[0]) {
+    _forEach(sdk.groups, (g_XYZ) => {
+      // ricerca le coppie di valori nel gruppo
+      g_XYZ?.cells.forEach((cid_XY) => {
+        if (!done[cid_XY]) {
+          // cella 1 (SINISTRA)
+          const cell_XY = sdk.cells[cid_XY];
+          const XY = cell_XY?.availables || [];
+          if (XY.length === 2) {
+            // ricerca una seconda cella con una coppia che contenga uno dei due valori (non entrambi)
+            // data la coppia XY, trovati i complementari YZ, per ognuno ricerca il
+            // complementare (ZX) destro o sinitro cioè
+            // - su un gruppo che "vede" solo XY (sinistro) o
+            // - su uno che "vede" solo YZ (destro)
+            g_XYZ?.cells.forEach((cid_YZ) => {
+              const cell_YZ = sdk.cells[cid_YZ];
+              const YZ = cell_YZ?.availables || [];
+              const Y = _intersection(XY, YZ);
+              if (!done[cid_YZ] && cid_YZ !== cid_XY && YZ.length === 2 && Y.length === 1) {
+                const X = _difference(XY, YZ);
+                // ricerca del complementare destro (su ZX):
+                getAllGroups(sdk, [cid_YZ]).find(g_YZX => {
+                  if (g_YZX.id !== g_XYZ.id) {
+                    // elenco delle celle che rispondono ai requisiti:
+                    // tutte quelle che generano una tripletta XY - YZ - ZH
+                    g_YZX.cells.forEach(cid_ZX => {
+                      const cell_ZX = sdk.cells[cid_ZX];
+                      const ZX = cell_ZX?.availables || [];
+                      const Z = _intersection(YZ, ZX);
+                      if (!done[cid_ZX] && cid_ZX !== cid_YZ && YZ.length === 2 && Z.length === 1) {
+                        const X2 = _difference(ZX, YZ);
+                        if (X2.length === 1 && X2[0] === X[0] && Y[0] !== Z[0] && X[0] !== Z[0]) {
 
-                            console.log(`APPLICABILITA' DELL'ALGORITMO COUPLES:\n\tcell XY`, cell_XY,
-                              '\n\tcell YZ', cell_YZ, '\n\tcell ZX', cell_ZX);
+                          console.log(`APPLICABILITA' DELL'ALGORITMO COUPLES:\n\tcell XY`, cell_XY,
+                            '\n\tcell YZ', cell_YZ, '\n\tcell ZX', cell_ZX);
 
-                            // trovato la tripletta corretta...
-                            // può eliminare X dalle celle che vedono contemporaneamente cell_XY & cell_ZX
-                            let applied_now = false;
-                            getByVisibles(sdk, [cid_XY, cid_ZX])
-                              .forEach(c => {
-                                const removed = _remove(sdk.cells[c.id]?.availables || [], av => av === X[0]);
-                                if (removed.length > 0) {
-                                  applied = true;
-                                  descLines.push(new AlgorithmResultLine({
-                                    cell: c.id,
-                                    others: [cid_XY, cid_YZ, cid_ZX],
-                                    description: `On cell ${getUserCoord(c.id)} the possible values [${removed.join(',')}] have been removed`
-                                  }));
-                                  applied_now = true;
-                                }
-                              });
-                            // vanno aggiornate le collezioni altrimenti non è corretta l'esecuzione successiva
-                            if (applied_now) checkAvailables(sdk);
-                          }
+                          // trovato la tripletta corretta...
+                          // può eliminare X dalle celle che vedono contemporaneamente cell_XY & cell_ZX
+                          let applied_now = false;
+                          getByVisibles(sdk, [cid_XY, cid_ZX])
+                            .forEach(c => {
+                              const removed = _remove(sdk.cells[c.id]?.availables || [], av => av === X[0]);
+                              if (removed.length > 0) {
+                                applied = true;
+                                descLines.push(new AlgorithmResultLine({
+                                  cell: c.id,
+                                  others: [cid_XY, cid_YZ, cid_ZX],
+                                  description: `On cell ${getUserCoord(c.id)} the possible values [${removed.join(',')}] have been removed`
+                                }));
+                                applied_now = true;
+                              }
+                            });
+                          // vanno aggiornate le collezioni altrimenti non è corretta l'esecuzione successiva
+                          if (applied_now) checkAvailables(sdk);
                         }
-                      });
-                    }
-                  });
+                      }
+                    });
+                  }
+                });
 
-                  // ricerca del complementare sinistro:
-
-                }
-              });
-            }
+                // ricerca del complementare sinistro:
+                // TODO ...
+              }
+            });
           }
-        });
+        }
       });
-    //}
+    });
 
     return new AlgorithmResult({
       algorithm: this.id,
