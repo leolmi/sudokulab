@@ -27,35 +27,15 @@ export class SudokuService implements OnModuleInit {
       if (!!validation_error) {
         handleError(reject, validation_error);
       } else {
-        this.sudokuModel.findOne({ _id: sudokuDto._id })
-          .then(sdk_byid => {
-            if (!sdk_byid) {
-              this.sudokuModel.create(sudokuDto).then(
-                () => handleSuccess(resolve, sudokuDto, 'schema created successfully'),
-                (err) => handleError(reject, err))
-            } else if (isMutation(sdk_byid.info, sudokuDto.info)) {
-              this.sudokuModel.findOneAndUpdate(
-                { _id: sdk_byid._id },
-                { $set: { info: _clone(sdk_byid.info) } },
-                { new: true, upsert: false, remove: false, projection: {} },
-                (err, u) => err ?
-                  handleError(reject, err) :
-                  handleSuccess(resolve, u, 'schema updated successfully'));
-            } else {
-              handleError(reject, 'no mutations found')
-            }
-          }, err => handleError(reject, err));
-
-
-        // this.sudokuModel
-        //   .updateOne({_id: sudokuDto._id}, {$setOnInsert: sudokuDto}, {upsert: true})
-        //   .then(resp => {
-        //     if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result:', resp, '\n\rfor schema:', sudokuDto.fixed);
-        //     resolve((resp.upsertedCount > 0) ? <SudokuDoc>sudokuDto : undefined);
-        //   }, err => {
-        //     if (environment.debug) console.error(...SDK_PREFIX_W, 'uploaded schema error', err);
-        //     reject(err);
-        //   });
+        this.sudokuModel
+          .updateOne({_id: sudokuDto._id}, {$set: sudokuDto}, {upsert: true})
+          .then(resp => {
+            if (environment.debug) console.log(...SDK_PREFIX_W, 'uploaded schema result:', resp, '\n\rfor schema:', sudokuDto.fixed);
+            resolve((resp.upsertedCount > 0) ? <SudokuDoc>sudokuDto : undefined);
+          }, err => {
+            if (environment.debug) console.error(...SDK_PREFIX_W, 'uploaded schema error', err);
+            reject(err);
+          });
       }
     });
   }
