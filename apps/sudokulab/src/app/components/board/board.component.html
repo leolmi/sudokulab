@@ -11,20 +11,18 @@
            [class.pencil-mode]="!!(playSudoku$|async)?.options?.usePencil"
            *ngFor="let col of cols$|async">
         <div class="cell-container"
+             *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
+             fxLayout="row" fxLayoutAlign="center center"
              [ngStyle]="cellStyle$|async"
              (click)="select(col, row)"
-             fxLayout="row" fxLayoutAlign="center center"
-             *ngIf="((playSudoku$|async)?.cells||{})[col+'.'+row] as cell"
-             [ngClass]="{
-                'fixed': cell.fixed,
-                'selected': cell.id === (selected$|async),
-                'right-line': ((grline$|async)||{})[col],
-                'bottom-line': ((grline$|async)||{})[row],
-                'error': cell.error,
-                'highlight': ((highlights$|async)||{})[cell.id],
-                'highlight-secondary': ((otherHighlightsCells$|async)||{})[cell.id],
-                'highlight-cell': ((highlightsCell$|async)||{})[cell.id]
-             }">
+             [class.fixed]="cell.fixed"
+             [class.selected]="cell.id === (selected$|async)"
+             [class.right-line]="((grline$|async)||{})[col]"
+             [class.bottom-line]="((grline$|async)||{})[row]"
+             [class.error]="cell.error"
+             [class.highlight]="((highlights$|async)||{})[cell.id]"
+             [class.highlight-secondary]="((otherHighlightsCells$|async)||{})[cell.id]"
+             [class.highlight-cell]="((highlightsCell$|async)||{})[cell.id]">
           <div class="cell-value" [ngClass]="{'pulse': ((highlightStep$|async)||{})[cell.id]}">{{cell?.value}}</div>
           <sudokulab-cell-values
             *ngIf="!cell?.value"
