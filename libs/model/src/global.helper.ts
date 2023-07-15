@@ -100,7 +100,7 @@ export const saveUserSetting = (changes: SettingsChanges[]) => {
   try {
     const udata: any = userdata ? JSON.parse(userdata||'{}') : {};
     changes.forEach(c => _set(udata, c.path, c.data));
-    debug(() => console.log(...SDK_PREFIX_DEBUG, 'SAVE USER SETTINGS', udata));
+    debug(() => console.log(...SDK_PREFIX_DEBUG, 'SAVE USER SETTINGS', udata), 'user-data');
     localStorage.setItem(SUDOKULAB_SETTINGS_KEY, JSON.stringify(udata));
   } catch (err) {
     console.warn(SDK_PREFIX, 'Cannot save user data!', err);
@@ -118,14 +118,15 @@ export const setDebugMode = (on = true) => {
     console.log(err)
   }
 }
-export const isDebugMode = () => {
+export const isDebugMode = (level?: string) => {
   try {
-    return localStorage.getItem(SUDOKULAB_DEBUG_KEY) === 'active'
+    const debug_status = localStorage.getItem(SUDOKULAB_DEBUG_KEY)
+    return !!level ? debug_status === level : !!debug_status;
   } catch (err) {
     return false;
   }
 };
-export const debug = (handler: () => any): void => isDebugMode() ? handler() : null;
+export const debug = (handler: () => any, level?: string): void => isDebugMode(level) ? handler() : null;
 
 export const isValue = (v?: string, acceptX = false): boolean => {
   const effv = (v || '').trim();

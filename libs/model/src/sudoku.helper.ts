@@ -60,17 +60,28 @@ export const parseValue = (raw: string, rank?: number, acceptX = false): string 
   return value;
 }
 
+interface GroupValuesMaps {
+  v: Dictionary<boolean>;
+  f: Dictionary<boolean>;
+}
+
 /**
- * Restituisce il dizionario
+ * Restituisce un doppio dizionario dei valori per gruppo: { v: { [valore]: true }, f: { [valore]: true } } dove:
+ * - `v`: individua i valori presenti
+ * - `f`: individua i valori fissi presenti
  * @param sdk
  * @param g
  */
-const _getGroupCellValuesMap = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<string> => {
-  return _reduce(g.cells, (m, cid) => {
-    const v = cid ? sdk?.cells[cid]?.value : '';
-    if (!!cid && !!v && isValue(v)) m[v] = `${m[v] || ''}${cid}`;
-    return m;
-  }, <Dictionary<string>>{});
+const _getGroupCellValuesMaps = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): GroupValuesMaps => {
+  return _reduce(g.cells, (gvm, cid) => {
+    const cell = sdk?.cells[cid];
+    const v = cid ? cell?.value : '';
+    if (!!cid && !!v && isValue(v)) {
+      gvm.v[v] = true;
+      if (cell?.fixed) gvm.f[v] = true;
+    }
+    return gvm;
+  }, <GroupValuesMaps>{ v: {}, f: {}});
 }
 
 export interface ResetSchemaOptions {
@@ -115,13 +126,12 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefo
     if (!g) return;
     // vettore valori di gruppo con tutti i valori reali (quelli numerici)
     // { v1: cid1..cidN, v2:.... }
-    const values = _getGroupCellValuesMap(sdk, g);
+    const vMaps = _getGroupCellValuesMaps(sdk, g);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
-    // g.cells.forEach(c => _remove(c.availables, av => !!values[av] && values[av] !== c.id));
     g.cells.forEach(cid => {
       const cell: any = sdk.cells[cid]||{};
       // elimina dagli availables i valori già presenti e diversi dal valore della cella stessa
-      _remove(cell.availables||[], (av: string) => av !== cell.value && !!values[av]);
+      _remove(cell.availables||[], (av: string) => (av !== cell.value || !!vMaps.f[av]) && !!vMaps.v[av]);
     });
   });
 }

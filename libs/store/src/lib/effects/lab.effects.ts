@@ -16,7 +16,6 @@ import {
   clear,
   getSchemaName,
   getSudokuForUserSettings,
-  getUserSetting,
   isValidValue,
   loadValues,
   MessageType,
@@ -24,7 +23,8 @@ import {
   PlaySudoku,
   resetAvailable,
   saveUserSetting,
-  SDK_PREFIX, SettingsChanges,
+  SDK_PREFIX,
+  SettingsChanges,
   Solver,
   solveStepToCell,
   Sudoku,
@@ -35,7 +35,6 @@ import {
 import {cloneDeep as _clone, extend as _extend, forEach as _forEach, last as _last} from 'lodash';
 import {saveAs} from 'file-saver';
 import {Router} from '@angular/router';
-import {calcAvailables} from "../actions";
 
 @Injectable()
 export class LabEffects {

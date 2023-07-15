@@ -7,6 +7,7 @@ export class PlaySudokuOptions {
     this.maxSplitSchema = SUDOKU_DEFAULT_MAXSPLIT;
     this.excludeTryAlgorithm = false;
     this.showPopupDetails = true;
+    this.highlightsDelay = 4000;
     Object.assign(this, o || {});
   }
   usePencil: boolean;
@@ -14,4 +15,5 @@ export class PlaySudokuOptions {
   maxSplitSchema: number;
   excludeTryAlgorithm: boolean;
   showPopupDetails: boolean;
+  highlightsDelay: number;
 }

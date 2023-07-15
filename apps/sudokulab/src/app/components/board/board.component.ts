@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import {
   cellId,
+  debug,
   decodeCellId,
   getAlgorithm,
   getDimension,
@@ -19,19 +20,31 @@ import {
   LabFacade,
   MessageType,
   PlaySudoku,
+  PlaySudokuOptions,
   SolveStepResult,
   SUDOKU_DEFAULT_RANK,
   SudokuFacade,
   SudokuMessage
 } from '@sudokulab/model';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {delay, filter, map, takeUntil, withLatestFrom} from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  take,
+  takeUntil,
+  withLatestFrom
+} from 'rxjs/operators';
 import { DestroyComponent } from '../DestroyComponent';
 import { Dictionary } from '@ngrx/entity';
 import { keys as _keys, last as _last, cloneDeep as _clone } from 'lodash';
 import {SOLVER_STEP_DETAILS} from "../../model";
+import * as equal from 'fast-deep-equal';
 
-const SHOW_INFO_TIMEOUT = 5000;
+const DEFAULT_SHOW_INFO_TIMEOUT = 5000;
 
 @Component({
   selector: 'sudokulab-board',
@@ -39,10 +52,10 @@ const SHOW_INFO_TIMEOUT = 5000;
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BoardComponent extends DestroyComponent implements OnDestroy, AfterViewInit {
-  private _hlTimeout: any = null;
-
-  @ViewChild('schemaElement') schemaElement: ElementRef|undefined = undefined;
+export class BoardComponent extends DestroyComponent implements OnDestroy {
+  @ViewChild('schemaElement') set schemaElement(e: ElementRef|undefined) {
+    this._element$.next(e);
+  };
   playSudoku$: Observable<PlaySudoku|undefined>;
   selected$: Observable<string>;
   cellStyle$: Observable<any>;
@@ -61,11 +74,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
   @Input() emptyText: string = '';
 
   @Input() set highLight(c: Dictionary<boolean>|null) {
-    if (c) {
-      if (this._hlTimeout) clearTimeout(this._hlTimeout);
-      this.highlightsCell$.next(c);
-      this._hlTimeout = setTimeout(() => this._clearHighlights(), SHOW_INFO_TIMEOUT);
-    }
+    if (c) this.highlightsCell$.next(c);
   };
 
   @Input() set otherHighLight(c: Dictionary<boolean>|null) {
@@ -85,27 +94,55 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
     this.highlightStep$ = _lab.selectHighlightCells$.pipe(takeUntil(this._destroy$));
 
 
-    this.rows$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
-    this.cols$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)));
-    this.cellStyle$ = combineLatest(this.playSudoku$, this._resize$, this._element$).pipe(map(([sdk, r, ele]) =>
-      getSchemaCellStyle(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
-    this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)));
-    this.showPencil$ = this.playSudoku$.pipe(map(s => !!s?.options.usePencil));
-    this.showAvailable$ = this.playSudoku$.pipe(map(s => !!s?.options.showAvailables));
-    this.highlights$ = this.stepInfos$.pipe(map(r => getHighlight(_last(r))));
+    this.rows$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)),
+        distinctUntilChanged((d1, d2) => equal(d1, d2)));
+    this.cols$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)),
+        distinctUntilChanged((d1, d2) => equal(d1, d2)));
+    this.cellStyle$ = combineLatest([this.playSudoku$, this._resize$, this._element$])
+        .pipe(map(([sdk, r, ele]) =>
+            getSchemaCellStyle(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
+    this.grline$ = this.playSudoku$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)),
+        distinctUntilChanged((d1, d2) => equal(d1, d2)));
+    this.showPencil$ = this.playSudoku$.pipe(map(s => !!s?.options.usePencil),
+        distinctUntilChanged());
+    this.showAvailable$ = this.playSudoku$.pipe(map(s => !!s?.options.showAvailables),
+        distinctUntilChanged((o1, o2) => equal(o1, o2)));
+    this.highlights$ = this.stepInfos$.pipe(map(r => getHighlight(_last(r))),
+        distinctUntilChanged((d1, d2) => equal(d1, d2)));
 
-    this.stepInfos$
-      .pipe(takeUntil(this._destroy$), map(r => getCellHighlight(_last(r))))
+    this.stepInfos$.pipe(
+        takeUntil(this._destroy$),
+        debounceTime(100),
+        map(r => getCellHighlight(_last(r))),
+        distinctUntilChanged((d1, d2) => equal(d1, d2)))
       .subscribe(hl => this.highlightsCell$.next(hl));
 
-    const stis$ = this.stepInfos$.pipe(takeUntil(this._destroy$), filter(si => (si||[]).length>0))
-    stis$.pipe(withLatestFrom(this.playSudoku$)).subscribe(([stis, sdk]) =>
-      this._showInfo(stis, !!sdk?.options?.showPopupDetails));
-    stis$.pipe(delay(SHOW_INFO_TIMEOUT)).subscribe(() => _lab.clearStepInfo());
+    const stis$ = this.stepInfos$.pipe(
+        takeUntil(this._destroy$),
+        debounceTime(100),
+        filter(si => (si||[]).length > 0),
+        withLatestFrom(this.playSudoku$));
 
-    this.highlightStep$
-      .pipe(filter(hls => _keys(hls).length>0), delay(2000))
+    stis$.subscribe(([ssr, sdk]) =>
+      this._showInfo(ssr, sdk?.options));
+    stis$.pipe(
+        switchMap(([ssr, sdk]) =>
+            of(ssr).pipe(delay(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
+                .subscribe(() => _lab.clearStepInfo());
+
+    this.highlightStep$.pipe(
+        filter(hls => _keys(hls).length>0),
+        withLatestFrom(this.playSudoku$),
+        switchMap(([hls, sdk]) => of(hls).pipe(
+            debounceTime(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
       .subscribe(() => _lab.clesrHighlightCells());
+
+    this.highlightsCell$.pipe(
+        filter(hlc => _keys(hlc).length>0),
+        withLatestFrom(this.playSudoku$),
+        switchMap(([hlc, sdk]) => of(hlc).pipe(
+            debounceTime(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
+        .subscribe(() => this._clearHighlights());
   }
 
   private _clearHighlights() {
@@ -113,20 +150,16 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
     this.otherHighlightsCells$.next({});
   }
 
-  private _showInfo(stis: SolveStepResult[], isAction: boolean) {
+  private _showInfo(stis: SolveStepResult[], options?: PlaySudokuOptions) {
     const alg = getAlgorithm(_last(stis)?.result?.algorithm||'');
     this._lab.raiseMessage(new SudokuMessage({
       message: alg?.name||'',
       type: MessageType.highlight,
-      duration: SHOW_INFO_TIMEOUT,
-      action: isAction ? 'Details' : '',
+      duration: options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT,
+      action: options?.showPopupDetails ? 'Details' : '',
       actionCode: SOLVER_STEP_DETAILS,
       data: _clone(stis)
     }));
-  }
-
-  ngAfterViewInit() {
-    this._element$.next(this.schemaElement);
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -141,7 +174,11 @@ export class BoardComponent extends DestroyComponent implements OnDestroy, After
   }
 
   select(col: number, row: number) {
-    this._lab.setActiveCell(cellId(col, row));
+    const cid = cellId(col, row);
+    this._lab.setActiveCell(cid);
+    debug(() => this.playSudoku$
+      .pipe(take(1))
+      .subscribe(sdk => console.log(`CELL (${cid})`, sdk?.cells[cid])));
   }
 }
 

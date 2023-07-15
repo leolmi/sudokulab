@@ -52,7 +52,7 @@ export class OptionsComponent implements AfterViewInit {
       map(([t, info]) => !!t || info?.session === SUDOKULAB_SESSION_DEVELOP || !environment.production));
     this.operationStatus$ = _sudoku.selectOperationStatus$;
     this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
-    this.playerOptions$ = _lab.selectActiveSudoku$.pipe(map(sdk => sdk?.options));
+    this.playerOptions$ = _lab.selectActiveSudoku$.pipe(map(sdk => new PlaySudokuOptions(sdk?.options)));
     // this.showAvailable$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
     // this.showPopupDetails$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
     this.valuesMode$ = _sudoku.selectValuesMode$;
@@ -99,6 +99,10 @@ export class OptionsComponent implements AfterViewInit {
     this._lab.updatePlayerOptions({ [target]: v });
   }
 
+  applyValue(v: any, target: string) {
+    this._lab.updatePlayerOptions({ [target]: getValue(v?.target) });
+  }
+
   manage(operation: string, args?: any) {
     this._sudoku.manage(ManagementKeyDialogComponent, operation, args);
   }
@@ -121,5 +125,14 @@ export class OptionsComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this._initGoogleApi();
+  }
+}
+
+
+const getValue = (e: HTMLInputElement): any => {
+  switch(e.type) {
+    case 'number': return e.valueAsNumber;
+    case 'date': return e.valueAsDate;
+    default: return e.value;
   }
 }
