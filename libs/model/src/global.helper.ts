@@ -144,3 +144,8 @@ export const combine = (...args: string[]): string => {
   });
   return args.join('/');
 }
+
+/**
+ * Vero se il browser supporta gli worker web
+ */
+export const isWorkerEnabled = () => typeof(Worker) !== "undefined";

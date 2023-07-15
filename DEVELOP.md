@@ -9,3 +9,6 @@
 - [ ] algoritmi: implementare popup con help per ogni algoritmo con esempio 
   predefinito o applicato allo schema attuale;
 - [ ] riconoscimeto schema in immagini;
+- [ ] possibilità di spostare tute le logiche di calcolo in workers dedicati 
+  - immediato (playing) 
+  - generatore
