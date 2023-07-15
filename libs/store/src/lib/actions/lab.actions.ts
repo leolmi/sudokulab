@@ -123,3 +123,9 @@ export const setStepDetails = createAction(
   '[SudokuLab.lab] set current step-info',
   props<{ steps?: SolveStepResult[] }>()
 );
+
+export const calcAvailables = createAction(
+  '[SudokuLab.lab] reset availables',
+  props<{ reset: boolean }>()
+);
+

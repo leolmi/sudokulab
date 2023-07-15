@@ -35,6 +35,7 @@ import {
 import {cloneDeep as _clone, extend as _extend, forEach as _forEach, last as _last} from 'lodash';
 import {saveAs} from 'file-saver';
 import {Router} from '@angular/router';
+import {calcAvailables} from "../actions";
 
 @Injectable()
 export class LabEffects {
@@ -146,6 +147,7 @@ export class LabEffects {
       this._store.select(SudokuSelectors.selectActiveCell)),
     filter(([a, sdk, cid]) => !!sdk && isValidValue(a.value, sdk?.sudoku?.rank)),
     switchMap(([a, sdk, cid]) => {
+      const actions: Action[] = [];
       const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
       const cell = changes.cells[cid];
       if (!cell || cell.fixed) return [];
@@ -160,22 +162,33 @@ export class LabEffects {
           cell.pencil = toggleValue(cell.pencil, value);
         }
         if (!!prev && cell.value !== prev) {
-          resetAvailable(changes);
-          checkAvailables(changes);
+          actions.push(SudokuActions.calcAvailables({ reset: true }));
         }
       } else {
         cell.pencil = [];
         cell.value = (value || '').trim();
-        if (!!prev && cell.value !== prev) resetAvailable(changes);
-        checkAvailables(changes);
+        actions.push(SudokuActions.calcAvailables({ reset: (!!prev && cell.value !== prev) }));
       }
       return [
         SudokuActions.updateSudoku({ changes }),
-        SudokuActions.checkState()
+        ...actions,
       ];
     })
   ));
 
+  calcAvailables$ = createEffect(() => this._actions$.pipe(
+    ofType(SudokuActions.calcAvailables),
+    debounceTime(250),
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
+    switchMap(([a, sdk]) => {
+      const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
+      if (a.reset) resetAvailable(changes);
+      checkAvailables(changes);
+      return [
+        SudokuActions.updateSudoku({ changes }),
+        SudokuActions.checkState()];
+    })
+  ))
 
   move$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.move),
