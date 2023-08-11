@@ -7,6 +7,7 @@ import {
   includes as _includes,
   intersection as _intersection,
   isArray as _isArray,
+  isFunction as _isFunction,
   isNumber as _isNumber,
   isObject as _isObject,
   isString as _isString,
@@ -334,6 +335,11 @@ export const toggleValue = (vls: string[], value: string): string[] => {
 
 export const isDirectionKey = (direction: string): boolean => {
   return _keys(AVAILABLE_DIRECTIONS).indexOf(direction)>-1;
+}
+
+export const clearEvent = (e: any) => {
+  if (_isFunction(e?.stopPropagation)) e.stopPropagation();
+  if (_isFunction(e?.preventDefault)) e.preventDefault();
 }
 
 export const geEditFixedCount = (sdk: EditSudoku|undefined): number => {

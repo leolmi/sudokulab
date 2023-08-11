@@ -1,8 +1,8 @@
 import {
   checkAvailables,
-  clear,
+  clear, isValidValue,
   MessageType,
-  PlaySudoku,
+  PlaySudoku, PlaySudokuCell, PlaySudokuOptions,
   resetAvailable,
   Solver,
   SudokuMessage,
@@ -79,6 +79,26 @@ export const togglePencil = (sdk: PlaySudoku): boolean => {
 }
 
 /**
+ * Imposta il valore della cella
+ * @param cell
+ * @param value
+ * @param options
+ */
+export const applyCellValue = (cell?: PlaySudokuCell, value?: string, options?: PlaySudokuOptions): boolean => {
+  if (!cell || cell.fixed) return false;
+  if (!isValidValue(value||'')) return false;
+  if (value === 'Delete') value = '';
+  if (!!options?.usePencil) {
+    cell.value = '';
+    cell.pencil = !value ? [] : toggleValue(cell.pencil, value);
+  } else {
+    cell.pencil = [];
+    cell.value = (value || '').trim();
+  }
+  return true;
+}
+
+/**
  * imposta il valore sulla cella o sui valori possibili
  * @param sdk
  * @param cellId
@@ -87,25 +107,7 @@ export const togglePencil = (sdk: PlaySudoku): boolean => {
 export const setCellValue = (sdk: PlaySudoku, cellId: string, value: string): boolean => {
   if (cellId) {
     const cell = sdk.cells[cellId];
-    if (!cell || cell.fixed) return false;
-    value = (value||'').trim();
-    if (value === 'Delete') value = '';
-
-    if (sdk.options.usePencil) {
-      if (cell) {
-        cell.value = '';
-        if (!value) {
-          cell.pencil = [];
-        } else {
-          cell.pencil = toggleValue(cell.pencil, value);
-        }
-        return true;
-      }
-    } else if (cell) {
-      cell.pencil = [];
-      cell.value = value;
-      return true;
-    }
+    return applyCellValue(cell, value, sdk?.options);
   }
   return false;
 }

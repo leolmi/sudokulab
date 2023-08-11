@@ -11,27 +11,25 @@ import {
 import {DestroyComponent} from "../DestroyComponent";
 import {
   BOARD_DATA,
-  BoardAction,
   BoardData,
   cellId,
+  clearEvent,
   getDimension,
   getLinesGroups,
   getSchemaCellStyle,
   isDirectionKey,
-  isValidValue,
   moveOnDirection,
   PlaySudoku,
   PlaySudokuCell,
-  PlaySudokuOptions,
   SUDOKU_DEFAULT_RANK,
-  SudokuFacade,
-  toggleValue
+  SudokuFacade
 } from "@sudokulab/model";
 import {combineLatest, Observable} from "rxjs";
 import {BoardWorkerArgs, BoardWorkerData} from "./board-worker.model";
-import {distinctUntilChanged, map, withLatestFrom} from "rxjs/operators";
+import {distinctUntilChanged, map, takeUntil, withLatestFrom} from "rxjs/operators";
 import {cloneDeep as _clone} from 'lodash';
 import * as equal from "fast-deep-equal";
+import {applyCellValue} from "./board-worker.logic";
 
 
 @Component({
@@ -91,11 +89,9 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
       });
 
     // intercetta i valori
-    this.board.value$.pipe(
-      withLatestFrom(this.board.sdk$, this.board.activeCellId$))
-      .subscribe(([value, sdk, acid]) => {
-        if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{ value, sdk, action: BoardAction.value, cellId: acid });
-      });
+    this.board.value$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((value) => this.keyEvent(<KeyboardEvent>{ key: value }));
   }
 
   private _updateSdk(handler: (sdk: PlaySudoku, cell?: PlaySudokuCell) => boolean) {
@@ -111,13 +107,12 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
   keyEvent(e: KeyboardEvent) {
     const sdk = this.board.sdk$.value;
     if (isDirectionKey(e?.key)) {
-      e.stopPropagation();
-      e.preventDefault();
+      clearEvent(e);
       const target = moveOnDirection(this.board.activeCellId$.value, sdk.sudoku, e?.key);
       this.select(target?.col || 0, target?.row || 0);
     } else {
       this._updateSdk((sdk, cell) =>
-        setCellValue(cell, (e?.key||'').trim(), sdk.options));
+        applyCellValue(cell, e?.key||'', sdk.options));
     }
   }
 
@@ -131,25 +126,6 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
   }
 }
 
-/**
- * Imposta il valore della cella
- * @param cell
- * @param value
- * @param options
- */
-const setCellValue = (cell?: PlaySudokuCell, value?: string, options?: PlaySudokuOptions): boolean => {
-  if (!cell || cell.fixed) return false;
-  if (!isValidValue(value||'')) return false;
-  if (value === 'Delete') value = '';
-  if (!!options?.usePencil) {
-    cell.value = '';
-    cell.pencil = !value ? [] : toggleValue(cell.pencil, value);
-  } else {
-    cell.pencil = [];
-    cell.value = (value || '').trim();
-  }
-  return true;
-}
 
 /**
  * gestisce le modifiche effettuate dall'worker
