@@ -30,6 +30,7 @@ export abstract class LabFacade implements Facade {
   abstract download(): void;
   abstract upload(): void;
   abstract stepInfo(): void;
+  abstract setStepInfos(infos: SolveStepResult[]): void;
   abstract clearStepInfo(): void;
   abstract raiseMessage(message: SudokuMessage): void;
   abstract updateSchemasOptions(changes: Partial<SchemasOptions>): void;

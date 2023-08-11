@@ -11,6 +11,7 @@ import {
 import {DestroyComponent} from "../DestroyComponent";
 import {
   BOARD_DATA,
+  BoardAction,
   BoardData,
   cellId,
   clearEvent,
@@ -18,18 +19,19 @@ import {
   getLinesGroups,
   getSchemaCellStyle,
   isDirectionKey,
+  LabFacade,
   moveOnDirection,
   PlaySudoku,
   PlaySudokuCell,
   SUDOKU_DEFAULT_RANK,
   SudokuFacade
 } from "@sudokulab/model";
-import {combineLatest, Observable} from "rxjs";
-import {BoardWorkerArgs, BoardWorkerData} from "./board-worker.model";
-import {distinctUntilChanged, map, takeUntil, withLatestFrom} from "rxjs/operators";
+import {BehaviorSubject, combineLatest, Observable} from "rxjs";
+import {BoardWorkerArgs, BoardWorkerData, BoardWorkerHighlights} from "./board-worker.model";
+import {debounceTime, distinctUntilChanged, filter, map, takeUntil, withLatestFrom} from "rxjs/operators";
 import {cloneDeep as _clone} from 'lodash';
 import * as equal from "fast-deep-equal";
-import {applyCellValue} from "./board-worker.logic";
+import {applyCellValue, isEmptyHihlights} from "./board-worker.logic";
 
 
 @Component({
@@ -50,20 +52,26 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
   cellStyle$: Observable<any>;
   showPencil$: Observable<boolean>;
   showAvailable$: Observable<boolean>;
-  gridline$: Observable<{[id: number]: boolean}>;
+  highlights$: BehaviorSubject<BoardWorkerHighlights>;
+  gridLines$: Observable<{[id: number]: boolean}>;
 
   @Input()
   emptyText: string = 'select a schema';
 
   constructor(_sudoku: SudokuFacade,
+              _lab: LabFacade,
               @Inject(BOARD_DATA) public board: BoardData) {
     super(_sudoku);
+    this.highlights$ = new BehaviorSubject<BoardWorkerHighlights>(BoardWorkerHighlights.empty);
+
     if (board.isWorkerAvailable) {
       this._worker = new Worker(new URL('./board.worker', import.meta.url));
       this._worker.onmessage = (e: MessageEvent) => {
         const data = <BoardWorkerData>e.data;
         handleWorkerSdk(board, data);
         if (data.message) _sudoku.raiseMessage(data.message);
+        this.highlights$.next(data.highlights || BoardWorkerHighlights.empty);
+        if (data.infos) _lab.setStepInfos(data.infos);
       }
     }
 
@@ -74,7 +82,7 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
     this.cellStyle$ = combineLatest([board.sdk$, this._resize$, this._element$])
       .pipe(map(([sdk, r, ele]) =>
         getSchemaCellStyle(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
-    this.gridline$ = board.sdk$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)),
+    this.gridLines$ = board.sdk$.pipe(map(s => getLinesGroups(s?.sudoku?.rank)),
       distinctUntilChanged((d1, d2) => equal(d1, d2)));
     this.showPencil$ = board.sdk$.pipe(map(s => !!s?.options.usePencil),
       distinctUntilChanged());
@@ -85,13 +93,28 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
     this.board.action$.pipe(
       withLatestFrom(this.board.sdk$))
       .subscribe(([action, sdk]) => {
-        if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{ action, sdk });
+        if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{action, sdk});
       });
 
     // intercetta i valori
     this.board.value$
       .pipe(takeUntil(this._destroy$))
-      .subscribe((value) => this.keyEvent(<KeyboardEvent>{ key: value }));
+      .subscribe((value) => this.keyEvent(<KeyboardEvent>{key: value}));
+
+    // intercetta le info line
+    this.board.info$
+      .pipe(filter(i => !!i), takeUntil(this._destroy$), withLatestFrom(this.board.sdk$))
+      .subscribe(([info, sdk]) => {
+        if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{ sdk, action: BoardAction.infoLine, info});
+      });
+
+    // chiude gli highlights
+    this.highlights$
+      .pipe(filter(hl => !isEmptyHihlights(hl)),
+        debounceTime(5000))
+      .subscribe((hl) => {
+        this.highlights$.next(BoardWorkerHighlights.empty)
+      });
   }
 
   private _updateSdk(handler: (sdk: PlaySudoku, cell?: PlaySudokuCell) => boolean) {

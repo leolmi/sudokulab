@@ -46,8 +46,12 @@ export class LabContext extends LabFacade {
   }
 
   stepInfo() {
-    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.infoStep);
+    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.calcStep);
     this._store.dispatch(SudokuActions.stepInfo());
+  }
+
+  setStepInfos(infos: SolveStepResult[]) {
+    this._store.dispatch(SudokuActions.setStepInfo({ infos }));
   }
 
   clearStepInfo() {

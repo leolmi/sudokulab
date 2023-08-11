@@ -17,14 +17,12 @@
              (click)="select(col, row)"
              [class.fixed]="cell.fixed"
              [class.selected]="cell.id === (board.activeCellId$|async)"
-             [class.right-line]="((gridline$|async)||{})[col]"
-             [class.bottom-line]="((gridline$|async)||{})[row]"
-             [class.error]="cell.error">
-<!--             [class.highlight]="((highlights$|async)||{})[cell.id]"-->
-<!--             [class.highlight-secondary]="((otherHighlightsCells$|async)||{})[cell.id]"-->
-<!--             [class.highlight-cell]="((highlightsCell$|async)||{})[cell.id]">-->
-<!--          <div class="cell-value" [ngClass]="{'pulse': ((highlightStep$|async)||{})[cell.id]}">{{cell?.value}}</div>-->
-          <div class="cell-value">{{cell?.value}}</div>
+             [class.right-line]="((gridLines$|async)||{})[col]"
+             [class.bottom-line]="((gridLines$|async)||{})[row]"
+             [class.error]="cell.error"
+             [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
+             [class.highlight-secondary]="((highlights$|async)?.others||{})[cell.id]">
+          <div class="cell-value" [ngClass]="{'pulse': ((highlights$|async)?.cellValue||{})[cell.id]}">{{cell?.value}}</div>
           <sudokulab-cell-values
             *ngIf="!cell?.value"
             [class.pencil-values]="true"

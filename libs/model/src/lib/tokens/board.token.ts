@@ -1,15 +1,17 @@
 import {InjectionToken} from "@angular/core";
 import {PlaySudoku} from "../PlaySudoku";
 import {BehaviorSubject, Subject} from "rxjs";
+import {AlgorithmResultLine} from "../AlgorithmResult";
 
 export enum BoardAction {
   check = 'check',
   solve = 'solve',
   solveStep = 'solveStep',
-  infoStep = 'infoStep',
+  calcStep = 'calcStep',
   clear = 'clear',
   pencil = 'pencil',
   value = 'value',
+  infoLine = 'infoLine',
 }
 
 export class BoardData {
@@ -19,6 +21,7 @@ export class BoardData {
     this.activeCellId$ = new BehaviorSubject<string>('');
     this.action$ = new Subject<BoardAction>();
     this.value$ = new Subject<string>();
+    this.info$ = new Subject<AlgorithmResultLine>();
   }
 
   sdk$: BehaviorSubject<PlaySudoku>;
@@ -26,6 +29,7 @@ export class BoardData {
   action$: Subject<BoardAction>;
   value$: Subject<string>;
   isWorkerAvailable: boolean;
+  info$: Subject<AlgorithmResultLine>;
 }
 
 export const BOARD_DATA = new InjectionToken<{}>('BOARD_DATA');

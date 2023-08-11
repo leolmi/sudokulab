@@ -1,7 +1,16 @@
 /// <reference lib="webworker" />
 import {BoardWorkerArgs, BoardWorkerData} from "./board-worker.model";
 import {BoardAction, MessageType, SudokuMessage} from "@sudokulab/model";
-import {checkSchema, clearSchema, setCellValue, solveSchema, solveSchemaStep, togglePencil} from "./board-worker.logic";
+import {
+  calcInfoStep,
+  checkSchema,
+  clearSchema,
+  getLineHighlights,
+  setCellValue,
+  solveSchema,
+  solveSchemaStep,
+  togglePencil
+} from "./board-worker.logic";
 
 const SDK_DEFAULT_TIMEOUT = 250;
 
@@ -30,14 +39,16 @@ addEventListener('message', ({ data }) => {
         if (clearSchema(sdk)) postMessage(<BoardWorkerData>{sdk});
         break;
       case BoardAction.solveStep:
-        // TODO: risolve lo step successivo
-        const highligths = solveSchemaStep(sdk);
-        if (highligths) postMessage(<BoardWorkerData>{sdk, highligths});
-        postMessage(<BoardWorkerData>{message: TODO});
+        const hls = solveSchemaStep(sdk);
+        if (hls) postMessage(<BoardWorkerData>{sdk, highlights: hls});
         break;
-      case BoardAction.infoStep:
-        // TODO: fornisce le info per lo step successivo
-        postMessage(<BoardWorkerData>{message: TODO});
+      case BoardAction.calcStep:
+        const dat = calcInfoStep(sdk);
+        if (dat) postMessage(dat);
+        break;
+      case BoardAction.infoLine:
+        const hll = getLineHighlights(args?.info);
+        postMessage(<BoardWorkerData>{highlights: hll});
         break;
       case BoardAction.pencil:
         if (togglePencil(sdk)) postMessage(<BoardWorkerData>{sdk});

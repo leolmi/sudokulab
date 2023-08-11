@@ -10,6 +10,7 @@ import {
 import {
   AlgorithmResultLine,
   BOARD_DATA,
+  BoardAction,
   BoardData,
   Cell,
   getBoardStyle,
@@ -177,6 +178,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   }
 
   stepLineClick(line: AlgorithmResultLine) {
+    if (this._board.isWorkerAvailable) this._board.info$.next(line);
     if (!!line?.cell) this.highlight$.next({ [line?.cell]: true });
     this.otherHighlight$.next(_reduce(line?.others||[], (d, os) => ({ ...d, [os]: true }) , {}));
   }
