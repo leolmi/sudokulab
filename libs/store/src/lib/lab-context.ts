@@ -1,4 +1,7 @@
 import {
+  BOARD_DATA,
+  BoardAction,
+  BoardData,
   LabFacade,
   PlaySudoku,
   PlaySudokuOptions,
@@ -12,7 +15,7 @@ import * as SudokuSelectors from './selectors';
 import * as SudokuActions from './actions';
 import {Store} from '@ngrx/store';
 import {SudokuStore} from './sudoku-store';
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {Dictionary} from '@ngrx/entity';
 
 @Injectable()
@@ -43,6 +46,7 @@ export class LabContext extends LabFacade {
   }
 
   stepInfo() {
+    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.infoStep);
     this._store.dispatch(SudokuActions.stepInfo());
   }
 
@@ -51,11 +55,13 @@ export class LabContext extends LabFacade {
   }
 
   solveStep() {
+    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.solveStep);
     this._store.dispatch(SudokuActions.solveStep());
     this.schemaChanged$.next({});
   }
 
   solve() {
+    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.solve);
     this._store.dispatch(SudokuActions.solve());
     this.schemaChanged$.next({});
   }
@@ -70,6 +76,7 @@ export class LabContext extends LabFacade {
   }
 
   clear() {
+    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.clear);
     this._store.dispatch(SudokuActions.clear());
     this.schemaChanged$.next({});
   }
@@ -128,7 +135,8 @@ export class LabContext extends LabFacade {
   }
 
   constructor(private _store: Store<SudokuStore>,
-              private _sudoku: SudokuFacade) {
+              private _sudoku: SudokuFacade,
+              @Inject(BOARD_DATA) private _board: BoardData) {
     super();
     this.schemaChanged$ = new BehaviorSubject<any>(null);
   }

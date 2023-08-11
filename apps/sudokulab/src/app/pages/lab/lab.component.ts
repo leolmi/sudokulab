@@ -1,6 +1,16 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Inject,
+  OnDestroy,
+  ViewChild
+} from '@angular/core';
 import {
   AlgorithmResultLine,
+  BOARD_DATA,
+  BoardData,
   Cell,
   getBoardStyle,
   HandleImageResult,
@@ -21,7 +31,7 @@ import {CameraDialogComponent} from '../../components/camera-dialog/camera-dialo
 import {SchemaCheckComponent} from '../../components/schema-check/schema-check.component';
 import {ActivatedRoute} from '@angular/router';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {filter, map, skip, take, takeUntil} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, skip, take, takeUntil} from 'rxjs/operators';
 import {Dictionary} from '@ngrx/entity';
 import {SOLVER_STEP_DETAILS} from "../../model";
 import {AskDialogComponent} from "../../components/ask-dialog/ask-dialog.component";
@@ -51,13 +61,16 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   activeSteps$: BehaviorSubject<SolveStepResult[]>;
   highlight$: BehaviorSubject<Dictionary<boolean>>;
   otherHighlight$: BehaviorSubject<Dictionary<boolean>>;
+  isWorkerAvailable$: BehaviorSubject<boolean>;
 
   constructor(private _lab: LabFacade,
               private _route: ActivatedRoute,
               private _dialog: MatDialog,
+              @Inject(BOARD_DATA) private _board: BoardData,
               _sudoku: SudokuFacade) {
     super(_sudoku);
     this._sudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
+    this.isWorkerAvailable$ = new BehaviorSubject<boolean>(_board.isWorkerAvailable);
     this.cells$ = this._sudoku$.pipe(map(sdk => sdk?.cells || {}));
     this.isPencil$ = this._sudoku$.pipe(map(sdk => !!sdk?.options?.usePencil));
     this.isShowDetails$ = this._sudoku$.pipe(map(sdk => !sdk?.options?.showPopupDetails));
@@ -87,9 +100,13 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
     this.topToolFlex$ = this.compact$.pipe(map(iscompact => iscompact ? 'none' : '50'));
-    this.progress$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$), map(sdk => sdk?.state.percent || 0));
+    this.progress$ = combineLatest([_lab.selectActiveSudoku$, _board.sdk$]).pipe(
+      takeUntil(this._destroy$),
+      map(([sdk, wsdk]) => _board.isWorkerAvailable ?
+        wsdk?.state.percent || 0 :
+        sdk?.state.percent || 0));
 
-    this.boardStyle$ = combineLatest(this._resize$, this._element$)
+    this.boardStyle$ = combineLatest([this._resize$, this._element$])
       .pipe(map(([r, ele]) => getBoardStyle(ele)));
 
     _sudoku.doGenericAction = (code: string, data: any) => this._doAction(code, data);
@@ -102,6 +119,12 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
     _lab.schemaChanged$.pipe(
       takeUntil(this._destroy$))
       .subscribe(() => this.closeDetails());
+
+    this._sudoku$.pipe(
+      takeUntil(this._destroy$),
+      filter(sdk => !!sdk),
+      distinctUntilChanged((s1, s2) => s1?.id === s2?.id))
+      .subscribe(sdk => this._board.sdk$.next(sdk || new PlaySudoku()));
   }
 
   private _doAction(code: string, data: any) {

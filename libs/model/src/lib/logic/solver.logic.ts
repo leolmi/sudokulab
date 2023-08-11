@@ -1,10 +1,11 @@
-import { PlaySudoku } from '../PlaySudoku';
-import { AlgorithmResult } from '../AlgorithmResult';
-import { SolveStepResult } from './SolveStepResult';
+import {PlaySudoku} from '../PlaySudoku';
+import {AlgorithmResult} from '../AlgorithmResult';
+import {SolveStepResult} from './SolveStepResult';
 import {
   applySudokuRules,
   getAlgorithmsMap,
   getAvailables,
+  getGroups,
   getRank,
   getValues,
   isSolved
@@ -19,15 +20,16 @@ import {
   reduce as _reduce,
   values as _values
 } from 'lodash';
-import { Dictionary } from '@ngrx/entity';
-import { SolveAllResult } from './SolveAllResult';
-import { SudokuSolution } from '../SudokuSolution';
-import { SudokuInfo } from '../SudokuInfo';
+import {Dictionary} from '@ngrx/entity';
+import {SolveAllResult} from './SolveAllResult';
+import {SudokuSolution} from '../SudokuSolution';
+import {SudokuInfo} from '../SudokuInfo';
 import {DIFFICULTY_MAX, DIFFICULTY_RANGES, getAlgorithm, getAlgorithms, TRY_NUMBER_ALGORITHM} from '../Algorithms';
-import { Algorithms, AlgorithmType } from '../enums';
-import { PlaySudokuGroup } from '../PlaySudokuGroup';
-import { addLine, debug, isValue } from '../../global.helper';
-import { SDK_PREFIX, SDK_PREFIX_DEBUG } from '../consts';
+import {Algorithms, AlgorithmType} from '../enums';
+import {PlaySudokuGroup} from '../PlaySudokuGroup';
+import {addLine, debug, isValue} from '../../global.helper';
+import {SDK_PREFIX, SDK_PREFIX_DEBUG} from '../consts';
+import {PlaySudokuCell} from "../PlaySudokuCell";
 
 export class Solver {
   private readonly _sdks: SudokuSolution[];
@@ -155,6 +157,15 @@ const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
   return handler(changes);
 }
 
+/**
+ * restituisce vero se il gruppo contiene più celle oltre la passata con il suo valore
+ * @param g
+ * @param c
+ */
+const hasMoreValues = (g: PlaySudokuGroup, c: PlaySudokuCell): boolean => {
+  return (g.valuesOnCells[c.id]||0) > 1;
+}
+
 export const checkAvailables = (sdk: PlaySudoku|undefined, resetBefore = false) => {
   if (!sdk) return;
   // aaplica le regole base del sudoku
@@ -180,8 +191,10 @@ export const checkAvailables = (sdk: PlaySudoku|undefined, resetBefore = false) 
   // calcolo dello state e ricerca errori
   _forEach(sdk.cells || {}, (c) => {
     if (!!c?.value) sdk.state.valuesCount++;
-    if (!!c) {
-      c.error = (!c.fixed && isValue(c.value) && !_includes(c.availables, c.value));
+    if (!!c && !c.fixed) {
+      const cgs = getGroups(sdk, [c.id]);
+      const morev = cgs.find(g => hasMoreValues(g, c));
+      c.error = isValue(c.value) && (!_includes(c.availables, c.value) || !!morev);
       if (!!c.error) sdk.state.error = addLine(sdk.state.error, `Any available value for the cell "${c.id}"!`);
       if (!c.value) sdk.state.complete = false;
     }

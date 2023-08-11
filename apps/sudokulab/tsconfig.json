@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "files": [],
-  "include": [],
+  "include": [
+    "src/app/components/board-worker/board.worker.ts"
+  ],
   "references": [
     {
       "path": "./tsconfig.app.json"

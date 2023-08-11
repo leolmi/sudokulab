@@ -59,6 +59,7 @@ export * from './lib/HandleImageResult';
 export * from './lib/GoogleCredentials';
 
 export * from './lib/services';
+export * from './lib/tokens';
 
 export * from './sudoku.helper';
 export * from './global.helper';

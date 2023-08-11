@@ -1,0 +1,42 @@
+<div class="sudokulab-board"
+     #schemaElement
+     [ngClass]="{'lines': !!!(board.sdk$|async)}">
+  <div class="empty-text" *ngIf="!!!(board.sdk$|async)">{{emptyText}}</div>
+  <div class="sudokulab-board-background"
+       fxLayout="column">
+    <div class="sudokulab-board-row"
+         *ngFor="let row of rows$|async"
+         fxLayout="row" fxLayoutAlign="start center">
+      <div class="sudokulab-board-cell"
+           [class.pencil-mode]="!!(board.sdk$|async)?.options?.usePencil"
+           *ngFor="let col of cols$|async">
+        <div class="cell-container"
+             *ngIf="((board.sdk$|async)?.cells||{})[col+'.'+row] as cell"
+             fxLayout="row" fxLayoutAlign="center center"
+             [ngStyle]="cellStyle$|async"
+             (click)="select(col, row)"
+             [class.fixed]="cell.fixed"
+             [class.selected]="cell.id === (board.activeCellId$|async)"
+             [class.right-line]="((gridline$|async)||{})[col]"
+             [class.bottom-line]="((gridline$|async)||{})[row]"
+             [class.error]="cell.error">
+<!--             [class.highlight]="((highlights$|async)||{})[cell.id]"-->
+<!--             [class.highlight-secondary]="((otherHighlightsCells$|async)||{})[cell.id]"-->
+<!--             [class.highlight-cell]="((highlightsCell$|async)||{})[cell.id]">-->
+<!--          <div class="cell-value" [ngClass]="{'pulse': ((highlightStep$|async)||{})[cell.id]}">{{cell?.value}}</div>-->
+          <div class="cell-value">{{cell?.value}}</div>
+          <sudokulab-cell-values
+            *ngIf="!cell?.value"
+            [class.pencil-values]="true"
+            [rank]="(board.sdk$|async)?.sudoku?.rank"
+            [values]="cell.pencil"></sudokulab-cell-values>
+          <sudokulab-cell-values
+            *ngIf="(showAvailable$|async) && !cell?.value && (cell?.pencil||[]).length<=0"
+            [rank]="(board.sdk$|async)?.sudoku?.rank"
+            [values]="cell.availables"></sudokulab-cell-values>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

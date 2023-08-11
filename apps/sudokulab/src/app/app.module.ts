@@ -81,6 +81,8 @@ import {SolverStepDetailsPopupComponent} from "./components/solver-step-details/
 import {ManagementKeyDialogComponent} from "./components/management-key-dialog/management-key-dialog.component";
 import {OperationsBarComponent} from "./components/operations-bar/operations-bar.component";
 import {CropPointComponent} from "./components/image-handler/crop-point.component";
+import {BoardWorkerComponent} from "./components/board-worker/board-worker.component";
+import {BOARD_DATA, BoardData} from "../../../../libs/model/src/lib/tokens/board.token";
 
 @NgModule({
   declarations: [
@@ -105,6 +107,7 @@ import {CropPointComponent} from "./components/image-handler/crop-point.componen
     SudokuSchemaComponent,
     HelpComponent,
     BoardStateComponent,
+    BoardWorkerComponent,
     CropAreaComponent,
     ImageHandlerComponent,
     CameraDialogComponent,
@@ -154,6 +157,7 @@ import {CropPointComponent} from "./components/image-handler/crop-point.componen
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AppInterceptor, multi: true },
+    { provide: BOARD_DATA, useClass: BoardData },
     SudokulabWindowService,
     SudokulabPagesService,
     { provide: SudokuFacade, useClass: SudokuContext },

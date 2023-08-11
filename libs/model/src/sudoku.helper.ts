@@ -111,6 +111,26 @@ export const resetAvailable = (sdk: PlaySudoku|EditSudoku|undefined, o?: ResetSc
 }
 
 /**
+ * restituisce il dizionario della quantità di numeri per cella,
+ * ossia il numero dei valori presenti nel gruppo uguali a quello della cella
+ * @param sdk
+ * @param g
+ */
+const _getValuesOnCells = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<number> => {
+  const v: Dictionary<number> = {};
+  g.cells.forEach(cid => {
+    const cell = (sdk?.cells||{})[cid];
+    if (cell && cell.value) v[cell.value] = (v[cell.value]||0)+1;
+  });
+  const voc: Dictionary<number> = {};
+  g.cells.forEach(cid => {
+    const cell = (sdk?.cells||{})[cid];
+    voc[cid] = (cell && cell.value) ? v[cell.value] : 0;
+  });
+  return voc;
+}
+
+/**
  * aaplica la regola base del sudoku:
  * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
  * @param sdk
@@ -127,6 +147,8 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefo
     // vettore valori di gruppo con tutti i valori reali (quelli numerici)
     // { v1: cid1..cidN, v2:.... }
     const vMaps = _getGroupCellValuesMaps(sdk, g);
+    // calcola il numero di valori uguali per cella
+    g.valuesOnCells = _getValuesOnCells(sdk, g);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
     g.cells.forEach(cid => {
       const cell: any = sdk.cells[cid]||{};
@@ -367,20 +389,16 @@ export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefin
   const rank = o?.rank||9;
   switch (AVAILABLE_DIRECTIONS[direction]||MoveDirection.next) {
     case MoveDirection.up:
-      if (info.row <= 0) return;
-      info.row--;
+      info.row = (info.row <= 0) ? rank - 1 : info.row - 1;
       break;
     case MoveDirection.down:
-      if (info.row >= rank - 1) return;
-      info.row++;
+      info.row = (info.row >= rank - 1) ? 0 : info.row + 1;
       break;
     case MoveDirection.left:
-      if (info.col <= 0) return;
-      info.col--;
+      info.col = (info.col <= 0) ? rank - 1 : info.col - 1;
       break;
     case MoveDirection.right:
-      if (info.col >= rank - 1) return;
-      info.col++;
+      info.col = (info.col >= rank - 1) ? 0 : info.col + 1;
       break;
     case MoveDirection.prev:
       if (info.col <= 0) {
@@ -392,7 +410,7 @@ export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefin
           info.col = rank - 1;
         }
       } else {
-        info.col --;
+        info.col--;
       }
       break;
     case MoveDirection.next:
@@ -406,7 +424,7 @@ export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefin
           info.col = 0;
         }
       } else {
-        info.col ++;
+        info.col++;
       }
       break;
   }
