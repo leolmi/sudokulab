@@ -12,6 +12,7 @@ export enum BoardAction {
   pencil = 'pencil',
   value = 'value',
   infoLine = 'infoLine',
+  available = 'available',
 }
 
 export class BoardData {

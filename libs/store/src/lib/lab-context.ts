@@ -127,6 +127,7 @@ export class LabContext extends LabFacade {
   }
 
   toggleAvailable() {
+    if (this._board.isWorkerAvailable) return this._board.action$.next(BoardAction.available);
     this._store.dispatch(SudokuActions.toggleAvailable());
   }
 

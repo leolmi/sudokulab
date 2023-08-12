@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {Location} from '@angular/common';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
@@ -9,6 +9,8 @@ import * as SudokuActions from '../actions';
 import {
   Algorithms,
   applyAlgorithm,
+  BOARD_DATA,
+  BoardData,
   buildSudokuInfo,
   calcFixedCount,
   cellId,
@@ -319,8 +321,9 @@ export class LabEffects {
   calcLabStatus$ = createEffect(() => this._actions$.pipe(
     ofType(SudokuActions.setActivePage, SudokuActions.setActiveSudoku, SudokuActions.checkStatus),
     delay(250),
-    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku)),
-    concatMap(([a, sdk]) =>
+    withLatestFrom(this._store.select(SudokuSelectors.selectActiveSudoku), this._board.sdk$),
+    map(([a, sdk, wsdk]) => this._board.isWorkerAvailable ? wsdk : sdk),
+    concatMap((sdk) =>
       [SudokuActions.updatePageStatus({
         status: {
           has_no_lab_schema: !sdk,
@@ -396,6 +399,8 @@ export class LabEffects {
   constructor(private _actions$: Actions,
               private _location: Location,
               private _router: Router,
-              private _store: Store<SudokuStore>) {
+              private _store: Store<SudokuStore>,
+              @Inject(BOARD_DATA) private _board: BoardData) {
+    _board.sdk$.subscribe(() => _store.dispatch(SudokuActions.checkStatus()));
   }
 }

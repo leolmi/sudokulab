@@ -9,6 +9,7 @@ import {
   setCellValue,
   solveSchema,
   solveSchemaStep,
+  toggleAvalable,
   togglePencil
 } from "./board-worker.logic";
 
@@ -52,6 +53,9 @@ addEventListener('message', ({ data }) => {
         break;
       case BoardAction.pencil:
         if (togglePencil(sdk)) postMessage(<BoardWorkerData>{sdk});
+        break;
+      case BoardAction.available:
+        if (toggleAvalable(sdk)) postMessage(<BoardWorkerData>{sdk});
         break;
       case BoardAction.value:
         if (setCellValue(sdk, args?.cellId || '', args?.value || '')) {

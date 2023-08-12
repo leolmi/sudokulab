@@ -129,6 +129,15 @@ export const togglePencil = (sdk: PlaySudoku): boolean => {
 }
 
 /**
+ * Attiva/disattiva la visibilità dei valori possibili
+ * @param sdk
+ */
+export const toggleAvalable = (sdk: PlaySudoku): boolean => {
+  sdk.options.showAvailables = !sdk.options.showAvailables;
+  return true;
+}
+
+/**
  * Imposta il valore della cella
  * @param cell
  * @param value

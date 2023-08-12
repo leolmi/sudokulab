@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, OnDestroy, Output} from '@angular/core';
 import {
   BOARD_DATA,
   BoardAction,
@@ -9,8 +9,8 @@ import {
   SUDOKU_DEFAULT_RANK,
   use
 } from '@sudokulab/model';
-import {map} from 'rxjs/operators';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import {distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, Observable, Subject} from 'rxjs';
 import {Dictionary} from '@ngrx/entity';
 import {forEach as _forEach} from 'lodash';
 
@@ -20,7 +20,8 @@ import {forEach as _forEach} from 'lodash';
   styleUrls: ['./key-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class KeyBoardComponent {
+export class KeyBoardComponent implements OnDestroy {
+  private readonly _destroy$: Subject<void>;
   private _rank$: BehaviorSubject<number>;
   private _cells$: BehaviorSubject<Dictionary<Cell>|Cell[]>;
   isActive$: BehaviorSubject<boolean>;
@@ -47,6 +48,7 @@ export class KeyBoardComponent {
   @Output() onPencilChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(@Inject(BOARD_DATA) private _board: BoardData) {
+    this._destroy$ = new Subject<void>();
     this._rank$ = new BehaviorSubject<number>(SUDOKU_DEFAULT_RANK);
     this._cells$ = new BehaviorSubject<any>({});
     this.isActive$ = new BehaviorSubject<boolean>(this._board.isWorkerAvailable);
@@ -67,6 +69,16 @@ export class KeyBoardComponent {
       });
       return status;
     }));
+
+    _board.sdk$.pipe(
+      takeUntil(this._destroy$),
+      distinctUntilChanged((s1,s2) => s1?.options.usePencil === s2?.options.usePencil))
+      .subscribe((s) => this.isPencil$.next(!!s?.options.usePencil));
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.unsubscribe();
   }
 
   clickOnNumber(num: string) {
