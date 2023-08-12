@@ -1,11 +1,11 @@
 <div class="key-board"
-     [ngClass]="{'disabled': !!!(isActive$|async)}"
+     [class.disabled]="!(isActive$|async)"
      fxLayout="row" fxLayoutAlign="start center">
   <div class="key-number"
-       [ngClass]="{'filled': !!((status$|async)||{})[kn]}"
+       *ngFor="let kn of numbers$|async"
+       [class.filled]="!!((status$|async)||{})[kn]&&!(isPencil$|async)"
        matTooltip="clear cell"
        [matTooltipDisabled]="kn!=='x'"
-       *ngFor="let kn of numbers$|async"
        (click)="clickOnNumber(kn)"
        fxFlex>
     <mat-icon *ngIf="kn==='x'">check_box_outline_blank</mat-icon>
@@ -15,7 +15,7 @@
        *ngIf="usePencil"
        matTooltip="pencil mode"
        (click)="togglePencil()"
-       [ngClass]="{'color-accent': isPencil$|async}"
+       [class.color-accent]="isPencil$|async"
        fxFlex>
     <mat-icon>edit</mat-icon>
   </div>
