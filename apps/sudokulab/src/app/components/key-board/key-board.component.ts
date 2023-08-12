@@ -12,7 +12,7 @@ import {
 import {distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
 import {BehaviorSubject, combineLatest, Observable, Subject} from 'rxjs';
 import {Dictionary} from '@ngrx/entity';
-import {forEach as _forEach} from 'lodash';
+import {forEach as _forEach, reduce as _reduce} from 'lodash';
 
 @Component({
   selector: 'sudokulab-key-board',
@@ -29,6 +29,7 @@ export class KeyBoardComponent implements OnDestroy {
 
   numbers$: Observable<string[]>;
   status$: Observable<Dictionary<boolean>>;
+  usedStatus$: Observable<Dictionary<boolean>>;
 
   @Input() set rank(n: number|undefined|null) {
     this._rank$.next(n || SUDOKU_DEFAULT_RANK);
@@ -69,6 +70,11 @@ export class KeyBoardComponent implements OnDestroy {
       });
       return status;
     }));
+
+    this.usedStatus$ = combineLatest([_board.sdk$, _board.activeCellId$]).pipe(
+      filter(() => _board.isWorkerAvailable),
+      map(([sdk, cellId]) => _reduce(sdk.cells[cellId]?.pencil||[], (s, v) =>
+        ({ ...s, [v]: true }), {})));
 
     _board.sdk$.pipe(
       takeUntil(this._destroy$),

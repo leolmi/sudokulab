@@ -4,6 +4,7 @@
   <div class="key-number"
        *ngFor="let kn of numbers$|async"
        [class.filled]="!!((status$|async)||{})[kn]&&!(isPencil$|async)"
+       [class.used]="!!((usedStatus$|async)||{})[kn]&&!!(isPencil$|async)"
        matTooltip="clear cell"
        [matTooltipDisabled]="kn!=='x'"
        (click)="clickOnNumber(kn)"

@@ -21,6 +21,9 @@
     cursor: not-allowed;
     pointer-events: none;
   }
+  &.used {
+    color: #ff4081;
+  }
   &:hover {
     background-color: rgba(10,10,10,.1);
   }
