@@ -22,6 +22,7 @@ export class BoardData {
     this.action$ = new Subject<BoardAction>();
     this.value$ = new Subject<string>();
     this.info$ = new Subject<AlgorithmResultLine>();
+    this.userData$ = new BehaviorSubject<any>({});
   }
 
   sdk$: BehaviorSubject<PlaySudoku>;
@@ -30,6 +31,7 @@ export class BoardData {
   value$: Subject<string>;
   isWorkerAvailable: boolean;
   info$: Subject<AlgorithmResultLine>;
+  userData$: BehaviorSubject<any>;
 }
 
 export const BOARD_DATA = new InjectionToken<{}>('BOARD_DATA');

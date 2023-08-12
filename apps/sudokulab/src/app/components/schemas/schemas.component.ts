@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { LabFacade, PlaySudoku, SchemasOptions, SudokuFacade, use } from '@sudokulab/model';
+import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
+import {BOARD_DATA, BoardData, LabFacade, PlaySudoku, SchemasOptions, SudokuFacade, use} from '@sudokulab/model';
 import { combineLatest, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { DestroyComponent } from '../DestroyComponent';
@@ -24,10 +24,11 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   counter$: Observable<number>;
   total$: Observable<number>;
   canOpen$: Observable<boolean>;
-  userChanges$: Observable<Dictionary<boolean>>;
+  userChanges$: Observable<Dictionary<any>>;
 
   constructor(private _lab: LabFacade,
-              _sudoku: SudokuFacade) {
+              _sudoku: SudokuFacade,
+              @Inject(BOARD_DATA) private _board: BoardData) {
     super(_sudoku);
     this._schemas$ = _sudoku.selectAllSchemas$.pipe(
       takeUntil(this._destroy$));
@@ -55,8 +56,9 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
     this.total$ = this._schemas$.pipe(map(sch => (sch||[]).length));
     this.canOpen$ = combineLatest([this.activeId$, this.selectedId$])
       .pipe(map(([aid, sid]) => !!sid && sid !== aid));
-    this.userChanges$ = combineLatest([_sudoku.selectUserSettings$, this.schemas$])
-      .pipe(map(([us, schemas]) => getSchemasMap(schemas, us)))
+    this.userChanges$ = combineLatest([_sudoku.selectUserSettings$, this.schemas$, _board.userData$])
+      .pipe(map(([us, schemas, udata]) =>
+        _board.isWorkerAvailable ? (udata?.schema||{}) : getSchemasMap(schemas, us)));
   }
 
   select(schema: PlaySudoku) {

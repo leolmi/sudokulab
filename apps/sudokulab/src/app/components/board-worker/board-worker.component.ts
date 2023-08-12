@@ -28,10 +28,11 @@ import {
 } from "@sudokulab/model";
 import {BehaviorSubject, combineLatest, Observable} from "rxjs";
 import {BoardWorkerArgs, BoardWorkerData, BoardWorkerHighlights} from "./board-worker.model";
-import {debounceTime, distinctUntilChanged, filter, map, takeUntil, withLatestFrom} from "rxjs/operators";
-import {cloneDeep as _clone} from 'lodash';
+import {debounceTime, distinctUntilChanged, filter, map, take, takeUntil, withLatestFrom} from "rxjs/operators";
+import {cloneDeep as _clone, isEmpty as _isEmpty} from 'lodash';
 import * as equal from "fast-deep-equal";
 import {applyCellValue, isEmptyHihlights} from "./board-worker.logic";
+import {getUserData, loadUserData, saveUserData} from "./board-worker.data";
 
 
 @Component({
@@ -89,24 +90,34 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
     this.showAvailable$ = board.sdk$.pipe(map(s => !!s?.options.showAvailables),
       distinctUntilChanged((o1, o2) => equal(o1, o2)));
 
+    // carica i dati utente
+    board.sdk$
+      .pipe(distinctUntilChanged((s1,s2) => s1?.id === s2?.id))
+      .subscribe(sdk => setTimeout(() => board.sdk$.next(loadUserData(sdk)), 250));
+
     // intercetta le actions
-    this.board.action$.pipe(
-      withLatestFrom(this.board.sdk$))
+    board.action$.pipe(
+      withLatestFrom(board.sdk$))
       .subscribe(([action, sdk]) => {
         if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{action, sdk});
       });
 
     // intercetta i valori
-    this.board.value$
+    board.value$
       .pipe(takeUntil(this._destroy$))
       .subscribe((value) => this.keyEvent(<KeyboardEvent>{key: value}));
 
     // intercetta le info line
-    this.board.info$
-      .pipe(filter(i => !!i), takeUntil(this._destroy$), withLatestFrom(this.board.sdk$))
+    board.info$
+      .pipe(filter(i => !!i), takeUntil(this._destroy$), withLatestFrom(board.sdk$))
       .subscribe(([info, sdk]) => {
         if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{ sdk, action: BoardAction.infoLine, info});
       });
+
+    // inizializza i dati utente
+    board.userData$
+      .pipe(take(1), filter(ud => _isEmpty(ud)))
+      .subscribe(() => board.userData$.next(getUserData()));
 
     // chiude gli highlights
     this.highlights$
@@ -158,5 +169,8 @@ export class BoardWorkerComponent extends DestroyComponent implements OnDestroy 
 const handleWorkerSdk = (board: BoardData, data: BoardWorkerData) => {
   const sdk = board.sdk$.value;
   if (!sdk?.id || equal(data?.sdk, sdk)) return;
-  if (data.sdk) board.sdk$.next(data.sdk);
+  if (data.sdk) {
+    board.sdk$.next(data.sdk);
+    board.userData$.next(saveUserData(data.sdk));
+  }
 }

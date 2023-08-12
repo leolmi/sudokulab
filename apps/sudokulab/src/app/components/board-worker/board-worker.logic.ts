@@ -18,7 +18,7 @@ import {
   SudokuMessage,
   toggleValue
 } from "@sudokulab/model";
-import {extend as _extend, isEmpty as _isEmpty, last as _last, reduce as _reduce} from "lodash";
+import {extend as _extend, isEmpty as _isEmpty, last as _last} from "lodash";
 import {BoardWorkerData, BoardWorkerHighlights} from "./board-worker.model";
 
 /**
