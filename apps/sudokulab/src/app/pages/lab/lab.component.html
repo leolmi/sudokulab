@@ -1,16 +1,18 @@
 <div class="sudokulab-page"
      [fxLayout]="layout$|async"
      [fxLayoutAlign]="layoutAlign$|async">
-  <div class="tools tools-left compact-auto-height" [fxFlex]="topToolFlex$|async">
+  <div class="tools tools-left compact-auto-height"
+       [fxFlex]="topToolFlex$|async"
+       fxLayout="column">
     <sudokulab-info></sudokulab-info>
-    <div class="details-container"
-         *ngIf="!!!(compact$|async)">
+    <div class="details-container" fxFlex
+         *ngIf="!!!(sudokuLab.state.isCompact$|async)">
       <sudokulab-solver-step-details
         *ngIf="isShowDetails$|async"
         [handleLines]="true"
         [showHelpImage]="false"
         [allowClose]="true"
-        [steps]="(activeSteps$|async)||[]"
+        [steps]="(sudokuLab.state.stepInfos$|async)||[]"
         (onClose)="closeDetails()"
         (onLineCLick)="stepLineClick($event)"></sudokulab-solver-step-details>
     </div>
@@ -28,13 +30,8 @@
                         class="lab-progress-bar"
                         color="primary"
                         mode="determinate"></mat-progress-bar>
-      <sudokulab-key-board [cells]="cells$|async"
-                           [isActive]="isActiveCell$|async"
-                           [isPencil]="isPencil$|async"
-                           [rank]="rank$|async"
-                           [usePencil]="true"
-                           (onValueChanged)="keyPressed($event)"
-                           (onPencilChanged)="pencilChanged($event)"></sudokulab-key-board>
+      <sudokulab-key-board [boardData]="boardData"
+                           [usePencil]="true"></sudokulab-key-board>
       <sudokulab-board-state></sudokulab-board-state>
       <sudokulab-operations-bar class="compact-visible"></sudokulab-operations-bar>
     </div>
@@ -47,7 +44,7 @@
         [handleLines]="true"
         [showHelpImage]="false"
         [allowClose]="true"
-        [steps]="(activeSteps$|async)||[]"
+        [steps]="(sudokuLab.state.stepInfos$|async)||[]"
         (onClose)="closeDetails()"
         (onLineCLick)="stepLineClick($event)"></sudokulab-solver-step-details>
     </div>

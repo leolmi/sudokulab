@@ -1,18 +1,19 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input } from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, Input} from '@angular/core';
 import {
-  cellId, GeneratorFacade,
+  cellId,
   getCellStyle,
   getDimension,
   getLinesGroups,
   getSchemaName,
   isValue,
   Sudoku,
+  SudokuLab,
   WorkingInfo
 } from '@sudokulab/model';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { Dictionary } from '@ngrx/entity';
-import { filter, map } from 'rxjs/operators';
-import { forEach as _forEach } from 'lodash';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import {Dictionary} from '@ngrx/entity';
+import {map} from 'rxjs/operators';
+import {forEach as _forEach} from 'lodash';
 
 class CellInfo {
   constructor(public value: string,
@@ -46,7 +47,7 @@ export class ThumbnailComponent {
   @Input() unknown: string = 'unknown';
   @Input() hideDescription: boolean = false;
   constructor(private ele: ElementRef,
-              private _generator: GeneratorFacade) {
+              public sudokuLab: SudokuLab) {
     this._sdk$ = new BehaviorSubject<Sudoku|undefined>(undefined);
     this.workingMode$ = new BehaviorSubject<boolean>(false);
     this.rows$ = this._sdk$.pipe(map(s => getDimension(s?.rank)));
@@ -57,7 +58,7 @@ export class ThumbnailComponent {
     const elem = (<HTMLElement>ele.nativeElement).getElementsByClassName('thumbnail-schema-container');
     this.cellStyle$ = this._sdk$.pipe(map(s => getCellStyle(s, <HTMLElement>elem[0])));
 
-    this.working$ = combineLatest(this.workingMode$, _generator.selectGeneratorWorkingInfo$).pipe(
+    this.working$ = combineLatest([this.workingMode$, sudokuLab.state.workingInfo$]).pipe(
       map(([wm, info]) => wm ? info : undefined));
   }
 

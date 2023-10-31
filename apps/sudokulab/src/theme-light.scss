@@ -133,10 +133,54 @@
         $color-hover 8px);
   }
   .svg-board {
-    .fill-cell {
+    .svg-board-cell {
       fill: $color-background-contrast;
     }
   }
+  .svg-interactive-board {
+    .svg-board-background {
+      fill: $color-background-board;
+    }
+    .svg-board-cell {
+      fill: transparent;
+      stroke: #ddd;
+      &.current {
+        outline: $color-accent 1px solid;
+        outline-offset: -1px;
+      }
+      &.highlight-secondary {
+        fill: rgba(255, 64, 129, 0.2);
+      }
+      &.highlight {
+        fill: rgba(255, 64, 129, 0.8);
+        .svg-board-cell-text {
+          fill: white;
+        }
+      }
+    }
+    .svg-board-line {
+      stroke: $color-background-contrast;
+    }
+    .svg-board-cell-text {
+      fill: $color-background-contrast;
+      &.error {
+        fill: $color-error2;
+      }
+      &.svg-pulse {
+        fill: $color-accent;
+      }
+    }
+    .svg-board-cell-values-text {
+      fill: $color-accent;
+    }
+    &.pencil {
+      .svg-board-line {
+        stroke: $color-accent;
+      }
+    }
+  }
+
+
 
   .pencil-values {
     .cell-available-value {

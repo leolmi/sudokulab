@@ -1,23 +1,22 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, NgZone} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {
+  clearUserSettings,
   isDebugMode,
-  LabFacade,
   MessageType,
   PlaySudokuOptions,
   setDebugMode,
-  SudokuFacade,
+  SudokuLab,
   SUDOKULAB_DARK_THEME,
   SUDOKULAB_LIGHT_THEME,
   SUDOKULAB_MANAGE_OPERATION,
   SUDOKULAB_SESSION_DEVELOP,
-  SudokulabWindowService, SudokuMessage
+  SudokuMessage
 } from '@sudokulab/model';
-import {map, skip} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
 import {ManagementKeyDialogComponent} from "../../components/management-key-dialog/management-key-dialog.component";
-
-declare const gapi: any;
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'sudokulab-options-page',
@@ -25,106 +24,58 @@ declare const gapi: any;
   styleUrls: ['./options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class OptionsComponent implements AfterViewInit {
+export class OptionsComponent {
   isDebugMode$: BehaviorSubject<boolean>;
   isDarkTheme$: Observable<boolean>;
   playerOptions$: Observable<PlaySudokuOptions|undefined>;
-  // showAvailable$: Observable<boolean>;
-  // showPopupDetails$: Observable<boolean>;
-  googleok$: BehaviorSubject<boolean>;
-  googleok_check$: Observable<boolean>;
   isManagement$: Observable<boolean>;
-  operationStatus$: Observable<number>;
   isOperationActive$: Observable<boolean>;
-  valuesMode$: Observable<string>;
   OPERATION = SUDOKULAB_MANAGE_OPERATION;
   availableValuesModes: string[] = ['number', 'dot'];
 
-  constructor(private _sudoku: SudokuFacade,
-              private _lab: LabFacade,
-              private _window: SudokulabWindowService,
-              private _zone: NgZone) {
+  constructor(public sudokuLab: SudokuLab,
+              private _dialog: MatDialog) {
     this.isDebugMode$ = new BehaviorSubject<boolean>(isDebugMode());
-    this.googleok$ = new BehaviorSubject<boolean>(true);
-    this.googleok_check$ = this.googleok$.pipe(skip(1));
-    this.isDarkTheme$ = _sudoku.selectTheme$.pipe(map(theme => theme === SUDOKULAB_DARK_THEME));
-    this.isManagement$ = combineLatest(_sudoku.selectToken$, _sudoku.selectAppInfo$).pipe(
+    this.isDarkTheme$ = sudokuLab.state.theme$.pipe(map(theme => theme === SUDOKULAB_DARK_THEME));
+    this.isManagement$ = combineLatest([sudokuLab.state.token$, sudokuLab.state.info$]).pipe(
       map(([t, info]) => !!t || info?.session === SUDOKULAB_SESSION_DEVELOP || !environment.production));
-    this.operationStatus$ = _sudoku.selectOperationStatus$;
-    this.isOperationActive$ = this.operationStatus$.pipe(map(o => (o||-1)>=0));
-    this.playerOptions$ = _lab.selectActiveSudoku$.pipe(map(sdk => new PlaySudokuOptions(sdk?.options)));
-    // this.showAvailable$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
-    // this.showPopupDetails$ = _lab.selectActiveSudoku$.pipe(map(sdk => !!sdk?.options?.showAvailables));
-    this.valuesMode$ = _sudoku.selectValuesMode$;
-  }
 
-  private _initGoogleApi() {
-    const btn = this._window.nativeWindow.document.getElementById('google-login-button');
-    gapi.load('client:auth2', () =>
-      gapi.auth2.init({
-        client_id: environment.google.client_id,
-        cookie_policy: 'single_host_origin',
-        scope: 'profile email'
-      }).then(() => gapi.auth2.attachClickHandler(btn, {},
-        (googleUser: any) =>
-          this._zone.run(() => {
-            const profile = googleUser.getBasicProfile();
-            this._sudoku.googleLogin({
-              accessToken: googleUser.getAuthResponse().id_token,
-              name: profile.getName(),
-              email: profile.getEmail(),
-              picture: profile.getImageUrl()
-            });
-            this.googleok$.next(true);
-          }),
-        (error: any) =>
-          this._zone.run(() =>
-            this._error('error while try to attach google autentication', error, true))),
-        (err: any) =>
-          this._zone.run(() =>
-            this._error('error while try to init google autentication', err, true))));
+    this.isOperationActive$ = sudokuLab.state.operationStatus$.pipe(map(o => (o||-1)>=0));
+    this.playerOptions$ = sudokuLab.state.activePlaySudoku$.pipe(map(sdk => new PlaySudokuOptions(sdk?.options)));
   }
 
   setDebugMode(e: any) {
     setDebugMode(e.checked);
   }
   setDarkTheme(e: any) {
-    this._sudoku.setTheme(e.checked ? SUDOKULAB_DARK_THEME : SUDOKULAB_LIGHT_THEME);
+    this.sudokuLab.state.theme$.next(e.checked ? SUDOKULAB_DARK_THEME : SUDOKULAB_LIGHT_THEME);
   }
-  setValuesMode(e: any) {
-    this._sudoku.setValuesMode(e);
+  setValuesMode(e: string) {
+    this.sudokuLab.state.valuesMode$.next(e);
   }
 
   apply(v: any, target: string) {
-    this._lab.updatePlayerOptions({ [target]: v });
+    this.sudokuLab.updatePlayerOptions({ [target]: v });
   }
 
   applyValue(v: any, target: string) {
-    this._lab.updatePlayerOptions({ [target]: getValue(v?.target) });
+    this.sudokuLab.updatePlayerOptions({ [target]: getValue(v?.target) });
   }
 
-  manage(operation: string, args?: any) {
-    this._sudoku.manage(ManagementKeyDialogComponent, operation, args);
+  manage(operation: string, data?: any) {
+    this._dialog.open(ManagementKeyDialogComponent, { width: '400px', data })
+      .afterClosed()
+      .pipe(filter(key => !!key))
+      .subscribe(key => this.sudokuLab.manage(operation, key, data));
   }
 
-  clearUserSettings() {
-    this._sudoku.clearUserSettings();
-    setTimeout(() => this._sudoku.raiseMessage(new SudokuMessage({
-      message: 'User settings has been deleted!',
+  clearUSettings() {
+    clearUserSettings();
+    setTimeout(() => this.sudokuLab.showMessage(new SudokuMessage({
+      message: 'User settings has been deleted! Page will reload...',
       type: MessageType.success
     })));
-  }
-
-  private _error(message: string, err: any, hidden = false) {
-    if (!hidden) {
-      this._sudoku.raiseError(err);
-    }
-    this.googleok$.next(false);
-    console.error(message, err);
-  }
-
-  ngAfterViewInit() {
-    this._initGoogleApi();
+    setTimeout(() => location.reload(), 2000);
   }
 }
 

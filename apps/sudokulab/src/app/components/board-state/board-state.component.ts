@@ -1,8 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import { DestroyComponent } from '../DestroyComponent';
-import {BOARD_DATA, BoardData, getRank, LabFacade, PlaySudoku, SudokuFacade} from '@sudokulab/model';
-import {combineLatest, Observable} from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import {DestroyComponent} from '../DestroyComponent';
+import {BOARD_DATA, BoardData, getRank, PlaySudoku, SudokuLab} from '@sudokulab/model';
+import {Observable, of} from 'rxjs';
 
 @Component({
   selector: 'sudokulab-board-state',
@@ -11,16 +10,15 @@ import { map, takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BoardStateComponent extends DestroyComponent implements OnDestroy {
-  bordStateSanitized$: Observable<string>;
-  constructor(private _lab: LabFacade,
-              _sudoku: SudokuFacade,
+  bordStateSanitized$: Observable<string> = of('');
+  constructor(public sudokuLab: SudokuLab,
               @Inject(BOARD_DATA) private _board: BoardData) {
-    super(_sudoku);
+    super(sudokuLab);
 
-    this.bordStateSanitized$ = combineLatest([_lab.selectActiveSudoku$, _board.sdk$]).pipe(
-      takeUntil(this._destroy$),
-      map(([sdk, wsdk]) => _board.isWorkerAvailable ? wsdk : sdk),
-      map(sdk => stateText(sdk)));
+    // this.bordStateSanitized$ = combineLatest([_lab.selectActiveSudoku$, _board.sdk$]).pipe(
+    //   takeUntil(this._destroy$),
+    //   map(([sdk, wsdk]) => _board.isWorkerAvailable ? wsdk : sdk),
+    //   map(sdk => stateText(sdk)));
   }
 }
 

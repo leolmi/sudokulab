@@ -7,11 +7,11 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { CameraDialogOptions, CameraDialogResult, SquareInfo, SudokuFacade, SudokuMessage } from '@sudokulab/model';
-import { BehaviorSubject } from 'rxjs';
-import { cloneDeep as _clone } from 'lodash';
-import { CAMERA_CONSTRAINTS, searchForSquare } from './logic';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {CameraDialogOptions, CameraDialogResult, SquareInfo, SudokuLab, SudokuMessage} from '@sudokulab/model';
+import {BehaviorSubject} from 'rxjs';
+import {cloneDeep as _clone} from 'lodash';
+import {CAMERA_CONSTRAINTS} from './logic';
 
 interface DeviceInfo {
   name: string;
@@ -41,7 +41,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
 
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: CameraDialogOptions,
-              private _sudoku: SudokuFacade,
+              private sudokuLab: SudokuLab,
               private _dialogRef: MatDialogRef<CameraDialogComponent>) {
     this.isReady$ = new BehaviorSubject<boolean>(false);
     this.isRunning$ = new BehaviorSubject<boolean>(false);
@@ -52,7 +52,7 @@ export class CameraDialogComponent implements AfterViewInit, OnDestroy {
     this.devices$ = new BehaviorSubject<DeviceInfo[]>([]);
     this.square$ = new BehaviorSubject<SquareInfo|null>(null);
 
-    this.message$.subscribe(message => _sudoku.raiseMessage(new SudokuMessage({ message })));
+    this.message$.subscribe(message => sudokuLab.showMessage(new SudokuMessage({ message })));
   }
 
   private _error(err?: any, message?: string) {

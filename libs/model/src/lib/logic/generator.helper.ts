@@ -135,24 +135,6 @@ export const resolve = (info: GeneratorInfo): SolveAllResult => {
   return solver.solve();
 }
 
-const getFixedValues = (sdk: EditSudoku, allowX = false): string => {
-  let fixed = '';
-  traverseSchema(sdk, (cid) => {
-    const raw_value = sdk.cells[cid]?.value || '';
-    const value = isValue(raw_value) ? raw_value :
-      (raw_value === SUDOKU_DYNAMIC_VALUE && allowX ? SUDOKU_DYNAMIC_VALUE : SUDOKU_EMPTY_VALUE);
-    fixed = `${fixed || ''}${value}`;
-  });
-  return fixed;
-}
-
-export const getSudoku = (sdk: EditSudoku): Sudoku => {
-  return new Sudoku({
-    rank: sdk.options.rank,
-    fixed: getFixedValues(sdk)
-  });
-}
-
 
 
 /**

@@ -3,7 +3,7 @@
        fxLayout="row" fxLayoutAlign="start center">
     <mat-form-field appearance="outline" class="no-wrapper-padding difficulty-combo" fxFlex>
       <mat-label>Sort by</mat-label>
-      <mat-select [value]="(options$|async)?.sortBy"
+      <mat-select [value]="(sudokuLab.state.schemasOptions$|async)?.sortBy"
                   (valueChange)="applySort($event)">
         <mat-option *ngFor="let sbi of availableSortBy" [value]="sbi.code">
           {{sbi.description}}
@@ -12,17 +12,17 @@
     </mat-form-field>
     <div class="schemas-counter" fxLayout="column">
       <div>{{counter$|async}}</div>
-      <div *ngIf="!!!(options$|async)?.try" class="schemas-counter-total">{{total$|async}}</div>
+      <div *ngIf="!!!(sudokuLab.state.schemasOptions$|async)?.try" class="schemas-counter-total">{{total$|async}}</div>
     </div>
     <button mat-icon-button
             (click)="toggleAsc()"
             matTooltip="Asc or desc sort">
-      <mat-icon>{{(options$|async)?.asc ? 'south' : 'north'}}</mat-icon>
+      <mat-icon>{{(sudokuLab.state.schemasOptions$|async)?.asc ? 'south' : 'north'}}</mat-icon>
     </button>
     <button mat-icon-button
             (click)="toggleTry()"
             matTooltip="include schemas that use the try algorithm"
-            [ngClass]="{'color-primary': !!(options$|async)?.try}">
+            [ngClass]="{'color-primary': !!(sudokuLab.state.schemasOptions$|async)?.try}">
       <mat-icon>generating_tokens</mat-icon>
     </button>
   </div>
@@ -32,8 +32,8 @@
       itemSize="32" >
       <sudokulab-schemas-item
         *cdkVirtualFor="let schema of schemas$|async"
-        [active]="(activeId$|async) === schema._id"
-        [selected]="(selectedId$|async) === schema._id"
+        [active]="(sudokuLab.state.activeSudokuId$|async) === schema._id"
+        [selected]="(sudokuLab.state.selectedSudokuId$|async) === schema._id"
         (onClick)="select($event)"
         [hasChanges]="!!((userChanges$|async)||{})[schema._id]"
         [schema]="schema"></sudokulab-schemas-item>

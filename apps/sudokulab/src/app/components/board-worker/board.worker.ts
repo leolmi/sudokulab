@@ -1,6 +1,5 @@
 /// <reference lib="webworker" />
-import {BoardWorkerArgs, BoardWorkerData} from "./board-worker.model";
-import {BoardAction, MessageType, SudokuMessage} from "@sudokulab/model";
+import {BoardAction, BoardWorkerArgs, BoardWorkerData, MessageType, SudokuMessage} from "@sudokulab/model";
 import {
   calcInfoStep,
   checkSchema,

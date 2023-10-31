@@ -5,26 +5,17 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {BoardComponent} from './components/board/board.component';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {
-  GeneratorFacade,
-  LabFacade,
-  OptionsFacade,
-  PrintFacade,
+  BOARD_DATA,
+  BoardData,
+  GENERATOR_DATA,
+  GeneratorData,
   SchemaNamePipe,
-  SudokuFacade,
+  SudokuLab,
   SudokulabPage,
+  SudokulabPageExecutor,
   SudokulabPagesService,
   SudokulabWindowService
 } from '@sudokulab/model';
-import {
-  GeneratorContext,
-  LabContext,
-  OptionsContext,
-  PrintContext,
-  SudokuContext,
-  SudokuStoreModule
-} from '@sudokulab/store';
-import {StoreModule} from '@ngrx/store';
-import {EffectsModule} from '@ngrx/effects';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
@@ -82,7 +73,13 @@ import {ManagementKeyDialogComponent} from "./components/management-key-dialog/m
 import {OperationsBarComponent} from "./components/operations-bar/operations-bar.component";
 import {CropPointComponent} from "./components/image-handler/crop-point.component";
 import {BoardWorkerComponent} from "./components/board-worker/board-worker.component";
-import {BOARD_DATA, BoardData} from "../../../../libs/model/src/lib/tokens/board.token";
+import {SvgInteractiveBoard} from "./components/svg-interactive-board/svg-interactive-board.component";
+import {SudokuLabLogic} from "./app.logic";
+import {PrintExecutor} from "./pages/print/print.executor";
+import {GeneratorExecutor} from "./pages/generator/generator.executor";
+import {LabExecutor} from "./pages/lab/lab.executor";
+import {SudokulabExecutorsService} from "./services/sudokulab-executors.service";
+import {OptionsExecutor} from "./pages/options/options.executor";
 
 @NgModule({
   declarations: [
@@ -90,6 +87,7 @@ import {BOARD_DATA, BoardData} from "../../../../libs/model/src/lib/tokens/board
     AppComponent,
     AskDialogComponent,
     BoardComponent,
+    SvgInteractiveBoard,
     GeneratorBoardComponent,
     SchemasItemComponent,
     SchemasComponent,
@@ -127,7 +125,6 @@ import {BOARD_DATA, BoardData} from "../../../../libs/model/src/lib/tokens/board
     HttpClientModule,
     FlexLayoutModule,
     ScrollingModule,
-    SudokuStoreModule,
     MatSnackBarModule,
     MatButtonModule,
     MatToolbarModule,
@@ -144,8 +141,6 @@ import {BOARD_DATA, BoardData} from "../../../../libs/model/src/lib/tokens/board
     MatSliderModule,
     MatRippleModule,
     MatCardModule,
-    StoreModule.forRoot({}),
-    EffectsModule.forRoot([]),
     BrowserAnimationsModule,
     RouterModule.forRoot([
       ...LabManifest.routes(),
@@ -157,19 +152,21 @@ import {BOARD_DATA, BoardData} from "../../../../libs/model/src/lib/tokens/board
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AppInterceptor, multi: true },
-    { provide: BOARD_DATA, useClass: BoardData },
     SudokulabWindowService,
     SudokulabPagesService,
-    { provide: SudokuFacade, useClass: SudokuContext },
-    { provide: LabFacade, useClass: LabContext },
-    { provide: GeneratorFacade, useClass: GeneratorContext },
-    { provide: PrintFacade, useClass: PrintContext },
-    { provide: OptionsFacade, useClass: OptionsContext },
+    SudokulabExecutorsService,
+    { provide: SudokuLab, useClass: SudokuLabLogic },
+    { provide: BOARD_DATA, useClass: BoardData },
+    { provide: GENERATOR_DATA, useClass: GeneratorData },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
-    { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
+    // { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
     { provide: SudokulabPage, useClass: PrintManifest, multi: true },
     { provide: SudokulabPage, useClass: OptionsManifest, multi: true },
-    { provide: SudokulabPage, useClass: HelpManifest, multi: true }
+    { provide: SudokulabPage, useClass: HelpManifest, multi: true },
+    { provide: SudokulabPageExecutor, useClass: LabExecutor, multi: true },
+    { provide: SudokulabPageExecutor, useClass: GeneratorExecutor, multi: true },
+    { provide: SudokulabPageExecutor, useClass: PrintExecutor, multi: true },
+    { provide: SudokulabPageExecutor, useClass: OptionsExecutor, multi: true },
   ],
   bootstrap: [AppComponent],
 })

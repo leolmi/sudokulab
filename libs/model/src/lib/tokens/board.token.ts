@@ -1,38 +1,21 @@
 import {InjectionToken} from "@angular/core";
-import {PlaySudoku} from "../PlaySudoku";
 import {BehaviorSubject, Subject} from "rxjs";
 import {AlgorithmResultLine} from "../AlgorithmResult";
+import {BoardAction} from "../board.model";
+import {PlaySudokuOptions} from "../PlaySudokuOptions";
+import {SudokuData} from "./sudoku-data";
+import {Sudoku} from "../Sudoku";
 
-export enum BoardAction {
-  check = 'check',
-  solve = 'solve',
-  solveStep = 'solveStep',
-  calcStep = 'calcStep',
-  clear = 'clear',
-  pencil = 'pencil',
-  value = 'value',
-  infoLine = 'infoLine',
-  available = 'available',
-}
-
-export class BoardData {
+export class BoardData extends SudokuData<BoardAction> {
   constructor() {
-    this.isWorkerAvailable = typeof Worker !== 'undefined';
-    this.sdk$ = new BehaviorSubject<PlaySudoku>(new PlaySudoku());
-    this.activeCellId$ = new BehaviorSubject<string>('');
-    this.action$ = new Subject<BoardAction>();
-    this.value$ = new Subject<string>();
+    super({
+      sudoku: new Sudoku(),
+      options: new PlaySudokuOptions()
+    });
     this.info$ = new Subject<AlgorithmResultLine>();
-    this.userData$ = new BehaviorSubject<any>({});
   }
 
-  sdk$: BehaviorSubject<PlaySudoku>;
-  activeCellId$: BehaviorSubject<string>;
-  action$: Subject<BoardAction>;
-  value$: Subject<string>;
-  isWorkerAvailable: boolean;
   info$: Subject<AlgorithmResultLine>;
-  userData$: BehaviorSubject<any>;
 }
 
 export const BOARD_DATA = new InjectionToken<{}>('BOARD_DATA');

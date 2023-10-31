@@ -1,5 +1,10 @@
 import { MenuButton } from './MenuButton';
-import { Facade } from './Facade';
+import {SudokuLab} from "./logic";
+
+export abstract class SudokulabPageExecutor {
+  abstract name: string;
+  abstract execute(logic: SudokuLab, code: string): void;
+}
 
 export abstract class SudokulabPage {
   default?: boolean;
@@ -7,5 +12,6 @@ export abstract class SudokulabPage {
   abstract code: string;
   abstract icon: string;
   abstract buttons: MenuButton[];
-  abstract execute(facade: Facade, code: string): void;
+  abstract executor?: string;
+  abstract getUrl(sl: SudokuLab): string;
 }

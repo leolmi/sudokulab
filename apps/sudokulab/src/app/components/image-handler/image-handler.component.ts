@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {HandleImageOptions, HandleImageResult, ImgDto, OcrResult, Sudoku, SudokuFacade} from '@sudokulab/model';
+import {ImgDto, ImportOptions, OcrResult, Sudoku} from '@sudokulab/model';
 import {BehaviorSubject, combineLatest} from 'rxjs';
 import {CropInfo} from './image-handler.model';
 import {map, switchMap, take} from 'rxjs/operators';
@@ -22,8 +22,7 @@ export class ImageHandlerComponent {
   working$: BehaviorSubject<boolean>;
   correction$: BehaviorSubject<ShapeToCanvasCorrection>;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: HandleImageOptions,
-              private _sudoku: SudokuFacade,
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ImportOptions,
               private _http: HttpClient,
               private _dialogRef: MatDialogRef<ImageHandlerComponent>) {
     this.crop$ = new BehaviorSubject<CropInfo>(new CropInfo());
@@ -44,7 +43,7 @@ export class ImageHandlerComponent {
       .subscribe((resp: OcrResult) => {
         this.working$.next(false);
         const sdk = new Sudoku({fixed: resp.values});
-        this._dialogRef.close(new HandleImageResult({sdk, onlyValues: this.data.onlyValues}));
+        this._dialogRef.close(new ImportOptions({sdk, onlyValues: this.data.onlyValues}));
       }, (err) => {
         console.error('Error while processing image', err);
         this.working$.next(false);
@@ -58,9 +57,9 @@ export class ImageHandlerComponent {
     if (!ctx) return;
     this.crop$.pipe(
       take(1),
-      switchMap((crop) => checkImageSize(this.data.image)
-        .pipe(map(resize => ({ crop, img: resize.img })))))
-        .subscribe(r => drawShapeToCanvas(r.img, ctx, r.crop, this.correction$.value));
+      switchMap((crop) => checkImageSize(this.data?.image || '')
+        .pipe(map(resize => ({crop, img: resize.img})))))
+      .subscribe(r => drawShapeToCanvas(r.img, ctx, r.crop, this.correction$.value));
   }
 
   onValueChange(e: any, target: string) {

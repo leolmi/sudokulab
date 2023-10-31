@@ -14,8 +14,8 @@ export const DEFAULT_BUTTONS = {
 }
 
 export const DEFAULT_LAB_BUTTONS = {
-  stepinfo: {icon: 'support', code: 'stepinfo', tooltip: 'Info next step', disabledKey: 'has_no_lab_schema'},
-  step: {icon: 'skip_next', code: 'step', tooltip: 'Solve next step', disabledKey: 'has_no_lab_schema'},
+  stepinfo: {icon: 'support', code: 'calcStep', tooltip: 'Info next step', disabledKey: 'has_no_lab_schema'},
+  step: {icon: 'skip_next', code: 'solveStep', tooltip: 'Solve next step', disabledKey: 'has_no_lab_schema'},
   solve: {icon: 'auto_fix_high', code: 'solve', tooltip: 'Solve all schema', disabledKey: 'has_no_lab_schema'},
   analyze: {icon: 'play_circle_outline', code: 'analyze', tooltip: 'Analyze schema', disabledKey: 'has_no_lab_schema'},
   download: {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: 'has_no_lab_schema'},

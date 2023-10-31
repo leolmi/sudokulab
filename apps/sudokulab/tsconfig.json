@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "files": [],
   "include": [
-    "src/app/components/board-worker/board.worker.ts"
+    "src/app/components/board-worker/board.worker.ts",
+    "src/app/pages/generator/generator.worker.ts"
   ],
   "references": [
     {

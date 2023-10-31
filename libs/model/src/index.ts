@@ -1,5 +1,6 @@
 export * from './lib/enums';
 export * from './lib/consts';
+export * from './lib/userdata';
 export * from './lib/Cell';
 export * from './lib/CellInfo';
 export * from './lib/Sudoku';
@@ -7,12 +8,15 @@ export * from './lib/SudokuMessage';
 export * from './lib/SudokuOptions';
 export * from './lib/SudokuInfo';
 export * from './lib/SudokulabInfo';
+export * from './lib/SudokuLabState';
 export * from './lib/SudokuSolution';
 export * from './lib/Algorithm';
 export * from './lib/AlgorithmResult';
 export * from './lib/Algorithms';
 export * from './lib/PrintTemplate';
 export * from './lib/PrintPage';
+export * from './lib/generator.model';
+export * from './lib/board.model';
 
 export * from './lib/SudokuSchema';
 
@@ -55,6 +59,8 @@ export * from './lib/CameraDialogOptions';
 export * from './lib/CameraDialogResult';
 export * from './lib/HandleImageOptions';
 export * from './lib/HandleImageResult';
+export * from './lib/LoadSudokuOptions';
+export * from './lib/ImportOptions';
 
 export * from './lib/GoogleCredentials';
 
@@ -62,6 +68,8 @@ export * from './lib/services';
 export * from './lib/tokens';
 
 export * from './sudoku.helper';
+export * from './generator.helper';
 export * from './global.helper';
 
 export * from './lib/pipes/schema-name.pipe';
+export * from './board-data-manager';

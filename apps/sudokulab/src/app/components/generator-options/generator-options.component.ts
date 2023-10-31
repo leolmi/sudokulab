@@ -1,24 +1,23 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
   DIFFICULTY_RANGES,
-  EditSudoku,
   EditSudokuEndGenerationMode,
-  EditSudokuOptions,
   EditSudokuValorizationMode,
-  GeneratorFacade,
+  GENERATOR_DATA,
+  GeneratorData,
+  GeneratorMode,
+  GeneratorStatus,
+  getGeneratorStatus,
   getMaxNumbers,
   getMinNumbers,
   hasEndGenerationValue,
   hasXValues,
-  SudokuFacade,
-  SudokuSymmetry,
-  update,
-  use
+  SUDOKU_DEFAULT_RANK,
+  SudokuSymmetry
 } from '@sudokulab/model';
-import {map, takeUntil} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {has as _has, keys as _keys} from 'lodash';
-import {GeneratorBaseComponent} from '../GeneratorBaseComponent';
 import {ItemInfo} from '../../model';
 
 @Component({
@@ -27,7 +26,7 @@ import {ItemInfo} from '../../model';
   styleUrls: ['./generator-options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GeneratorOptionsComponent extends GeneratorBaseComponent implements OnDestroy {
+export class GeneratorOptionsComponent {
   minNumbers$: Observable<number>;
   maxNumbers$: Observable<number>;
   isStopModeCount$: Observable<boolean>;
@@ -37,22 +36,22 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
   availableDifficulty: ItemInfo[];
   availableStopModes: ItemInfo[];
   availableValorizationModes: ItemInfo[];
-  options$: Observable<EditSudokuOptions>;
-  editSudoku$: Observable<EditSudoku|undefined>;
-  stopModeCOuntLabel$: Observable<string>;
+  stopModeCountLabel$: Observable<string>;
+  fixedCount$: Observable<number>;
 
-  constructor(private _generator: GeneratorFacade,
-              _sudoku: SudokuFacade) {
-    super(_generator, _sudoku);
+  status$: Observable<GeneratorStatus>;
+  MODE = GeneratorMode;
+  RANK = SUDOKU_DEFAULT_RANK;
 
-    this.editSudoku$ = _generator.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
-    this.isStopModeCount$ = this.editSudoku$.pipe(map(es => hasEndGenerationValue(es?.options)));
-    this.stopModeCOuntLabel$ = this.editSudoku$.pipe(map(es =>
-      es?.options.generationEndMode === EditSudokuEndGenerationMode.afterTime ? 'Seconds' : 'Builded schemas'));
-    this.minNumbers$ = this.editSudoku$.pipe(map(es => getMinNumbers(es?.options?.rank)));
-    this.maxNumbers$ = this.editSudoku$.pipe(map(es => getMaxNumbers(es?.options?.rank)));
-    this.hasXValues$ = this.editSudoku$.pipe(map(es => hasXValues(es)));
-    this.options$ = this.editSudoku$.pipe(map(es => es?.options||new EditSudokuOptions()));
+  constructor(@Inject(GENERATOR_DATA) public generator: GeneratorData) {
+    this.status$ = generator.sdk$.pipe(map((sdk) => getGeneratorStatus(sdk)));
+    this.isStopModeCount$ = generator.sdk$.pipe(map(ps => hasEndGenerationValue(ps?.options)));
+    this.stopModeCountLabel$ = generator.sdk$.pipe(map(ps =>
+       ps?.options.generator.generationEndMode === EditSudokuEndGenerationMode.afterTime ? 'Seconds' : 'Builded schemas'));
+    this.minNumbers$ = generator.sdk$.pipe(map(ps => getMinNumbers(ps?.sudoku?.rank)));
+    this.maxNumbers$ = generator.sdk$.pipe(map(ps => getMaxNumbers(ps?.sudoku?.rank)));
+    this.hasXValues$ = generator.sdk$.pipe(map(ps => hasXValues(ps)));
+    this.fixedCount$ = generator.sdk$.pipe(map(ps => 0));
 
     this.availableDimensions = [{
       code: 4,
@@ -106,6 +105,10 @@ export class GeneratorOptionsComponent extends GeneratorBaseComponent implements
 
   apply(e: any, target: string) {
     const value = this._getValue(e);
-    use(this.options$, o => this._generator.updateGeneratorOptions(update(o, {[target]: value})));
+    //use(this.options$, o => this._gen.updateGeneratorOptions(update(o, {[target]: value})));
+  }
+
+  applySudoku(e: any, target: string) {
+
   }
 }

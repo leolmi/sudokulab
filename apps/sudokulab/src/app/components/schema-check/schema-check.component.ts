@@ -1,18 +1,6 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {
-  Cell,
-  consolidate,
-  getHash,
-  getSudokuCells,
-  HandleImageResult,
-  Sudoku,
-  updateSudokuCellValue
-} from '@sudokulab/model';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Dictionary } from '@ngrx/entity';
-import { map } from 'rxjs/operators';
-import { cloneDeep as _clone } from 'lodash';
+import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {BoardDataManager, HandleImageResult} from '@sudokulab/model';
 
 @Component({
   selector: 'sudokulab-schema-check',
@@ -20,33 +8,21 @@ import { cloneDeep as _clone } from 'lodash';
   styleUrls: ['./schema-check.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SchemaCheckComponent {
-  schema$: BehaviorSubject<Sudoku>;
-  activeCellId$: BehaviorSubject<string>;
-  cells$: Observable<Dictionary<Cell>>;
+export class SchemaCheckComponent implements OnDestroy {
+  manager: BoardDataManager;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: HandleImageResult,
               private _dialogRef: MatDialogRef<SchemaCheckComponent>) {
-    this.schema$ = new BehaviorSubject<Sudoku>(data.sdk||new Sudoku());
-    this.activeCellId$ = new BehaviorSubject<string>('');
-    this.cells$ = this.schema$.pipe(map(sdk => getSudokuCells(sdk)));
+    this.manager = new BoardDataManager();
+    this.manager.setOptions({fixedValues: true});
   }
 
-  selectionChanged(id: string) {
-    this.activeCellId$.next(id);
-  }
-
-  updateSchema(sdk: Sudoku) {
-    this.schema$.next(sdk);
+  ngOnDestroy() {
+    this.manager.dispose();
   }
 
   done() {
-    const sdk = new Sudoku(this.schema$.value);
+    const sdk = this.manager.getSudoku();
     this._dialogRef.close(new HandleImageResult({sdk, onlyValues: this.data.onlyValues}));
-  }
-
-  keyPressed(value: string) {
-    const id = this.activeCellId$.getValue();
-    if (!!id) updateSudokuCellValue(this.schema$, { id, value });
   }
 }

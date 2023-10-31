@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
-import { LabFacade, SudokulabPage } from '@sudokulab/model';
+import {Injectable} from '@angular/core';
+import {SudokuLab, SudokulabPage} from '@sudokulab/model';
 import {AvailablePages, DEFAULT_BUTTONS, DEFAULT_LAB_BUTTONS} from '../../model';
-import { LabComponent } from './lab.component';
-import { Routes } from '@angular/router';
+import {LabComponent} from './lab.component';
+import {Routes} from '@angular/router';
 
-@Injectable()
+@Injectable({
+  providedIn: "root"
+})
 export class LabManifest extends SudokulabPage {
   default = true;
   code = AvailablePages.lab;
@@ -25,21 +27,13 @@ export class LabManifest extends SudokulabPage {
     DEFAULT_LAB_BUTTONS.popupdetails
   ];
   title = 'Player';
-  execute = (facade: LabFacade, code: string) => {
-    switch (code) {
-      case 'test': return facade.test();
-      case 'step': return facade.solveStep();
-      case 'clear': return facade.clear();
-      case 'solve': return facade.solve();
-      case 'analyze': return facade.analyze();
-      case 'download': return facade.download();
-      case 'upload': return facade.upload();
-      case 'stepinfo': return facade.stepInfo();
-      case 'camera': return facade.camera();
-      case 'available': return facade.toggleAvailable();
-      case 'popupdetails': return facade.togglePopupDetails();
-    }
+  executor = 'lab-executor';
+  getUrl(sl: SudokuLab): string {
+    const base = `${AvailablePages.lab}`;
+    const sdk_id = sl.state.activeSudokuId$.value;
+    return sdk_id ? `${base}/${sdk_id}` : base;
   }
+
   static routes = (): Routes => [{
     path: '',
     component: LabComponent

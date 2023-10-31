@@ -1,5 +1,5 @@
 <div class="container sudokulab-scrollbar"
-     [ngClass]="{'compact': compact$|async}"
+     [ngClass]="{'compact': ((sudokuLab.state.compactLevel$|async)||0)>0}"
      fxLayout="column">
   <mat-toolbar class="sudokulab-toolbar" color="primary">
     <div class="logo"
@@ -8,7 +8,7 @@
          (click)="menuTrigger.openMenu()"
          matTooltip="author info" fxLayout="column">
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
-      <span class="sub-title compact-visible">{{(page$|async)?.title}}</span>
+      <span class="sub-title compact-visible">{{(sudokuLab.state.page$|async)?.title}}</span>
     </div>
     <mat-menu #authorMenu="matMenu">
       <button (click)="clickOnLogo()" mat-menu-item>
@@ -21,10 +21,10 @@
         </div>
       </button>
     </mat-menu>
-    <span class="title compact-hidden">{{(page$|async)?.title}}</span>
+    <span class="title compact-hidden">{{(sudokuLab.state.page$|async)?.title}}</span>
     <span fxFlex></span>
     <div class="buttons-container compact-hidden" fxLayout="row" fxLayoutAlign="start center">
-      <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
+      <ng-container *ngFor="let pgbtn of ((sudokuLab.state.page$|async)?.buttons||[])">
         <div class="button-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
         <button mat-icon-button
                 *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
@@ -44,7 +44,7 @@
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
-      <ng-container *ngFor="let pgbtn of ((page$|async)?.buttons||[])">
+      <ng-container *ngFor="let pgbtn of ((sudokuLab.state.page$|async)?.buttons||[])">
         <div class="button-menu-separator" *ngIf="pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"></div>
         <button mat-menu-item
                 *ngIf="!pgbtn.separator && !((status$|async)||{})[pgbtn?.invisibleKey||'']"
@@ -56,33 +56,33 @@
         </button>
       </ng-container>
       <div class="button-menu-separator"></div>
-      <button *ngFor="let pag of (pages$|async)||[]"
+      <button *ngFor="let pag of sudokuLab.pages"
               mat-menu-item
-              [ngClass]="{'color-accent': pag.code === (page$|async)?.code}"
+              [ngClass]="{'color-accent': pag.code === (sudokuLab.state.page$|async)?.code}"
               (click)="openPage(pag)">
         <mat-icon>{{pag.icon}}</mat-icon>
         <span>{{pag.title}}</span>
       </button>
     </mat-menu>
   </mat-toolbar>
-  <mat-progress-bar *ngIf="!(isLoadedSchemas$|async)" class="main-progress-bar" color="accent" mode="indeterminate"></mat-progress-bar>
+  <mat-progress-bar *ngIf="!!(sudokuLab.state.waiting$|async)" class="main-progress-bar" color="accent" mode="indeterminate"></mat-progress-bar>
   <div class="central-container" fxFlex fxLayout="row" fxLayoutAlign="center start">
     <div class="vertical-toolbar background2 compact-hidden" fxLayout="column">
-      <button *ngFor="let pag of (pages$|async)||[]"
+      <button *ngFor="let pag of sudokuLab.pages"
               mat-icon-button
-              [ngClass]="{'selected': pag.code === (page$|async)?.code}"
+              [ngClass]="{'selected': pag.code === (sudokuLab.state.page$|async)?.code}"
               [matTooltip]="pag.title"
               (click)="openPage(pag)">
         <mat-icon>{{pag.icon}}</mat-icon>
       </button>
     </div>
-    <div *ngIf="!(isLoadedSchemas$|async)"
+    <div *ngIf="!!(sudokuLab.state.waiting$|async)"
          class="page-container-overlay"
          fxLayout="row" fxLayoutAlign="center center">
       <div class="initial-message">starting...</div>
     </div>
     <div class="page-container opacity-0"
-         [class.active]="!!(isLoadedSchemas$|async)" fxFlex>
+         [class.active]="!(sudokuLab.state.waiting$|async)" fxFlex>
       <router-outlet></router-outlet>
     </div>
   </div>

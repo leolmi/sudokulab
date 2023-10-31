@@ -1,21 +1,17 @@
 <div class="schemalab-tool options-tool compact-auto-height" fxLayout="column">
   <div class="output-schemas">
     <div class="output-empty"
-         *ngIf="((schemas$|async)||[]).length<=0 && !(running$|async)"
+         *ngIf="((generator.schemas$|async)||[]).length<=0 && !(generator.running$|async)"
          fxLayout="column" fxLayoutAlign="center">
       <div>no schema</div>
     </div>
     <svg-board class="thumbnail"
-               *ngFor="let sdk of schemas$|async"
+               *ngFor="let sdk of generator.schemas$|async"
                [sudoku]="sdk"
                matTooltip="click to open in player"
                (click)="openInLab(sdk)"></svg-board>
-<!--    <sudokulab-thumbnail *ngFor="let sdk of schemas$|async"-->
-<!--                         [sudoku]="sdk"-->
-<!--                         matTooltip="click to open in player"-->
-<!--                         (click)="openInLab(sdk)"></sudokulab-thumbnail>-->
     <sudokulab-thumbnail [workingMode]="true"
-                         *ngIf="!!(running$|async)"
+                         *ngIf="!!(generator.running$|async)"
                          [sudoku]="sudoku$|async"
                          unknown="generating..."></sudokulab-thumbnail>
   </div>

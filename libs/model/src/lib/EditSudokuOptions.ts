@@ -1,4 +1,5 @@
 import { EditSudokuEndGenerationMode, EditSudokuValorizationMode, SudokuSymmetry } from './enums';
+import {SUDOKU_DEFAULT_RANK} from "./consts";
 
 export class EditSudokuOptions {
   constructor(o?: Partial<EditSudokuOptions>) {
@@ -9,7 +10,7 @@ export class EditSudokuOptions {
     if ([4, 9, 16].indexOf(this.rank || 0) < 0) this.rank = 9;
   }
 
-  rank = 9;
+  rank = SUDOKU_DEFAULT_RANK;
   unique = true;
   symmetry = SudokuSymmetry.horizontal;
   fixedCount = 24;

@@ -1,83 +1,118 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
-  getCellStyle,
-  getLinesGroups,
-  EditSudoku,
-  GeneratorFacade,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
+import {BehaviorSubject, Observable, of} from 'rxjs';
+import {
   cellId,
+  clearEvent,
+  GENERATOR_DATA,
+  GeneratorData,
+  getDimension,
+  getLinesGroups,
   isDirectionKey,
-  use, getDimension, SudokuFacade, getSchemaCellStyle, SUDOKU_DEFAULT_RANK, SUDOKU_DYNAMIC_VALUE
+  moveOnDirection,
+  SUDOKU_DEFAULT_RANK,
+  SUDOKU_DYNAMIC_VALUE,
+  SudokuLab,
 } from '@sudokulab/model';
-import { map, takeUntil, tap } from 'rxjs/operators';
-import { GeneratorBaseComponent } from '../GeneratorBaseComponent';
+import {map} from 'rxjs/operators';
+import {DestroyComponent} from '../DestroyComponent';
 
 @Component({
   selector: 'sudokulab-generator-board',
   templateUrl: './generator-board.component.html',
   styleUrls: ['./generator-board.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GeneratorBoardComponent extends GeneratorBaseComponent implements OnDestroy {
-  @ViewChild('board') board: ElementRef | undefined;
-  editSudoku$: Observable<EditSudoku|undefined>;
-  selected$: Observable<string>;
+export class GeneratorBoardComponent extends DestroyComponent implements OnDestroy {
+  @ViewChild('board') set board(e: ElementRef|undefined) {
+    this._element$.next(e);
+  };
+
   cellStyle$: Observable<any>;
   rows$: Observable<number[]>;
   cols$: Observable<number[]>;
-  grline$: Observable<{[id: number]: boolean}>;
+  gridLine$: Observable<{ [id: number]: boolean }>;
   hasFocus$: BehaviorSubject<boolean>;
   DYNAMIC = SUDOKU_DYNAMIC_VALUE;
-  PROXYVALUE: any = {x: '?'};
-  constructor(private ele: ElementRef,
-              private _generator: GeneratorFacade,
-              _sudoku: SudokuFacade) {
-    super(_generator, _sudoku);
-    this.editSudoku$ = _generator.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
-    this.selected$ = _generator.selectActiveCell$.pipe(takeUntil(this._destroy$));
+  RANK = SUDOKU_DEFAULT_RANK;
+  PROXYVALUE: any = { x: '?' };
+
+  constructor(public sudokuLab: SudokuLab,
+              @Inject(GENERATOR_DATA) public generator: GeneratorData) {
+    super(sudokuLab);
+
     this.hasFocus$ = new BehaviorSubject<boolean>(false);
+    this.rows$ = generator.sdk$.pipe(
+      map((s) => getDimension(s?.sudoku?.rank || SUDOKU_DEFAULT_RANK))
+    );
+    this.cols$ = generator.sdk$.pipe(
+      map((s) => getDimension(s?.sudoku?.rank || SUDOKU_DEFAULT_RANK))
+    );
+    this.gridLine$ = generator.sdk$.pipe(
+      map((s) => getLinesGroups(s?.sudoku?.rank || SUDOKU_DEFAULT_RANK))
+    );
 
-    this.rows$ = this.editSudoku$.pipe(map(s => getDimension(s?.options?.rank)));
-    this.cols$ = this.editSudoku$.pipe(map(s => getDimension(s?.options?.rank)));
-    this.cellStyle$ = combineLatest(this.editSudoku$, this._resize$, this._element$).pipe(map(([sdk, r, ele]) =>
-      getSchemaCellStyle(sdk?.options?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 200)));
+    this.cellStyle$ = of({});
 
-    // this.cellStyle$ = this.editSudoku$.pipe(map(s => getCellStyle(s?.options, ele.nativeElement.parentElement)));
-    this.grline$ = this.editSudoku$.pipe(map(s => getLinesGroups(s?.options?.rank)));
+    // this.cellStyle$ = combineLatest([generator.sdk$, this._element$, this._resize$]).pipe(
+    //   filter(([sdk, ele]) => !!sdk && !!ele?.nativeElement),
+    //   // debounceTime(1000),
+    //   map(([sdk, ele]) =>
+    //     getSchemaCellStyle(sdk?.options?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 600)));
+    //
+    // this.cellStyle$.subscribe(cs => console.log('CELL STYLE', cs));
+
+    // setTimeout(() => {
+    //   this.cellStyle$ = combineLatest([generator.sdk$, this._element$, this._resize$]).pipe(
+    //     filter(([sdk, ele]) => !!sdk && !!ele),
+    //     map(([sdk, ele]) =>
+    //       getSchemaCellStyle(sdk?.options?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 600)));
+    // }, 2000);
+
+    // this.cellStyle$ = combineLatest([generator.sdk$, this._element$, this._resize$]).pipe(
+    //   map(([sdk, ele]) =>
+    //     getSchemaCellStyle(sdk?.options?.rank || SUDOKU_DEFAULT_RANK, ele?.nativeElement?.clientWidth || 600)));
+
+    // generator.sdk$.subscribe(sdk => console.log('[1] SDK rank', sdk?.options?.rank||SUDOKU_DEFAULT_RANK));
+    // this._element$.subscribe(ele => console.log('[2] ELE clientWidth', ele?.nativeElement?.clientWidth || 600));
+    // this._resize$.subscribe(res => console.log('[3] RESIZE'));
   }
 
-  ngAfterViewInit() {
-    this._element$.next(this.board);
-  }
-
-  focus(status = true) {
-    use(this.running$, (running) => {
-      if (running) return;
-      if (!!status) this.board?.nativeElement.focus();
-      this.hasFocus$.next(status);
-    });
-  }
+  // focus(status = true) {
+  //   use(this.generator.running$, (running) => {
+  //     if (running) return;
+  //     // if (status) this.board?.nativeElement.focus();
+  //     this.hasFocus$.next(status);
+  //   });
+  // }
 
   @HostListener('window:keyup', ['$event'])
   keyEvent(e: KeyboardEvent) {
-    use(this.running$, (running) => {
-      if (running) return;
-      if (!this.hasFocus$.getValue()) return;
-      if (isDirectionKey(e?.key)) {
-        this._generator.move(e?.key);
-        e.stopPropagation();
-        e.preventDefault();
-      } else {
-        this._generator.setValue(e?.key);
-      }
-    });
+    const sdk = this.generator.sdk$.value;
+    if (this.generator.running$.value || !sdk) return;
+
+    if (isDirectionKey(e?.key)) {
+      clearEvent(e);
+      const target = moveOnDirection(
+        this.generator.activeCellId$.value,
+        sdk.sudoku,
+        e?.key
+      );
+      this.select(target?.col || 0, target?.row || 0);
+    } else {
+      this.generator.value$.next(e?.key);
+    }
   }
 
   select(col: number, row: number) {
-    use(this.running$, (running) => {
-      if (running) return;
-      this.focus()
-      this._generator.setActiveCell(cellId(col, row));
-    });
+    if (this.generator.running$.value) return;
+    this.generator.activeCellId$.next(cellId(col, row));
   }
 }

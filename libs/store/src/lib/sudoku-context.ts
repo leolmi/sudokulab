@@ -150,7 +150,7 @@ export class SudokuContext extends SudokuFacade {
   }
 
   onCheckSchema(component: Type<any>, destroyer$: Observable<any>): void {
-    this._on(this._checkSchema$, component, destroyer$, { width: '500px', panelClass: 'full-screen' })
+    this._on(this._checkSchema$, component, destroyer$, { width: '454px', panelClass: 'full-screen' })
       .pipe(filter(res => !!(<HandleImageResult>res)?.sdk))
       .subscribe((res) => this.loadSudoku((<HandleImageResult>res).sdk, (<HandleImageResult>res).onlyValues));
   }

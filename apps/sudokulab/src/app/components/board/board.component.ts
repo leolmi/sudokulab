@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostListener,
-  Input,
-  OnDestroy,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, OnDestroy, ViewChild} from '@angular/core';
 import {
   cellId,
   debug,
@@ -17,19 +8,17 @@ import {
   getLinesGroups,
   getSchemaCellStyle,
   isDirectionKey,
-  LabFacade,
   MessageType,
   PlaySudoku,
   PlaySudokuOptions,
   SolveStepResult,
   SUDOKU_DEFAULT_RANK,
-  SudokuFacade,
+  SudokuLab,
   SudokuMessage
 } from '@sudokulab/model';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {
   debounceTime,
-  delay,
   distinctUntilChanged,
   filter,
   map,
@@ -38,9 +27,9 @@ import {
   takeUntil,
   withLatestFrom
 } from 'rxjs/operators';
-import { DestroyComponent } from '../DestroyComponent';
-import { Dictionary } from '@ngrx/entity';
-import { keys as _keys, last as _last, cloneDeep as _clone } from 'lodash';
+import {DestroyComponent} from '../DestroyComponent';
+import {Dictionary} from '@ngrx/entity';
+import {cloneDeep as _clone, keys as _keys, last as _last} from 'lodash';
 import {SOLVER_STEP_DETAILS} from "../../model";
 import * as equal from 'fast-deep-equal';
 
@@ -82,16 +71,16 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
   };
 
   constructor(private ele: ElementRef,
-              private _lab: LabFacade,
-              _sudoku: SudokuFacade) {
-    super(_sudoku);
+              public sudokuLab: SudokuLab) {
+    super(sudokuLab);
 
     this.highlightsCell$ = new BehaviorSubject<Dictionary<boolean>>({});
     this.otherHighlightsCells$ = new BehaviorSubject<Dictionary<boolean>>({});
-    this.playSudoku$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
-    this.selected$ = _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
-    this.stepInfos$ = _lab.selectStepInfos$.pipe(takeUntil(this._destroy$));
-    this.highlightStep$ = _lab.selectHighlightCells$.pipe(takeUntil(this._destroy$));
+
+    this.playSudoku$ = of(undefined); // _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
+    this.selected$ = of(''); // _lab.selectActiveCell$.pipe(takeUntil(this._destroy$));
+    this.stepInfos$ = of([]); // _lab.selectStepInfos$.pipe(takeUntil(this._destroy$));
+    this.highlightStep$ = of({}); // _lab.selectHighlightCells$.pipe(takeUntil(this._destroy$));
 
 
     this.rows$ = this.playSudoku$.pipe(map(s => getDimension(s?.sudoku?.rank)),
@@ -125,17 +114,17 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
 
     stis$.subscribe(([ssr, sdk]) =>
       this._showInfo(ssr, sdk?.options));
-    stis$.pipe(
-        switchMap(([ssr, sdk]) =>
-            of(ssr).pipe(delay(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
-                .subscribe(() => _lab.clearStepInfo());
+    // stis$.pipe(
+    //     switchMap(([ssr, sdk]) =>
+    //         of(ssr).pipe(delay(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
+    //             .subscribe(() => _lab.clearStepInfo());
 
-    this.highlightStep$.pipe(
-        filter(hls => _keys(hls).length>0),
-        withLatestFrom(this.playSudoku$),
-        switchMap(([hls, sdk]) => of(hls).pipe(
-            debounceTime(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
-      .subscribe(() => _lab.clesrHighlightCells());
+    // this.highlightStep$.pipe(
+    //     filter(hls => _keys(hls).length>0),
+    //     withLatestFrom(this.playSudoku$),
+    //     switchMap(([hls, sdk]) => of(hls).pipe(
+    //         debounceTime(sdk?.options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT))))
+    //   .subscribe(() => _lab.clesrHighlightCells());
 
     this.highlightsCell$.pipe(
         filter(hlc => _keys(hlc).length>0),
@@ -152,7 +141,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
 
   private _showInfo(stis: SolveStepResult[], options?: PlaySudokuOptions) {
     const alg = getAlgorithm(_last(stis)?.result?.algorithm||'');
-    this._lab.raiseMessage(new SudokuMessage({
+    this.sudokuLab.showMessage(new SudokuMessage({
       message: alg?.name||'',
       type: MessageType.highlight,
       duration: options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT,
@@ -165,17 +154,17 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
   @HostListener('window:keyup', ['$event'])
   keyEvent(e: KeyboardEvent) {
     if (isDirectionKey(e?.key)) {
-      this._lab.move(e?.key);
+      //this._lab.move(e?.key);
       e.stopPropagation();
       e.preventDefault();
     } else {
-      this._lab.setValue(e?.key);
+      //this._lab.setValue(e?.key);
     }
   }
 
   select(col: number, row: number) {
     const cid = cellId(col, row);
-    this._lab.setActiveCell(cid);
+    //this._lab.setActiveCell(cid);
     debug(() => this.playSudoku$
       .pipe(take(1))
       .subscribe(sdk => console.log(`CELL (${cid})`, sdk?.cells[cid])));

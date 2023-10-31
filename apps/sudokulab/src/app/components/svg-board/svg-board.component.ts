@@ -15,7 +15,7 @@ interface SvgCell {
       <rect x="0" y="0" width="90" height="90" stroke="#aaa" fill="transparent" stroke-width="1"></rect>
       <rect x="30" y="0" width="30" height="90" stroke="#aaa" fill="transparent" stroke-width="1"></rect>
       <rect x="0" y="30" width="90" height="30" stroke="#aaa" fill="transparent" stroke-width="1"></rect>
-      <rect *ngFor="let cell of cells$|async" class="fill-cell" width="10" height="10" [attr.x]="cell.x" [attr.y]="cell.y"></rect>
+      <rect *ngFor="let cell of cells$|async" class="svg-board-cell" width="10" height="10" [attr.x]="cell.x" [attr.y]="cell.y"></rect>
     </g>
   </svg>`
 })

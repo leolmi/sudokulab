@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
 import {BehaviorSubject, Observable} from "rxjs";
-import {AlgorithmResultLine, getAlgorithm, SolveStepResult, update} from "@sudokulab/model";
+import {AlgorithmResultLine, getAlgorithm, SolveStepResult, SudokuLab, update} from "@sudokulab/model";
 import {reduce as _reduce} from 'lodash';
 import {map, tap} from "rxjs/operators";
 import {Dictionary} from "@ngrx/entity";
@@ -14,7 +14,7 @@ interface Line {
 
 @Component({
   selector: 'sudokulab-solver-step-details',
-  template: `<div class="details-container">
+  template: `<div class="details-container" fxLayout="column">
     <div class="lines-header" [class.allow-close]="allowClose && ((lines$|async)||[]).length>0">
       <img *ngIf="showHelpImage" src="assets/images/board_num.png" alt="description image">
       <button *ngIf="allowClose && ((lines$|async)||[]).length>0" class="close-button"
@@ -22,16 +22,20 @@ interface Line {
         <mat-icon>highlight_off</mat-icon>
       </button>
     </div>
-    <div class="lines-container">
-      <div *ngFor="let line of lines$|async"
-           class="detail-line"
-           (click)="clickOnLine(line)"
-           [class.result-line]="!!line.line && handleLines"
-           [class.hidden-line]="!!line.line && line.hidden"
-           [class.visible-line]="((visibles$|async)||{})[''+(line.num||'')]"
-           fxLayout="row" fxLayoutAlign="start center">
-        <div class="line-number" *ngIf="!!line.line">{{line.num}}</div>
-        <div class="line-text" [class.title]="!line.line" fxFlex>{{line.text}}</div>
+    <div class="lines-container"
+         [fxFlex]="containerFlex$|async"
+         [class.compact]="sudokuLab.state.isCompact$|async">
+      <div class="lines-list-container">
+        <div *ngFor="let line of lines$|async"
+             class="detail-line"
+             (click)="clickOnLine(line)"
+             [class.result-line]="!!line.line && handleLines"
+             [class.hidden-line]="!!line.line && line.hidden"
+             [class.visible-line]="((visibles$|async)||{})[''+(line.num||'')]"
+             fxLayout="row" fxLayoutAlign="start center">
+          <div class="line-number" *ngIf="!!line.line">{{line.num}}</div>
+          <div class="line-text" [class.title]="!line.line" fxFlex>{{line.text}}</div>
+        </div>
       </div>
     </div>
   </div>`,
@@ -42,6 +46,7 @@ export class SolverStepDetailsComponent {
   steps$: BehaviorSubject<SolveStepResult[]>;
   lines$: Observable<Line[]>;
   visibles$: BehaviorSubject<Dictionary<boolean>>;
+  containerFlex$: Observable<string>;
 
   @Input() handleLines: boolean = false;
   @Input() showHelpImage: boolean = true;
@@ -54,9 +59,10 @@ export class SolverStepDetailsComponent {
   @Output() onLineCLick: EventEmitter<AlgorithmResultLine> = new EventEmitter<AlgorithmResultLine>();
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor() {
+  constructor(public sudokuLab: SudokuLab) {
     this.visibles$ = new BehaviorSubject<any>({});
     this.steps$ = new BehaviorSubject<SolveStepResult[]>([])
+    this.containerFlex$ = sudokuLab.state.isCompact$.pipe(map(cmp => cmp ? 'none' : '100'))
 
     this.lines$ = this.steps$.pipe(
       map(steps => {

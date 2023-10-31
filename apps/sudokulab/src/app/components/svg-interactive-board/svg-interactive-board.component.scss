@@ -1,0 +1,29 @@
+.svg-board-cell {
+  transition: fill .5s ease-in-out;
+}
+
+.svg-board-cell-text {
+  font-size: 6px;
+  font-weight: 100;
+  transition: fill .5s ease-in-out;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  &.fixed {
+    font-weight: bold;
+  }
+  &.svg-pulse {
+    font-weight: bold;
+    animation: svg-pulse 2s infinite;
+  }
+}
+
+.svg-board-cell-values-text {
+  font-size: 2px;
+}
+
+.svg-board-line,
+.svg-board-cell-text,
+.svg-board-cell-values-text {
+  user-select: none;
+  pointer-events: none;
+}

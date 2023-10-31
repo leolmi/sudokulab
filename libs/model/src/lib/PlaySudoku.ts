@@ -16,10 +16,11 @@ export class PlaySudoku {
     this.cells = {};
     this.groups = {};
     this.groupsForCell = {};
+    this.sudoku = new Sudoku();
     Object.assign(this, ps || {});
     this.options = new PlaySudokuOptions(ps?.options);
     this.state = new PlaySudokuState(ps?.state);
-    _loadSudoku(this);
+    checkSudoku(this);
   }
   id: string;
   _id: number;
@@ -38,7 +39,7 @@ const _addGroup = (ps: PlaySudoku, type: SudokuGroupType, pos: number) => {
 
 const _getValue = (v: string): string => (v||SUDOKU_EMPTY_VALUE) === SUDOKU_EMPTY_VALUE ? '' : v;
 
-const _loadSudoku = (ps: PlaySudoku) => {
+export const checkSudoku = (ps: PlaySudoku) => {
   if (!ps?.sudoku) return;
   ps.groups = {};
   ps.cells = {};

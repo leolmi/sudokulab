@@ -1,16 +1,9 @@
 <h1 mat-dialog-title>Check schema</h1>
 <div mat-dialog-content class="schema-check-dialog">
   <div class="schema-container">
-    <sudokulab-schema
-      class="schema"
-      [schema]="schema$|async"
-      (selectionChanged)="selectionChanged($event)"
-      (schemaChanged)="updateSchema($event)"></sudokulab-schema>
+    <svg-interactive-board [sudokuData]="manager.data"></svg-interactive-board>
   </div>
-  <sudokulab-key-board [cells]="cells$|async"
-                       [isActive]="!!(activeCellId$|async)"
-                       [rank]="(schema$|async)?.rank"
-                       (onValueChanged)="keyPressed($event)"></sudokulab-key-board>
+  <sudokulab-key-board [boardData]="manager.data"></sudokulab-key-board>
 </div>
 <mat-dialog-actions>
   <div fxFlex></div>

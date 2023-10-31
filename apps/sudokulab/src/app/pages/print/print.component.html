@@ -1,9 +1,9 @@
 <div class="sudokulab-page sudokulab-page-print background3" fxLayout="row">
   <div class="print-container" fxFlex>
     <div class="pages-container">
-      <print-page *ngFor="let page of pages$|async"
-                  [alone]="((pages$|async)||[]).length<2"
-                  [page]="page" [activeId]="activeArea$|async"
+      <print-page *ngFor="let page of sudokuLab.state.printPages$|async"
+                  [alone]="((sudokuLab.state.printPages$|async)||[]).length<2"
+                  [page]="page" [activeId]="sudokuLab.state.activePrintArea$|async"
                   (clearPage)="clearPage($event)"
                   (removePage)="removePage($event)"
                   (activeChanged)="activeArea($event)"></print-page>
@@ -18,10 +18,10 @@
            *ngFor="let sdk of schemas$|async"
            (click)="addSchema(sdk)"
            fxLayout="row">
-        <svg-board class="thumbnail background" [sudoku]="sdk?.sudoku"></svg-board>
+        <svg-board class="thumbnail background" [sudoku]="sdk"></svg-board>
         <div class="schema-info" fxLayout="column">
           <div class="title" fxFlex>{{sdk | schemaName}}</div>
-          <div class="sub-title">{{sdk.sudoku?.info?.difficultyValue||'?'}}</div>
+          <div class="sub-title">{{sdk?.info?.difficultyValue||'?'}}</div>
         </div>
       </div>
     </cdk-virtual-scroll-viewport>

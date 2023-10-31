@@ -1,6 +1,7 @@
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
-import { SudokuFacade } from '@sudokulab/model';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {Component, ElementRef, HostListener, OnDestroy} from '@angular/core';
+import {SudokuLab} from '@sudokulab/model';
+import {map, takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'destroy-component',
@@ -11,14 +12,14 @@ export class DestroyComponent implements OnDestroy {
   protected _element$: BehaviorSubject<ElementRef|undefined>;
   protected readonly _destroy$: Subject<boolean>;
   compact$: Observable<boolean>;
-  constructor(protected _sudoku: SudokuFacade) {
+  constructor(sudokuLab: SudokuLab) {
     this._destroy$ = new Subject<boolean>();
     this._resize$ = new BehaviorSubject<any>({});
     this._element$ = new BehaviorSubject<ElementRef | undefined>(undefined);
-    this.compact$ = _sudoku.selectIsCompact$;
+    this.compact$ = sudokuLab.state.compactLevel$.pipe(
+      takeUntil(this._destroy$),
+      map(l => l > 0));
   }
-
-  checkCompact() { this._sudoku.checkCompactStatus(); }
 
   @HostListener('window:resize')
   resize() {

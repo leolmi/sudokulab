@@ -1,13 +1,14 @@
 .details-container {
   white-space: pre-wrap;
   overflow: auto;
+  height: 100%;
 }
 
 .lines-header {
   position: relative;
   text-align: center;
   &.allow-close {
-    min-height: 24px;
+    min-height: 40px;
   }
   img {
     width: 100px;
@@ -20,6 +21,22 @@
 }
 
 .lines-container {
+  position: relative;
+  overflow: auto;
+
+  .lines-list-container {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  &.compact {
+    .lines-list-container {
+      position: relative;
+    }
+  }
+
   .detail-line {
     background-color: rgba(1,1,1,.05);
     &.result-line {
@@ -48,6 +65,8 @@
     }
   }
 }
+
+
 
 .hidden-line {
   &:not(.visible-line) {

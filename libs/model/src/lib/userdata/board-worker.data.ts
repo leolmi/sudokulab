@@ -1,7 +1,18 @@
-import {getRank, PlaySudoku, PlaySudokuCell} from "@sudokulab/model";
-import {BOARD_WORKER_USER_DATA_KEY, BoardUserData, CellData, SchemaData} from "./board-worker.model";
-import {cloneDeep as _clone, extend as _extend, find as _find, forEach as _forEach, reduce as _reduce} from "lodash";
+import {
+  cloneDeep as _clone,
+  extend as _extend,
+  find as _find,
+  forEach as _forEach,
+  isFunction as _isFunction,
+  reduce as _reduce
+} from "lodash";
+import {PlaySudoku} from "../PlaySudoku";
+import {BOARD_WORKER_USER_DATA_KEY, BoardUserData, CellData, SchemaData} from "../board.model";
+import {getRank} from "../../sudoku.helper";
+import {PlaySudokuCell} from "../PlaySudokuCell";
 
+const _memory: BoardUserData = new BoardUserData();
+let IS_LOG_WARN_001 = false;
 
 const applyUserData = (sdk: PlaySudoku, data: BoardUserData): void => {
   const sdata = (data?.schema||{})[sdk._id];
@@ -26,6 +37,13 @@ const applyUserData = (sdk: PlaySudoku, data: BoardUserData): void => {
  * carica i dati utente
  */
 export const getUserData = (): BoardUserData|undefined => {
+  if (!_isFunction(localStorage?.getItem)) {
+    if (!IS_LOG_WARN_001) {
+      console.warn('cannot use localStorage to persist user data');
+      IS_LOG_WARN_001 = true;
+    }
+    return _memory;
+  }
   const udata_str = localStorage.getItem(BOARD_WORKER_USER_DATA_KEY);
   let udata: any;
   if (udata_str) {
@@ -87,6 +105,14 @@ export const saveUserData = (sdk: PlaySudoku): BoardUserData => {
   } else {
     delete data.schema[sdk._id];
   }
-  localStorage.setItem(BOARD_WORKER_USER_DATA_KEY, JSON.stringify(data));
+  if (!_isFunction(localStorage?.setItem)) {
+    if (!IS_LOG_WARN_001) {
+      console.warn('cannot use localStorage to persist user data');
+      IS_LOG_WARN_001 = true;
+    }
+    _extend(_memory, data);
+  } else {
+    localStorage.setItem(BOARD_WORKER_USER_DATA_KEY, JSON.stringify(data));
+  }
   return data;
 }

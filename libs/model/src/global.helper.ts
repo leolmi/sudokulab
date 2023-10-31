@@ -1,5 +1,5 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {take, takeUntil} from 'rxjs/operators';
 import {
   cloneDeep as _clone,
   extend as _extend,
@@ -43,6 +43,18 @@ export const setApplicationTheme = (wins: SudokulabWindowService, theme: string)
 
 export const use = <T>(o$: Observable<T>, handler: (o:T) => any): any => o$.pipe(take(1)).subscribe(o => handler(o));
 
+export const useOn = <T>(o$: Observable<T>,
+                         t$: BehaviorSubject<T>,
+                         destroyer$: Observable<any>,
+                         h?: (o: T) => any): Subscription|null => {
+  if (!o$) return null;
+  return o$.pipe(takeUntil(destroyer$)).subscribe(ov => {
+    const cov = _clone(ov);
+    t$.next(cov);
+    if (!!h) h(cov);
+  });
+}
+
 export const getHash = (o: any): number => {
   o = o || '';
   if (!_isString(o)) {
@@ -78,6 +90,15 @@ export const isMutation = (o: any, c: any): boolean =>
 
 export const isCompact = (ws: SudokulabWindowService): boolean => (ws.nativeWindow?.innerWidth || 2000) < SUDOKU_COMPACT_WIDTH;
 
+/**
+ * Livello di compattezza
+ * @param ws
+ */
+export const getCompactLevel = (ws: SudokulabWindowService): number => {
+  if ((ws.nativeWindow?.innerWidth || 2000) < SUDOKU_COMPACT_WIDTH) return 1;
+  return 0;
+}
+
 
 export const getUserSetting = <T>(path: string): T|undefined => {
   const userdata = localStorage.getItem(SUDOKULAB_SETTINGS_KEY);
@@ -105,6 +126,10 @@ export const saveUserSetting = (changes: SettingsChanges[]) => {
   } catch (err) {
     console.warn(SDK_PREFIX, 'Cannot save user data!', err);
   }
+}
+
+export const clearUserSettings = () => {
+  localStorage.removeItem(SUDOKULAB_SETTINGS_KEY);
 }
 
 export const addLine = (original: string, line: string, separator = '\n'): string => {
@@ -149,3 +174,12 @@ export const combine = (...args: string[]): string => {
  * Vero se il browser supporta gli worker web
  */
 export const isWorkerEnabled = () => typeof(Worker) !== "undefined";
+
+/**
+ * restituisce il messaggio d'errore
+ * @param err
+ */
+export const getErrorMessage = (err: any): string => {
+  if ((<Error>err).message) return err.message;
+  return 'Generic error';
+}

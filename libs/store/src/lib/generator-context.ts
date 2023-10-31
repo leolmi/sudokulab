@@ -1,16 +1,19 @@
-import { Injectable } from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {
   EditSudoku,
   EditSudokuOptions,
+  GENERATOR_DATA,
+  GeneratorAction,
+  GeneratorData,
   GeneratorFacade,
   Sudoku,
   SudokuFacade,
   SudokuMessage,
   WorkingInfo
 } from '@sudokulab/model';
-import { Observable } from 'rxjs';
-import { Store } from '@ngrx/store';
-import { SudokuStore } from './sudoku-store';
+import {Observable} from 'rxjs';
+import {Store} from '@ngrx/store';
+import {SudokuStore} from './sudoku-store';
 import * as GeneratorSelectors from './selectors';
 import * as GeneratorActions from './actions';
 import * as SudokuActions from './actions';
@@ -41,6 +44,7 @@ export class GeneratorContext extends GeneratorFacade {
   }
 
   run() {
+    this._generator.action$.next(GeneratorAction.run);
     this._store.dispatch(GeneratorActions.setGeneratorStatus({ active: true }));
   }
 
@@ -54,14 +58,17 @@ export class GeneratorContext extends GeneratorFacade {
   }
 
   stop() {
+    this._generator.action$.next(GeneratorAction.stop);
     this._store.dispatch(GeneratorActions.stopGeneratorRequest());
   }
 
   clear() {
+    this._generator.action$.next(GeneratorAction.clear);
     this._store.dispatch(GeneratorActions.clearGenerator());
   }
 
   download() {
+    this._generator.action$.next(GeneratorAction.download);
     this._store.dispatch(GeneratorActions.downloadActiveGeneratorSchema());
   }
 
@@ -70,6 +77,7 @@ export class GeneratorContext extends GeneratorFacade {
   }
 
   openInLab(schema: Sudoku) {
+    this._generator.action$.next(GeneratorAction.openInLab);
     this._store.dispatch(SudokuActions.openSchemaInLab({ schema }));
   }
 
@@ -78,23 +86,28 @@ export class GeneratorContext extends GeneratorFacade {
   }
 
   downloadAll() {
+    this._generator.action$.next(GeneratorAction.downloadAll);
     this._store.dispatch(GeneratorActions.downloadGeneratedSchemas());
   }
 
   removeAll() {
+    this._generator.action$.next(GeneratorAction.removeAll);
     this._store.dispatch(GeneratorActions.clearGeneratedSchemas());
   }
 
   upload() {
+    this._generator.action$.next(GeneratorAction.upload);
     this._sudoku.upload();
   }
 
   generate() {
+    this._generator.action$.next(GeneratorAction.generate);
     this._store.dispatch(GeneratorActions.generateSchema());
   }
 
   constructor(private _store: Store<SudokuStore>,
-              private _sudoku: SudokuFacade) {
+              private _sudoku: SudokuFacade,
+              @Inject(GENERATOR_DATA) private _generator: GeneratorData) {
     super();
   }
 }

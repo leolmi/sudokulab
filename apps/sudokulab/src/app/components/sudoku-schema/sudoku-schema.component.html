@@ -1,6 +1,5 @@
 <div class="sudokulab-schema" #schemaElement>
   <div class="sudokulab-schema-background"
-       *ngIf="!!(element$|async)"
        fxLayout="column">
     <div class="sudokulab-schema-row"
          *ngFor="let row of rows$|async"
@@ -15,8 +14,8 @@
              [ngClass]="{
                 'fixed': cell?.fixed,
                 'selected': cell.id === (selected$|async),
-                'right-line': ((grline$|async)||{})[col],
-                'bottom-line': ((grline$|async)||{})[row],
+                'right-line': ((gridLine$|async)||{})[col],
+                'bottom-line': ((gridLine$|async)||{})[row],
                 'has-value': !!(cell?.value)
              }">
           <div class="cell-value">{{cell.value}}</div>

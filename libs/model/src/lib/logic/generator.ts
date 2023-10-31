@@ -2,8 +2,9 @@ import {EditSudoku} from "../EditSudoku";
 import {GeneratorFacade} from "../GeneratorFacade";
 import {use} from "../../global.helper";
 import {combineLatest} from "rxjs";
-import {fillSchema, GeneratorInfo, getSudoku, resolve, valorise} from "./generator.helper";
+import {fillSchema, GeneratorInfo, resolve, valorise} from "./generator.helper";
 import {WorkingInfo} from "../WorkingInfo";
+import {getSudoku} from "../../generator.helper";
 
 const STEP_TIMEOUT = 100;
 

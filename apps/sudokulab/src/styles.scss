@@ -198,3 +198,15 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
     transform: scale(1);
   }
 }
+
+@keyframes svg-pulse {
+  0% {
+    transform: scale(0.95);
+  }
+  70% {
+    transform: scale(2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

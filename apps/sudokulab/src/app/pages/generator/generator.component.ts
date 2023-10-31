@@ -1,11 +1,17 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { GeneratorBaseComponent } from '../../components/GeneratorBaseComponent';
-import { GeneratorFacade, getBoardStyle, SudokuFacade, WorkingInfo } from '@sudokulab/model';
-import { UploadDialogComponent } from '../../components/upload-dialog/upload-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
-import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AvailablePages } from '../../model';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Inject,
+  OnDestroy,
+  ViewChild
+} from '@angular/core';
+import {GENERATOR_DATA, GeneratorData, GeneratorWorkingInfo, getBoardStyle, SudokuLab} from '@sudokulab/model';
+import {MatDialog} from '@angular/material/dialog';
+import {combineLatest, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {DestroyComponent} from "../../components/DestroyComponent";
 
 @Component({
   selector: 'sudokulab-generator-page',
@@ -13,30 +19,41 @@ import { AvailablePages } from '../../model';
   styleUrls: ['./generator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GeneratorComponent extends GeneratorBaseComponent implements OnDestroy, AfterViewInit {
+export class GeneratorComponent extends DestroyComponent implements OnDestroy, AfterViewInit {
   @ViewChild('board') board: ElementRef|undefined = undefined;
   layout$: Observable<string>;
   layoutAlign$: Observable<string>;
   boardStyle$: Observable<any>;
-  working$: Observable<WorkingInfo|undefined>;
-  constructor(private _generator: GeneratorFacade,
-              private _dialog: MatDialog,
-              _sudoku: SudokuFacade) {
-    super(_generator, _sudoku);
+  working$: Observable<string>;
+
+  constructor(private _dialog: MatDialog,
+              public sudokuLab: SudokuLab,
+              @Inject(GENERATOR_DATA) public generator: GeneratorData) {
+    super(sudokuLab);
+
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
-    _sudoku
-      .onUpload(UploadDialogComponent, this._destroy$)
-      .subscribe(res => !!res ? _sudoku.loadSchema(res.sdk) : null);
+    // _sudoku
+    //   .onUpload(UploadDialogComponent, this._destroy$)
+    //   .subscribe(res => !!res ? _sudoku.loadSchema(res.sdk) : null);
 
-    this.boardStyle$ = combineLatest(this._resize$, this._element$)
+    this.boardStyle$ = combineLatest([this._resize$, this._element$])
       .pipe(map(([r, ele]) => getBoardStyle(ele)));
 
-    this.working$ = combineLatest(this.running$, _generator.selectGeneratorWorkingInfo$).pipe(
-      map(([running, info]) => running ? info : undefined));
+    this.working$ = combineLatest([generator.running$, generator.workingInfo$]).pipe(
+      map(([running, info]) => running ? getworkingInfo(info) : ''));
+
+    sudokuLab.context$.next(this.generator);
   }
 
   ngAfterViewInit() {
     this._element$.next(this.board);
   }
+}
+
+const getworkingInfo = (info: GeneratorWorkingInfo): string => {
+
+  // TODO: working info...
+
+  return 'working...';
 }

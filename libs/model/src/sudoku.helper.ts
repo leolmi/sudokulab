@@ -1,8 +1,9 @@
 import {Sudoku} from './lib/Sudoku';
-import {PlaySudoku} from './lib/PlaySudoku';
+import {checkSudoku, PlaySudoku} from './lib/PlaySudoku';
 import {
   cloneDeep as _clone,
   extend as _extend,
+  find as _find,
   forEach as _forEach,
   includes as _includes,
   intersection as _intersection,
@@ -41,6 +42,10 @@ import {calcFixedCount, getHash, isValue} from './global.helper';
 import {ElementRef} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {PlaySudokuCell} from "./lib/PlaySudokuCell";
+import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
+import {saveAs} from "file-saver";
+import {PlaySudokuState} from "./lib/PlaySudokuState";
+import {BoardAction} from "./lib/board.model";
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -176,7 +181,7 @@ export const decodeCellId = (id: string, rank: number = SUDOKU_DEFAULT_RANK): Ce
 
 export const groupId = (type: SudokuGroupType, pos: number) => `${type}.${pos}`;
 
-export const getGroupRank = (rank: number): number => Math.sqrt(rank||9);
+export const getGroupRank = (rank: number): number => Math.sqrt(rank||SUDOKU_DEFAULT_RANK);
 
 export const getCellStyle = (sdk: Sudoku|EditSudokuOptions|undefined, ele: HTMLElement, size = 40): any => {
   const pxlw = sdk ? Math.floor(ele.clientWidth / sdk.rank) : size;
@@ -208,8 +213,8 @@ export const getBoardStyle = (ele: ElementRef|undefined): any => {
 
 export const getLinesGroups = (rank: number|undefined): {[id: number]: boolean} => {
   const res: {[id: number]: boolean} = {};
-  const grank = getGroupRank(rank||9);
-  for(let g = 0; g < (rank||9)-1; g++) {
+  const grank = getGroupRank(rank||SUDOKU_DEFAULT_RANK);
+  for(let g = 0; g < (rank||SUDOKU_DEFAULT_RANK)-1; g++) {
     res[g] = ((g+1)%grank === 0);
   }
   return res;
@@ -265,8 +270,8 @@ export const getUserCoord = (cid: string): string => {
 
 
 export const getRank = (sdk: PlaySudoku|EditSudoku|undefined): number => {
-  if (sdk instanceof PlaySudoku) return (<PlaySudoku>sdk).sudoku?.rank || 9;
-  return sdk?.options.rank || 9;
+  if (sdk instanceof PlaySudoku) return (<PlaySudoku>sdk).sudoku?.rank || SUDOKU_DEFAULT_RANK;
+  return sdk?.options.rank || SUDOKU_DEFAULT_RANK;
 }
 
 export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined,
@@ -291,25 +296,33 @@ export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
   return values;
 }
 
-export const loadValues = (sdk: PlaySudoku|undefined, values: string): void => {
+export const loadValues = (sdk: PlaySudoku|EditSudoku|undefined, values: string): void => {
   if (!sdk || (values || '').length < getRank(sdk)) return;
   _forEach(sdk.cells, c => {
     const v = values.charAt(c?.position||0);
-    if (!!c) c.value = isValue(v) ? v : '';
+    if (!!c) c.value = isValue(v, ) ? v : '';
   });
   applySudokuRules(sdk, true);
 }
 
+export const loadSchema = (tsdk: PlaySudoku, sdk?: Sudoku): void => {
+  if (!sdk) return;
+  tsdk.sudoku = sdk;
+  tsdk._id = sdk?._id || 0;
+  tsdk.state = new PlaySudokuState();
+  checkSudoku(tsdk);
+}
+
 export const getAvailables = (rank: number|undefined) =>
-  Array(rank || 9).fill(0).map((x, i) => `${(i+1)}`);
+  Array(rank || SUDOKU_DEFAULT_RANK).fill(0).map((x, i) => `${(i+1)}`);
 
 export const getDimension = (rank: number|undefined) =>
-  Array(rank || 9).fill(0).map((x, i) => i)
+  Array(rank || SUDOKU_DEFAULT_RANK).fill(0).map((x, i) => i)
 
 export const isValidValue = (value: string, rank?: number, acceptX = false): boolean => {
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
-  const isvalue = available_pos > -1 && available_pos < (rank || 9);
+  const isvalue = available_pos > -1 && available_pos < (rank || SUDOKU_DEFAULT_RANK);
   const isdynamic = value === SUDOKU_DYNAMIC_VALUE;
   return (value.length === 1 && (isvalue || (isdynamic && acceptX))) || ['Delete', ' '].indexOf(value)>-1;
 }
@@ -317,7 +330,7 @@ export const isValidValue = (value: string, rank?: number, acceptX = false): boo
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
-  const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || 9);
+  const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || SUDOKU_DEFAULT_RANK);
   return (value.length === 1 && isvalue) || ['Delete', SUDOKU_DYNAMIC_VALUE, ' ', '?'].indexOf(value) > -1;
 }
 
@@ -380,7 +393,7 @@ export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, o?: SchemaNameOp
   const separator = o?.separator||'_';
   const sudoku: Sudoku|undefined = (<PlaySudoku>sdk)?.sudoku||<Sudoku>sdk;
   if (!sudoku) return o?.unknown || 'unknown';
-  const rank = sudoku.rank||9;
+  const rank = sudoku.rank||SUDOKU_DEFAULT_RANK;
   const fixc = getFixedCount(sudoku);
   const hash = o?.hideHash ? '' : `(${getHash(sudoku.fixed)})`;
   const diff = sudoku.info?.difficulty||'' ? `${separator}${sudoku.info?.difficulty}` : '';
@@ -392,7 +405,7 @@ export const getSchemaName = (sdk: PlaySudoku|Sudoku|undefined, o?: SchemaNameOp
 export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefined, direction: string): CellInfo|undefined => {
   const info = decodeCellId(cid);
   if (info.row < 0 || info.col < 0) return;
-  const rank = o?.rank||9;
+  const rank = o?.rank||SUDOKU_DEFAULT_RANK;
   switch (AVAILABLE_DIRECTIONS[direction]||MoveDirection.next) {
     case MoveDirection.up:
       info.row = (info.row <= 0) ? rank - 1 : info.row - 1;
@@ -438,20 +451,21 @@ export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefin
 }
 
 
-export const hasEndGenerationValue = (o?: EditSudokuOptions): boolean => {
-  return !!o && [EditSudokuEndGenerationMode.afterN, EditSudokuEndGenerationMode.afterTime].indexOf(o.generationEndMode)>-1;
+export const hasEndGenerationValue = (o?: PlaySudokuOptions): boolean => {
+  return !!o && [EditSudokuEndGenerationMode.afterN, EditSudokuEndGenerationMode.afterTime].indexOf(o.generator.generationEndMode)>-1;
 }
 
 export const getMinNumbers = (rank: number|undefined): number => {
-  return Math.floor(((rank || 9) * (rank || 9)) / 5);
+  return Math.floor(((rank || SUDOKU_DEFAULT_RANK) * (rank || SUDOKU_DEFAULT_RANK)) / 5);
 }
 
 export const getMaxNumbers = (rank: number|undefined): number => {
-  return Math.floor(((rank || 9) * (rank || 9)) / 2);
+  return Math.floor(((rank || SUDOKU_DEFAULT_RANK) * (rank || SUDOKU_DEFAULT_RANK)) / 2);
 }
 
-export const hasXValues = (sdk: EditSudoku|undefined): boolean => {
-  return !!(sdk?.cellList || []).find(cid => sdk?.cells[cid]?.value === SUDOKU_DYNAMIC_VALUE);
+export const hasXValues = (sdk: PlaySudoku|EditSudoku|undefined): boolean => {
+  return !!_find(sdk?.cells || [], (cid: string) =>
+    (sdk?.cells || {})[cid]?.value === SUDOKU_DYNAMIC_VALUE);
 }
 
 export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>, deleteCases = false): SudokuInfo => {
@@ -610,4 +624,19 @@ export const isPencilEmpty = (cells: Dictionary<Cell>): boolean => {
   let pencil = false;
   _forEach(cells, (c) => ((<PlaySudokuCell>c)?.pencil || []).length > 0 ? pencil = true : null);
   return !pencil;
+}
+
+export const dowloadSchema = (sdk: PlaySudoku) => {
+  const schema: Sudoku = new Sudoku({
+    fixed: sdk?.sudoku?.fixed || '',
+    info: new SudokuInfo(sdk?.sudoku?.info)
+  });
+  const filename = getSchemaName(schema);
+  const schema_str = JSON.stringify(schema, null, 2);
+  const blob = new Blob([schema_str], { type: "application/json;" });
+  saveAs(blob, `${filename}.json`);
+}
+
+export const getLabCodeAction = (labCode: string): BoardAction|undefined => {
+  return (/^lab\./g.test(labCode)) ? <BoardAction>(labCode.substring(4)) : undefined;
 }

@@ -1,4 +1,4 @@
-<mat-progress-bar *ngIf="!!(running$|async)"
+<mat-progress-bar *ngIf="generator.running$|async"
                   class="progress-bar"
                   color="accent"
                   mode="indeterminate"></mat-progress-bar>
@@ -10,14 +10,14 @@
   </div>
   <div class="board-container" fxLayout="column">
     <div class="board" #board [ngStyle]="boardStyle$|async">
-      <sudokulab-generator-board></sudokulab-generator-board>
-      <div class="working-container compact-visible" *ngIf="!!(working$|async)">
+      <svg-interactive-board [sudokuData]="generator"></svg-interactive-board>
+      <div class="working-container compact-visible" *ngIf="generator.running$|async">
         <mat-progress-spinner class="working-spinner"
                               diameter="300"
                               color="accent"
                               strokeWidth="12"
                               mode="indeterminate"></mat-progress-spinner>
-        <div class="working-counter">{{(working$|async)?.counter||''}}</div>
+        <div class="working-counter">{{(working$|async)||''}}</div>
       </div>
     </div>
     <sudokulab-generator-toolbar></sudokulab-generator-toolbar>

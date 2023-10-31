@@ -3,6 +3,7 @@ import { Dictionary } from '@ngrx/entity';
 
 export const featureName = 'sudoku';
 export const SUDOKU_DYNAMIC_VALUE = 'x';
+export const SUDOKU_DYNAMIC_VALUE2 = '?';
 export const SUDOKU_EMPTY_VALUE = '0';
 export const SUDOKU_DEFAULT_RANK = 9;
 export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
@@ -49,3 +50,5 @@ export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
 }
 
 export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
+
+

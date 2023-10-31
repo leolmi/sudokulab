@@ -1,17 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import {
-  getAlgorithms,
-  getDiffCount,
-  getFixedCount,
-  getTryCount,
-  LabFacade,
-  SudokuFacade,
-  SudokuInfo
-} from '@sudokulab/model';
-import { map, takeUntil } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { keys as _keys } from 'lodash';
-import { DestroyComponent } from '../DestroyComponent';
+import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {getAlgorithms, getDiffCount, getFixedCount, getTryCount, SudokuInfo, SudokuLab} from '@sudokulab/model';
+import {map} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {keys as _keys} from 'lodash';
+import {DestroyComponent} from '../DestroyComponent';
 
 interface MapItem {
   name: string;
@@ -35,15 +27,13 @@ export class InfoComponent extends DestroyComponent implements OnDestroy {
   difficultyValue$: Observable<number>;
   difficultyMap$: Observable<MapItem[]>;
 
-  constructor(private _lab: LabFacade,
-              _sudoku: SudokuFacade) {
-    super(_sudoku);
-    const sdk$ = _lab.selectActiveSudoku$.pipe(takeUntil(this._destroy$));
-    this.info$ = sdk$.pipe(map(s => s?.sudoku?.info));
-    this.percent$ = sdk$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));
-    this.fixed$ = sdk$.pipe(map(s => getFixedCount(s?.sudoku)));
-    this.hash$ = sdk$.pipe(map(s => s?.sudoku?._id ? `${s.sudoku._id}` : ''));
-    this.useTry$ = sdk$.pipe(map(s => getTryCount(s)));
+  constructor(public sudokuLab: SudokuLab) {
+    super(sudokuLab);
+    this.info$ = sudokuLab.state.activePlaySudoku$.pipe(map(s => s?.sudoku?.info));
+    this.percent$ = sudokuLab.state.activePlaySudoku$.pipe(map(s => `${(s?.state?.percent||0).toFixed(0)}%`));
+    this.fixed$ = sudokuLab.state.activePlaySudoku$.pipe(map(s => getFixedCount(s?.sudoku)));
+    this.hash$ = sudokuLab.state.activePlaySudoku$.pipe(map(s => s?.sudoku?._id ? `${s.sudoku._id}` : ''));
+    this.useTry$ = sudokuLab.state.activePlaySudoku$.pipe(map(s => getTryCount(s)));
 
     this.difficulty$ = this.info$.pipe(map(info => info?.difficulty||'unknown'));
     this.difficultyValue$ = this.info$.pipe(map(info => info?.difficultyValue||0));

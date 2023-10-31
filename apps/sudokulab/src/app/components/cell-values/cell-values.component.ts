@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {BehaviorSubject, combineLatest, Observable} from "rxjs";
-import {distinctUntilChanged, map} from "rxjs/operators";
-import {SUDOKU_DEFAULT_RANK, SudokuFacade} from "@sudokulab/model";
+import {map} from "rxjs/operators";
+import {SUDOKU_DEFAULT_RANK, SudokuLab} from "@sudokulab/model";
 
 interface ValuesTabelCell {
   value: string;
@@ -38,11 +38,11 @@ export class CellValuesComponent {
     this._rank$.next(r||SUDOKU_DEFAULT_RANK);
   }
 
-  constructor(private _sudoku: SudokuFacade) {
+  constructor(public sudokuLab: SudokuLab) {
     this._rank$ = new BehaviorSubject<number>(SUDOKU_DEFAULT_RANK);
     this._values$ = new BehaviorSubject<string[]>([]);
 
-    this.values$ = combineLatest(this._rank$, this._values$, _sudoku.selectValuesMode$).pipe(
+    this.values$ = combineLatest([this._rank$, this._values$, sudokuLab.state.valuesMode$]).pipe(
       map(([rank, values, mode]) => {
         return Array.from({length: 10}, (_, i) => getValue(`${(i + 1)}`, values, mode));
       }));

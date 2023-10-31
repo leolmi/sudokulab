@@ -1,16 +1,15 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {
   checkImportText,
   getHash,
+  ImportOptions,
   MessageType,
-  Sudoku,
-  SudokuFacade,
+  Sudoku, SUDOKU_DEFAULT_RANK,
+  SudokuLab,
   SudokuMessage,
-  UploadDialogOptions,
-  UploadDialogResult,
   use
 } from '@sudokulab/model';
 
@@ -28,30 +27,27 @@ export class UploadDialogComponent {
   valid$: Observable<boolean>;
   onlyValues$: BehaviorSubject<boolean>;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: UploadDialogOptions,
-              private _sudoku: SudokuFacade,
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ImportOptions,
+              public sudokuLab: SudokuLab,
               private _dialogRef: MatDialogRef<UploadDialogComponent>) {
     this.text$ = new BehaviorSubject<string>('');
     this.onlyValues$ = new BehaviorSubject<boolean>(false);
 
     const textLenght$ = this.text$.pipe(map(txt => checkImportText(txt, { partial: true }).length));
     this.textInfo$ = textLenght$.pipe(map(ln => `${ln} characthers`));
-    this.valid$ = textLenght$.pipe(map(ln => ln > 0));
+    this.valid$ = textLenght$.pipe(map(ln => ln === (SUDOKU_DEFAULT_RANK*SUDOKU_DEFAULT_RANK)));
   }
 
   private _upload(sdk: Sudoku) {
-    this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult({ sdk, onlyValues: this.onlyValues$.value }));
+    this._dialogRef.close(new ImportOptions({ sdk, onlyValues: this.onlyValues$.value }));
   }
 
   private _image(image: string) {
-    this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult({ image, onlyValues: this.onlyValues$.value }));
+    this._dialogRef.close(new ImportOptions({ image, onlyValues: this.onlyValues$.value }));
   }
 
   editOnGrid() {
-    this._sudoku.upload(false);
-    this._dialogRef.close(new UploadDialogResult({ editOnGrid: true, onlyValues: this.onlyValues$.value }));
+    this._dialogRef.close(new ImportOptions({ editOnGrid: true, onlyValues: this.onlyValues$.value }));
   }
 
   applyText(e: any) {
@@ -91,10 +87,10 @@ export class UploadDialogComponent {
         });
         this._upload(sudoku);
       } catch (err) {
-        this._sudoku.raiseError(err);
+        this.sudokuLab.raiseError(err);
       }
     };
-    reader.onerror = (err) => this._sudoku.raiseError(err);
+    reader.onerror = (err) => this.sudokuLab.raiseError(err);
     reader.readAsText(file);
   }
 
@@ -105,11 +101,11 @@ export class UploadDialogComponent {
         //console.log('IMAGE DATA', <string>reader.result);
         this._image(<string>reader.result);
       } catch (err) {
-        this._sudoku.raiseError(err);
+        this.sudokuLab.raiseError(err);
       }
     };
     reader.onerror = (err) => {
-      this._sudoku.raiseError(err);
+      this.sudokuLab.raiseError(err);
     }
     reader.readAsDataURL(file);
   }
@@ -122,7 +118,7 @@ export class UploadDialogComponent {
       this._readJsonFile(file);
     } else {
       if (!!e) e.target.value = '';
-      return this._sudoku.raiseMessage(new SudokuMessage({
+      return this.sudokuLab.showMessage(new SudokuMessage({
         message: 'Invalid file!',
         type: MessageType.error
       }));
