@@ -50,13 +50,6 @@ export class OperationsBarComponent {
   }
 
   execute(btn: ButtonInfo) {
-    this.sudokuLab.internalCode$.next(btn?.code);
-
-    // switch (btn?.code) {
-      // case 'step': return this._lab.solveStep();
-      // case 'stepinfo': return this._lab.stepInfo();
-      // case 'available': return this._lab.toggleAvailable();
-      // case 'popupdetails': return this._lab.togglePopupDetails();
-    // }
+    this.sudokuLab.internalCode$.next(`lab.${btn?.code}`);
   }
 }

@@ -20,7 +20,7 @@ export class LabManifest extends SudokulabPage {
     DEFAULT_BUTTONS.separator,
     DEFAULT_LAB_BUTTONS.download,
     DEFAULT_LAB_BUTTONS.upload,
-    DEFAULT_LAB_BUTTONS.camera,
+    // TODO:  DEFAULT_LAB_BUTTONS.camera,
     DEFAULT_LAB_BUTTONS.clear,
     DEFAULT_BUTTONS.separator,
     DEFAULT_LAB_BUTTONS.available,

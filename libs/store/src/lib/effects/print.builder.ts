@@ -78,12 +78,12 @@ const composeSection = (sdk: Sudoku, left = true): string => {
   return html;
 }
 
-export const composePage = (p: PrintPage): string => {
+export const composePage = (p: PrintPage, last?: boolean): string => {
   let html = HTML_HEADER;
   let sdk = p.schema['top'];
   if (!!sdk) html = [html ,composeSection(sdk)].join('\n');
   sdk = p.schema['bottom'];
   if (!!sdk) html = [html ,composeSection(sdk, false)].join('\n');
-  html = [html , HTML_FOOTER].join('\n');
+  if (!last) html = [html , HTML_FOOTER].join('\n');
   return html;
 }

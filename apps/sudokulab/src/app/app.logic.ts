@@ -1,9 +1,10 @@
 import {
   buildSudokuInfo,
   calcFixedCount,
-  CameraDialogResult,
+  clearSchema,
   debug,
-  getCompactLevel, getErrorMessage,
+  getCompactLevel,
+  getErrorMessage,
   getHash,
   HandleImageResult,
   ImportOptions,
@@ -19,7 +20,8 @@ import {
   setApplicationTheme,
   Solver,
   Sudoku,
-  SUDOKU_AUTHOR_LINK, SudokuData,
+  SUDOKU_AUTHOR_LINK,
+  SudokuData,
   SudokuInfo,
   SudokuLab,
   SudokulabInfo,
@@ -28,7 +30,7 @@ import {
   SudokuLabState,
   SudokulabWindowService,
   SudokuMessage,
-  updateSchema, UploadDialogOptions, UploadDialogResult
+  updateSchema
 } from "@sudokulab/model";
 import {Injectable} from "@angular/core";
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
@@ -48,7 +50,6 @@ import {Router} from "@angular/router";
 import {Location} from "@angular/common";
 import {SudokulabExecutorsService} from "./services/sudokulab-executors.service";
 import {UploadDialogComponent} from "./components/upload-dialog/upload-dialog.component";
-import {clearSchema} from "./components/board-worker/board-worker.logic";
 
 const API = {
   check: '/api/sudoku/check',

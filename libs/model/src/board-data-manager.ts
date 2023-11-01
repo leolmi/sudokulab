@@ -6,10 +6,9 @@ import {getSudoku} from "./generator.helper";
 import {Sudoku} from "./lib/Sudoku";
 import {BoardAction, BoardWorkerData} from "./lib/board.model";
 import {cloneDeep as _clone, extend as _extend, isEmpty as _isEmpty} from 'lodash';
-import {cellId, clearEvent, dowloadSchema, isDirectionKey, moveOnDirection} from "./sudoku.helper";
+import {applyCellValue, cellId, clearEvent, dowloadSchema, isDirectionKey, moveOnDirection} from "./sudoku.helper";
 import {PlaySudokuCell} from "./lib/PlaySudokuCell";
 import {getUserData, saveUserData} from "./lib/userdata";
-import {applyCellValue, clearSchema} from "../../../apps/sudokulab/src/app/components/board-worker/board-worker.logic";
 import * as equal from "fast-deep-equal";
 import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 

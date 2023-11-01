@@ -12,6 +12,7 @@ import {distinctUntilChanged, filter, map, withLatestFrom} from "rxjs/operators"
 import {isEqual as _isEqual} from 'lodash';
 import {PrintPage} from "./PrintPage";
 import {WorkingInfo} from "./WorkingInfo";
+import {clearSchema} from "../sudoku.helper";
 
 
 /**
@@ -63,6 +64,7 @@ export class SudokuLabState {
         sudoku = new Sudoku();
         console.warn(...SDK_PREFIX, `schema "${asi}" not found`);
       } else {
+        clearSchema(sudoku);
         saveUserSetting([{ path: `lab.activeSudokuId`, data: sudoku._id }]);
       }
       const ps = new PlaySudoku({ sudoku });

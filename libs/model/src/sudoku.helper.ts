@@ -1,4 +1,4 @@
-import {Sudoku} from './lib/Sudoku';
+import {isSudoku, Sudoku} from './lib/Sudoku';
 import {checkSudoku, PlaySudoku} from './lib/PlaySudoku';
 import {
   cloneDeep as _clone,
@@ -28,7 +28,7 @@ import {
   SUDOKU_DYNAMIC_VALUE,
   SUDOKU_EMPTY_VALUE
 } from './lib/consts';
-import {calcDifficulty} from './lib/logic';
+import {calcDifficulty, clear} from './lib/logic';
 import {Cell} from './lib/Cell';
 import {EditSudoku, EditSudokuGenerationMap} from './lib/EditSudoku';
 import {EditSudokuCell} from './lib/EditSudokuCell';
@@ -639,4 +639,44 @@ export const dowloadSchema = (sdk: PlaySudoku) => {
 
 export const getLabCodeAction = (labCode: string): BoardAction|undefined => {
   return (/^lab\./g.test(labCode)) ? <BoardAction>(labCode.substring(4)) : undefined;
+}
+
+/**
+ * cancella i dati utente dello schema (modifica l'oggetto passato)
+ * @param sdk
+ */
+export const clearSchema = (sdk: PlaySudoku|Sudoku|undefined): boolean => {
+  if (!sdk) return false;
+  if (isSudoku(sdk)) {
+    (<Sudoku>sdk).values = (<Sudoku>sdk).fixed;
+    return true;
+  } else {
+    const cleared = clear(<PlaySudoku>sdk);
+    clearSchema((<PlaySudoku>sdk).sudoku);
+    _extend(sdk, cleared);
+    return true;
+  }
+}
+
+const DELETE_VALUES = ['Delete', 'delete', ' '];
+
+/**
+ * Imposta il valore della cella
+ * @param cell
+ * @param value
+ * @param options
+ */
+export const applyCellValue = (cell?: PlaySudokuCell, value?: string, options?: PlaySudokuOptions): boolean => {
+  if (!cell || (!options?.fixedValues && cell.fixed)) return false;
+  if (!isValidValue(value || '')) return false;
+  if (DELETE_VALUES.indexOf(value || '') > -1) value = '';
+  if (!!options?.usePencil) {
+    cell.value = '';
+    cell.pencil = !value ? [] : toggleValue(cell.pencil, value);
+  } else {
+    cell.pencil = [];
+    cell.value = (value || '').trim();
+    if (options?.fixedValues) cell.fixed = !!cell.value;
+  }
+  return true;
 }

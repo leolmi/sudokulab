@@ -13,12 +13,13 @@ export class PrintExecutor extends SudokulabPageExecutor {
 
     switch (code) {
       case 'print':
-        const pages = logic.state.printPages$.value;
-        const html = (pages||[]).map(p => composePage(p)).join('\n');
+        const pages = logic.state.printPages$.value || [];
+        const html = pages.map((p, index) => composePage(p, index >= (pages.length - 1))).join('\n');
         const print_page: any = this._window.nativeWindow.open(`../assets/templates/print.html`);
-        if (!!print_page) print_page.data = { html };
+        if (!!print_page) print_page.data = {html};
         break;
-      default: return console.warn('Unhandled print action', code);
+      default:
+        return console.warn('Unhandled print action', code);
     }
 
   }

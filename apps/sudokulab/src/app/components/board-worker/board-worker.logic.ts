@@ -1,26 +1,20 @@
 import {
   AlgorithmResultLine,
   Algorithms,
+  applyCellValue,
   BoardWorkerData,
   BoardWorkerHighlights,
   cellId,
   checkAvailables,
-  clear,
   decodeCellId,
-  isSudoku,
-  isValidValue,
   MessageType,
   PlaySudoku,
-  PlaySudokuCell,
-  PlaySudokuOptions,
   resetAvailable,
   Solver,
   SolveStepResult,
   solveStepToCell,
-  Sudoku,
   SUDOKU_DEFAULT_RANK,
-  SudokuMessage,
-  toggleValue
+  SudokuMessage
 } from "@sudokulab/model";
 import {extend as _extend, isEmpty as _isEmpty, last as _last} from "lodash";
 
@@ -61,23 +55,6 @@ export const solveSchema = (sdk: PlaySudoku): SudokuMessage|undefined => {
     });
   }
   return message;
-}
-
-/**
- * cancella i dati utente dello schema (modifica l'oggetto passato)
- * @param sdk
- */
-export const clearSchema = (sdk: PlaySudoku|Sudoku|undefined): boolean => {
-  if (!sdk) return false;
-  if (isSudoku(sdk)) {
-    (<Sudoku>sdk).values = (<Sudoku>sdk).fixed;
-    return true;
-  } else {
-    const cleared = clear(<PlaySudoku>sdk);
-    clearSchema((<PlaySudoku>sdk).sudoku);
-    _extend(sdk, cleared);
-    return true;
-  }
 }
 
 /**
@@ -148,28 +125,6 @@ export const toggleAvalable = (sdk: PlaySudoku): boolean => {
   return true;
 }
 
-const DELETE_VALUES = ['Delete', 'delete', ' '];
-
-/**
- * Imposta il valore della cella
- * @param cell
- * @param value
- * @param options
- */
-export const applyCellValue = (cell?: PlaySudokuCell, value?: string, options?: PlaySudokuOptions): boolean => {
-  if (!cell || (!options?.fixedValues && cell.fixed)) return false;
-  if (!isValidValue(value || '')) return false;
-  if (DELETE_VALUES.indexOf(value || '') > -1) value = '';
-  if (!!options?.usePencil) {
-    cell.value = '';
-    cell.pencil = !value ? [] : toggleValue(cell.pencil, value);
-  } else {
-    cell.pencil = [];
-    cell.value = (value || '').trim();
-    if (options?.fixedValues) cell.fixed = !!cell.value;
-  }
-  return true;
-}
 /**
  * imposta il valore sulla cella o sui valori possibili
  * @param sdk
