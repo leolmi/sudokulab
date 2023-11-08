@@ -637,7 +637,7 @@ export const isPencilEmpty = (cells: Dictionary<Cell>): boolean => {
  * @param sdk
  */
 export const isEmptySchema = (sdk: PlaySudoku) => {
-  return !sdk || !sdk?.sudoku || !_find(sdk?.cells||[], (cell) => !!cell?.value);
+  return !sdk || !sdk?.sudoku || !_find(sdk?.cells||[], (cell: any) => !!cell?.value);
 }
 
 export const dowloadSchema = (sdk: PlaySudoku) => {
