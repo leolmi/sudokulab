@@ -34,6 +34,7 @@ const postStringMessage = (message: string, type = MessageType.warning) => {
 
 const stopProcess = () => {
   STATE.status.running = false;
+  STATE.status.stopping = false;
 }
 
 const checkState = () => {
@@ -70,7 +71,7 @@ const testRUN = () => {
       message: STATE.status.stopping ? 'worker is stopped' : 'finish generation!',
       type: STATE.status.stopping ? MessageType.warning : MessageType.success
     });
-    STATE.status.stopping = false;
+    stopProcess();
     _postMessage({ message });
   });
 

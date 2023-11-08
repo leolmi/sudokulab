@@ -22,14 +22,14 @@ export class GeneratorDataManagerOptions {
 export class GeneratorDataManager extends DataManagerBase {
   private _worker: Worker|undefined;
   private _options: GeneratorDataManagerOptions;
-  data: GeneratorData;
+  generator: GeneratorData;
 
   constructor(private sudokuLab: SudokuLab,
-              data?: GeneratorData,
+              generator?: GeneratorData,
               o?: Partial<GeneratorDataManagerOptions>) {
-    super(data);
+    super(generator);
     this._options = new GeneratorDataManagerOptions(o);
-    this.data = data || new GeneratorData();
+    this.generator = generator || new GeneratorData();
 
     // intercetta i comandi
     sudokuLab.internalCode$.pipe(
@@ -38,13 +38,13 @@ export class GeneratorDataManager extends DataManagerBase {
       .subscribe((action) => this.handleAction(action));
 
     // intercetta i comandi
-    this.data.action$.pipe(
+    this.generator.action$.pipe(
       takeUntil(this._destroy$))
       .subscribe((action) => this.handleAction(action));
   }
 
   handleAction(action?: GeneratorAction): void {
-    const sdk = _clone(this.data.sdk$.value);
+    const sdk = _clone(this.generator.sdk$.value);
     switch (action) {
       case GeneratorAction.download:
         return dowloadSchema(sdk);
@@ -53,7 +53,7 @@ export class GeneratorDataManager extends DataManagerBase {
         if (this._worker) this._worker.postMessage(<GeneratorWorkerArgs>{action, sdk});
         break;
       case GeneratorAction.clear:
-        if (clearSchema(sdk)) this.data.sdk$.next(sdk);
+        if (clearSchema(sdk)) this.generator.sdk$.next(sdk);
         break;
       case GeneratorAction.upload:
         this.sudokuLab.upload().subscribe();
@@ -77,8 +77,8 @@ export class GeneratorDataManager extends DataManagerBase {
    * @param o
    */
   setOptions(o: Partial<PlaySudokuOptions>) {
-    if (this.data.disabled$.value) return;
-    updateSchema(this.data, (sdk) => !!_extend(sdk.options, o))
+    if (this.generator.disabled$.value) return;
+    updateSchema(this.generator, (sdk) => !!_extend(sdk.options, o))
       .then(() => this.changed$.next());
   }
 
@@ -87,20 +87,21 @@ export class GeneratorDataManager extends DataManagerBase {
    * @param data
    */
   handleWorkerData(data: GeneratorWorkerData) {
+    const running = !!data.status?.running;
 
     // valuta lo stato di running
-    if (!!data.status?.running !== this.data.running$.value) {
-      this.data.running$.next(!!data.status?.running);
+    if (this.generator.running$.value !== running) {
+      this.generator.running$.next(running);
       this.changed$.next();
     }
 
     // verifica gli schemi generati
     const generated = data.status?.generatedSchema;
     if (generated) {
-      const schemas = _clone(this.data.schemas$.value);
+      const schemas = _clone(this.generator.schemas$.value);
       if (!schemas.find(s => s.fixed === generated.fixed)) {
         schemas.push(generated);
-        this.data.schemas$.next(schemas);
+        this.generator.schemas$.next(schemas);
         this.changed$.next();
       }
     }
