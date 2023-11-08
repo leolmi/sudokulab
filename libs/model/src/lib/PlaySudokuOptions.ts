@@ -25,6 +25,9 @@ export class PlaySudokuOptions {
     this.showPopupDetails = true;
     this.highlightsDelay = 4000;
     this.fixedValues = false;
+    this.acceptX = false;
+    this.characters = {};
+    this.inputProxy = {};
     Object.assign(this, o || {});
     this.generator = new GeneratorOptions(this.generator||{});
   }
@@ -35,6 +38,8 @@ export class PlaySudokuOptions {
   showPopupDetails: boolean;
   highlightsDelay: number;
   fixedValues: boolean;
-
+  acceptX: boolean
+  characters: any;
+  inputProxy: any;
   generator: GeneratorOptions;
 }

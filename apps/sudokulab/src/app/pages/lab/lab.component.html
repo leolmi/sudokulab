@@ -19,17 +19,14 @@
   </div>
   <div class="board-container" fxLayout="column">
     <div class="board" #board [ngStyle]="boardStyle$|async">
-      <sudokulab-board emptyText="select a schema"
-                       *ngIf="!(isWorkerAvailable$|async)"
-                       [highLight]="highlight$|async"
-                       [otherHighLight]="otherHighlight$|async"></sudokulab-board>
-      <sudokulab-board-worker *ngIf="isWorkerAvailable$|async"></sudokulab-board-worker>
+      <div class="not-available-workers"
+           fxLayout="row" fxLayoutAlign="center center"
+           *ngIf="!boardData.isWorkerAvailable">
+        <div class="text-center">workers not available, schema cannot be showed</div>
+      </div>
+      <sudokulab-board-worker *ngIf="boardData.isWorkerAvailable"></sudokulab-board-worker>
     </div>
     <div class="bottom-board compact-size-600" fxFlex>
-      <mat-progress-bar [value]="progress$|async"
-                        class="lab-progress-bar"
-                        color="primary"
-                        mode="determinate"></mat-progress-bar>
       <sudokulab-key-board [boardData]="boardData"
                            [usePencil]="true"></sudokulab-key-board>
       <sudokulab-board-state></sudokulab-board-state>

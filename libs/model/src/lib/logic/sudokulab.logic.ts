@@ -124,6 +124,11 @@ export abstract class SudokuLab {
    */
   abstract updatePlayerOptions(o?: Partial<PlaySudokuOptions>): void;
 
+  /**
+   * aggiorna lo stato di abilitazione/selezione degli elementi della pagina
+   * @param ps
+   */
+  abstract updatePageStatus(ps: any): void;
 
   /**
    * emette un'azione da parte della pagina gestibile anche esternamente all'esecutore della pagina

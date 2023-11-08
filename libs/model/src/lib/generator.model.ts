@@ -3,19 +3,24 @@ import {SudokuMessage} from "./SudokuMessage";
 import {Dictionary} from "@ngrx/entity";
 import {SchemaData} from "./board.model";
 import {EditSudokuOptions} from "./EditSudokuOptions";
+import {PlaySudoku} from "./PlaySudoku";
+import {Sudoku} from "./Sudoku";
 
 export const SDK_DEFAULT_GENERATOR_TIMEOUT = 250;
 export const SDK_GENERATOR_USER_DATA_KEY = 'SUDOKULAB_GENERATOR_USERDATA';
 
 export enum GeneratorAction {
+  // for worker:
   run = 'run',
   stop = 'stop',
+  generate = 'generate',
+
+  // for manager:
   clear = 'clear',
   download = 'download',
   downloadAll = 'downloadAll',
   upload = 'upload',
   removeAll = 'removeAll',
-  generate = 'generate',
   openInLab = 'openInLab',
 }
 
@@ -48,6 +53,8 @@ export class GeneratorStatus {
     this.generated = 0;
     this.total = 0;
     this.mode = GeneratorMode.unknown;
+    this.running = false;
+    this.stopping = false
     Object.assign(this, s || {});
   }
   fixed: number;
@@ -55,17 +62,21 @@ export class GeneratorStatus {
   generated: number;
   total: number;
   mode: GeneratorMode;
+  running?: boolean;
+  stopping?: boolean;
+  generatedSchema?: Sudoku;
 }
 
 export interface GeneratorWorkerArgs {
-  sdk: EditSudoku;
+  sdk?: PlaySudoku;
   timeout?: number;
   action?: GeneratorAction;
 }
 
 export interface GeneratorWorkerData {
-  sdk?: EditSudoku;
   message?: SudokuMessage;
+  status?: GeneratorStatus;
+  sdk?: PlaySudoku;
 }
 
 export interface GeneratorWorkingInfo {

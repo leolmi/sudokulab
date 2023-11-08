@@ -46,6 +46,7 @@ import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 import {saveAs} from "file-saver";
 import {PlaySudokuState} from "./lib/PlaySudokuState";
 import {BoardAction} from "./lib/board.model";
+import {GeneratorAction} from "./lib/generator.model";
 
 
 export const cellId = (column: number, row: number) => `${column}.${row}`;
@@ -60,9 +61,9 @@ export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap
   return !!cell?.fixed && !gmap.cellsX[cell.id];
 }
 
-export const parseValue = (raw: string, rank?: number, acceptX = false): string => {
+export const parseValue = (raw: string, rank?: number, o?: PlaySudokuOptions): string => {
   let value = (raw||'').trim();
-  if (value === 'Delete' || !isValidValue(value, rank, acceptX)) value = '';
+  if (value === 'Delete' || !isValidValue(value, rank, o)) value = '';
   return value;
 }
 
@@ -319,12 +320,17 @@ export const getAvailables = (rank: number|undefined) =>
 export const getDimension = (rank: number|undefined) =>
   Array(rank || SUDOKU_DEFAULT_RANK).fill(0).map((x, i) => i)
 
-export const isValidValue = (value: string, rank?: number, acceptX = false): boolean => {
+export const getRealUserValue = (value: string, o?: PlaySudokuOptions) => {
   const mvalue = (value || '').toLowerCase();
-  const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
+  return (o?.inputProxy||{})[mvalue]||mvalue;
+}
+
+export const isValidValue = (value: string, rank?: number, o?: PlaySudokuOptions): boolean => {
+  value = getRealUserValue(value, o);
+  const available_pos = AVAILABLE_VALUES.indexOf(value);
   const isvalue = available_pos > -1 && available_pos < (rank || SUDOKU_DEFAULT_RANK);
   const isdynamic = value === SUDOKU_DYNAMIC_VALUE;
-  return (value.length === 1 && (isvalue || (isdynamic && acceptX))) || ['Delete', ' '].indexOf(value)>-1;
+  return (value.length === 1 && (isvalue || (isdynamic && !!o?.acceptX))) || ['Delete', ' '].indexOf(value)>-1;
 }
 
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
@@ -464,8 +470,8 @@ export const getMaxNumbers = (rank: number|undefined): number => {
 }
 
 export const hasXValues = (sdk: PlaySudoku|EditSudoku|undefined): boolean => {
-  return !!_find(sdk?.cells || [], (cid: string) =>
-    (sdk?.cells || {})[cid]?.value === SUDOKU_DYNAMIC_VALUE);
+  return !!_find(sdk?.cells || [], (cell: any) =>
+    cell?.value === SUDOKU_DYNAMIC_VALUE);
 }
 
 export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>, deleteCases = false): SudokuInfo => {
@@ -593,7 +599,7 @@ export const getSudokuCells = (sdk: Sudoku): Dictionary<Cell> => {
     for (let col = 0; col < sdk.rank; col++) {
       for (let row = 0; row < sdk.rank; row++) {
         const index = (row * sdk.rank) + col;
-        const v = parseValue(sdk.fixed.charAt(index), sdk.rank, true);
+        const v = parseValue(sdk.fixed.charAt(index), sdk.rank);
         cells[cellId(col, row)] = {
           id: cellId(col, row),
           value: v,
@@ -626,6 +632,14 @@ export const isPencilEmpty = (cells: Dictionary<Cell>): boolean => {
   return !pencil;
 }
 
+/**
+ * vero se lo schema non esiste o non è valorizzato in alcun modo
+ * @param sdk
+ */
+export const isEmptySchema = (sdk: PlaySudoku) => {
+  return !sdk || !sdk?.sudoku || !_find(sdk?.cells||[], (cell) => !!cell?.value);
+}
+
 export const dowloadSchema = (sdk: PlaySudoku) => {
   const schema: Sudoku = new Sudoku({
     fixed: sdk?.sudoku?.fixed || '',
@@ -639,6 +653,10 @@ export const dowloadSchema = (sdk: PlaySudoku) => {
 
 export const getLabCodeAction = (labCode: string): BoardAction|undefined => {
   return (/^lab\./g.test(labCode)) ? <BoardAction>(labCode.substring(4)) : undefined;
+}
+
+export const getGeneratorCodeAction = (genCode: string): GeneratorAction|undefined => {
+  return (/^lab\./g.test(genCode)) ? <GeneratorAction>(genCode.substring(4)) : undefined;
 }
 
 /**
@@ -668,7 +686,8 @@ const DELETE_VALUES = ['Delete', 'delete', ' '];
  */
 export const applyCellValue = (cell?: PlaySudokuCell, value?: string, options?: PlaySudokuOptions): boolean => {
   if (!cell || (!options?.fixedValues && cell.fixed)) return false;
-  if (!isValidValue(value || '')) return false;
+  if (!isValidValue(value || '', undefined, options)) return false;
+  value = getRealUserValue(value || '', options);
   if (DELETE_VALUES.indexOf(value || '') > -1) value = '';
   if (!!options?.usePencil) {
     cell.value = '';

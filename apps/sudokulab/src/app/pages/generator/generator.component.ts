@@ -7,11 +7,19 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
-import {GENERATOR_DATA, GeneratorData, GeneratorWorkingInfo, getBoardStyle, SudokuLab} from '@sudokulab/model';
+import {
+  GENERATOR_DATA,
+  GeneratorData,
+  GeneratorDataManager,
+  GeneratorWorkingInfo,
+  getBoardStyle,
+  SudokuLab
+} from '@sudokulab/model';
 import {MatDialog} from '@angular/material/dialog';
 import {combineLatest, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, takeUntil} from 'rxjs/operators';
 import {DestroyComponent} from "../../components/DestroyComponent";
+import {AvailablePages, DEFAULT_GENERATOR_PAGE_STATUS} from "../../model";
 
 @Component({
   selector: 'sudokulab-generator-page',
@@ -25,17 +33,16 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
   layoutAlign$: Observable<string>;
   boardStyle$: Observable<any>;
   working$: Observable<string>;
+  private _manager: GeneratorDataManager;
 
   constructor(private _dialog: MatDialog,
               public sudokuLab: SudokuLab,
               @Inject(GENERATOR_DATA) public generator: GeneratorData) {
     super(sudokuLab);
 
+    this._manager = new GeneratorDataManager(sudokuLab, generator, { saveDataOnChanges: true });
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
-    // _sudoku
-    //   .onUpload(UploadDialogComponent, this._destroy$)
-    //   .subscribe(res => !!res ? _sudoku.loadSchema(res.sdk) : null);
 
     this.boardStyle$ = combineLatest([this._resize$, this._element$])
       .pipe(map(([r, ele]) => getBoardStyle(ele)));
@@ -44,10 +51,26 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
       map(([running, info]) => running ? getworkingInfo(info) : ''));
 
     sudokuLab.context$.next(this.generator);
+
+    this._manager.changed$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => this.sudokuLab.updatePageStatus(this._getPageStatus()))
+  }
+
+  private _getPageStatus(): any {
+    return {
+      [AvailablePages.generator]: {
+        [DEFAULT_GENERATOR_PAGE_STATUS.gen_running]: this.generator.running$.value,
+        [DEFAULT_GENERATOR_PAGE_STATUS.gen_not_running]: !this.generator.running$.value,
+        [DEFAULT_GENERATOR_PAGE_STATUS.has_no_schemas]: (this.generator.schemas$.value || []).length < 1,
+        [DEFAULT_GENERATOR_PAGE_STATUS.has_no_gen_schema]: !this.generator.schema$.value,
+      }
+    }
   }
 
   ngAfterViewInit() {
     this._element$.next(this.board);
+    this._manager.init(new Worker(new URL('./generator.worker', import.meta.url)));
   }
 }
 

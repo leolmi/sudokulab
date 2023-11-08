@@ -38,7 +38,7 @@ class SvgCell {
     const dic = decodeCellId(c?.id);
     this.x = dic.col * GEOMETRY.width;
     this.y = dic.row * GEOMETRY.height;
-    this.text = c?.value;
+    this.text = (o?.characters||{})[c?.value]||c?.value;
     this.textX = this.x + (GEOMETRY.width/2);
     this.textY = this.y + (GEOMETRY.height/2);
     this.fixed = !!c?.fixed;
@@ -82,12 +82,14 @@ class SvgCell {
               [class.error]="cell.error"
               [class.svg-pulse]="((highlights$|async)?.cellValue||{})[cell.id]"
               [attr.x]="cell.textX" [attr.y]="cell.textY+.5">{{cell.text}}</text>
-        <g *ngFor="let vl of cell.values">
-          <text class="svg-board-cell-values-text"
-                text-anchor="start"
-                [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
-                [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)">{{valueMode=='dot'?'∎':vl}}</text>
-        </g>
+        <ng-container *ngIf="!cell.text">
+          <g *ngFor="let vl of cell.values">
+            <text class="svg-board-cell-values-text"
+                  text-anchor="start"
+                  [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
+                  [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)">{{valueMode=='dot'?'∎':vl}}</text>
+          </g>
+        </ng-container>
       </g>
       <rect x="30" y="-1" width="30" height="100"
             class="svg-board-line"

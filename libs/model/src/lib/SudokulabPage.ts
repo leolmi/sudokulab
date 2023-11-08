@@ -1,4 +1,4 @@
-import { MenuButton } from './MenuButton';
+import {ButtonInfo, MenuButton} from './MenuButton';
 import {SudokuLab} from "./logic";
 
 export abstract class SudokulabPageExecutor {
@@ -11,7 +11,7 @@ export abstract class SudokulabPage {
   abstract title: string;
   abstract code: string;
   abstract icon: string;
-  abstract buttons: MenuButton[];
+  abstract buttons: ButtonInfo[];
   abstract executor?: string;
   abstract getUrl(sl: SudokuLab): string;
 }

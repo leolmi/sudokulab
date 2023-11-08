@@ -1,15 +1,7 @@
 import {ChangeDetectionStrategy, Component} from "@angular/core";
 import {BehaviorSubject} from "rxjs";
-import {SudokuLab} from "@sudokulab/model";
+import {ButtonInfo, SudokuLab} from "@sudokulab/model";
 import {DEFAULT_LAB_BUTTONS} from "../../model";
-
-interface ButtonInfo {
-  tooltip: string;
-  icon: string;
-  code: string;
-  disabledKey?: string;
-  checkedKey?: string;
-}
 
 @Component({
   selector: 'sudokulab-operations-bar',
@@ -17,7 +9,7 @@ interface ButtonInfo {
     <div class="operations-bar" fxLayout="row" fxLayoutAlign="start center">
       <mat-icon class="icon-button"
                 *ngFor="let btn of (lbuttons$|async)"
-                [matTooltip]="btn.tooltip"
+                [matTooltip]="btn.tooltip||''"
                 (click)="execute(btn)"
                 [class.color-accent]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.checkedKey||'']"
                 [class.disabled]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.disabledKey||'']"
@@ -25,7 +17,7 @@ interface ButtonInfo {
       <div fxFlex></div>
       <mat-icon class="icon-button"
                 *ngFor="let btn of (rbuttons$|async)"
-                [matTooltip]="btn.tooltip"
+                [matTooltip]="btn.tooltip||''"
                 (click)="execute(btn)"
                 [class.color-accent]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.checkedKey||'']"
                 [class.disabled]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.disabledKey||'']"

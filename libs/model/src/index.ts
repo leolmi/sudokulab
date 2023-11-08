@@ -70,6 +70,8 @@ export * from './lib/tokens';
 export * from './sudoku.helper';
 export * from './generator.helper';
 export * from './global.helper';
+export * from './manager.helper';
 
 export * from './lib/pipes/schema-name.pipe';
 export * from './board-data-manager';
+export * from './generator-data-manager';

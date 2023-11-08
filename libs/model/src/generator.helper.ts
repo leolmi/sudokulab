@@ -36,13 +36,32 @@ export const getGeneratorStatus = (sdk: PlaySudoku): GeneratorStatus => {
 }
 
 /**
- * restituisce la modalità del generatore
+ * Restituisce la modalità del generatore:
+ * - **single**: singolo schema, non richiede operazioni di generazione ma solo puro calcolo risolutivo poicé
+ * ha solo nomeri fissi;
+ * - **fixed**: gli schemi sono gerati sulla base delle possibili combinazioni dei possibili valori dinamici
+ * - **multiple**: il generatore deve aggiungere valori fissi possibili secondo le logiche definite per raggiungere
+ * il numero di numeri fissi richiesti, in questa casistica sono presenti cicli di valorizzazione aggiuntivi a quelli
+ * dei numeri dinamici;
+ * - **unknown**: non è possibile determinare la modalità di generazione degli schemi;
  * @param status
  */
 export const getGenerationMode = (status: GeneratorStatus): GeneratorMode => {
+  // **single**: singolo schema, non richiede operazioni di generazione
+  // ma solo puro calcolo risolutivo poicé ha solo nomeri fissi
   if (status.total === status.fixed) return GeneratorMode.single;
+
+  // **fixed**: gli schemi sono gerati sulla base delle possibili combinazioni
+  // dei possibili valori dinamici
   if (status.total === (status.dynamics+status.fixed)) return GeneratorMode.fixed;
+
+  // **multiple**: il generatore deve aggiungere valori fissi possibili secondo
+  // le logiche definite per raggiungere il numero di numeri fissi richiesti,
+  // in questa casistica sono presenti cicli di valorizzazione aggiuntivi a quelli
+  // dei numeri dinamici.
   if (status.total > (status.dynamics+status.fixed)) return GeneratorMode.multiple;
+
+  // **unknown**: non è possibile determinare la modalità di generazione degli schemi
   return GeneratorMode.unknown;
 }
 

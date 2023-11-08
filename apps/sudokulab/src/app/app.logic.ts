@@ -465,6 +465,16 @@ export class SudokuLabLogic extends SudokuLab {
     // TODO...
 
   }
+
+  /**
+   * aggiorna lo stato di abilitazione/selezione degli elementi della pagina
+   * @param ps
+   */
+  updatePageStatus(ps: any) {
+    const status = _clone(this.state.pagesStatus$.value)
+    _extend(status, ps);
+    this.state.pagesStatus$.next(status);
+  }
 }
 
 /**
