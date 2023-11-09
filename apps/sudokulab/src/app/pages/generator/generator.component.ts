@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   Inject,
+  NgZone,
   OnDestroy,
   ViewChild
 } from '@angular/core';
@@ -33,14 +34,17 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
   layoutAlign$: Observable<string>;
   boardStyle$: Observable<any>;
   working$: Observable<string>;
-  private _manager: GeneratorDataManager;
 
   constructor(private _dialog: MatDialog,
+              private _zone: NgZone,
               public sudokuLab: SudokuLab,
               @Inject(GENERATOR_DATA) public generator: GeneratorData) {
     super(sudokuLab);
 
-    this._manager = new GeneratorDataManager(sudokuLab, generator, { saveDataOnChanges: true });
+    if (!generator.manager) {
+      generator.manager = new GeneratorDataManager(_zone, sudokuLab, generator, { saveDataOnChanges: true });
+    }
+
     this.layout$ = this.compact$.pipe(map(iscompact => iscompact ? 'column' : 'row'));
     this.layoutAlign$ = this.compact$.pipe(map(iscompact => iscompact ? 'start center' : 'center'));
 
@@ -52,7 +56,7 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
 
     sudokuLab.context$.next(this.generator);
 
-    this._manager.changed$
+    generator.manager.changed$
       .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.sudokuLab.updatePageStatus(this._getPageStatus()))
   }
@@ -70,7 +74,7 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
 
   ngAfterViewInit() {
     this._element$.next(this.board);
-    this._manager.init(new Worker(new URL('./generator.worker', import.meta.url)));
+    this.generator.manager?.init(() => new Worker(new URL('./generator.worker', import.meta.url)));
   }
 }
 

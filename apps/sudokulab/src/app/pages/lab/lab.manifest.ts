@@ -23,8 +23,7 @@ export class LabManifest extends SudokulabPage {
     DEFAULT_LAB_BUTTONS.camera,
     DEFAULT_LAB_BUTTONS.clear,
     DEFAULT_BUTTONS.separator,
-    DEFAULT_LAB_BUTTONS.available,
-    DEFAULT_LAB_BUTTONS.popupdetails
+    DEFAULT_LAB_BUTTONS.available
   ];
   title = 'Player';
   executor = 'lab-executor';

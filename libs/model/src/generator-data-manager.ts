@@ -6,7 +6,8 @@ import {cloneDeep as _clone, extend as _extend} from "lodash";
 import {clearSchema, dowloadSchema, getGeneratorCodeAction} from "./sudoku.helper";
 import {DataManagerBase} from "./data-manager.base";
 import {SudokuLab} from "./lib/logic";
-import {map, takeUntil} from "rxjs/operators";
+import {filter, map, takeUntil} from "rxjs/operators";
+import {NgZone} from "@angular/core";
 
 export class GeneratorDataManagerOptions {
   constructor(o?: Partial<GeneratorDataManagerOptions>) {
@@ -24,7 +25,8 @@ export class GeneratorDataManager extends DataManagerBase {
   private _options: GeneratorDataManagerOptions;
   generator: GeneratorData;
 
-  constructor(private sudokuLab: SudokuLab,
+  constructor(private _zone: NgZone,
+              private _sudokuLab: SudokuLab,
               generator?: GeneratorData,
               o?: Partial<GeneratorDataManagerOptions>) {
     super(generator);
@@ -32,9 +34,10 @@ export class GeneratorDataManager extends DataManagerBase {
     this.generator = generator || new GeneratorData();
 
     // intercetta i comandi
-    sudokuLab.internalCode$.pipe(
+    _sudokuLab.internalCode$.pipe(
       takeUntil(this._destroy$),
-      map(code => getGeneratorCodeAction(code)))
+      map(code => getGeneratorCodeAction(code)),
+      filter(action => !!action))
       .subscribe((action) => this.handleAction(action));
 
     // intercetta i comandi
@@ -56,7 +59,7 @@ export class GeneratorDataManager extends DataManagerBase {
         if (clearSchema(sdk)) this.generator.sdk$.next(sdk);
         break;
       case GeneratorAction.upload:
-        this.sudokuLab.upload().subscribe();
+        this._sudokuLab.upload().subscribe();
         break;
       case GeneratorAction.downloadAll:
         // scarica tutti gli schemi generati
@@ -87,11 +90,17 @@ export class GeneratorDataManager extends DataManagerBase {
    * @param data
    */
   handleWorkerData(data: GeneratorWorkerData) {
-    const running = !!data.status?.running;
 
     // valuta lo stato di running
+    const running = !!data.status?.running;
     if (this.generator.running$.value !== running) {
       this.generator.running$.next(running);
+      this.changed$.next();
+    }
+
+    const stopping = !!data.status?.stopping;
+    if (this.generator.stopping$.value !== stopping) {
+      this.generator.stopping$.next(stopping);
       this.changed$.next();
     }
 
@@ -107,18 +116,21 @@ export class GeneratorDataManager extends DataManagerBase {
     }
 
     // visualizza i messaggi
-    if (data.message) this.sudokuLab.showMessage(data.message);
+    if (data.message) this._sudokuLab.showMessage(data.message);
 
     // TODO: altro??
   }
 
   /**
    * inizializza il manager
-   * @param worker
+   * @param handler
    */
-  init(worker: Worker) {
-    this._worker = worker;
-    this._worker.onmessage = (e: MessageEvent) => this.handleWorkerData(<GeneratorWorkerData>e.data);
+  init(handler: () => Worker) {
+    if (!this._worker) {
+      this._worker = handler();
+      this._worker.onmessage = (e: MessageEvent) =>
+        this._zone.run(() => this.handleWorkerData(<GeneratorWorkerData>e.data));
+    }
     this.changed$.next();
   }
 }

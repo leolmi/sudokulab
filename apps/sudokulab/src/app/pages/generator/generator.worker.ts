@@ -38,7 +38,9 @@ const stopProcess = () => {
 }
 
 const checkState = () => {
-  if (STATE.status.stopping && STATE.status.running) stopProcess();
+  if (STATE.status.stopping && STATE.status.running) {
+    STATE.status.running = false;
+  }
 }
 
 /**
@@ -49,7 +51,7 @@ const checkState = () => {
  */
 const runPart = (onend: () => void, duration = 10, i = 0) => {
   setTimeout(() => {
-    if (i < (duration*2)) {
+    if (i < (duration * 2)) {
       checkState();
       if (STATE.status.running) {
         runPart(onend, duration, ++i);
@@ -66,6 +68,8 @@ const testRUN = () => {
   STATE.status.running = true;
   STATE.status.stopping = false;
 
+  postStringMessage('generator started successfully', MessageType.success);
+
   runPart(() => {
     const message = new SudokuMessage({
       message: STATE.status.stopping ? 'worker is stopped' : 'finish generation!',
@@ -74,11 +78,9 @@ const testRUN = () => {
     stopProcess();
     _postMessage({ message });
   });
-
-  postStringMessage('generator started successfully', MessageType.success);
 }
 
-const _postMessage = (d: Partial<GeneratorWorkerData>) => {
+const _postMessage = (d?: Partial<GeneratorWorkerData>) => {
   postMessage(<GeneratorWorkerData>{ ...d,
     status: STATE.status,
     sdk: STATE.sdk
@@ -115,6 +117,7 @@ addEventListener('message', ({ data }) => {
         if (!STATE.status.running) return postStringMessage('Worker is not running');
         if (STATE.status.stopping) return postStringMessage('Worker is still stopping');
         STATE.status.stopping = true;
+        _postMessage();
         break;
       case GeneratorAction.generate:
       default:

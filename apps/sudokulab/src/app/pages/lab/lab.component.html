@@ -8,7 +8,6 @@
     <div class="details-container" fxFlex
          *ngIf="!!!(sudokuLab.state.isCompact$|async)">
       <sudokulab-solver-step-details
-        *ngIf="isShowDetails$|async"
         [handleLines]="true"
         [showHelpImage]="false"
         [allowClose]="true"
@@ -37,7 +36,6 @@
     <div class="details-container"
          *ngIf="!!(compact$|async)">
       <sudokulab-solver-step-details
-        *ngIf="isShowDetails$|async"
         [handleLines]="true"
         [showHelpImage]="false"
         [allowClose]="true"

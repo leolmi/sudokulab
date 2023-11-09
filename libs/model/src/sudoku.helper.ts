@@ -656,7 +656,7 @@ export const getLabCodeAction = (labCode: string): BoardAction|undefined => {
 }
 
 export const getGeneratorCodeAction = (genCode: string): GeneratorAction|undefined => {
-  return (/^lab\./g.test(genCode)) ? <GeneratorAction>(genCode.substring(4)) : undefined;
+  return (/^gen\./g.test(genCode)) ? <GeneratorAction>(genCode.substring(4)) : undefined;
 }
 
 /**

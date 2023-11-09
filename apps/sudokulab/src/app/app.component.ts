@@ -10,7 +10,7 @@ import {
   SudokulabWindowService
 } from '@sudokulab/model';
 import {combineLatest, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {debounceTime, filter, map} from 'rxjs/operators';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {Dictionary} from '@ngrx/entity';
@@ -22,6 +22,7 @@ import {Dictionary} from '@ngrx/entity';
 })
 export class AppComponent {
   status$: Observable<Dictionary<boolean>>;
+  page$: Observable<SudokulabPage>;
 
   constructor(private _http: HttpClient,
               private _router: Router,
@@ -33,6 +34,10 @@ export class AppComponent {
     this.status$ = combineLatest([sudokuLab.state.page$, sudokuLab.state.pagesStatus$]).pipe(
       map(([page, status]) => (status||{})[page?.code||'']||{}));
 
+    this.page$ = sudokuLab.state.page$.asObservable().pipe(
+      debounceTime(100),
+      filter(p => !!p),
+      map(p => <SudokulabPage>p));
     sudokuLab.bootstrap();
   }
 
@@ -42,7 +47,7 @@ export class AppComponent {
   }
 
   openPage(page: SudokulabPage) {
-    this.sudokuLab.state.page$.next(page)
+    setTimeout(() => this.sudokuLab.state.page$.next(page));
   }
 
   execute(code: string) {

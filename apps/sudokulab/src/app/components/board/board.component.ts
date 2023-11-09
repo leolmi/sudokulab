@@ -145,7 +145,7 @@ export class BoardComponent extends DestroyComponent implements OnDestroy {
       message: alg?.name||'',
       type: MessageType.highlight,
       duration: options?.highlightsDelay||DEFAULT_SHOW_INFO_TIMEOUT,
-      action: options?.showPopupDetails ? 'Details' : '',
+      action: '',
       actionCode: SOLVER_STEP_DETAILS,
       data: _clone(stis)
     }));

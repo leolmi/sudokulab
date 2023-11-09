@@ -5,6 +5,7 @@ import {BoardAction} from "../board.model";
 import {PlaySudokuOptions} from "../PlaySudokuOptions";
 import {SudokuData} from "./sudoku-data";
 import {Sudoku} from "../Sudoku";
+import {BoardDataManager} from "../../board-data-manager";
 
 export class BoardData extends SudokuData<BoardAction> {
   constructor() {
@@ -14,7 +15,7 @@ export class BoardData extends SudokuData<BoardAction> {
     });
     this.info$ = new Subject<AlgorithmResultLine>();
   }
-
+  manager?: BoardDataManager;
   info$: Subject<AlgorithmResultLine>;
 }
 

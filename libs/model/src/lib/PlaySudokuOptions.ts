@@ -22,7 +22,6 @@ export class PlaySudokuOptions {
     this.showAvailables = false;
     this.maxSplitSchema = SUDOKU_DEFAULT_MAXSPLIT;
     this.excludeTryAlgorithm = false;
-    this.showPopupDetails = true;
     this.highlightsDelay = 4000;
     this.fixedValues = false;
     this.acceptX = false;
@@ -35,7 +34,6 @@ export class PlaySudokuOptions {
   showAvailables: boolean;
   maxSplitSchema: number;
   excludeTryAlgorithm: boolean;
-  showPopupDetails: boolean;
   highlightsDelay: number;
   fixedValues: boolean;
   acceptX: boolean

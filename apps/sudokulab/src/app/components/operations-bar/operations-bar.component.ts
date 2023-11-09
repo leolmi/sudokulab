@@ -1,7 +1,8 @@
 import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {ButtonInfo, SudokuLab} from "@sudokulab/model";
-import {DEFAULT_LAB_BUTTONS} from "../../model";
+import {AvailablePages, DEFAULT_LAB_BUTTONS} from "../../model";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'sudokulab-operations-bar',
@@ -11,16 +12,16 @@ import {DEFAULT_LAB_BUTTONS} from "../../model";
                 *ngFor="let btn of (lbuttons$|async)"
                 [matTooltip]="btn.tooltip||''"
                 (click)="execute(btn)"
-                [class.color-accent]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.checkedKey||'']"
-                [class.disabled]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.disabledKey||'']"
+                [class.color-accent]="!!((status$|async)||{})[btn?.checkedKey||'']"
+                [class.disabled]="!!((status$|async)||{})[btn?.disabledKey||'']"
       >{{btn.icon}}</mat-icon>
       <div fxFlex></div>
       <mat-icon class="icon-button"
                 *ngFor="let btn of (rbuttons$|async)"
                 [matTooltip]="btn.tooltip||''"
                 (click)="execute(btn)"
-                [class.color-accent]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.checkedKey||'']"
-                [class.disabled]="!!((sudokuLab.state.pagesStatus$|async)||{})[btn?.disabledKey||'']"
+                [class.color-accent]="!!((status$|async)||{})[btn?.checkedKey||'']"
+                [class.disabled]="!!((status$|async)||{})[btn?.disabledKey||'']"
       >{{btn.icon}}</mat-icon>
     </div>`,
   styleUrls: ['./operations-bar.component.scss'],
@@ -29,15 +30,16 @@ import {DEFAULT_LAB_BUTTONS} from "../../model";
 export class OperationsBarComponent {
   rbuttons$: BehaviorSubject<ButtonInfo[]>;
   lbuttons$: BehaviorSubject<ButtonInfo[]>;
+  status$: Observable<any>;
 
   constructor(public sudokuLab: SudokuLab) {
+    this.status$ = sudokuLab.state.pagesStatus$.pipe(map(s => (s||{})[AvailablePages.lab]||{}));
     this.lbuttons$ = new BehaviorSubject<ButtonInfo[]>([
       DEFAULT_LAB_BUTTONS.stepinfo,
       DEFAULT_LAB_BUTTONS.step
     ]);
     this.rbuttons$ = new BehaviorSubject<ButtonInfo[]>([
-      DEFAULT_LAB_BUTTONS.available,
-      DEFAULT_LAB_BUTTONS.popupdetails
+      DEFAULT_LAB_BUTTONS.available
     ]);
   }
 

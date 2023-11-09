@@ -2,9 +2,10 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {DestroyComponent} from '../../components/DestroyComponent';
 import {PrintPage, Sudoku, SudokuLab, use} from '@sudokulab/model';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {cloneDeep as _clone, endsWith as _endsWith, remove as _remove} from 'lodash';
-import {map} from 'rxjs/operators';
+import {cloneDeep as _clone, endsWith as _endsWith, keys as _keys, remove as _remove} from 'lodash';
+import {map, takeUntil} from 'rxjs/operators';
 import {filterSchemas} from '../../utils/components.utils';
+import {AvailablePages, DEFAULT_PRINT_PAGE_STATUS} from "../../model";
 
 
 @Component({
@@ -25,6 +26,10 @@ export class PrintComponent extends DestroyComponent {
         return filterSchemas(ss, o);
       }));
     this.loading$ = new BehaviorSubject<boolean>(true);
+
+    this.sudokuLab.state.printPages$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((pages) => sudokuLab.updatePageStatus(getPageStatus(pages)));
   }
 
   private _onPages(handler: (pages: PrintPage[], page?: PrintPage) => boolean, id?: string) {
@@ -67,5 +72,21 @@ export class PrintComponent extends DestroyComponent {
       if (page) page.schema = {};
       return true;
     }, id);
+  }
+}
+
+const isEmptyPrintPage = (page: PrintPage): boolean => {
+  return !_keys(page.schema).find(k => !!page.schema[k]?.values);
+}
+
+const isEmptyPrint = (pages: PrintPage[]): boolean => {
+  return pages.length < 1 || (pages.length === 1 && isEmptyPrintPage(pages[0]));
+}
+
+const getPageStatus = (pages: PrintPage[]): any => {
+  return {
+    [AvailablePages.print]: {
+      [DEFAULT_PRINT_PAGE_STATUS.has_no_page]: isEmptyPrint(pages),
+    }
   }
 }

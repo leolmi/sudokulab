@@ -4,6 +4,7 @@ import {GeneratorAction, GeneratorWorkingInfo} from "../generator.model";
 import {Sudoku} from "../Sudoku";
 import {SudokuData} from "./sudoku-data";
 import {PlaySudokuOptions} from "../PlaySudokuOptions";
+import {GeneratorDataManager} from "../../generator-data-manager";
 
 export class GeneratorData extends SudokuData<GeneratorAction> {
   constructor() {
@@ -18,14 +19,20 @@ export class GeneratorData extends SudokuData<GeneratorAction> {
       })
     });
     this.running$ = new BehaviorSubject<boolean>(false);
+    this.stopping$ = new BehaviorSubject<boolean>(false);
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
     this.schema$ = new BehaviorSubject<Sudoku|null>(null);
     this.workingInfo$ = new BehaviorSubject<GeneratorWorkingInfo>({});
   }
+  manager?: GeneratorDataManager;
   /**
    * stato running del generatore
    */
   running$: BehaviorSubject<boolean>;
+  /**
+   * stato stopping del generatore
+   */
+  stopping$: BehaviorSubject<boolean>;
   /**
    * elenco degli schemi generati
    */

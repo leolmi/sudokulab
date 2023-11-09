@@ -54,3 +54,11 @@ export const DEFAULT_GENERATOR_BUTTONS = {
   download: { icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: DEFAULT_GENERATOR_PAGE_STATUS.has_no_gen_schema },
   clear : {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: DEFAULT_GENERATOR_PAGE_STATUS.has_no_gen_schema},
 }
+
+export const DEFAULT_PRINT_PAGE_STATUS = {
+  has_no_page: 'has_no_page'
+}
+
+export const DEFAULT_PRINT_BUTTONS = {
+  print: {icon: 'print', code: 'print', tooltip: 'Print', disabledKey: DEFAULT_PRINT_PAGE_STATUS.has_no_page }
+}

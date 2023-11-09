@@ -143,12 +143,6 @@ export class SudokuLabLogic extends SudokuLab {
     this.internalCode$.next(internal_code);
   }
 
-  openByUrl() {
-    const codes = location.hash.substr(2).split('/');
-    let page = this._pagesProvider.pages.find(page => page.code === codes[0]);
-    setTimeout(() => !!page ? this.state.page$.next(page) : null);
-  }
-
   /**
    * Verifica lo stato compact
    */

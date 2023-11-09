@@ -1,5 +1,8 @@
 <div class="generator-toolbar" fxLayout="row" fxLayoutAlign="start center">
   <div class="description" fxFlex>{{description$|async}}</div>
   <button mat-raised-button class="running-button" color="accent" *ngIf="!!!(generator.running$|async)" (click)="run()">RUN</button>
-  <button mat-raised-button class="running-button" color="warn" *ngIf="!!(generator.running$|async)" (click)="stop()">STOP</button>
+  <ng-container *ngIf="!!(generator.running$|async)">
+    <button mat-raised-button class="running-button" color="warn" *ngIf="!(generator.stopping$|async)" (click)="stop()">STOP</button>
+    <button mat-raised-button class="running-button" color="primary" *ngIf="!!(generator.stopping$|async)" disabled>STOPPING</button>
+  </ng-container>
 </div>

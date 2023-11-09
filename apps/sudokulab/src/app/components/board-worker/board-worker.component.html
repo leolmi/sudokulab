@@ -3,7 +3,7 @@
   <svg-interactive-board
     [sudokuData]="board"
     [valueMode]="(valueMode$|async)||''"
-    [highlights]="highlights$|async"
+    [highlights]="board.manager?.highlights$|async"
     (changed)="changed()"
   ></svg-interactive-board>
 </div>

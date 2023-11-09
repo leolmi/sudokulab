@@ -39,7 +39,6 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
   layoutAlign$: Observable<string>;
   topToolFlex$: Observable<string>;
   boardStyle$: Observable<any>;
-  isShowDetails$: Observable<boolean>;
   rank$: Observable<number>;
 
 
@@ -53,7 +52,6 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
               @Inject(BOARD_DATA) public boardData: BoardData) {
     super(sudokuLab);
     this.isWorkerAvailable$ = new BehaviorSubject<boolean>(boardData.isWorkerAvailable);
-    this.isShowDetails$ = boardData.sdk$.pipe(map(sdk => !sdk?.options?.showPopupDetails));
     this.rank$ = boardData.sdk$.pipe(map(sdk => sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK));
     this.highlight$ = new BehaviorSubject<Dictionary<boolean>>({});
     this.otherHighlight$ = new BehaviorSubject<Dictionary<boolean>>({});
@@ -84,7 +82,6 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
       [AvailablePages.lab]: {
         [DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema]: isEmptySchema(sdk),
         [DEFAULT_LAB_PAGE_STATUS.not_available_camera]: true,
-        [DEFAULT_LAB_PAGE_STATUS.popup_details_checked]: !!sdk?.options?.showPopupDetails,
         [DEFAULT_LAB_PAGE_STATUS.available_visible_checked]: !!sdk?.options?.showAvailables,
       }
     }

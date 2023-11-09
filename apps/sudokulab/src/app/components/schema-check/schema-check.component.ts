@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject, NgZone, OnDestroy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {BoardDataManager, HandleImageResult} from '@sudokulab/model';
+import {BoardDataManager, HandleImageResult, SudokuLab} from '@sudokulab/model';
 
 @Component({
   selector: 'sudokulab-schema-check',
@@ -12,8 +12,10 @@ export class SchemaCheckComponent implements OnDestroy {
   manager: BoardDataManager;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: HandleImageResult,
+              private _zone: NgZone,
+              private _sudokuLab: SudokuLab,
               private _dialogRef: MatDialogRef<SchemaCheckComponent>) {
-    this.manager = new BoardDataManager();
+    this.manager = new BoardDataManager(_zone, _sudokuLab);
     this.manager.setOptions({fixedValues: true});
   }
 
