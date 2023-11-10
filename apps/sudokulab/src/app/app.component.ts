@@ -22,6 +22,7 @@ import {Dictionary} from '@ngrx/entity';
 })
 export class AppComponent {
   status$: Observable<Dictionary<boolean>>;
+  class$: Observable<any>;
   page$: Observable<SudokulabPage>;
 
   constructor(private _http: HttpClient,
@@ -31,6 +32,7 @@ export class AppComponent {
               public sudokuLab: SudokuLab,
               @Inject(BOARD_DATA) private _board: BoardData,
               @Inject(GENERATOR_DATA) private _generator: GeneratorData) {
+    this.class$ = sudokuLab.state.compactLevel$.pipe(map(cl => ({ [`compact-${cl||0}`]: true })));
     this.status$ = combineLatest([sudokuLab.state.page$, sudokuLab.state.pagesStatus$]).pipe(
       map(([page, status]) => (status||{})[page?.code||'']||{}));
 

@@ -8,6 +8,7 @@ export abstract class SudokulabPageExecutor {
 
 export abstract class SudokulabPage {
   default?: boolean;
+  preSeparator?: boolean;
   abstract title: string;
   abstract code: string;
   abstract icon: string;

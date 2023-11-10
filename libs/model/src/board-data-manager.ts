@@ -12,8 +12,6 @@ import {DataManagerBase} from "./data-manager.base";
 import {NgZone} from "@angular/core";
 import {SudokuLab} from "./lib/logic";
 import {isEmptyHihlights} from "../../../apps/sudokulab/src/app/components/board-worker/board-worker.logic";
-import {SudokuMessage} from "./lib/SudokuMessage";
-import {MessageType} from "./lib/enums";
 import {DEFAULT_MESSAGES} from "./lib/consts";
 
 

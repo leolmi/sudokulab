@@ -26,7 +26,9 @@ export const SUDOKULAB_BASIC_AUTHORIZATION = 'SUDOKULAB-BASIC';
 
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
 
-export const SUDOKU_COMPACT_WIDTH = 1450;
+export const SUDOKU_COMPACT_WIDTH_1 = 1450;
+export const SUDOKU_COMPACT_WIDTH_2 = 640;
+
 
 export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];
 export const SDK_PREFIX_DEBUG = ['%cSUDOKULAB', 'color:#ff4081;'];

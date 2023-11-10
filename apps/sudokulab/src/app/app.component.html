@@ -1,5 +1,6 @@
 <div class="container sudokulab-scrollbar"
-     [ngClass]="{'compact': ((sudokuLab.state.compactLevel$|async)||0)>0}"
+     [class.compact]="((sudokuLab.state.compactLevel$|async)||0)>0"
+     [ngClass]="class$|async"
      fxLayout="column">
   <mat-toolbar class="sudokulab-toolbar" color="primary">
     <div class="logo"
@@ -68,13 +69,15 @@
   <mat-progress-bar *ngIf="!!(sudokuLab.state.waiting$|async)" class="main-progress-bar" color="accent" mode="indeterminate"></mat-progress-bar>
   <div class="central-container" fxFlex fxLayout="row" fxLayoutAlign="center start">
     <div class="vertical-toolbar background2 compact-hidden" fxLayout="column">
-      <button *ngFor="let pag of sudokuLab.pages"
-              mat-icon-button
-              [ngClass]="{'selected': pag.code === (page$|async)?.code}"
-              [matTooltip]="pag.title"
-              (click)="openPage(pag)">
-        <mat-icon>{{pag.icon}}</mat-icon>
-      </button>
+      <ng-container *ngFor="let pag of sudokuLab.pages">
+        <div class="separator" *ngIf="!!pag.preSeparator"></div>
+        <button mat-icon-button
+                [ngClass]="{'selected': pag.code === (page$|async)?.code}"
+                [matTooltip]="pag.title"
+                (click)="openPage(pag)">
+          <mat-icon>{{pag.icon}}</mat-icon>
+        </button>
+      </ng-container>
     </div>
     <div *ngIf="!!(sudokuLab.state.waiting$|async)"
          class="page-container-overlay"

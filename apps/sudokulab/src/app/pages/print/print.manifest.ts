@@ -8,6 +8,7 @@ import {Routes} from '@angular/router';
 export class PrintManifest extends SudokulabPage {
   code = AvailablePages.print;
   icon = 'print';
+  preSeparator = true;
   buttons = [
     DEFAULT_PRINT_BUTTONS.print
   ];

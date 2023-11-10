@@ -1,16 +1,15 @@
 import {Injectable} from '@angular/core';
-import {GeneratorAction, GeneratorData, SudokuLab, SudokulabPage} from '@sudokulab/model';
+import {SudokuLab, SudokulabPage} from '@sudokulab/model';
 import {AvailablePages, DEFAULT_BUTTONS, DEFAULT_GENERATOR_BUTTONS} from '../../model';
 import {GeneratorComponent} from './generator.component';
 import {Routes} from '@angular/router';
-import {GeneratorExecutor} from "./generator.executor";
 
 @Injectable({
   providedIn: "root"
 })
 export class GeneratorManifest extends SudokulabPage {
   code = AvailablePages.generator;
-  icon = 'settings';
+  icon = 'auto_fix_high';
   buttons = [
     DEFAULT_GENERATOR_BUTTONS.generate,
     DEFAULT_BUTTONS.separator,

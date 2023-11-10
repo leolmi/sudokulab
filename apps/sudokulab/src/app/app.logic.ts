@@ -129,12 +129,12 @@ export class SudokuLabLogic extends SudokuLab {
    */
   async bootstrap() {
     this.state.waiting$.next(true);
+    // - verifica lo stato compact
+    this.checkCompactStatus();
     // - caricare le app info
     await this._loadInfos();
     // - caricare i documenti
     await this._loadSchemas();
-    // - verifica lo stato compact
-    this.checkCompactStatus();
     // fine bootstrap
     this.state.waiting$.next(false);
   }
@@ -521,7 +521,9 @@ const getSchema = (sdk: PlaySudoku): Sudoku => {
 
 
 const setFirstPage = (state: SudokuLabState, pages: SudokulabPage[]) => {
-  const page = (pages||[]).find(p => p.default)||pages[0];
+  const m = /#\/(.*?)(\/|$)/.exec(location.hash);
+  const defPage = (pages || []).find(p => p.default) || pages[0];
+  let page = m ? (pages || []).find(p => p.code === m[1]) || defPage : defPage;
   if (page) state.page$.next(page);
 }
 

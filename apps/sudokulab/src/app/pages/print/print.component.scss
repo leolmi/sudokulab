@@ -2,6 +2,10 @@
 
 .sudokulab-page-print {
   padding: 0 !important;
+  &.sudokulab-page {
+    overflow: hidden !important;
+    height: 100% !important;
+  }
 }
 .schemas {
   width: 400px;
@@ -119,3 +123,28 @@
     }
   }
 }
+
+::ng-deep {
+  .compact-2 {
+    .sudokulab-page-print {
+      .print-page-base {
+        height: 240px;
+        width: 160px;
+      }
+      .print-page {
+        .print-page-content {
+          .print-page-area {
+            padding: 11px 33px !important;
+          }
+        }
+      }
+      .schema-info {
+        display: none !important;
+      }
+      .schemas {
+        width: 80px !important;
+      }
+    }
+  }
+}
+

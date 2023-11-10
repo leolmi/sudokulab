@@ -19,7 +19,7 @@
            (click)="addSchema(sdk)"
            fxLayout="row">
         <svg-board class="thumbnail background" [sudoku]="sdk"></svg-board>
-        <div class="schema-info" fxLayout="column">
+        <div class="schema-info compact-size-600" fxLayout="column">
           <div class="title" fxFlex>{{sdk | schemaName}}</div>
           <div class="sub-title">{{sdk?.info?.difficultyValue||'?'}}</div>
         </div>

@@ -17,17 +17,5 @@ export class AppInterceptor implements HttpInterceptor {
     } else {
       return next.handle(req);
     }
-
-    // return this._sudoku.selectToken$.pipe(
-    //     take(1),
-    //     switchMap((token) => {
-    //       request = request.clone({
-    //         setHeaders: {
-    //           Authorization: !!token ? `Bearer ${token}` : `Basic ${btoa(SUDOKULAB_BASIC_AUTHORIZATION)}`
-    //         }
-    //       });
-    //       return next.handle(request);
-    //     })
-    //   )
   }
 }

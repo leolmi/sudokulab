@@ -159,7 +159,7 @@ import {OptionsExecutor} from "./pages/options/options.executor";
     { provide: BOARD_DATA, useClass: BoardData },
     { provide: GENERATOR_DATA, useClass: GeneratorData },
     { provide: SudokulabPage, useClass: LabManifest, multi: true },
-    //{ provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
+    // { provide: SudokulabPage, useClass: GeneratorManifest, multi: true },
     { provide: SudokulabPage, useClass: PrintManifest, multi: true },
     { provide: SudokulabPage, useClass: OptionsManifest, multi: true },
     { provide: SudokulabPage, useClass: HelpManifest, multi: true },

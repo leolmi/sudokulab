@@ -15,7 +15,8 @@ import { SudokulabWindowService } from './lib/services';
 import {
   SDK_PREFIX,
   SDK_PREFIX_DEBUG,
-  SUDOKU_COMPACT_WIDTH,
+  SUDOKU_COMPACT_WIDTH_1,
+  SUDOKU_COMPACT_WIDTH_2,
   SUDOKU_DYNAMIC_VALUE,
   SUDOKU_EMPTY_VALUE,
   SUDOKULAB_DARK_THEME,
@@ -88,14 +89,16 @@ export const updateBehaviorSubject = <T>(bs$: BehaviorSubject<T>, handler: (c: T
 export const isMutation = (o: any, c: any): boolean =>
   !!o && !!c && JSON.stringify(o) !== JSON.stringify(c);
 
-export const isCompact = (ws: SudokulabWindowService): boolean => (ws.nativeWindow?.innerWidth || 2000) < SUDOKU_COMPACT_WIDTH;
+export const isCompact = (ws: SudokulabWindowService): boolean => (ws.nativeWindow?.innerWidth || 2000) < SUDOKU_COMPACT_WIDTH_1;
 
 /**
  * Livello di compattezza
  * @param ws
  */
 export const getCompactLevel = (ws: SudokulabWindowService): number => {
-  if ((ws.nativeWindow?.innerWidth || 2000) < SUDOKU_COMPACT_WIDTH) return 1;
+  const winSize = ws.nativeWindow?.innerWidth || 2000;
+  if (winSize <= SUDOKU_COMPACT_WIDTH_2) return 2;
+  if (winSize <= SUDOKU_COMPACT_WIDTH_1) return 1;
   return 0;
 }
 
