@@ -26,6 +26,10 @@
       <sudokulab-board-worker *ngIf="boardData.isWorkerAvailable"></sudokulab-board-worker>
     </div>
     <div class="bottom-board compact-size-600" fxFlex>
+      <mat-progress-bar [value]="progress$|async"
+                        class="lab-progress-bar"
+                        color="primary"
+                        mode="determinate"></mat-progress-bar>
       <sudokulab-key-board [boardData]="boardData"
                            [usePencil]="true"></sudokulab-key-board>
       <sudokulab-board-state></sudokulab-board-state>

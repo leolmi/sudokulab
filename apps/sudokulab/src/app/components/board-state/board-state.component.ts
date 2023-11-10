@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/co
 import {DestroyComponent} from '../DestroyComponent';
 import {BOARD_DATA, BoardData, getRank, PlaySudoku, SudokuLab} from '@sudokulab/model';
 import {Observable, of} from 'rxjs';
+import {map, takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'sudokulab-board-state',
@@ -10,15 +11,14 @@ import {Observable, of} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BoardStateComponent extends DestroyComponent implements OnDestroy {
-  bordStateSanitized$: Observable<string> = of('');
+  bordStateSanitized$: Observable<string>;
   constructor(public sudokuLab: SudokuLab,
               @Inject(BOARD_DATA) private _board: BoardData) {
     super(sudokuLab);
 
-    // this.bordStateSanitized$ = combineLatest([_lab.selectActiveSudoku$, _board.sdk$]).pipe(
-    //   takeUntil(this._destroy$),
-    //   map(([sdk, wsdk]) => _board.isWorkerAvailable ? wsdk : sdk),
-    //   map(sdk => stateText(sdk)));
+    this.bordStateSanitized$ = _board.sdk$.pipe(
+      takeUntil(this._destroy$),
+      map(sdk => stateText(sdk)));
   }
 }
 

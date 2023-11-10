@@ -77,6 +77,11 @@
     color: $color-accent-contrast;
   }
 
+  .color-accent-important {
+    background-color: $color-accent !important;
+    color: $color-accent-contrast !important;
+  }
+
   .cell-container {
     background: $color-board-background;
     color: $color-board-background-contrast !important;

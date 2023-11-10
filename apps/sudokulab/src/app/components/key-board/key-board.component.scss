@@ -8,14 +8,19 @@
 }
 
 .key-number {
-  padding: 10px 0;
+  //padding: 4px 0;
   border: rgba(10,10,10,.1) 1px solid;
-  font-size: 32px;
-  text-align: center;
+  font-size: 30px;
+  //text-align: center;
   cursor: pointer;
   font-weight: bold;
   text-transform: uppercase;
   user-select: none;
+  border-radius: 50%;
+  margin: 4px;
+  width: 46px;
+  height: 46px;
+
   &.filled {
     opacity: .2;
     cursor: not-allowed;
@@ -31,5 +36,16 @@
     font-size: inherit;
     height: 1em;
     width: 1em;
+  }
+}
+
+@media only screen and (max-width: 640px) {
+  .key-board {
+    .key-number {
+      border: none;
+      margin: 0;
+      font-size: 26px;
+      width: auto;
+    }
   }
 }

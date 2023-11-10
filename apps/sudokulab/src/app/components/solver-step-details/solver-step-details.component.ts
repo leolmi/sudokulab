@@ -1,6 +1,14 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
+import {ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output} from "@angular/core";
 import {BehaviorSubject, Observable} from "rxjs";
-import {AlgorithmResultLine, getAlgorithm, SolveStepResult, SudokuLab, update} from "@sudokulab/model";
+import {
+  AlgorithmResultLine,
+  BOARD_DATA,
+  BoardData,
+  getAlgorithm,
+  SolveStepResult,
+  SudokuLab,
+  update
+} from "@sudokulab/model";
 import {reduce as _reduce} from 'lodash';
 import {map, tap} from "rxjs/operators";
 import {Dictionary} from "@ngrx/entity";
@@ -34,7 +42,9 @@ interface Line {
              [class.visible-line]="((visibles$|async)||{})[''+(line.num||'')]"
              fxLayout="row" fxLayoutAlign="start center">
           <div class="line-number" *ngIf="!!line.line">{{line.num}}</div>
-          <div class="line-text" [class.title]="!line.line" fxFlex>{{line.text}}</div>
+          <div class="line-text"
+               [class.color-accent-important]="!!line.line && (boardData.info$|async) === line.line"
+               [class.title]="!line.line" fxFlex>{{line.text}}</div>
         </div>
       </div>
     </div>
@@ -59,7 +69,8 @@ export class SolverStepDetailsComponent {
   @Output() onLineCLick: EventEmitter<AlgorithmResultLine> = new EventEmitter<AlgorithmResultLine>();
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(public sudokuLab: SudokuLab) {
+  constructor(public sudokuLab: SudokuLab,
+              @Inject(BOARD_DATA) public boardData: BoardData) {
     this.visibles$ = new BehaviorSubject<any>({});
     this.steps$ = new BehaviorSubject<SolveStepResult[]>([])
     this.containerFlex$ = sudokuLab.state.isCompact$.pipe(map(cmp => cmp ? 'none' : '100'))

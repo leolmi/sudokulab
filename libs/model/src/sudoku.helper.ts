@@ -23,9 +23,9 @@ import {Algorithm} from './lib/Algorithm';
 import {CellInfo} from './lib/CellInfo';
 import {
   AVAILABLE_DIRECTIONS,
-  AVAILABLE_VALUES,
+  AVAILABLE_VALUES, DELETE_VALUES,
   SUDOKU_DEFAULT_RANK,
-  SUDOKU_DYNAMIC_VALUE,
+  SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2,
   SUDOKU_EMPTY_VALUE
 } from './lib/consts';
 import {calcDifficulty, clear} from './lib/logic';
@@ -330,14 +330,14 @@ export const isValidValue = (value: string, rank?: number, o?: PlaySudokuOptions
   const available_pos = AVAILABLE_VALUES.indexOf(value);
   const isvalue = available_pos > -1 && available_pos < (rank || SUDOKU_DEFAULT_RANK);
   const isdynamic = value === SUDOKU_DYNAMIC_VALUE;
-  return (value.length === 1 && (isvalue || (isdynamic && !!o?.acceptX))) || ['Delete', ' '].indexOf(value)>-1;
+  return (value.length === 1 && (isvalue || (isdynamic && !!o?.acceptX))) || DELETE_VALUES.indexOf(value)>-1;
 }
 
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
   const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || SUDOKU_DEFAULT_RANK);
-  return (value.length === 1 && isvalue) || ['Delete', SUDOKU_DYNAMIC_VALUE, ' ', '?'].indexOf(value) > -1;
+  return (value.length === 1 && isvalue) || [...DELETE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2].indexOf(value) > -1;
 }
 
 export const toggleValue = (vls: string[], value: string): string[] => {
@@ -675,8 +675,6 @@ export const clearSchema = (sdk: PlaySudoku|Sudoku|undefined): boolean => {
     return true;
   }
 }
-
-const DELETE_VALUES = ['Delete', 'delete', ' '];
 
 /**
  * Imposta il valore della cella

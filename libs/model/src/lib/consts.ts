@@ -1,5 +1,6 @@
-import { MoveDirection } from './enums';
+import {MessageType, MoveDirection} from './enums';
 import { Dictionary } from '@ngrx/entity';
+import {SudokuMessage} from "./SudokuMessage";
 
 export const featureName = 'sudoku';
 export const SUDOKU_DYNAMIC_VALUE = 'x';
@@ -31,6 +32,8 @@ export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];
 export const SDK_PREFIX_DEBUG = ['%cSUDOKULAB', 'color:#ff4081;'];
 export const SDK_PREFIX_W = ['\u001b[34m[SUDOKULAB]\u001b[0m'];
 
+export const DELETE_VALUES = ['delete', 'Delete', '.', ' '];
+
 export const SUDOKULAB_MANAGE_OPERATION = {
   resyncAll: 'resyncAll'
 }
@@ -51,4 +54,6 @@ export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
 
 export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
 
-
+export const DEFAULT_MESSAGES = {
+  solved: new SudokuMessage({ message: 'Sudoku successfully solved!', type: MessageType.success })
+}

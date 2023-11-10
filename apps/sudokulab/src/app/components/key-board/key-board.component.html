@@ -4,6 +4,7 @@
        *ngFor="let kn of numbers$|async"
        [class.filled]="!!((status$|async)||{})[kn]&&!(isPencil$|async)"
        [class.used]="!!((usedStatus$|async)||{})[kn]&&!!(isPencil$|async)"
+       fxLayout="row" fxLayoutAlign="center center"
        matTooltip="clear cell"
        [matTooltipDisabled]="kn!=='x'"
        (click)="clickOnNumber(kn)"
@@ -16,6 +17,7 @@
        matTooltip="pencil mode"
        (click)="togglePencil()"
        [class.color-accent]="isPencil$|async"
+       fxLayout="row" fxLayoutAlign="center center"
        fxFlex>
     <mat-icon>edit</mat-icon>
   </div>

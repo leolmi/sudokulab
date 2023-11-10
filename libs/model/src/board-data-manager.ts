@@ -1,8 +1,6 @@
 import {BoardData} from "./lib/tokens";
 import {debounceTime, distinctUntilChanged, filter, map, take, takeUntil, withLatestFrom} from "rxjs/operators";
-import {BehaviorSubject, Subject} from "rxjs";
-import {getSudoku} from "./generator.helper";
-import {Sudoku} from "./lib/Sudoku";
+import {BehaviorSubject} from "rxjs";
 import {BoardAction, BoardWorkerArgs, BoardWorkerData, BoardWorkerHighlights} from "./lib/board.model";
 import {extend as _extend, isEmpty as _isEmpty} from 'lodash';
 import {dowloadSchema, getLabCodeAction} from "./sudoku.helper";
@@ -12,9 +10,11 @@ import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 import {handleKeyEvent, updateSchema} from "./manager.helper";
 import {DataManagerBase} from "./data-manager.base";
 import {NgZone} from "@angular/core";
-import {GeneratorWorkerData} from "./lib/generator.model";
 import {SudokuLab} from "./lib/logic";
 import {isEmptyHihlights} from "../../../apps/sudokulab/src/app/components/board-worker/board-worker.logic";
+import {SudokuMessage} from "./lib/SudokuMessage";
+import {MessageType} from "./lib/enums";
+import {DEFAULT_MESSAGES} from "./lib/consts";
 
 
 export class BoardDataManagerOptions {
@@ -68,18 +68,18 @@ export class BoardDataManager extends DataManagerBase {
       .pipe(filter(hl => !isEmptyHihlights(hl)),
         debounceTime(5000))
       .subscribe((hl) => {
-        this.highlights$.next(BoardWorkerHighlights.empty)
+        this.highlights$.next(BoardWorkerHighlights.empty);
+        this.data.info$.next(undefined);
       });
 
     // carica i dati utente & effettua la verifica
     this.data.sdk$
       .pipe(distinctUntilChanged((s1,s2) => s1?.id === s2?.id))
-      .subscribe(s => { //setTimeout(() => {
+      .subscribe(s => {
         const sdk = loadUserData(s);
         this.data.sdk$.next(sdk);
         if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{sdk});
       });
-    //}, 250));
 
     // intercetta le actions
     this.data.action$.pipe(
@@ -111,6 +111,12 @@ export class BoardDataManager extends DataManagerBase {
     // dopo ogni modifica elimina le info di step
     this.data.manager?.changed$.pipe(debounceTime(250)).subscribe(() => _sudokuLab.state.stepInfos$.next([]));
 
+    this.data.sdk$.pipe(
+      takeUntil(this._destroy$),
+      map(sdk => sdk?.state.complete),
+      distinctUntilChanged(),
+      filter(c => !!c))
+      .subscribe(() => this._sudokuLab.showMessage(DEFAULT_MESSAGES.solved));
   }
 
   /**
@@ -135,13 +141,13 @@ export class BoardDataManager extends DataManagerBase {
   }
 
   /**
-   * gestisce gli eventi da tastiera
+   * gestisce gli eventi da tastiera esterni
    * @param e
    */
   handleKeyEvent(e: KeyboardEvent) {
     if (this.data.disabled$.value) return;
     const sdk = handleKeyEvent(this.data, e);
-    if (sdk) this.changed$.next();
+    if (sdk) this.changed();
   }
 
   handleAction(action?: BoardAction): boolean {

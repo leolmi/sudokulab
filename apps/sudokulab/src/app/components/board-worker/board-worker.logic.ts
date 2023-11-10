@@ -6,7 +6,7 @@ import {
   BoardWorkerHighlights,
   cellId,
   checkAvailables,
-  decodeCellId,
+  decodeCellId, DEFAULT_MESSAGES,
   MessageType,
   PlaySudoku,
   resetAvailable,
@@ -38,10 +38,7 @@ export const solveSchema = (sdk: PlaySudoku): SudokuMessage|undefined => {
   const solver = new Solver(sdk);
   const result = solver.solve();
   if (result.unique) {
-    message = new SudokuMessage({
-      message: 'Sudoku successfully solved!',
-      type: MessageType.success
-    });
+    message = DEFAULT_MESSAGES.solved;
     _extend(sdk, result.unique.sdk);
   } else if (result.multiple) {
     message = new SudokuMessage({

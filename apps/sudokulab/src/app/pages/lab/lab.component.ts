@@ -11,7 +11,8 @@ import {
   AlgorithmResultLine,
   BOARD_DATA,
   BoardData,
-  getBoardStyle, isEmptySchema,
+  getBoardStyle,
+  isEmptySchema,
   PlaySudoku,
   SUDOKU_DEFAULT_RANK,
   SudokuLab
@@ -19,11 +20,10 @@ import {
 import {MatDialog} from '@angular/material/dialog';
 import {DestroyComponent} from '../../components/DestroyComponent';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
 import {Dictionary} from '@ngrx/entity';
-import {AvailablePages, DEFAULT_LAB_PAGE_STATUS, SOLVER_STEP_DETAILS} from "../../model";
-import {SolverStepDetailsPopupComponent} from "../../components/solver-step-details/solver-step-details-popup.component";
+import {AvailablePages, DEFAULT_LAB_PAGE_STATUS} from "../../model";
 import {reduce as _reduce} from 'lodash';
 
 @Component({
@@ -34,7 +34,7 @@ import {reduce as _reduce} from 'lodash';
 })
 export class LabComponent extends DestroyComponent implements OnDestroy, AfterViewInit {
   @ViewChild('board') board: ElementRef|undefined = undefined;
-
+  progress$: Observable<number>;
   layout$: Observable<string>;
   layoutAlign$: Observable<string>;
   topToolFlex$: Observable<string>;
@@ -64,7 +64,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
     this.boardStyle$ = combineLatest([this._resize$, this._element$])
       .pipe(map(([r, ele]) => getBoardStyle(ele)));
 
-    this.sudokuLab.state.activePlaySudoku$.pipe(
+    sudokuLab.state.activePlaySudoku$.pipe(
       takeUntil(this._destroy$),
       filter(sdk => !!sdk),
       debounceTime(250),
@@ -74,6 +74,10 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
     this.boardData.sdk$
       .pipe(takeUntil(this._destroy$))
       .subscribe(() => sudokuLab.updatePageStatus(this._getPageStatus()));
+
+    this.progress$ = this.boardData.sdk$.pipe(
+      takeUntil(this._destroy$),
+      map((sdk) => sdk?.state.percent||0));
   }
 
   private _getPageStatus(): any {
@@ -84,18 +88,6 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
         [DEFAULT_LAB_PAGE_STATUS.not_available_camera]: true,
         [DEFAULT_LAB_PAGE_STATUS.available_visible_checked]: !!sdk?.options?.showAvailables,
       }
-    }
-  }
-
-  private _doAction(code: string, data: any) {
-    switch (code) {
-      case SOLVER_STEP_DETAILS:
-        this._dialog.open(SolverStepDetailsPopupComponent, {
-          width: '600px',
-          panelClass: 'sudokulab-solver-step-details',
-          data
-        });
-        break;
     }
   }
 
