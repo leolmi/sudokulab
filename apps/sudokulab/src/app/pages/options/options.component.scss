@@ -4,13 +4,6 @@
   margin-right: auto;
 }
 
-::ng-deep {
-  .compact {
-    .options-container {
-      padding: 20px;
-    }
-  }
-}
 
 .sudokulab-page-options {
   overflow-y: auto;
@@ -21,11 +14,24 @@
   }
 }
 
+
+::ng-deep {
+  .compact {
+    .sudokulab-page-options {
+      .options-container {
+        padding: 20px !important;
+      }
+    }
+  }
+}
+
 .options-group {
   padding: 24px 0 24px 24px;
   border: rgba(10,10,10,.1) 1px solid;
-  margin-bottom: 24px;
   position: relative;
+  &:not(:last-child) {
+    margin-bottom: 24px;
+  }
   .options-group-title {
     font-size: 1.4em;
     font-weight: bold;
