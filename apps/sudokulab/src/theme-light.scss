@@ -147,11 +147,9 @@
       fill: $color-background-board;
     }
     .svg-board-cell {
-      fill: transparent;
       stroke: #ddd;
-      &.current {
-        outline: $color-accent 1px solid;
-        outline-offset: -1px;
+      &.svg-selection-cell {
+        stroke: $color-accent;
       }
       &.highlight-secondary {
         fill: rgba(255, 64, 129, 0.2);

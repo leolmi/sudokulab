@@ -8,7 +8,7 @@ import {
   PlaySudokuOptions,
   SudokuData, useOn
 } from "@sudokulab/model";
-import {BehaviorSubject, Observable, Subject, Subscription} from "rxjs";
+import {BehaviorSubject, combineLatest, Observable, Subject, Subscription} from "rxjs";
 import {map, switchMap, takeUntil} from "rxjs/operators";
 import {forEach as _forEach, reduce as _reduce} from 'lodash';
 import {Dictionary} from "@ngrx/entity";
@@ -31,13 +31,23 @@ const GEOMETRY: any = {
   }
 }
 
+class SvgSize {
+  constructor(s?: Partial<SvgSize>) {
+    this.x = 0;
+    this.y = 0;
+    Object.assign(this, s||{});
+  }
+  x: number;
+  y: number;
+}
+
 class SvgCell {
   constructor(c: PlaySudokuCell, o?: PlaySudokuOptions) {
     this.cell = c;
     this.id = c?.id;
-    const dic = decodeCellId(c?.id);
-    this.x = dic.col * GEOMETRY.width;
-    this.y = dic.row * GEOMETRY.height;
+    const size = getCellCoords(c);
+    this.x = size.x
+    this.y = size.y
     this.text = (o?.characters||{})[c?.value]||c?.value;
     this.textX = this.x + (GEOMETRY.width/2);
     this.textY = this.y + (GEOMETRY.height/2);
@@ -99,6 +109,11 @@ class SvgCell {
             class="svg-board-line"
             fill="transparent"
             [attr.stroke-width]="GEOMETRY.lineBigWidth"></rect>
+      <rect class="svg-board-cell svg-selection-cell"
+            [attr.stroke-width]="GEOMETRY.lineThinWidth"
+            [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
+            [attr.x]="(selection$|async)?.x"
+            [attr.y]="(selection$|async)?.y"></rect>
     </g>
   </svg>`,
   styleUrls: ['./svg-interactive-board.component.scss']
@@ -112,6 +127,7 @@ export class SvgInteractiveBoard implements OnDestroy {
   pencil$: Observable<boolean>;
   currentCellId$: BehaviorSubject<string>;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
+  selection$: Observable<SvgSize>;
   GEOMETRY = GEOMETRY;
 
   @Input()
@@ -141,6 +157,9 @@ export class SvgInteractiveBoard implements OnDestroy {
 
     this.pencil$ = this.sdk$.pipe(map(sdk => !!sdk?.options?.usePencil));
     this.cells$ = this.sdk$.pipe(map(sdk => getCells(sdk)));
+    this.selection$ = combineLatest([this.sdk$, this.currentCellId$]).pipe(
+      map(([sdk, cid])=> (sdk?.cells||{})[cid]),
+      map((cell) => getCellCoords(cell)));
   }
 
 
@@ -167,6 +186,11 @@ export class SvgInteractiveBoard implements OnDestroy {
     this._destroy$.next();
     this._destroy$.unsubscribe();
   }
+}
+
+const getCellCoords = (cell?: PlaySudokuCell): SvgSize => {
+  const dic = decodeCellId(cell?.id||'');
+  return { x: dic.col * GEOMETRY.width, y: dic.row * GEOMETRY.height };
 }
 
 const getCells = (sdk: PlaySudoku): SvgCell[] =>

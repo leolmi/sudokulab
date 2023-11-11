@@ -1,5 +1,12 @@
 .svg-board-cell {
   transition: fill .5s ease-in-out;
+  fill: transparent;
+  &.svg-selection-cell {
+    stroke-width: 1;
+    transform: scale(.9);
+    transform-origin: center;
+    transform-box: border-box;
+  }
 }
 
 .svg-board-cell-text {
