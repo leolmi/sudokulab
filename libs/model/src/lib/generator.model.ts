@@ -17,6 +17,7 @@ export enum GeneratorAction {
 
   // for manager:
   clear = 'clear',
+  check = 'check',
   download = 'download',
   downloadAll = 'downloadAll',
   upload = 'upload',

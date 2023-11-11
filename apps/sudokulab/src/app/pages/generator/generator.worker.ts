@@ -1,4 +1,5 @@
 import {
+  DEFAULT_MESSAGES,
   GeneratorAction,
   GeneratorStatus,
   GeneratorWorkerArgs,
@@ -17,11 +18,6 @@ interface GeneratorWorkeState {
   sdk: PlaySudoku;
 }
 
-const TODO = new SudokuMessage({
-  message: 'Not implemented yet',
-  type: MessageType.warning
-});
-
 const STATE: GeneratorWorkeState = {
   timeout: null,
   status: new GeneratorStatus(),
@@ -30,6 +26,12 @@ const STATE: GeneratorWorkeState = {
 
 const postStringMessage = (message: string, type = MessageType.warning) => {
   _postMessage({message: new SudokuMessage({message, type})});
+}
+
+const startProcess = () => {
+  STATE.status.running = true;
+  STATE.status.stopping = false;
+  postStringMessage('generator started successfully', MessageType.success);
 }
 
 const stopProcess = () => {
@@ -43,18 +45,20 @@ const checkState = () => {
   }
 }
 
+//#region: TEST
+
 /**
  *
  * @param onend    (end callback)
  * @param duration (secondi)
  * @param i
  */
-const runPart = (onend: () => void, duration = 10, i = 0) => {
+const _testProcessStep = (onend: () => void, duration = 10, i = 0) => {
   setTimeout(() => {
     if (i < (duration * 2)) {
       checkState();
       if (STATE.status.running) {
-        runPart(onend, duration, ++i);
+        _testProcessStep(onend, duration, ++i);
       } else {
         onend();
       }
@@ -64,13 +68,9 @@ const runPart = (onend: () => void, duration = 10, i = 0) => {
   }, 500);
 }
 
-const testRUN = () => {
-  STATE.status.running = true;
-  STATE.status.stopping = false;
+const _testProcess = () => {
 
-  postStringMessage('generator started successfully', MessageType.success);
-
-  runPart(() => {
+  _testProcessStep(() => {
     const message = new SudokuMessage({
       message: STATE.status.stopping ? 'worker is stopped' : 'finish generation!',
       type: STATE.status.stopping ? MessageType.warning : MessageType.success
@@ -78,6 +78,20 @@ const testRUN = () => {
     stopProcess();
     _postMessage({ message });
   });
+}
+
+//#endregion
+
+const startGenerator = () => {
+  startProcess();
+
+  // >>>> TEST
+  return _testProcess();
+  // <<<< TEST
+
+
+  // TODO....
+
 }
 
 const _postMessage = (d?: Partial<GeneratorWorkerData>) => {
@@ -109,9 +123,9 @@ addEventListener('message', ({ data }) => {
     switch (args.action) {
       case GeneratorAction.run:
         if (STATE.status.running) return postStringMessage('Worker is still running');
-        if (!args.sdk) return postStringMessage('Undefined generator schema');
-        loadSdk(args.sdk);
-        testRUN();
+        if (!sdk) return postStringMessage('Undefined generator schema');
+        loadSdk(sdk);
+        startGenerator();
         break;
       case GeneratorAction.stop:
         if (!STATE.status.running) return postStringMessage('Worker is not running');
@@ -121,7 +135,7 @@ addEventListener('message', ({ data }) => {
         break;
       case GeneratorAction.generate:
       default:
-        _postMessage({ message: TODO });
+        _postMessage({ message: DEFAULT_MESSAGES.todo });
         break;
     }
   }, args.timeout || SDK_DEFAULT_GENERATOR_TIMEOUT)

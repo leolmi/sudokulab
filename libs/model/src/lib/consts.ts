@@ -57,5 +57,6 @@ export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
 export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
 
 export const DEFAULT_MESSAGES = {
-  solved: new SudokuMessage({ message: 'Sudoku successfully solved!', type: MessageType.success })
+  todo: new SudokuMessage({message: 'Not implemented yet', type: MessageType.warning}),
+  solved: new SudokuMessage({message: 'Sudoku successfully solved!', type: MessageType.success})
 }

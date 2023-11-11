@@ -1,6 +1,6 @@
 import {Component, EventEmitter, HostListener, Input, OnDestroy, Output} from "@angular/core";
 import {
-  BoardWorkerHighlights,
+  BoardWorkerHighlights, clearEvent,
   decodeCellId,
   handleKeyEvent,
   PlaySudoku,
@@ -110,7 +110,6 @@ class SvgCell {
             fill="transparent"
             [attr.stroke-width]="GEOMETRY.lineBigWidth"></rect>
       <rect class="svg-board-cell svg-selection-cell"
-            [attr.stroke-width]="GEOMETRY.lineThinWidth"
             [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
             [attr.x]="(selection$|async)?.x"
             [attr.y]="(selection$|async)?.y"></rect>
@@ -173,6 +172,7 @@ export class SvgInteractiveBoard implements OnDestroy {
   @HostListener('window:keyup', ['$event'])
   keyEvent(e: KeyboardEvent) {
     if (this.sudokuData.disabled$.value) return;
+    clearEvent(e);
     const sdk = handleKeyEvent(this.sudokuData, e);
     this.changed.emit(sdk);
   }

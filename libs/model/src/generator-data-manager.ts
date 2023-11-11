@@ -3,9 +3,9 @@ import {updateSchema} from "./manager.helper";
 import {GeneratorAction, GeneratorWorkerArgs, GeneratorWorkerData} from "./lib/generator.model";
 import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 import {cloneDeep as _clone, extend as _extend} from "lodash";
-import {clearSchema, dowloadSchema, getGeneratorCodeAction} from "./sudoku.helper";
+import {clearSchema, dowloadSchema, getGeneratorCodeAction, resetAvailable} from "./sudoku.helper";
 import {DataManagerBase} from "./data-manager.base";
-import {SudokuLab} from "./lib/logic";
+import {checkAvailables, SudokuLab} from "./lib/logic";
 import {filter, map, takeUntil} from "rxjs/operators";
 import {NgZone} from "@angular/core";
 
@@ -57,6 +57,11 @@ export class GeneratorDataManager extends DataManagerBase {
         break;
       case GeneratorAction.clear:
         if (clearSchema(sdk)) this.generator.sdk$.next(sdk);
+        break;
+      case GeneratorAction.check:
+        resetAvailable(sdk);
+        checkAvailables(sdk);
+        this.generator.sdk$.next(sdk);
         break;
       case GeneratorAction.upload:
         this._sudokuLab.upload().subscribe();

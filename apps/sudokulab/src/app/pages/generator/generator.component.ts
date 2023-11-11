@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import {
   GENERATOR_DATA,
+  GeneratorAction,
   GeneratorData,
   GeneratorDataManager,
   GeneratorWorkingInfo,
@@ -75,6 +76,10 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
   ngAfterViewInit() {
     this._element$.next(this.board);
     this.generator.manager?.init(() => new Worker(new URL('./generator.worker', import.meta.url)));
+  }
+
+  changed() {
+    this.generator.action$.next(GeneratorAction.check);
   }
 }
 
