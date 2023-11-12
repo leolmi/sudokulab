@@ -24,7 +24,9 @@
 
 ## PROCESSO DI GENERAZIONE
 
-- `1` valuta la eseguibilità del processo di generazione
+secondo la tipologia di esecuzione segue percorsi diversi:
+
+- `1` valuta la eseguibilità del processo di generazione processo `valutazione stato iniziale`
   - [`single`]
     - se lo schema è stato risolto passa alla `exit`;
     - se lo schema non è stato risolto prosegue;
@@ -37,7 +39,7 @@
       stata già creata e va alla `3`;
     - altrimenti prosegue;
 
-- `2` valuta la completezza dello schema [`multiple`]>[`fixed`];
+- `2` valuta la completezza dello schema [`multiple`]>[`fixed`] processo `valutazione schema`;
   - [`single`]
     - prosegue;
   - [`fixed`]
@@ -46,7 +48,7 @@
     - se non è completo processo: `generazione schema`;
     - altrimenti prosegue;
 
-- `3` valuta la valorizzazione dello schema [`fixed`]>[`single`];
+- `3` valuta la valorizzazione dello schema [`fixed`]>[`single`] processo `valutazione valori`;
   - [`single`]
     - prosegue;
   - [`fixed`]
@@ -61,7 +63,7 @@
 - `5` se lo schema è risolvibile e risponde alle regole, incrementa i paramerti e processo: `emette lo schema`.
   In questo step popola la cache degli schemi processati; 
 
-- `6` processo `valutazione stato`
+- `6` processo `valutazione stato finale`
   - [`single`]
     - prosegue;
   - [`fixed`]

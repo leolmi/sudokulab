@@ -6,7 +6,7 @@ import {cloneDeep as _clone, extend as _extend} from "lodash";
 import {clearSchema, dowloadSchema, getGeneratorCodeAction, resetAvailable} from "./sudoku.helper";
 import {DataManagerBase} from "./data-manager.base";
 import {checkAvailable, SudokuLab} from "./lib/logic";
-import {debounceTime, filter, map, takeUntil} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, filter, map, takeUntil} from "rxjs/operators";
 import {NgZone} from "@angular/core";
 import {loadGeneratorUserData, saveGeneratorUserData} from "./lib/userdata";
 
@@ -55,6 +55,10 @@ export class GeneratorDataManager extends DataManagerBase {
         saveGeneratorUserData(sdk);
         this.changed$.next();
       });
+
+    this.generator.running$
+      .pipe(distinctUntilChanged())
+      .subscribe((run) => this.generator.disabled$.next(run));
   }
 
   handleAction(action?: GeneratorAction): void {
@@ -80,7 +84,7 @@ export class GeneratorDataManager extends DataManagerBase {
       case GeneratorAction.downloadAll:
         // scarica tutti gli schemi generati
       case GeneratorAction.generate:
-        // genera uno schema co i valori inseriti
+        // genera uno schema con i valori inseriti
       case GeneratorAction.openInLab:
         // apre lo schema selezionato in lab
       case GeneratorAction.removeAll:

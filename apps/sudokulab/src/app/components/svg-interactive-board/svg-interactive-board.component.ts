@@ -77,6 +77,7 @@ class SvgCell {
   selector: 'svg-interactive-board',
   template: `<svg class="svg-interactive-board"
                   [class.pencil]="pencil$|async"
+                  [class.disabled]="disabled$|async"
                   viewBox="0 0 90 90">
     <g>
       <!-- CONTORNO (light) -->
@@ -138,6 +139,7 @@ export class SvgInteractiveBoard implements OnDestroy {
   cells$: Observable<SvgCell[]>;
   sdk$: BehaviorSubject<PlaySudoku>;
   pencil$: Observable<boolean>;
+  disabled$: BehaviorSubject<boolean>
   currentCellId$: BehaviorSubject<string>;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
   selection$: Observable<SvgSize>;
@@ -166,6 +168,7 @@ export class SvgInteractiveBoard implements OnDestroy {
     this._sudokuData = new SudokuData<any>();
     this.sdk$ = new BehaviorSubject<PlaySudoku>(new PlaySudoku());
     this.currentCellId$ = new BehaviorSubject<string>('');
+    this.disabled$ = new BehaviorSubject<boolean>(false);
     this.highlights$ = new BehaviorSubject<BoardWorkerHighlights>(BoardWorkerHighlights.empty);
 
     this.pencil$ = this.sdk$.pipe(map(sdk => !!sdk?.options?.usePencil));
@@ -181,6 +184,7 @@ export class SvgInteractiveBoard implements OnDestroy {
     if (!this._sudokuData) return;
     this._subscriptions['sdk'] = useOn(this._sudokuData.sdk$, this.sdk$, this._destroy$);
     this._subscriptions['cell'] = useOn(this._sudokuData.activeCellId$, this.currentCellId$, this._destroy$);
+    this._subscriptions['disabled'] = useOn(this._sudokuData.disabled$, this.disabled$, this._destroy$);
   }
 
   @HostListener('window:keyup', ['$event'])
