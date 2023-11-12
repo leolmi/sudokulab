@@ -14,6 +14,7 @@ import {PlaySudoku} from "./lib/PlaySudoku";
 export const checkGeneratorStatus = (status: GeneratorStatus): void => {
   if (status.total < status.fixed + status.dynamics) status.total = status.fixed + status.dynamics;
   if (status.total < 10) status.total = 10;
+  status.generated = status.total - (status.fixed + status.dynamics);
 }
 
 /**

@@ -2,7 +2,7 @@ import {Algorithm} from '../Algorithm';
 import {PlaySudoku} from '../PlaySudoku';
 import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import {find as _find} from 'lodash';
-import {checkAvailables} from '../logic';
+import {checkAvailable} from '../logic';
 import {AlgorithmType} from '../enums';
 import {getUserCoord} from "../../sudoku.helper";
 import {isValue} from '../../global.helper';
@@ -32,7 +32,7 @@ export class OneValueForCellAlgorithm extends Algorithm {
 
     if (!!cell) {
       cell.value = cell.availables[0];
-      checkAvailables(sdk);
+      checkAvailable(sdk);
     }
 
     return new AlgorithmResult({

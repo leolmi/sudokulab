@@ -8,6 +8,7 @@ import {
   getGroups,
   getRank,
   getValues,
+  getValuesOnCells,
   isSolved
 } from '../../sudoku.helper';
 import {
@@ -162,43 +163,125 @@ const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
  * @param g
  * @param c
  */
-const hasMoreValues = (g: PlaySudokuGroup, c: PlaySudokuCell): boolean => {
+const _hasMoreValues = (g: PlaySudokuGroup, c: PlaySudokuCell): boolean => {
   return (g.valuesOnCells[c.id]||0) > 1;
 }
 
-export const checkAvailables = (sdk: PlaySudoku|undefined, resetBefore = false) => {
+/**
+ * opzioni per la verifica dello schema
+ */
+export interface CheckAvailableOptions {
+  resetBefore?: boolean;
+  fixedAsValue?: boolean;
+}
+
+/**
+ * resetta i valori si stato dei gruppi
+ * - calcolo degli availableOnCells mappa utile all'algoritmo OneCellForValue
+ * - calcolo degli availableCounter per una verifica rapida della solvibilità
+ * @param sdk
+ */
+const _resetGroupsState = (sdk: PlaySudoku) => {
+  _forEach(sdk.groups || {}, (g) => {
+    if (g) {
+      g.availableOnCells = {};
+      g.availableCounter = {};
+      g.cells.forEach(cid => {
+        if (!sdk.cells[cid]?.value) {
+          const avsc = sdk.cells[cid]?.availables||[];
+          const avsc_key = avsc.join(',');
+          if (avsc_key) {
+            g.availableCounter[avsc_key] = g.availableCounter[avsc_key] || {};
+            (g.availableCounter[avsc_key] || {})[cid] = true;
+          }
+          avsc.forEach(av => {
+            const avs = `${av}`;
+            g.availableOnCells[avs] = g.availableOnCells[avs] || {};
+            (g.availableOnCells[avs] || {})[cid] = true;
+          });
+        }
+      });
+    }
+  });
+}
+
+/**
+ * Calcolo dello state e ricerca errori nelle celle
+ * @param sdk
+ * @param options
+ */
+const _checkCellsErrors = (sdk: PlaySudoku, options?: CheckAvailableOptions) => {
+  _forEach(sdk.cells || {}, (c) => {
+    if (!!c?.value) sdk.state.valuesCount++;
+    if (!!c) {
+      c.error = false;
+      if (!c.fixed || !!options?.fixedAsValue) {
+        const cgs = getGroups(sdk, [c.id]);
+        const morev = cgs.find(g => _hasMoreValues(g, c));
+
+        if (options?.fixedAsValue) {
+          c.error = isValue(c.value) && !!morev;
+        } else {
+          c.error = isValue(c.value) && (!_includes(c.availables, c.value) || !!morev);
+        }
+        if (!!c.error) sdk.state.error = addLine(sdk.state.error, `Wrong value for the cell "${c.id}"!`);
+        if (!c.value) sdk.state.complete = false;
+      }
+      if (!c.value && c.availables.length < 1) {
+        c.error = true;
+        sdk.state.error = addLine(sdk.state.error, `Any available value for the cell "${c.id}"!`);
+      }
+    }
+  });
+}
+
+/**
+ * Ricerca rapida degli errori nei gruppi
+ * @param sdk
+ */
+const _checkGroupsErrors = (sdk: PlaySudoku) => {
+  // ricerca degli errori nei gruppi
+  _forEach(sdk.groups || {}, (g) => {
+    _forEach(g?.availableCounter || {}, (acg, avk) => {
+      const vls = avk.split(',');
+      const cids = _keys(acg);
+      // se il numero di celle che hanno lo stesso elenco di valori possibili
+      // è maggiore del numero di valori possibili allora non è possibile
+      // soddisfare le valorizzazioni
+      if (cids.length > vls.length) {
+        cids.forEach(cid => {
+          const cell = sdk.cells[cid];
+          if (cell) cell.error = true;
+        });
+        sdk.state.error = addLine(sdk.state.error, `Wrong available values for the cells "${avk}"!`);
+      }
+    });
+  });
+}
+
+/**
+ *
+ * @param sdk
+ * @param options
+ */
+export const checkAvailable = (sdk: PlaySudoku|undefined, options?: CheckAvailableOptions) => {
   if (!sdk) return;
-  // aaplica le regole base del sudoku
-  applySudokuRules(sdk, resetBefore);
+  // aplica le regole base del sudoku
+  applySudokuRules(sdk, {
+    resetBefore: !!options?.resetBefore,
+    onlyRealFixed: !!options?.fixedAsValue
+  });
   // reset dei valori
   sdk.state.valuesCount = 0;
   sdk.state.error = '';
   sdk.state.complete = true;
   // calcolo degli availableOnCells mappa utile all'algoritmo OneCellForValue
-  _forEach(sdk.groups || {}, (g) => {
-    if (!g) return;
-    g.availableOnCells = {};
-    g.cells.forEach(cid => {
-      if (!sdk.cells[cid]?.value) {
-        sdk.cells[cid]?.availables.forEach(av => {
-          const avs = `${av}`;
-          g.availableOnCells[avs] = g.availableOnCells[avs] || {};
-          (g.availableOnCells[avs] || {})[cid] = true;
-        });
-      }
-    });
-  });
-  // calcolo dello state e ricerca errori
-  _forEach(sdk.cells || {}, (c) => {
-    if (!!c?.value) sdk.state.valuesCount++;
-    if (!!c && !c.fixed) {
-      const cgs = getGroups(sdk, [c.id]);
-      const morev = cgs.find(g => hasMoreValues(g, c));
-      c.error = isValue(c.value) && (!_includes(c.availables, c.value) || !!morev);
-      if (!!c.error) sdk.state.error = addLine(sdk.state.error, `Any available value for the cell "${c.id}"!`);
-      if (!c.value) sdk.state.complete = false;
-    }
-  });
+  _resetGroupsState(sdk);
+  // calcolo dello state e ricerca errori nelle celle
+  _checkCellsErrors(sdk, options);
+  // ricerca degli errori nei gruppi
+  _checkGroupsErrors(sdk);
+
   // percentuale di riempimento calcolata sul numero di valori da inserirre
   sdk.state.percent = ((sdk.state.valuesCount - sdk.state.fixedCount) / (81 - sdk.state.fixedCount)) * 100;
 }
@@ -282,7 +365,7 @@ export const getGroupExplicitCouples = (sdk: PlaySudoku, g: PlaySudokuGroup|unde
   return res;
 }
 
-export const clear = (sdk: PlaySudoku): PlaySudoku => {
+export const clear = (sdk: PlaySudoku, alsoFixed = false): PlaySudoku => {
   return _onSudoku(sdk, (ps) => {
     if (ps.options.usePencil) {
       _forEach(ps?.cells || {}, (c) => {
@@ -291,14 +374,15 @@ export const clear = (sdk: PlaySudoku): PlaySudoku => {
     } else {
       _forEach(ps?.cells || {}, (c) => {
         if (!!c) {
-          c.value = (c.fixed ? c.value : '');
+          c.value = alsoFixed ? '' : (c.fixed ? c.value : '');
+          if (alsoFixed) c.fixed = false;
           if (!c.fixed) c.availables = getAvailables(ps.sudoku?.rank);
         }
       });
       ps.state.complete = false;
       ps.state.error = '';
       ps.state.percent = 0;
-      checkAvailables(ps);
+      checkAvailable(ps);
     }
     return ps;
   });
@@ -393,7 +477,7 @@ export const buildDifficultyMap = (algs: AlgorithmResult[]): Dictionary<number[]
  * @param fxC   numero di valori fissi
  * @param f     fattore incrementante (come porzione d'espressione)
  */
-const calcIncrement = (v: number, N: number, rank: number, fxC: number, f: string): number => {
+const _calcIncrement = (v: number, N: number, rank: number, fxC: number, f: string): number => {
   // conta i numeri che completano lo schema
   const nums = ((rank * rank) || 81) - fxC;
   // scope dell'espressione
@@ -428,7 +512,7 @@ export const calcDifficultyValue = (info: SudokuInfo): number => {
     const alg = algorithms[a.algorithm];
     if (!!alg) {
       if (alg.type === AlgorithmType.solver) N++;
-      diff = calcIncrement(diff, N, info.rank, info.fixedCount, alg.factor);
+      diff = _calcIncrement(diff, N, info.rank, info.fixedCount, alg.factor);
     }
   });
   return Math.floor(diff);

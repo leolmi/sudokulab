@@ -160,6 +160,12 @@
           fill: white;
         }
       }
+      &.dynamic {
+        fill: $color-background2;
+      }
+      &.error {
+        fill: rgba($color-error2, .4);
+      }
     }
     .svg-board-line {
       stroke: $color-background-contrast;

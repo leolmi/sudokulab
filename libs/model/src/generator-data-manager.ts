@@ -1,13 +1,14 @@
 import {GeneratorData} from "./lib/tokens";
 import {updateSchema} from "./manager.helper";
 import {GeneratorAction, GeneratorWorkerArgs, GeneratorWorkerData} from "./lib/generator.model";
-import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
+import {GeneratorOptions, PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 import {cloneDeep as _clone, extend as _extend} from "lodash";
 import {clearSchema, dowloadSchema, getGeneratorCodeAction, resetAvailable} from "./sudoku.helper";
 import {DataManagerBase} from "./data-manager.base";
-import {checkAvailables, SudokuLab} from "./lib/logic";
-import {filter, map, takeUntil} from "rxjs/operators";
+import {checkAvailable, SudokuLab} from "./lib/logic";
+import {debounceTime, filter, map, takeUntil} from "rxjs/operators";
 import {NgZone} from "@angular/core";
+import {loadGeneratorUserData, saveGeneratorUserData} from "./lib/userdata";
 
 export class GeneratorDataManagerOptions {
   constructor(o?: Partial<GeneratorDataManagerOptions>) {
@@ -32,6 +33,7 @@ export class GeneratorDataManager extends DataManagerBase {
     super(generator);
     this._options = new GeneratorDataManagerOptions(o);
     this.generator = generator || new GeneratorData();
+    loadGeneratorUserData(this.generator);
 
     // intercetta i comandi
     _sudokuLab.internalCode$.pipe(
@@ -44,6 +46,15 @@ export class GeneratorDataManager extends DataManagerBase {
     this.generator.action$.pipe(
       takeUntil(this._destroy$))
       .subscribe((action) => this.handleAction(action));
+
+    this.generator.sdk$.pipe(
+      takeUntil(this._destroy$),
+      filter(sdk => !!sdk),
+      debounceTime(100))
+      .subscribe((sdk) => {
+        saveGeneratorUserData(sdk);
+        this.changed$.next();
+      });
   }
 
   handleAction(action?: GeneratorAction): void {
@@ -56,11 +67,11 @@ export class GeneratorDataManager extends DataManagerBase {
         if (this._worker) this._worker.postMessage(<GeneratorWorkerArgs>{action, sdk});
         break;
       case GeneratorAction.clear:
-        if (clearSchema(sdk)) this.generator.sdk$.next(sdk);
+        if (clearSchema(sdk, true)) this.generator.sdk$.next(sdk);
         break;
       case GeneratorAction.check:
         resetAvailable(sdk);
-        checkAvailables(sdk);
+        checkAvailable(sdk, { fixedAsValue: true });
         this.generator.sdk$.next(sdk);
         break;
       case GeneratorAction.upload:
@@ -88,6 +99,18 @@ export class GeneratorDataManager extends DataManagerBase {
     if (this.generator.disabled$.value) return;
     updateSchema(this.generator, (sdk) => !!_extend(sdk.options, o))
       .then(() => this.changed$.next());
+  }
+
+  /**
+   * aggiorna le opzioni per il generatore
+   * @param o
+   */
+  updateGeneratorOptions(o?: Partial<GeneratorOptions>) {
+    if (this.generator.disabled$.value) return;
+    const sdk = this.generator.sdk$.value;
+    const generator = _clone(sdk.options?.generator);
+    _extend(generator, o);
+    this.setOptions({ generator });
   }
 
   /**

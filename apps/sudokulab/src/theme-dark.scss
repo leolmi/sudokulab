@@ -184,7 +184,7 @@
       fill: $color-background-board-dark;
     }
     .svg-board-cell {
-      stroke: #ddd;
+      stroke: $color-background-contrast-dark-line;
       &.svg-selection-cell {
         stroke: $color-accent-dark;
       }
@@ -196,6 +196,12 @@
         .svg-board-cell-text {
           fill: white;
         }
+      }
+      &.dynamic {
+        fill: $color-background3-dark;
+      }
+      &.error {
+        fill: rgba($color-error2-dark, .4);
       }
     }
     .svg-board-line {

@@ -2,7 +2,7 @@ import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import { cloneDeep as _clone, minBy as _minBy, values as _values } from 'lodash';
-import { checkAvailables } from '../logic';
+import { checkAvailable } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
 import {getUserCoord} from "../../sudoku.helper";
@@ -12,7 +12,7 @@ export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 const _valorize = (sdk: PlaySudoku, cell: PlaySudokuCell, av: string): PlaySudoku => {
   const tc = sdk.cells[cell.id];
   if (tc) tc.value = av;
-  checkAvailables(sdk);
+  checkAvailable(sdk);
   return sdk;
 }
 

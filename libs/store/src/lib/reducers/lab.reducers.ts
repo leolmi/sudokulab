@@ -1,5 +1,5 @@
 import {
-  checkAvailables,
+  checkAvailable,
   getUserSetting,
   PlaySudoku,
   SchemasOptions,
@@ -46,7 +46,7 @@ const labReducers = createReducer(
   }),
   on(SudokuActions.loadSudoku, (state, { sudoku }) => {
     const psdk = new PlaySudoku({ sudoku });
-    checkAvailables(psdk);
+    checkAvailable(psdk);
     return adapter.upsertOne(psdk, state);
   }),
   on(SudokuActions.updateSudoku, (state, { changes }) => adapter.updateOne({ id: changes._id||0, changes }, state)),

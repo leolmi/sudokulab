@@ -2,7 +2,7 @@ import { Algorithm } from '../Algorithm';
 import { PlaySudoku } from '../PlaySudoku';
 import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import { find as _find, keys as _keys } from 'lodash';
-import { checkAvailables } from '../logic';
+import { checkAvailable } from '../logic';
 import { isValue } from '../../global.helper';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
@@ -43,7 +43,7 @@ export class OneCellForValueAlgorithm extends Algorithm {
       if (cell && !isValue(cell.value)) {
         applied = true;
         cell.value = ocvl;
-        checkAvailables(sdk);
+        checkAvailable(sdk);
       }
     }
 

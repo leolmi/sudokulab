@@ -13,7 +13,7 @@ import {PlaySudoku} from "../PlaySudoku";
 import {AlgorithmResult, AlgorithmResultLine} from "../AlgorithmResult";
 import {Dictionary} from "@ngrx/entity";
 import {getAllGroups, getByVisibles, getGroups, getUserCoord} from "../../sudoku.helper";
-import {checkAvailables} from "../logic";
+import {checkAvailable} from "../logic";
 
 export const CHAINS_ALGORITHM = 'Chains';
 
@@ -100,7 +100,7 @@ export class ChainsAlgorithm extends Algorithm {
                       }
                     });
                     // vanno aggiornate le collezioni altrimenti non è corretta l'esecuzione successiva
-                    if (applied_now) checkAvailables(sdk);
+                    if (applied_now) checkAvailable(sdk);
                   }
                 }
               });

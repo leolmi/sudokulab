@@ -7,10 +7,10 @@ import {
   GENERATOR_DATA,
   GeneratorData,
   GeneratorMode,
-  GeneratorStatus,
+  GeneratorStatus, getFixedCount,
   getGeneratorStatus,
   getMaxNumbers,
-  getMinNumbers,
+  getMinNumbers, getValuesCount,
   hasEndGenerationValue,
   hasXValues,
   SUDOKU_DEFAULT_RANK,
@@ -51,7 +51,7 @@ export class GeneratorOptionsComponent {
     this.minNumbers$ = generator.sdk$.pipe(map(ps => getMinNumbers(ps?.sudoku?.rank)));
     this.maxNumbers$ = generator.sdk$.pipe(map(ps => getMaxNumbers(ps?.sudoku?.rank)));
     this.hasXValues$ = generator.sdk$.pipe(map(ps => hasXValues(ps)));
-    this.fixedCount$ = generator.sdk$.pipe(map(ps => 0));
+    this.fixedCount$ = generator.sdk$.pipe(map(ps => getValuesCount(ps)));
 
     this.availableDimensions = [{
       code: 4,
@@ -103,12 +103,13 @@ export class GeneratorOptionsComponent {
     return value;
   }
 
-  apply(e: any, target: string) {
+  applyOption(e: any, target: string) {
     const value = this._getValue(e);
     //use(this.options$, o => this._gen.updateGeneratorOptions(update(o, {[target]: value})));
+    if (this.generator.manager) this.generator.manager.updateGeneratorOptions({[target]: value});
   }
 
   applySudoku(e: any, target: string) {
-
+    // not implemented
   }
 }

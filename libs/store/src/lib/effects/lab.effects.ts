@@ -14,7 +14,7 @@ import {
   buildSudokuInfo,
   calcFixedCount,
   cellId,
-  checkAvailables,
+  checkAvailable,
   clear,
   getSchemaName,
   getSudokuForUserSettings,
@@ -136,7 +136,7 @@ export class LabEffects {
     switchMap(([a, sdk]) => {
       if (!sdk) return [];
       const changes = clear(sdk);
-      if (!sdk.options.usePencil) checkAvailables(changes, true);
+      if (!sdk.options.usePencil) checkAvailable(changes, { resetBefore: true });
       return [SudokuActions.updateSudoku({ changes })];
     })
   ));
@@ -184,7 +184,7 @@ export class LabEffects {
     switchMap(([a, sdk]) => {
       const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
       if (a.reset) resetAvailable(changes);
-      checkAvailables(changes);
+      checkAvailable(changes);
       return [
         SudokuActions.updateSudoku({ changes }),
         SudokuActions.checkState()];

@@ -3,7 +3,7 @@ import {PlaySudoku} from '../PlaySudoku';
 import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import {Dictionary} from '@ngrx/entity';
 import {extend as _extend, forEach as _forEach, includes as _includes, keys as _keys, reduce as _reduce, remove as _remove} from 'lodash';
-import {checkAvailables, getGroupCouples, getGroupExplicitCouples} from '../logic';
+import {checkAvailable, getGroupCouples, getGroupExplicitCouples} from '../logic';
 import {getUserCoord, getGroups} from '../../sudoku.helper';
 import {AlgorithmType} from '../enums';
 import {debug, isValue} from '../../global.helper';
@@ -99,7 +99,7 @@ export class TwinsAlgorithm extends Algorithm {
       }
     });
 
-    if (applied) checkAvailables(sdk);
+    if (applied) checkAvailable(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

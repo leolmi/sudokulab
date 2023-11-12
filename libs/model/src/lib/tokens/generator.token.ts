@@ -6,17 +6,19 @@ import {SudokuData} from "./sudoku-data";
 import {PlaySudokuOptions} from "../PlaySudokuOptions";
 import {GeneratorDataManager} from "../../generator-data-manager";
 
+export const DEFAULT_GENERATOR_OPITIONS: Partial<PlaySudokuOptions> = {
+  showAvailables: true,
+  fixedValues: true,
+  acceptX: true,
+  characters: { x:'?' },
+  inputProxy: { '?':'x','0':'x' }
+}
+
 export class GeneratorData extends SudokuData<GeneratorAction> {
   constructor() {
     super({
       sudoku: new Sudoku(),
-      options: new PlaySudokuOptions({
-        showAvailables: true,
-        fixedValues: true,
-        acceptX: true,
-        characters: { x:'?' },
-        inputProxy: { '?':'x','0':'x' }
-      })
+      options: new PlaySudokuOptions(DEFAULT_GENERATOR_OPITIONS)
     });
     this.running$ = new BehaviorSubject<boolean>(false);
     this.stopping$ = new BehaviorSubject<boolean>(false);

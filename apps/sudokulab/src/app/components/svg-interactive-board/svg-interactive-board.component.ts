@@ -1,15 +1,17 @@
 import {Component, EventEmitter, HostListener, Input, OnDestroy, Output} from "@angular/core";
 import {
-  BoardWorkerHighlights, clearEvent,
+  BoardWorkerHighlights,
+  clearEvent,
   decodeCellId,
-  handleKeyEvent,
+  handleKeyEvent, isDynamicValue, isValidValue,
   PlaySudoku,
   PlaySudokuCell,
   PlaySudokuOptions,
-  SudokuData, useOn
+  SudokuData,
+  useOn
 } from "@sudokulab/model";
 import {BehaviorSubject, combineLatest, Observable, Subject, Subscription} from "rxjs";
-import {map, switchMap, takeUntil} from "rxjs/operators";
+import {map} from "rxjs/operators";
 import {forEach as _forEach, reduce as _reduce} from 'lodash';
 import {Dictionary} from "@ngrx/entity";
 
@@ -53,6 +55,8 @@ class SvgCell {
     this.textY = this.y + (GEOMETRY.height/2);
     this.fixed = !!c?.fixed;
     this.error = !!c?.error;
+    this.hideValues = isValidValue(c.value);
+    this.dynamic = isDynamicValue(c.value);
     this.values = (c?.pencil||[]).length>0 ? c?.pencil : (o?.showAvailables ? c?.availables||[] : []);
   }
   id: string;
@@ -61,8 +65,10 @@ class SvgCell {
   textX: number;
   textY: number;
   text: string;
+  hideValues: boolean;
   cell: PlaySudokuCell;
   fixed: boolean;
+  dynamic: boolean;
   error: boolean;
   values: string[];
 }
@@ -73,12 +79,15 @@ class SvgCell {
                   [class.pencil]="pencil$|async"
                   viewBox="0 0 90 90">
     <g>
+      <!-- CONTORNO (light) -->
       <rect x="0" y="0" width="90" height="90"
             class="svg-board-line svg-board-background"
             stroke-width="0"></rect>
       <g *ngFor="let cell of cells$|async">
         <rect class="svg-board-cell"
               [attr.stroke-width]="GEOMETRY.lineThinWidth"
+              [class.error]="cell.error"
+              [class.dynamic]="cell.dynamic"
               [class.current]="cell.id === (currentCellId$|async)"
               [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
               [class.highlight-secondary]="((highlights$|async)?.others||{})[cell.id]"
@@ -91,8 +100,10 @@ class SvgCell {
               [class.fixed]="cell.fixed"
               [class.error]="cell.error"
               [class.svg-pulse]="((highlights$|async)?.cellValue||{})[cell.id]"
-              [attr.x]="cell.textX" [attr.y]="cell.textY+.5">{{cell.text}}</text>
-        <ng-container *ngIf="!cell.text">
+              [attr.x]="cell.textX"
+              [attr.y]="cell.textY+.5">{{cell.text}}</text>
+        <ng-container *ngIf="!cell.hideValues">
+          <!-- AVAILABLE VALUES -->
           <g *ngFor="let vl of cell.values">
             <text class="svg-board-cell-values-text"
                   text-anchor="start"
@@ -101,14 +112,17 @@ class SvgCell {
           </g>
         </ng-container>
       </g>
+      <!-- LINNE SPESSE VERTICALI -->
       <rect x="30" y="-1" width="30" height="100"
             class="svg-board-line"
             fill="transparent"
             [attr.stroke-width]="GEOMETRY.lineBigWidth"></rect>
+      <!-- LINNE SPESSE ORIZZONTALI -->
       <rect x="-1" y="30" width="100" height="30"
             class="svg-board-line"
             fill="transparent"
             [attr.stroke-width]="GEOMETRY.lineBigWidth"></rect>
+      <!-- SELEZIONE -->
       <rect class="svg-board-cell svg-selection-cell"
             [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
             [attr.x]="(selection$|async)?.x"

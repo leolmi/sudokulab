@@ -12,7 +12,7 @@ import {AlgorithmType, PlaySudokuCellAlignment} from "../enums";
 import {PlaySudoku} from "../PlaySudoku";
 import {AlgorithmResult, AlgorithmResultLine} from "../AlgorithmResult";
 import {getUserCoord, getValuesAlignment} from "../../sudoku.helper";
-import {checkAvailables} from "../logic";
+import {checkAvailable} from "../logic";
 
 export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
 
@@ -64,7 +64,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
       });
     });
 
-    if (applied) checkAvailables(sdk);
+    if (applied) checkAvailable(sdk);
 
     return new AlgorithmResult({
       algorithm: this.id,

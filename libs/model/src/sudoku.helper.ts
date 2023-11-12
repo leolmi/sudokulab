@@ -1,4 +1,4 @@
-import {isSudoku, Sudoku} from './lib/Sudoku';
+import {getFixedValuesEmpty, isSudoku, Sudoku} from './lib/Sudoku';
 import {checkSudoku, PlaySudoku} from './lib/PlaySudoku';
 import {
   cloneDeep as _clone,
@@ -57,7 +57,7 @@ export const cellId = (column: number, row: number) => `${column}.${row}`;
  * @param gmap
  */
 export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap): boolean => {
-  if (!gmap) return !!cell?.fixed && cell.value !== SUDOKU_DYNAMIC_VALUE;
+  if (!gmap) return !!cell?.fixed && cell.value !== SUDOKU_DYNAMIC_VALUE && cell.value !== SUDOKU_DYNAMIC_VALUE2;
   return !!cell?.fixed && !gmap.cellsX[cell.id];
 }
 
@@ -123,7 +123,7 @@ export const resetAvailable = (sdk: PlaySudoku|EditSudoku|undefined, o?: ResetSc
  * @param sdk
  * @param g
  */
-const _getValuesOnCells = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<number> => {
+export const getValuesOnCells = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySudokuGroup|EditSudokuGroup): Dictionary<number> => {
   const v: Dictionary<number> = {};
   g.cells.forEach(cid => {
     const cell = (sdk?.cells||{})[cid];
@@ -155,7 +155,7 @@ export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefo
     // { v1: cid1..cidN, v2:.... }
     const vMaps = _getGroupCellValuesMaps(sdk, g);
     // calcola il numero di valori uguali per cella
-    g.valuesOnCells = _getValuesOnCells(sdk, g);
+    g.valuesOnCells = getValuesOnCells(sdk, g);
     // elimina da ogni collezione di valori possibili quelli già presenti nel gruppo
     g.cells.forEach(cid => {
       const cell: any = sdk.cells[cid]||{};
@@ -333,6 +333,10 @@ export const isValidValue = (value: string, rank?: number, o?: PlaySudokuOptions
   return (value.length === 1 && (isvalue || (isdynamic && !!o?.acceptX))) || DELETE_VALUES.indexOf(value)>-1;
 }
 
+export const isDynamicValue = (value: string): boolean => {
+  return [SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2].indexOf(value) > -1;
+}
+
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
@@ -374,6 +378,12 @@ export const getFixedCount = (sdk: Sudoku|EditSudoku|undefined): number => {
   } else if (_isString(sdk?.fixed)) {
     counter = calcFixedCount(sdk?.fixed);
   }
+  return counter;
+}
+
+export const getValuesCount = (sdk: PlaySudoku|undefined): number => {
+  let counter = 0;
+  if (!!sdk) _forEach(sdk.cells, (c) => !!c?.value ? counter++ : null);
   return counter;
 }
 
@@ -663,14 +673,15 @@ export const getGeneratorCodeAction = (genCode: string): GeneratorAction|undefin
  * cancella i dati utente dello schema (modifica l'oggetto passato)
  * @param sdk
  */
-export const clearSchema = (sdk: PlaySudoku|Sudoku|undefined): boolean => {
+export const clearSchema = (sdk: PlaySudoku|Sudoku|undefined, alsoFixed = false): boolean => {
   if (!sdk) return false;
   if (isSudoku(sdk)) {
+    if (alsoFixed) (<Sudoku>sdk).fixed = getFixedValuesEmpty(<Sudoku>sdk);
     (<Sudoku>sdk).values = (<Sudoku>sdk).fixed;
     return true;
   } else {
-    const cleared = clear(<PlaySudoku>sdk);
-    clearSchema((<PlaySudoku>sdk).sudoku);
+    const cleared = clear(<PlaySudoku>sdk, alsoFixed);
+    clearSchema((<PlaySudoku>sdk).sudoku, alsoFixed);
     _extend(sdk, cleared);
     return true;
   }

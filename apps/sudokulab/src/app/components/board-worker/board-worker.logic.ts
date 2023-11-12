@@ -5,8 +5,9 @@ import {
   BoardWorkerData,
   BoardWorkerHighlights,
   cellId,
-  checkAvailables,
-  decodeCellId, DEFAULT_MESSAGES,
+  checkAvailable,
+  decodeCellId,
+  DEFAULT_MESSAGES,
   MessageType,
   PlaySudoku,
   resetAvailable,
@@ -24,7 +25,7 @@ import {extend as _extend, isEmpty as _isEmpty, last as _last} from "lodash";
  */
 export const checkSchema = (sdk: PlaySudoku): boolean => {
   resetAvailable(sdk);
-  checkAvailables(sdk);
+  checkAvailable(sdk);
   return true;
 }
 

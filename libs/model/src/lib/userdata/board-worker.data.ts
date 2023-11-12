@@ -14,7 +14,7 @@ import {PlaySudokuCell} from "../PlaySudokuCell";
 const _memory: BoardUserData = new BoardUserData();
 let IS_LOG_WARN_001 = false;
 
-const applyUserData = (sdk: PlaySudoku, data: BoardUserData): void => {
+const _applyUserData = (sdk: PlaySudoku, data: BoardUserData): void => {
   const sdata = (data?.schema||{})[sdk._id];
   if (sdata) {
     sdk.state.valuesCount = sdk.state.fixedCount;
@@ -63,21 +63,21 @@ export const getUserData = (): BoardUserData|undefined => {
 export const loadUserData = (sdk: PlaySudoku): PlaySudoku => {
   const udata = getUserData();
   const csdk = _clone(sdk);
-  if (udata) applyUserData(csdk, udata);
+  if (udata) _applyUserData(csdk, udata);
   return csdk;
 }
 
-const getCellData = (cell: PlaySudokuCell|undefined): CellData|undefined => {
+const _getCellData = (cell: PlaySudokuCell|undefined): CellData|undefined => {
   if (cell?.fixed) return undefined;
   if (cell?.value) return { value: cell?.value };
   if ((cell?.pencil||[]).length>0) return { pencil: cell?.pencil };
   return undefined;
 }
 
-const getSchemaData = (sdk: PlaySudoku): SchemaData => {
+const _getSchemaData = (sdk: PlaySudoku): SchemaData => {
   return {
     cells: _reduce(sdk.cells, (a, c) => {
-      const cdata = getCellData(c);
+      const cdata = _getCellData(c);
       return cdata ? {...a, [c?.id || '']: cdata} : a;
     }, {}),
     options: sdk.options
@@ -88,7 +88,7 @@ const getSchemaData = (sdk: PlaySudoku): SchemaData => {
  * lo schema è vuoto se non trova alcuna valorizzazione delle celle o delle matite
  * @param data
  */
-const isEmptySchema = (data: SchemaData): boolean => {
+const _isEmptySchema = (data: SchemaData): boolean => {
   return !_find(data.cells, (c) => !!c);
 }
 
@@ -99,8 +99,8 @@ const isEmptySchema = (data: SchemaData): boolean => {
 export const saveUserData = (sdk: PlaySudoku): BoardUserData => {
   const udata = getUserData();
   const data = new BoardUserData(udata);
-  const sdata = getSchemaData(sdk);
-  if (!isEmptySchema(sdata)) {
+  const sdata = _getSchemaData(sdk);
+  if (!_isEmptySchema(sdata)) {
     data.schema[sdk._id] = sdata;
   } else {
     delete data.schema[sdk._id];

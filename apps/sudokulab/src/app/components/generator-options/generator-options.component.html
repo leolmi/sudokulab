@@ -21,7 +21,7 @@
       <mat-label>Symmetry</mat-label>
       <mat-select [value]="sdk.options.generator.symmetry"
                   [disabled]="generator.running$|async"
-                  (valueChange)="apply($event, 'symmetry')">
+                  (valueChange)="applyOption($event, 'symmetry')">
         <mat-option *ngFor="let sym of availableSymmetries" [value]="sym.code">
           {{sym.description}}
         </mat-option>
@@ -32,7 +32,7 @@
 <!--      <mat-label>Valorization mode</mat-label>-->
 <!--      <mat-select [value]="opt.valorizationMode"-->
 <!--                  [disabled]="generator.running$|async"-->
-<!--                  (valueChange)="apply($event, 'valorizationMode')">-->
+<!--                  (valueChange)="applyOption($event, 'valorizationMode')">-->
 <!--        <mat-option *ngFor="let vlm of availableValorizationModes" [value]="vlm.code">-->
 <!--          {{vlm.description}}-->
 <!--        </mat-option>-->
@@ -49,7 +49,7 @@
     [thumbLabel]="true"
     [tickInterval]="1"
     [value]="sdk.options.generator.fixedCount"
-    (valueChange)="apply($event, 'fixedCount')"
+    (valueChange)="applyOption($event, 'fixedCount')"
     aria-labelledby="example-name-label">
   </mat-slider>
   <!-- DIFFICULTY RANGE -->
@@ -60,7 +60,7 @@
       <mat-select [value]="sdk.options.generator.minDiff"
                   [disabled]="generator.running$|async"
                   placeholder="undefined"
-                  (valueChange)="apply($event, 'minDiff')">
+                  (valueChange)="applyOption($event, 'minDiff')">
         <mat-option *ngFor="let dif of availableDifficulty" [value]="dif.code">
           {{dif.description}}
         </mat-option>
@@ -72,7 +72,7 @@
       <mat-select [value]="sdk.options.generator.maxDiff"
                   [disabled]="generator.running$|async"
                   placeholder="undefined"
-                  (valueChange)="apply($event, 'maxDiff')">
+                  (valueChange)="applyOption($event, 'maxDiff')">
         <mat-option *ngFor="let dif of availableDifficulty" [value]="dif.code">
           {{dif.description}}
         </mat-option>
@@ -84,7 +84,7 @@
                     *ngIf="(status$|async)?.mode!==MODE.single"
                     [checked]="sdk.options.generator.excludeTryAlgorithm"
                     [disabled]="generator.running$|async"
-                    (change)="apply($event, 'excludeTryAlgorithm')">Exclude try algorithm</mat-slide-toggle>
+                    (change)="applyOption($event, 'excludeTryAlgorithm')">Exclude try algorithm</mat-slide-toggle>
   <!-- STOP -->
   <div fxLayout="row" fxLayoutAlign="start center"
        *ngIf="(status$|async)?.mode!==MODE.single">
@@ -93,7 +93,7 @@
       <mat-label>Stop mode</mat-label>
       <mat-select [value]="sdk.options.generator.generationEndMode"
                   [disabled]="generator.running$|async"
-                  (valueChange)="apply($event, 'generationEndMode')">
+                  (valueChange)="applyOption($event, 'generationEndMode')">
         <mat-option *ngFor="let stm of availableStopModes" [value]="stm.code">
           {{stm.description}}
         </mat-option>
@@ -106,8 +106,8 @@
       <input matInput
              type="number"
              [disabled]="generator.running$|async"
-             [value]="sdk.options.generator.generationEndValue"
-             (input)="apply($event, 'generationEndValue')">
+             [value]="(sdk.options.generator.generationEndValue||1)+''"
+             (input)="applyOption($event, 'generationEndValue')">
     </mat-form-field>
   </div>
 
@@ -119,7 +119,7 @@
 <!--             [disabled]="generator.running$|async"-->
 <!--             type="number"-->
 <!--             [value]="opt.maxSplitSchema.toString()"-->
-<!--             (input)="apply($event, 'maxSplitSchema')">-->
+<!--             (input)="applyOption($event, 'maxSplitSchema')">-->
 <!--    </mat-form-field>-->
 <!--    <div class="space"></div>-->
 <!--    <mat-form-field appearance="fill" fxFlex>-->
@@ -128,7 +128,7 @@
 <!--             [disabled]="generator.running$|async"-->
 <!--             type="number"-->
 <!--             [value]="opt.maxSchemaCycles.toString()"-->
-<!--             (input)="apply($event, 'maxSchemaCycles')">-->
+<!--             (input)="applyOption($event, 'maxSchemaCycles')">-->
 <!--    </mat-form-field>-->
 <!--  </div>-->
 <!--  <div fxLayout="row" fxLayoutAlign="start center">-->
@@ -138,7 +138,7 @@
 <!--             [disabled]="generator.running$|async"-->
 <!--             type="number"-->
 <!--             [value]="opt.maxValueCycles.toString()"-->
-<!--             (input)="apply($event, 'maxValueCycles')">-->
+<!--             (input)="applyOption($event, 'maxValueCycles')">-->
 <!--    </mat-form-field>-->
 <!--    <div class="space"></div>-->
 <!--    <div fxFlex></div>-->

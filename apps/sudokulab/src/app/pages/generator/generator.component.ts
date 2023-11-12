@@ -14,7 +14,7 @@ import {
   GeneratorData,
   GeneratorDataManager,
   GeneratorWorkingInfo,
-  getBoardStyle,
+  getBoardStyle, isEmptySchema,
   SudokuLab
 } from '@sudokulab/model';
 import {MatDialog} from '@angular/material/dialog';
@@ -68,7 +68,7 @@ export class GeneratorComponent extends DestroyComponent implements OnDestroy, A
         [DEFAULT_GENERATOR_PAGE_STATUS.gen_running]: this.generator.running$.value,
         [DEFAULT_GENERATOR_PAGE_STATUS.gen_not_running]: !this.generator.running$.value,
         [DEFAULT_GENERATOR_PAGE_STATUS.has_no_schemas]: (this.generator.schemas$.value || []).length < 1,
-        [DEFAULT_GENERATOR_PAGE_STATUS.has_no_gen_schema]: !this.generator.schema$.value,
+        [DEFAULT_GENERATOR_PAGE_STATUS.has_no_gen_schema]: isEmptySchema(this.generator.sdk$.value),
       }
     }
   }

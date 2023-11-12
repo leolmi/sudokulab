@@ -5,7 +5,7 @@ import {catchError, concatMap, debounceTime, filter, map, switchMap, withLatestF
 import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {
-  checkAvailables,
+  checkAvailable,
   debug,
   getHash,
   GoogleCredentials,
@@ -88,7 +88,7 @@ export class SudokuEffects {
     switchMap(() => this._http.get<Sudoku[]>('/api/sudoku/list').pipe(
       map(schemas => schemas.map(sudoku => {
         const ps = new PlaySudoku({ sudoku });
-        checkAvailables(ps);
+        checkAvailable(ps);
         return ps;
       })),
       switchMap((schemas) => [
