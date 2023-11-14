@@ -58,5 +58,6 @@ export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
 
 export const DEFAULT_MESSAGES = {
   todo: new SudokuMessage({message: 'Not implemented yet', type: MessageType.warning}),
-  solved: new SudokuMessage({message: 'Sudoku successfully solved!', type: MessageType.success})
+  solved: new SudokuMessage({message: 'Sudoku successfully solved!', type: MessageType.success}),
+  ended: new SudokuMessage({message: 'Generation ended!', type: MessageType.success})
 }

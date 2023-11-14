@@ -4,6 +4,7 @@ import {
   cloneDeep as _clone,
   extend as _extend,
   find as _find,
+  filter as _filter,
   forEach as _forEach,
   includes as _includes,
   intersection as _intersection,
@@ -286,17 +287,37 @@ export const traverseSchema = (sdk: PlaySudoku|EditSudoku|undefined,
   }
 }
 
-
+/**
+ * Restituisce vero se lo schema è stato risolto senza errori
+ * @param sdk
+ */
 export const isSolved = (sdk: PlaySudoku): boolean => {
   return !sdk.state.error && sdk.state.complete;
 }
 
+/**
+ * restituisce come unica stringa i valori dello schema (tutti: fissi e non)
+ * @param sdk
+ */
 export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
   let values = '';
   traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || SUDOKU_EMPTY_VALUE}`)
   return values;
 }
 
+/**
+ * restituisce l'elenco delle celle dinamiche
+ * @param sdk
+ */
+export const getDynamicCells = (sdk: PlaySudoku): PlaySudokuCell[] => {
+  return <PlaySudokuCell[]>_filter(sdk.cells||[], (c) => !!c && isDynamicValue(c.value||''));
+}
+
+/**
+ * carica i valori presenti nella stringa se la lunghezza è compatibile con il rank dello schema
+ * @param sdk
+ * @param values
+ */
 export const loadValues = (sdk: PlaySudoku|EditSudoku|undefined, values: string): void => {
   if (!sdk || (values || '').length < getRank(sdk)) return;
   _forEach(sdk.cells, c => {
@@ -306,6 +327,11 @@ export const loadValues = (sdk: PlaySudoku|EditSudoku|undefined, values: string)
   applySudokuRules(sdk, true);
 }
 
+/**
+ * carica lo schema
+ * @param tsdk
+ * @param sdk
+ */
 export const loadSchema = (tsdk: PlaySudoku, sdk?: Sudoku): void => {
   if (!sdk) return;
   tsdk.sudoku = sdk;
@@ -314,17 +340,36 @@ export const loadSchema = (tsdk: PlaySudoku, sdk?: Sudoku): void => {
   checkSudoku(tsdk);
 }
 
-export const getAvailables = (rank: number|undefined) =>
+/**
+ * Restituisce l'array dei valori (stringa) possibili secondo il rank dello schema passato
+ * @param rank
+ */
+export const getAvailables = (rank?: number): string[] =>
   Array(rank || SUDOKU_DEFAULT_RANK).fill(0).map((x, i) => `${(i+1)}`);
 
-export const getDimension = (rank: number|undefined) =>
+/**
+ * Restituisce l'array dei valori (numerici) possibili secondo il rank dello schema passato
+ * @param rank
+ */
+export const getDimension = (rank?: number): number[] =>
   Array(rank || SUDOKU_DEFAULT_RANK).fill(0).map((x, i) => i)
 
+/**
+ * Restituisce il valore inserito mappato sul proxy, se esiste
+ * @param value
+ * @param o
+ */
 export const getRealUserValue = (value: string, o?: PlaySudokuOptions) => {
   const mvalue = (value || '').toLowerCase();
   return (o?.inputProxy||{})[mvalue]||mvalue;
 }
 
+/**
+ * Restituisce vero se il valore è valido per lo schema
+ * @param value
+ * @param rank
+ * @param o
+ */
 export const isValidValue = (value: string, rank?: number, o?: PlaySudokuOptions): boolean => {
   value = getRealUserValue(value, o);
   const available_pos = AVAILABLE_VALUES.indexOf(value);
@@ -333,10 +378,19 @@ export const isValidValue = (value: string, rank?: number, o?: PlaySudokuOptions
   return (value.length === 1 && (isvalue || (isdynamic && !!o?.acceptX))) || DELETE_VALUES.indexOf(value)>-1;
 }
 
+/**
+ * Restituisce vero se il valore rappresenta una cella dinamica
+ * @param value
+ */
 export const isDynamicValue = (value: string): boolean => {
   return [SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2].indexOf(value) > -1;
 }
 
+/**
+ * Restituisce vero se il valore è valido per lo schema del generatore
+ * @param sch
+ * @param value
+ */
 export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string): boolean => {
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
@@ -344,6 +398,11 @@ export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string):
   return (value.length === 1 && isvalue) || [...DELETE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2].indexOf(value) > -1;
 }
 
+/**
+ * Alterna un valore nell'elenco di quelli possibili
+ * @param vls
+ * @param value
+ */
 export const toggleValue = (vls: string[], value: string): string[] => {
   const values = _clone(vls);
   const pos = values.indexOf(value);
