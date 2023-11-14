@@ -310,7 +310,7 @@ export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
  * @param sdk
  */
 export const getDynamicCells = (sdk: PlaySudoku): PlaySudokuCell[] => {
-  return <PlaySudokuCell[]>_filter(sdk.cells||[], (c) => !!c && isDynamicValue(c.value||''));
+  return <PlaySudokuCell[]>_filter(sdk.cells||[], (c: PlaySudokuCell|undefined) => !!c && isDynamicValue(c?.value||''));
 }
 
 /**
