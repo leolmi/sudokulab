@@ -11,30 +11,13 @@ import {PlaySudoku} from "./lib/PlaySudoku";
  * valida lo status del generatore
  * @param status
  */
-export const checkGeneratorStatus = (status: GeneratorStatus): void => {
-  if (status.total < status.fixed + status.dynamics) status.total = status.fixed + status.dynamics;
+const _checkGeneratorStatus = (status: GeneratorStatus): void => {
+  const values = (status.fixed + status.dynamics);
+  if (status.total < values) status.total = values;
   if (status.total < 10) status.total = 10;
-  status.generated = status.total - (status.fixed + status.dynamics);
+  status.generated = status.total - values;
 }
 
-/**
- * restituisce lo status del generatore
- * @param sdk
- */
-export const getGeneratorStatus = (sdk: PlaySudoku): GeneratorStatus => {
-  const status: GeneratorStatus = new GeneratorStatus({total: sdk.options.generator.fixedCount});
-  _forEach(sdk.cells, (c) => {
-    if (c?.value === SUDOKU_DYNAMIC_VALUE || c?.value === SUDOKU_DYNAMIC_VALUE2) {
-      status.dynamics++;
-    } else if (isValidValue(c?.value || '')) {
-      status.fixed++;
-    }
-  });
-
-  checkGeneratorStatus(status);
-  status.mode = getGenerationMode(status);
-  return status;
-}
 
 /**
  * Restituisce la modalità del generatore:
@@ -47,7 +30,7 @@ export const getGeneratorStatus = (sdk: PlaySudoku): GeneratorStatus => {
  * - **unknown**: non è possibile determinare la modalità di generazione degli schemi;
  * @param status
  */
-export const getGenerationMode = (status: GeneratorStatus): GeneratorMode => {
+const _getGenerationMode = (status: GeneratorStatus): GeneratorMode => {
   // **single**: singolo schema, non richiede operazioni di generazione
   // ma solo puro calcolo risolutivo poicé ha solo nomeri fissi
   if (status.total === status.fixed) return GeneratorMode.single;
@@ -66,7 +49,27 @@ export const getGenerationMode = (status: GeneratorStatus): GeneratorMode => {
   return GeneratorMode.unknown;
 }
 
-const getFixedValues = (sdk: EditSudoku|PlaySudoku, allowX = false): string => {
+/**
+ * restituisce lo status del generatore
+ * @param sdk
+ */
+export const getGeneratorStatus = (sdk: PlaySudoku): GeneratorStatus => {
+  const status: GeneratorStatus = new GeneratorStatus({total: sdk.options.generator.fixedCount});
+  _forEach(sdk.cells, (c) => {
+    if (c?.value === SUDOKU_DYNAMIC_VALUE || c?.value === SUDOKU_DYNAMIC_VALUE2) {
+      status.dynamics++;
+    } else if (isValidValue(c?.value || '')) {
+      status.fixed++;
+    }
+  });
+
+  _checkGeneratorStatus(status);
+  status.mode = _getGenerationMode(status);
+  return status;
+}
+
+
+const _getFixedValues = (sdk: EditSudoku|PlaySudoku, allowX = false): string => {
   let fixed = '';
   traverseSchema(sdk, (cid) => {
     const raw_value = sdk.cells[cid]?.value || '';
@@ -84,7 +87,7 @@ const getFixedValues = (sdk: EditSudoku|PlaySudoku, allowX = false): string => {
 export const getSudoku = (sdk: EditSudoku|PlaySudoku): Sudoku => {
   return new Sudoku({
     rank: getRank(sdk),
-    fixed: getFixedValues(sdk)
+    fixed: _getFixedValues(sdk)
   });
 }
 

@@ -74,7 +74,7 @@ export class GeneratorDataManager extends DataManagerBase {
         if (clearSchema(sdk, true)) this.generator.sdk$.next(sdk);
         break;
       case GeneratorAction.check:
-        resetAvailable(sdk);
+        resetAvailable(sdk, { onlyRealFixed: true });
         checkAvailable(sdk, { fixedAsValue: true });
         this.generator.sdk$.next(sdk);
         break;

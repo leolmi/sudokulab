@@ -9,6 +9,7 @@ import {
   includes as _includes,
   intersection as _intersection,
   isArray as _isArray,
+  isBoolean as _isBoolean,
   isFunction as _isFunction,
   isNumber as _isNumber,
   isObject as _isObject,
@@ -39,7 +40,7 @@ import {PlaySudokuGroup} from './lib/PlaySudokuGroup';
 import {SudokuInfo} from './lib/SudokuInfo';
 import {Dictionary} from '@ngrx/entity';
 import {SudokuSolution} from './lib/SudokuSolution';
-import {calcFixedCount, getHash, isValue} from './global.helper';
+import {calcFixedCount, getHash, isDynamic, isValue} from './global.helper';
 import {ElementRef} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {PlaySudokuCell} from "./lib/PlaySudokuCell";
@@ -146,10 +147,8 @@ export const getValuesOnCells = (sdk: PlaySudoku|EditSudoku|undefined, g: PlaySu
  */
 export const applySudokuRules = (sdk: PlaySudoku|EditSudoku|undefined, resetBefore: boolean|ResetSchemaOptions = false) => {
   if (!sdk) return;
-  if (resetBefore) {
-    const o: ResetSchemaOptions = _isObject(resetBefore) ? resetBefore : { onlyRealFixed: true };
-    resetAvailable(sdk, o);
-  }
+  const o = _isBoolean(resetBefore) ? <ResetSchemaOptions>{ resetBefore } : <ResetSchemaOptions>resetBefore||{};
+  if (!!o.resetBefore) resetAvailable(sdk, o);
   _forEach(sdk.groups || {}, (g) => {
     if (!g) return;
     // vettore valori di gruppo con tutti i valori reali (quelli numerici)
@@ -310,7 +309,7 @@ export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
  * @param sdk
  */
 export const getDynamicCells = (sdk: PlaySudoku): PlaySudokuCell[] => {
-  return <PlaySudokuCell[]>_filter(sdk.cells||[], (c: PlaySudokuCell|undefined) => !!c && isDynamicValue(c?.value||''));
+  return <PlaySudokuCell[]>_filter(sdk.cells||[], (c: PlaySudokuCell|undefined) => !!c && isDynamic(c?.value||''));
 }
 
 /**
@@ -374,16 +373,7 @@ export const isValidValue = (value: string, rank?: number, o?: PlaySudokuOptions
   value = getRealUserValue(value, o);
   const available_pos = AVAILABLE_VALUES.indexOf(value);
   const isvalue = available_pos > -1 && available_pos < (rank || SUDOKU_DEFAULT_RANK);
-  const isdynamic = value === SUDOKU_DYNAMIC_VALUE;
-  return (value.length === 1 && (isvalue || (isdynamic && !!o?.acceptX))) || DELETE_VALUES.indexOf(value)>-1;
-}
-
-/**
- * Restituisce vero se il valore rappresenta una cella dinamica
- * @param value
- */
-export const isDynamicValue = (value: string): boolean => {
-  return [SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2].indexOf(value) > -1;
+  return (value.length === 1 && (isvalue || (isDynamic(value) && !!o?.acceptX))) || DELETE_VALUES.indexOf(value)>-1;
 }
 
 /**
@@ -428,6 +418,12 @@ export const geEditFixedCount = (sdk: EditSudoku|undefined): number => {
   let counter = 0;
   _forEach(sdk?.cells||{}, c => (c?.fixed) ? counter++ : null);
   return counter;
+}
+
+export const getPlayFixedValues = (sdk: PlaySudoku|undefined): string => {
+  let fixed = '';
+  if (sdk) _forEach(sdk?.cells||{}, c => fixed = `${fixed||''}${c?.fixed ? (c?.value||'') : SUDOKU_EMPTY_VALUE}`);
+  return fixed;
 }
 
 export const getFixedCount = (sdk: Sudoku|EditSudoku|undefined): number => {

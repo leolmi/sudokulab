@@ -5,7 +5,7 @@ import {
   GeneratorStatus,
   GeneratorWorkerArgs,
   GeneratorWorkerData,
-  getGeneratorStatus,
+  getGeneratorStatus, getPlayFixedValues,
   getValues,
   MessageType,
   PlaySudoku,
@@ -58,7 +58,10 @@ const _stopProcess = () => {
 
 const isStopping = () => STATE.status.stopping;
 
-const _checkState = (): boolean => {
+/**
+ * verifica lo stato di running/stopping
+ */
+const _checkRunningState = (): boolean => {
   if (STATE.status.stopping && STATE.status.running) {
     STATE.status.running = false;
   }
@@ -76,7 +79,7 @@ const _checkState = (): boolean => {
 const _testProcessStep = (onend: () => void, duration = 10, i = 0) => {
   setTimeout(() => {
     if (i < (duration * 2)) {
-      _checkState();
+      _checkRunningState();
       if (STATE.status.running) {
         _testProcessStep(onend, duration, ++i);
       } else {
@@ -108,7 +111,7 @@ const _testProcess = () => {
 const _checkValMap = () => {
   if (!STATE.valMap) {
     const start = performance.now();
-    STATE.valMap = buildValMap(_checkState, STATE.activeSdk);
+    STATE.valMap = buildValMap(_checkRunningState, STATE.activeSdk);
     console.log(`valorization map builded after ${(performance.now()-start).toFixed(0)} mls, with ${(STATE.valMap?.valuesForCells||[]).length} steps`);
   }
 }
@@ -163,14 +166,13 @@ const _publishSchema = () => {
  */
 const _solve = () => {
   if (!STATE.activeSdk) return;
+  const values = getPlayFixedValues(STATE.activeSdk);
+  if (values) STATE.cache[values] = true;
   const solver = new Solver(STATE.activeSdk);
   const result = solver.solve();
   if (result.unique) {
     _extend(STATE.activeSdk, result.unique.sdk);
     _publishSchema();
-  } else {
-    const values = getValues(STATE.activeSdk);
-    STATE.cache[values] = true;
   }
 }
 
@@ -204,7 +206,7 @@ const _checkNextCycle = (): boolean => {
 }
 
 const _checkStartCycle = () => {
-  _checkState();
+  _checkRunningState();
   if (isStopping()) return _checkEnd();
   switch (STATE.status.mode) {
     case GeneratorMode.single:

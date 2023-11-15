@@ -17,7 +17,7 @@ import {
   SDK_PREFIX_DEBUG,
   SUDOKU_COMPACT_WIDTH_1,
   SUDOKU_COMPACT_WIDTH_2,
-  SUDOKU_DYNAMIC_VALUE,
+  SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2,
   SUDOKU_EMPTY_VALUE,
   SUDOKULAB_DARK_THEME,
   SUDOKULAB_DEBUG_KEY,
@@ -156,9 +156,15 @@ export const isDebugMode = (level?: string) => {
 };
 export const debug = (handler: () => any, level?: string): void => isDebugMode(level) ? handler() : null;
 
+/**
+ * Restituisce vero se il valore rappresenta una cella dinamica
+ * @param v
+ */
+export const isDynamic = (v: string) => v === SUDOKU_DYNAMIC_VALUE || v === SUDOKU_DYNAMIC_VALUE2;
+
 export const isValue = (v?: string, acceptX = false): boolean => {
   const effv = (v || '').trim();
-  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || effv !== SUDOKU_DYNAMIC_VALUE);
+  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || !isDynamic(effv));
 }
 
 export const calcFixedCount = (fixed?: string): number =>

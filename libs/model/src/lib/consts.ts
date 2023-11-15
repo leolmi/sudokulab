@@ -8,6 +8,7 @@ export const SUDOKU_DYNAMIC_VALUE2 = '?';
 export const SUDOKU_EMPTY_VALUE = '0';
 export const SUDOKU_DEFAULT_RANK = 9;
 export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
+export const SUDOKU_DEFAULT_MAX_SCHEMA_COUNT = 100;
 
 export const SUDOKULAB_LIGHT_THEME = 'light';
 export const SUDOKULAB_DARK_THEME = 'dark';

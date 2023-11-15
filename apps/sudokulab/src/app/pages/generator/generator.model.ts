@@ -20,7 +20,7 @@ export class ValMap {
   }
 
   get isDone(): boolean {
-    return this.cycle >= this.valuesForCells.length;
+    return this.valuesForCells.length > 0 && this.cycle >= this.valuesForCells.length;
   }
 
   complete(failed = false) {

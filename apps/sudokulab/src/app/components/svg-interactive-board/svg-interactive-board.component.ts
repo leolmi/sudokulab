@@ -3,7 +3,9 @@ import {
   BoardWorkerHighlights,
   clearEvent,
   decodeCellId,
-  handleKeyEvent, isDynamicValue, isValidValue,
+  handleKeyEvent,
+  isDynamic,
+  isValidValue,
   PlaySudoku,
   PlaySudokuCell,
   PlaySudokuOptions,
@@ -56,7 +58,7 @@ class SvgCell {
     this.fixed = !!c?.fixed;
     this.error = !!c?.error;
     this.hideValues = isValidValue(c.value);
-    this.dynamic = isDynamicValue(c.value);
+    this.dynamic = isDynamic(c.value);
     this.values = (c?.pencil||[]).length>0 ? c?.pencil : (o?.showAvailables ? c?.availables||[] : []);
   }
   id: string;
