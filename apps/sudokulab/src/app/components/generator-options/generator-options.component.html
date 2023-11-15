@@ -131,16 +131,17 @@
 <!--             (input)="applyOption($event, 'maxSchemaCycles')">-->
 <!--    </mat-form-field>-->
 <!--  </div>-->
-<!--  <div fxLayout="row" fxLayoutAlign="start center">-->
-<!--    <mat-form-field appearance="fill" fxFlex>-->
-<!--      <mat-label>Max value cycless</mat-label>-->
-<!--      <input matInput-->
-<!--             [disabled]="generator.running$|async"-->
-<!--             type="number"-->
-<!--             [value]="opt.maxValueCycles.toString()"-->
-<!--             (input)="applyOption($event, 'maxValueCycles')">-->
-<!--    </mat-form-field>-->
-<!--    <div class="space"></div>-->
-<!--    <div fxFlex></div>-->
-<!--  </div>-->
+  <div fxLayout="row" fxLayoutAlign="start center"
+       *ngIf="((status$|async)?.dynamics||0)>0">
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Max value cycles</mat-label>
+      <input matInput
+             [disabled]="generator.running$|async"
+             type="number"
+             [value]="sdk.options.generator.maxValCycles.toString()"
+             (input)="applyOption($event, 'maxValCycles')">
+    </mat-form-field>
+    <div class="space"></div>
+    <div fxFlex></div>
+  </div>
 </div>

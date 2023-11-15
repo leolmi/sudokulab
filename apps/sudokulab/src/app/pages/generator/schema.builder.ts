@@ -17,6 +17,7 @@ export interface SchemaGenerationResult {
 export interface SchemaGenerationOptions {
   cache?: any;
   maxCyclesCount?: number;
+  check?: () => boolean;
 }
 
 /**
@@ -148,7 +149,9 @@ export const generateSchema = (sdk?: PlaySudoku, options?: SchemaGenerationOptio
       }
       // il ciclo continua fino a che non viene creato uno schema che non è in cache
       // e non sono eseguiti più cicli di quelli definiti nelle opzioni
-    } while (!res.sdk && cycle < (options?.maxCyclesCount || SUDOKU_DEFAULT_MAX_SCHEMA_COUNT));
+    } while ((!options?.check || options.check()) &&
+            !res.sdk &&
+            cycle < (options?.maxCyclesCount || SUDOKU_DEFAULT_MAX_SCHEMA_COUNT));
   }
   return res;
 }

@@ -71,7 +71,8 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   filter: blur(4px);
 }
 
-.schemalab-tool {
+.schemalab-tool,
+.generator-tool {
   padding: 0 10px;
 }
 
@@ -128,7 +129,8 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 
   .tools {
-    .schemalab-tool {
+    .schemalab-tool,
+    .generator-tool {
       padding: 0;
     }
   }

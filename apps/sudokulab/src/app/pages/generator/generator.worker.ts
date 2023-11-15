@@ -1,12 +1,13 @@
 import {
   DEFAULT_MESSAGES,
+  EditSudokuEndGenerationMode,
   GeneratorAction,
   GeneratorMode,
   GeneratorStatus,
   GeneratorWorkerArgs,
   GeneratorWorkerData,
-  getGeneratorStatus, getPlayFixedValues,
-  getValues,
+  getGeneratorStatus,
+  getPlayFixedValues,
   MessageType,
   PlaySudoku,
   SDK_DEFAULT_GENERATOR_TIMEOUT,
@@ -14,10 +15,9 @@ import {
   SudokuMessage
 } from "@sudokulab/model";
 import {cloneDeep as _clone, extend as _extend, keys as _keys} from 'lodash';
-import {buildValMap} from "./valorizations-map.builder";
+import {buildValMap, nextValMap} from "./valorizations-map.builder";
 import {GeneratorWorkerState} from "./generator.model";
 import {generateSchema} from "./schema.builder";
-
 
 
 const STATE: GeneratorWorkerState = {
@@ -29,6 +29,7 @@ const STATE: GeneratorWorkerState = {
   valMap: undefined,
   schemaCache: {},
   noSchema: false,
+  start: 0,
 }
 
 const _postStringMessage = (message: string, type = MessageType.warning) => {
@@ -37,12 +38,13 @@ const _postStringMessage = (message: string, type = MessageType.warning) => {
 
 const _clearState = () => {
   STATE.status.stopping = false;
-  STATE.status.generated = 0;
   STATE.cache = {};
   STATE.schemaCache = {};
   STATE.noSchema = false;
   STATE.valMap = undefined;
   STATE.activeSdk = undefined;
+  STATE.start = Date.now();
+  STATE.status.generatedSchemas = [];
 }
 
 const _startProcess = () => {
@@ -110,9 +112,9 @@ const _testProcess = () => {
  */
 const _checkValMap = () => {
   if (!STATE.valMap) {
-    const start = performance.now();
-    STATE.valMap = buildValMap(_checkRunningState, STATE.activeSdk);
-    console.log(`valorization map builded after ${(performance.now()-start).toFixed(0)} mls, with ${(STATE.valMap?.valuesForCells||[]).length} steps`);
+    STATE.valMap = buildValMap(STATE.activeSdk, _checkRunningState);
+  } else {
+    nextValMap(STATE.valMap, STATE.activeSdk, _checkRunningState);
   }
 }
 
@@ -120,8 +122,8 @@ const _checkValMap = () => {
  * se può valorizza le celle dinamiche altrimenti restituisce false
  */
 const _applyFixedValues = (): boolean => {
-  if (!STATE.valMap?.isComplete || STATE.valMap.isDone) return false;
-  const values = STATE.valMap.valuesForCells[STATE.valMap.cycle];
+  if (STATE.valMap?.isDone) return false;
+  const values = STATE.valMap?.getValuesForCells()||{};
   _keys(values).forEach(cid => {
     const cell = (STATE.activeSdk?.cells||{})[cid];
     if (cell) {
@@ -142,7 +144,10 @@ const _checkSchemas = (): boolean => {
   if (!STATE.activeSdk || STATE.valMap?.isDone) {
     STATE.valMap = undefined;
     // se non ci sono più schemi generabili esce > FALSE
-    const result = generateSchema(STATE.sdk, { cache: STATE.schemaCache });
+    const result = generateSchema(STATE.sdk, {
+      cache: STATE.schemaCache,
+      check: _checkRunningState
+    });
     if (!result?.sdk) return false;
     STATE.activeSdk = result.sdk;
   }
@@ -152,11 +157,12 @@ const _checkSchemas = (): boolean => {
 
 
 const _publishSchema = () => {
-  STATE.status.generated++;
+  const schema = _clone(STATE.activeSdk?.sudoku);
+  if (schema) STATE.status.generatedSchemas?.push(schema);
   _postMessage({
     status: {
       ...STATE.status,
-      generatedSchema: _clone(STATE.activeSdk?.sudoku)
+      generatedSchema: schema
     }
   })
 }
@@ -165,7 +171,7 @@ const _publishSchema = () => {
  * risolve lo schema attivo
  */
 const _solve = () => {
-  if (!STATE.activeSdk) return;
+  if (!STATE.activeSdk || !_checkRunningState()) return;
   const values = getPlayFixedValues(STATE.activeSdk);
   if (values) STATE.cache[values] = true;
   const solver = new Solver(STATE.activeSdk);
@@ -184,20 +190,31 @@ const _buildActiveSchema = () => {
 }
 
 const _checkNextCycle = (): boolean => {
+  // verifica lo stop utente
+  if (!_checkRunningState()) return false;
+
+  // verifica le impostazioni di stop
+  switch(STATE.sdk.options.generator.generationEndMode) {
+    case EditSudokuEndGenerationMode.afterN:
+      if ((STATE.status.generatedSchemas?.length||0)>=STATE.sdk.options.generator.generationEndValue) return false;
+      break;
+    case EditSudokuEndGenerationMode.afterTime:
+      const now = Date.now();
+      if ((now - STATE.start) > (STATE.sdk.options.generator.generationEndValue*1000)) return false;
+      break;
+    case EditSudokuEndGenerationMode.manual:
+    default:
+      break;
+  }
+  // verifica lo stato del generatore
   switch (STATE.status.mode) {
     case GeneratorMode.fixed:
       // valuta se esistono possibili valorizzazioni
-      if (STATE.valMap && !STATE.valMap.isDone) {
-        STATE.valMap.cycle++;
-        return true;
-      }
+      if (STATE.valMap && !STATE.valMap.isDone) return true;
       break;
     case GeneratorMode.multiple:
       // valuta se esistono possibili valorizzazioni
-      if (STATE.valMap && !STATE.valMap.isDone) {
-        STATE.valMap.cycle++;
-        return true;
-      }
+      if (STATE.valMap && !STATE.valMap.isDone) return true;
       // valuta se è possibile creare schemi
       if (!STATE.noSchema) return true;
       break;
@@ -206,33 +223,38 @@ const _checkNextCycle = (): boolean => {
 }
 
 const _checkStartCycle = () => {
-  _checkRunningState();
-  if (isStopping()) return _checkEnd();
-  switch (STATE.status.mode) {
-    case GeneratorMode.single:
-      _buildActiveSchema();
-      _solve();
-      break;
-    case GeneratorMode.fixed:
-      _buildActiveSchema();
-      _checkValMap();
-      if (_applyFixedValues()) _solve();
-      break;
-    case GeneratorMode.multiple:
-      if (!_checkSchemas()) return _checkEnd();
-      _checkValMap();
-      if (_applyFixedValues()) _solve();
-      break;
-  }
-  _checkEnd();
+  // il setTimeout permette di leggere eventuali messaggi utente
+  // inviati durante il processo di generazione
+  setTimeout(() => {
+    _checkRunningState();
+    if (isStopping()) return _checkEnd();
+    switch (STATE.status.mode) {
+      case GeneratorMode.single:
+        _buildActiveSchema();
+        _solve();
+        break;
+      case GeneratorMode.fixed:
+        _buildActiveSchema();
+        _checkValMap();
+        if (_applyFixedValues()) _solve();
+        break;
+      case GeneratorMode.multiple:
+        if (!_checkSchemas()) return _checkEnd();
+        _checkValMap();
+        if (_applyFixedValues()) _solve();
+        break;
+    }
+    _checkEnd();
+  });
 }
 
 const _checkEnd = () => {
   if (_checkNextCycle()) {
     _checkStartCycle();
   } else {
+    const message = STATE.status.stopping ? DEFAULT_MESSAGES.userEnded : DEFAULT_MESSAGES.ended;
     _stopProcess();
-    _postMessage({message: DEFAULT_MESSAGES.ended});
+    _postMessage({message});
   }
 }
 

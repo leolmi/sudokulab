@@ -69,7 +69,7 @@ const _getUserDataSdk = (data: GeneratorUserData): PlaySudoku => {
 export const loadGeneratorUserData = (generator: GeneratorData): void => {
   const udata = getGeneratorUserData();
   const sdk = _getUserDataSdk(udata);
-  resetAvailable(sdk);
+  resetAvailable(sdk, { onlyRealFixed: true });
   checkAvailable(sdk, { fixedAsValue: true });
   generator.sdk$.next(sdk);
 }

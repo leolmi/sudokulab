@@ -9,7 +9,7 @@ import {
   GeneratorMode,
   GeneratorStatus, getFixedCount,
   getGeneratorStatus,
-  getMaxNumbers,
+  getMaxNumbers, getMaxValCycles,
   getMinNumbers, getValuesCount,
   hasEndGenerationValue,
   hasXValues,
@@ -38,6 +38,7 @@ export class GeneratorOptionsComponent {
   availableValorizationModes: ItemInfo[];
   stopModeCountLabel$: Observable<string>;
   fixedCount$: Observable<number>;
+  maxValCycles$: Observable<number>;
 
   status$: Observable<GeneratorStatus>;
   MODE = GeneratorMode;
@@ -52,6 +53,7 @@ export class GeneratorOptionsComponent {
     this.maxNumbers$ = generator.sdk$.pipe(map(ps => getMaxNumbers(ps?.sudoku?.rank)));
     this.hasXValues$ = generator.sdk$.pipe(map(ps => hasXValues(ps)));
     this.fixedCount$ = generator.sdk$.pipe(map(ps => getValuesCount(ps)));
+    this.maxValCycles$ = generator.sdk$.pipe(map(ps => getMaxValCycles(ps)));
 
     this.availableDimensions = [{
       code: 4,

@@ -52,7 +52,8 @@ export class GeneratorStatus {
     this.total = 0;
     this.mode = GeneratorMode.unknown;
     this.running = false;
-    this.stopping = false
+    this.stopping = false;
+    this.generatedSchemas = [];
     Object.assign(this, s || {});
   }
   fixed: number;
@@ -63,6 +64,7 @@ export class GeneratorStatus {
   running?: boolean;
   stopping?: boolean;
   generatedSchema?: Sudoku;
+  generatedSchemas?: Sudoku[];
 }
 
 export interface GeneratorWorkerArgs {

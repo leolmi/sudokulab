@@ -80,6 +80,7 @@ import {GeneratorExecutor} from "./pages/generator/generator.executor";
 import {LabExecutor} from "./pages/lab/lab.executor";
 import {SudokulabExecutorsService} from "./services/sudokulab-executors.service";
 import {OptionsExecutor} from "./pages/options/options.executor";
+import {GeneratorInfoComponent} from "./components/generator-info/generator-info.component";
 
 @NgModule({
   declarations: [
@@ -119,6 +120,7 @@ import {OptionsExecutor} from "./pages/options/options.executor";
     ManagementKeyDialogComponent,
     OperationsBarComponent,
     CropPointComponent,
+    GeneratorInfoComponent,
   ],
   imports: [
     BrowserModule,

@@ -6,6 +6,7 @@
      [fxLayout]="layout$|async"
      [fxLayoutAlign]="layoutAlign$|async">
   <div class="tools tools-left compact-hidden" fxFlex>
+    <sudokulab-generator-info></sudokulab-generator-info>
     <sudokulab-generator-options></sudokulab-generator-options>
   </div>
   <div class="board-container" fxLayout="column">
@@ -27,6 +28,7 @@
     <div class="bottom-board" fxFlex></div>
   </div>
   <div class="tools tools-right" fxFlex>
+    <sudokulab-generator-info class="compact-visible"></sudokulab-generator-info>
     <sudokulab-generator-options class="compact-visible"></sudokulab-generator-options>
     <sudokulab-generator-state></sudokulab-generator-state>
   </div>

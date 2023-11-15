@@ -9,6 +9,7 @@ export const SUDOKU_EMPTY_VALUE = '0';
 export const SUDOKU_DEFAULT_RANK = 9;
 export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
 export const SUDOKU_DEFAULT_MAX_SCHEMA_COUNT = 100;
+export const SUDOKU_DEFAULT_MAX_VAL_CYCLES = 500;
 
 export const SUDOKULAB_LIGHT_THEME = 'light';
 export const SUDOKULAB_DARK_THEME = 'dark';
@@ -60,5 +61,6 @@ export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
 export const DEFAULT_MESSAGES = {
   todo: new SudokuMessage({message: 'Not implemented yet', type: MessageType.warning}),
   solved: new SudokuMessage({message: 'Sudoku successfully solved!', type: MessageType.success}),
-  ended: new SudokuMessage({message: 'Generation ended!', type: MessageType.success})
+  ended: new SudokuMessage({message: 'Generation ended!', type: MessageType.success}),
+  userEnded: new SudokuMessage({message: 'Generation stopped!', type: MessageType.warning})
 }

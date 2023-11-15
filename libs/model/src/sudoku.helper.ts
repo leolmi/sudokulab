@@ -25,7 +25,7 @@ import {Algorithm} from './lib/Algorithm';
 import {CellInfo} from './lib/CellInfo';
 import {
   AVAILABLE_DIRECTIONS,
-  AVAILABLE_VALUES, DELETE_VALUES,
+  AVAILABLE_VALUES, DELETE_VALUES, SUDOKU_DEFAULT_MAX_VAL_CYCLES,
   SUDOKU_DEFAULT_RANK,
   SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2,
   SUDOKU_EMPTY_VALUE
@@ -440,6 +440,10 @@ export const getValuesCount = (sdk: PlaySudoku|undefined): number => {
   let counter = 0;
   if (!!sdk) _forEach(sdk.cells, (c) => !!c?.value ? counter++ : null);
   return counter;
+}
+
+export const getMaxValCycles = (sdk: PlaySudoku|undefined): number => {
+  return sdk?.options?.generator?.maxValCycles || SUDOKU_DEFAULT_MAX_VAL_CYCLES;
 }
 
 export interface SchemaNameOptions {

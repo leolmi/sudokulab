@@ -1,4 +1,4 @@
-import { SUDOKU_DEFAULT_MAXSPLIT } from './consts';
+import {SUDOKU_DEFAULT_MAX_VAL_CYCLES, SUDOKU_DEFAULT_MAXSPLIT} from './consts';
 import {EditSudokuEndGenerationMode, SudokuSymmetry} from "./enums";
 
 export class GeneratorOptions {
@@ -13,6 +13,7 @@ export class GeneratorOptions {
   generationEndValue = 1;
   minDiff = 0;
   maxDiff = 1000000;
+  maxValCycles = SUDOKU_DEFAULT_MAX_VAL_CYCLES;
 }
 
 export class PlaySudokuOptions {
