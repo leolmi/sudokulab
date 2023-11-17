@@ -25,6 +25,7 @@ export class GeneratorData extends SudokuData<GeneratorAction> {
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
     this.schema$ = new BehaviorSubject<Sudoku|null>(null);
     this.workingInfo$ = new BehaviorSubject<GeneratorWorkingInfo>({});
+    this.workingSchema$ = new BehaviorSubject<Sudoku | undefined>(undefined);
   }
   manager?: GeneratorDataManager;
   /**
@@ -47,6 +48,10 @@ export class GeneratorData extends SudokuData<GeneratorAction> {
    * informazioni di stato sulla generazione
    */
   workingInfo$: BehaviorSubject<GeneratorWorkingInfo>;
+  /**
+   * schema in lavorazione
+   */
+  workingSchema$: BehaviorSubject<Sudoku|undefined>;
 }
 
 export const GENERATOR_DATA = new InjectionToken<{}>('GENERATOR_DATA');

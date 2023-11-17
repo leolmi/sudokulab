@@ -1,13 +1,13 @@
 import {
   DEFAULT_MESSAGES,
-  EditSudokuEndGenerationMode,
+  SudokuEndGenerationMode,
   GeneratorAction,
   GeneratorMode,
   GeneratorStatus,
   GeneratorWorkerArgs,
   GeneratorWorkerData,
   getGeneratorStatus,
-  getPlayFixedValues,
+  getPlayFixedValues, getSudoku,
   MessageType,
   PlaySudoku,
   SDK_DEFAULT_GENERATOR_TIMEOUT,
@@ -45,6 +45,7 @@ const _clearState = () => {
   STATE.activeSdk = undefined;
   STATE.start = Date.now();
   STATE.status.generatedSchemas = [];
+  STATE.status.workingSchema = undefined;
 }
 
 const _startProcess = () => {
@@ -56,6 +57,7 @@ const _startProcess = () => {
 const _stopProcess = () => {
   STATE.status.running = false;
   STATE.status.stopping = false;
+  STATE.status.workingSchema = undefined;
 }
 
 const isStopping = () => STATE.status.stopping;
@@ -123,7 +125,7 @@ const _checkValMap = () => {
  */
 const _applyFixedValues = (): boolean => {
   if (STATE.valMap?.isDone) return false;
-  const values = STATE.valMap?.getValuesForCells()||{};
+  const values = STATE.valMap?.valuesForCells||{};
   _keys(values).forEach(cid => {
     const cell = (STATE.activeSdk?.cells||{})[cid];
     if (cell) {
@@ -195,14 +197,14 @@ const _checkNextCycle = (): boolean => {
 
   // verifica le impostazioni di stop
   switch(STATE.sdk.options.generator.generationEndMode) {
-    case EditSudokuEndGenerationMode.afterN:
+    case SudokuEndGenerationMode.afterN:
       if ((STATE.status.generatedSchemas?.length||0)>=STATE.sdk.options.generator.generationEndValue) return false;
       break;
-    case EditSudokuEndGenerationMode.afterTime:
+    case SudokuEndGenerationMode.afterTime:
       const now = Date.now();
       if ((now - STATE.start) > (STATE.sdk.options.generator.generationEndValue*1000)) return false;
       break;
-    case EditSudokuEndGenerationMode.manual:
+    case SudokuEndGenerationMode.manual:
     default:
       break;
   }
@@ -222,6 +224,13 @@ const _checkNextCycle = (): boolean => {
   return false;
 }
 
+const _notifyWorkingInfo = () => {
+  if (STATE.activeSdk) {
+    STATE.status.workingSchema = getSudoku(STATE.activeSdk);
+    _postMessage();
+  }
+}
+
 const _checkStartCycle = () => {
   // il setTimeout permette di leggere eventuali messaggi utente
   // inviati durante il processo di generazione
@@ -231,15 +240,18 @@ const _checkStartCycle = () => {
     switch (STATE.status.mode) {
       case GeneratorMode.single:
         _buildActiveSchema();
+        _notifyWorkingInfo();
         _solve();
         break;
       case GeneratorMode.fixed:
         _buildActiveSchema();
+        _notifyWorkingInfo();
         _checkValMap();
         if (_applyFixedValues()) _solve();
         break;
       case GeneratorMode.multiple:
         if (!_checkSchemas()) return _checkEnd();
+        _notifyWorkingInfo();
         _checkValMap();
         if (_applyFixedValues()) _solve();
         break;

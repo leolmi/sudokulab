@@ -8,7 +8,7 @@ import {
 } from "lodash";
 import {Dictionary} from "@ngrx/entity";
 import {EditSudoku, EditSudokuGenerationMap, GenerationMapCellInfo} from "../EditSudoku";
-import {SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE} from "../consts";
+import {SUDOKU_STANDARD_CHARACTERS} from "../consts";
 import {EditSudokuCell} from "../EditSudokuCell";
 import {
   applySudokuRules,
@@ -20,12 +20,12 @@ import {
   getValues,
   traverseSchema
 } from "../../sudoku.helper";
-import {EditSudokuEndGenerationMode, EditSudokuValorizationMode, SudokuSymmetry} from "../enums";
+import {SudokuEndGenerationMode, SudokuValorizationMode, SudokuSymmetry} from "../enums";
 import {SolveAllResult} from "./SolveAllResult";
 import {PlaySudokuOptions} from "../PlaySudokuOptions";
 import {Solver} from "./solver.logic";
 import {PlaySudoku} from "../PlaySudoku";
-import {isValue} from "../../global.helper";
+import {isDynamic, isValue} from "../../global.helper";
 import {Sudoku} from "../Sudoku";
 
 /**
@@ -35,7 +35,7 @@ import {Sudoku} from "../Sudoku";
 const _checkSchema = (sdk: EditSudoku) => {
   sdk.fixed = _reduce(sdk.cells, (cll, c) => c?.fixed ? cll.concat(c?.id||'') : cll, <string[]>[]);
   if (!sdk.originalSchema)
-    sdk.originalSchema = sdk.cellList.map(cid => sdk.cells[cid]).map(c => c?.value||SUDOKU_EMPTY_VALUE).join('');
+    sdk.originalSchema = sdk.cellList.map(cid => sdk.cells[cid]).map(c => c?.value||SUDOKU_STANDARD_CHARACTERS.empty).join('');
 }
 
 /**
@@ -69,7 +69,7 @@ export const fillSchema = (info: GeneratorInfo): void => {
       const toAddCount = Math.min(cells.length, availableCount);
       for (let i = 0; i < toAddCount; i++) {
         const cell = cells[i];
-        if (!cell.value) cell.value = SUDOKU_DYNAMIC_VALUE;
+        if (!cell.value) cell.value = SUDOKU_STANDARD_CHARACTERS.dynamic;
         info.checkFixedCell(cell);
       }
     }
@@ -99,7 +99,7 @@ export const valorise = (info: GeneratorInfo): void => {
 
   // valorizza le celle dinamiche secondo la modalità definita
   switch(info.original.options.valorizationMode) {
-    case EditSudokuValorizationMode.random:
+    case SudokuValorizationMode.random:
       _keys(info.schema?.generationMap?.cellsX||{}).forEach((cid) => {
         const cell = info.schema?.cells[cid];
         if (cell) {
@@ -109,7 +109,7 @@ export const valorise = (info: GeneratorInfo): void => {
         }
       });
       break;
-    case EditSudokuValorizationMode.sequential:
+    case SudokuValorizationMode.sequential:
       info.fromLastIncrementableIndex((xcell, cell) => {
         xcell.index++;
         cell.value = cell.availables[xcell.index];
@@ -196,7 +196,7 @@ export class GeneratorInfo {
       if (!this.fixedMap[cell.id]) {
         this.fixedMap[cell?.id || ''] = true;
         this.fixed.push(cell?.id || '');
-        if (cell.value === SUDOKU_DYNAMIC_VALUE) this.dynamicMap[cell?.id || ''] = true;
+        if (isDynamic(cell.value)) this.dynamicMap[cell?.id || ''] = true;
       }
     }
   }
@@ -217,7 +217,7 @@ export class GeneratorInfo {
     sdk = sdk || this.schema;
     const cells: EditSudokuCell[] = [];
     traverseSchema(sdk, (cid, cell) =>
-      (cell?.fixed || cell?.value === SUDOKU_DYNAMIC_VALUE) ? cells.push(cell) : null);
+      (cell?.fixed || isDynamic(cell?.value || '')) ? cells.push(<EditSudokuCell>cell) : null);
     return cells;
   }
 
@@ -235,10 +235,10 @@ export class GeneratorInfo {
   private _isEnded(): boolean {
     // ha raggiunto lo scopo della generazione
     switch (this.original.options.generationEndMode) {
-      case EditSudokuEndGenerationMode.afterN:
+      case SudokuEndGenerationMode.afterN:
         if (this.counter >= (this.original.options.generationEndValue || 1)) return true;
         break;
-      case EditSudokuEndGenerationMode.afterTime:
+      case SudokuEndGenerationMode.afterTime:
         const elapsed = Date.now() - this.startedAt;
         if (elapsed >= ((this.original.options.generationEndValue || 600) * 1000)) return true;
         break;
@@ -261,9 +261,9 @@ export class GeneratorInfo {
     if (this.monoCycle) return false;
     // deve avere possibilità di valorizzazione secondo la generationMap
     switch (this.original.options.valorizationMode) {
-      case EditSudokuValorizationMode.sequential:
+      case SudokuValorizationMode.sequential:
         return !!(this.schema?.generationMap?.fixedCells||[]).find(c => c.isValueX && c.index < (((this.schema?.cells||{})[c.id]?.availables||[]).length - 1));
-      case EditSudokuValorizationMode.random:
+      case SudokuValorizationMode.random:
         // non deve avere raggiunto il limite dei cicli di valorizzazione
         if (this.valueCycles >= this.original.options.maxValueCycles) return false;
 
@@ -308,7 +308,7 @@ export class GeneratorInfo {
   getSchemaFixedValues() {
     let fixed = '';
     traverseSchema(this.schema, (cid, cell) =>
-      fixed = `${fixed}${this.fixedMap[cell?.id || ''] ? cell?.value||'' : SUDOKU_EMPTY_VALUE}`);
+      fixed = `${fixed}${this.fixedMap[cell?.id || ''] ? cell?.value||'' : SUDOKU_STANDARD_CHARACTERS.empty}`);
     return fixed;
   }
 
@@ -448,7 +448,7 @@ export class GeneratorInfo {
             const xCell = xCells[i];
             const cell = this.schema?.cells[xCell.id];
             if (cell) {
-              cell.value = SUDOKU_DYNAMIC_VALUE;
+              cell.value = SUDOKU_STANDARD_CHARACTERS.dynamic;
               cell.availables = getAvailables(rank);
               xCell.index = -1;
             }

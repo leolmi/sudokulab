@@ -1,4 +1,4 @@
-import { calcFixedCount, getFixedCount, getTryCount, PrintPage, Sudoku, SUDOKU_EMPTY_VALUE } from '@sudokulab/model';
+import { calcFixedCount, getFixedCount, getTryCount, PrintPage, Sudoku, SUDOKU_STANDARD_CHARACTERS } from '@sudokulab/model';
 
 const HTML_HEADER = `<header layout-row centered-left><div class="title" flex>Supena<span class="title-postfix">Lab</span></div></header>`;
 const HTML_SECTION_LEFT = `<section layout-row flex><div class="schema-container" flex><div class="schema">@@BOARD</div></div>@@INFO</section>`;
@@ -57,7 +57,7 @@ const composeValues = (sdk: Sudoku): string => {
     const row = Math.floor(i / rank);
     const col = (i % rank);
     const value = (sdk?.values||'').charAt(i);
-    if (!!value && value !== SUDOKU_EMPTY_VALUE) {
+    if (!!value && value !== SUDOKU_STANDARD_CHARACTERS.empty) {
       const html_value = HTML_BOARD_VALUE
         .replace('@@VALUE', value)
         .replace('@@VALX', `${ (col * 10) + TEXT_OFFSET.x }`)

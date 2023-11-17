@@ -50,13 +50,14 @@ export enum MessageType {
   highlight = 'highlight'
 }
 
-export enum EditSudokuEndGenerationMode {
+export enum SudokuEndGenerationMode {
   manual = 'manual',
   afterN = 'afterN',
   afterTime = 'afterTime'
 }
 
-export enum EditSudokuValorizationMode {
+export enum SudokuValorizationMode {
+  auto = 'auto',
   sequential = 'sequential',
   random = 'random'
 }

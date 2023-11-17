@@ -1,12 +1,18 @@
-import { Sudoku } from './Sudoku';
-import { Dictionary } from '@ngrx/entity';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { SDK_PREFIX, SUDOKU_DEFAULT_RANK, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
-import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku.helper';
-import { isValue } from '../global.helper';
-import { SudokuGroupType } from './enums';
-import { cloneDeep as _clone, forEach as _forEach, reduce as _reduce, remove as _remove, includes as _includes } from 'lodash';
-import { distinctUntilChanged, skipWhile, takeUntil } from 'rxjs/operators';
+import {Sudoku} from './Sudoku';
+import {Dictionary} from '@ngrx/entity';
+import {BehaviorSubject, Observable, Subject, Subscription} from 'rxjs';
+import {SDK_PREFIX, SUDOKU_DEFAULT_RANK, SUDOKU_STANDARD_CHARACTERS} from './consts';
+import {cellId, getAvailables, getGroupRank, groupId} from '../sudoku.helper';
+import {isDynamic, isValue} from '../global.helper';
+import {SudokuGroupType} from './enums';
+import {
+  cloneDeep as _clone,
+  forEach as _forEach,
+  includes as _includes,
+  reduce as _reduce,
+  remove as _remove
+} from 'lodash';
+import {distinctUntilChanged, skipWhile, takeUntil} from 'rxjs/operators';
 
 export class SudokuSchemaGroup {
   constructor(g?: Partial<SudokuSchemaGroup>) {
@@ -88,7 +94,7 @@ export class SudokuSchemaCell {
     this.resetAvailable();
   }
   isValueX(): boolean {
-    return this.value$.getValue() === SUDOKU_DYNAMIC_VALUE && this.fixed;
+    return isDynamic(this.value$.value || '') && this.fixed;
   }
 }
 
@@ -182,7 +188,7 @@ export class SudokuSchema {
     _forEachCells(this, (id, c, r) => {
       const cell = this.cells[id];
       if(!!cell) {
-        fixed = `${fixed}${cell.fixed ? cell.value$.getValue() : SUDOKU_EMPTY_VALUE}`;
+        fixed = `${fixed}${cell.fixed ? cell.value$.getValue() : SUDOKU_STANDARD_CHARACTERS.empty}`;
         cell.setValue('');
         cell.availables$.next(getAvailables(this.rank));
       }
@@ -198,7 +204,7 @@ export class SudokuSchema {
     if ((fixed || '').length !== dim) return console.warn(SDK_PREFIX, 'Invalid fixed string', fixed);
     _forEachCells(this, (id, col, row, index) => {
       const v = (fixed||'').charAt(index);
-      if (v !== SUDOKU_EMPTY_VALUE) this.cells[id]?.setValue(v, true);
+      if (v !== SUDOKU_STANDARD_CHARACTERS.empty) this.cells[id]?.setValue(v, true);
     });
   }
 }

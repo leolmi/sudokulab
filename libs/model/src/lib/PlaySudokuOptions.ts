@@ -1,5 +1,5 @@
 import {SUDOKU_DEFAULT_MAX_VAL_CYCLES, SUDOKU_DEFAULT_MAXSPLIT} from './consts';
-import {EditSudokuEndGenerationMode, SudokuSymmetry} from "./enums";
+import {SudokuEndGenerationMode, SudokuSymmetry, SudokuValorizationMode} from "./enums";
 
 export class GeneratorOptions {
   constructor(o?: Partial<GeneratorOptions>) {
@@ -9,10 +9,11 @@ export class GeneratorOptions {
   unique = true;
   symmetry = SudokuSymmetry.horizontal;
   excludeTryAlgorithm = true;
-  generationEndMode = EditSudokuEndGenerationMode.afterN;
+  generationEndMode = SudokuEndGenerationMode.afterN;
   generationEndValue = 1;
   minDiff = 0;
   maxDiff = 1000000;
+  valCyclesMode = SudokuValorizationMode.auto;
   maxValCycles = SUDOKU_DEFAULT_MAX_VAL_CYCLES;
 }
 

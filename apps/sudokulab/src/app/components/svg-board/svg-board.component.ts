@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { getRank, Sudoku, SUDOKU_EMPTY_VALUE } from '@sudokulab/model';
+import { getRank, Sudoku, SUDOKU_STANDARD_CHARACTERS } from '@sudokulab/model';
 import { filter, map } from 'rxjs/operators';
 
 interface SvgCell {
@@ -39,7 +39,7 @@ export class SvgBoardComponent {
           const v = sdk.fixed.charAt(i);
           const row = Math.floor(i/9);
           const col = i % 9;
-          if (v !== SUDOKU_EMPTY_VALUE) {
+          if (v !== SUDOKU_STANDARD_CHARACTERS.empty) {
             cells.push({ x: 10 * col, y: 10 * row })
           }
         }

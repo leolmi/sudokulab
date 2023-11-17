@@ -22,8 +22,7 @@ import {
   moveOnDirection,
   saveUserSetting,
   Sudoku,
-  SUDOKU_DYNAMIC_VALUE,
-  SudokulabPagesService
+  SudokulabPagesService, SUDOKU_STANDARD_CHARACTERS
 } from '@sudokulab/model';
 import { cloneDeep as _clone, forEach as _forEach } from 'lodash';
 import * as JSZip from 'jszip';
@@ -41,7 +40,7 @@ export class GeneratorEffects {
     switchMap(([a, sch, id]) => {
       const output: Action[] = [GeneratorActions.setActiveGeneratorCell({ id: a.id })]
       const cell = sch.cells[a.id];
-      const value = (!!cell?.value) ? ' ' : SUDOKU_DYNAMIC_VALUE;
+      const value = (!!cell?.value) ? ' ' : SUDOKU_STANDARD_CHARACTERS.dynamic;
       if (!!id) output.push(GeneratorActions.setGeneratorValue({ value }));
       return output;
     })

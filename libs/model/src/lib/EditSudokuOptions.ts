@@ -1,4 +1,4 @@
-import { EditSudokuEndGenerationMode, EditSudokuValorizationMode, SudokuSymmetry } from './enums';
+import { SudokuEndGenerationMode, SudokuValorizationMode, SudokuSymmetry } from './enums';
 import {SUDOKU_DEFAULT_RANK} from "./consts";
 
 export class EditSudokuOptions {
@@ -16,9 +16,9 @@ export class EditSudokuOptions {
   fixedCount = 24;
   updateGeometry = true;
   excludeTryAlgorithm = true;
-  generationEndMode = EditSudokuEndGenerationMode.afterN;
+  generationEndMode = SudokuEndGenerationMode.afterN;
   generationEndValue = 1;
-  valorizationMode = EditSudokuValorizationMode.random;
+  valorizationMode = SudokuValorizationMode.random;
   minDiff = 0;
   maxDiff = 1000000;
   maxSplitSchema = 500;

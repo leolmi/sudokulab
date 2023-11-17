@@ -1,12 +1,14 @@
 import {
   cellId,
-  decodeCellId, EditSudoku,
-  GeneratorStatus, getFixedValuesEmpty,
-  getGeneratorStatus, getPlayFixedValues, isValue,
+  decodeCellId,
+  GeneratorStatus,
+  getGeneratorStatus,
+  getPlayFixedValues,
   PlaySudoku,
-  PlaySudokuCell, SUDOKU_DEFAULT_MAX_SCHEMA_COUNT,
-  SUDOKU_DEFAULT_RANK, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE,
-  SudokuSymmetry, traverseSchema
+  PlaySudokuCell,
+  SUDOKU_DEFAULT_MAX_SCHEMA_COUNT,
+  SUDOKU_DEFAULT_RANK, SUDOKU_STANDARD_CHARACTERS,
+  SudokuSymmetry
 } from "@sudokulab/model";
 import {cloneDeep as _clone, keys as _keys, random as _random, remove as _remove} from 'lodash';
 
@@ -99,7 +101,7 @@ const _addDynamicCell = (sdk: PlaySudoku): GeneratorStatus => {
       // imposta le celle dinamiche
       cells.forEach((c, i) => {
         if (i < status.generated) {
-          c.value = SUDOKU_DYNAMIC_VALUE;
+          c.value = SUDOKU_STANDARD_CHARACTERS.dynamic;
           c.fixed = true;
         }
       })

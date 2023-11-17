@@ -1,10 +1,10 @@
 import {GeneratorMode, GeneratorStatus, GeneratorUserData} from "./lib/generator.model";
 import {EditSudoku} from "./lib/EditSudoku";
 import {extend as _extend, forEach as _forEach} from 'lodash';
-import {SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2, SUDOKU_EMPTY_VALUE} from "./lib/consts";
+import {SUDOKU_STANDARD_CHARACTERS} from "./lib/consts";
 import {getRank, isValidValue, loadValues, traverseSchema} from "./sudoku.helper";
 import {Sudoku} from "./lib/Sudoku";
-import {isValue} from "./global.helper";
+import {isDynamic, isValue} from "./global.helper";
 import {PlaySudoku} from "./lib/PlaySudoku";
 
 /**
@@ -56,7 +56,7 @@ const _getGenerationMode = (status: GeneratorStatus): GeneratorMode => {
 export const getGeneratorStatus = (sdk: PlaySudoku): GeneratorStatus => {
   const status: GeneratorStatus = new GeneratorStatus({total: sdk.options.generator.fixedCount});
   _forEach(sdk.cells, (c) => {
-    if (c?.value === SUDOKU_DYNAMIC_VALUE || c?.value === SUDOKU_DYNAMIC_VALUE2) {
+    if (isDynamic(c?.value||'')) {
       status.dynamics++;
     } else if (isValidValue(c?.value || '')) {
       status.fixed++;
@@ -74,7 +74,7 @@ const _getFixedValues = (sdk: EditSudoku|PlaySudoku, allowX = false): string => 
   traverseSchema(sdk, (cid) => {
     const raw_value = sdk.cells[cid]?.value || '';
     const value = isValue(raw_value) ? raw_value :
-      (raw_value === SUDOKU_DYNAMIC_VALUE && allowX ? SUDOKU_DYNAMIC_VALUE : SUDOKU_EMPTY_VALUE);
+      (isDynamic(raw_value) && allowX ? SUDOKU_STANDARD_CHARACTERS.dynamic : SUDOKU_STANDARD_CHARACTERS.empty);
     fixed = `${fixed || ''}${value}`;
   });
   return fixed;

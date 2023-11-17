@@ -18,7 +18,7 @@ import {
   isDirectionKey,
   moveOnDirection,
   SUDOKU_DEFAULT_RANK,
-  SUDOKU_DYNAMIC_VALUE,
+  SUDOKU_STANDARD_CHARACTERS,
   SudokuLab,
 } from '@sudokulab/model';
 import {map} from 'rxjs/operators';
@@ -40,7 +40,7 @@ export class GeneratorBoardComponent extends DestroyComponent implements OnDestr
   cols$: Observable<number[]>;
   gridLine$: Observable<{ [id: number]: boolean }>;
   hasFocus$: BehaviorSubject<boolean>;
-  DYNAMIC = SUDOKU_DYNAMIC_VALUE;
+  DYNAMIC = SUDOKU_STANDARD_CHARACTERS.dynamic;
   RANK = SUDOKU_DEFAULT_RANK;
   PROXYVALUE: any = { x: '?' };
 

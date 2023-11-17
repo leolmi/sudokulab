@@ -1,7 +1,7 @@
 import {SudokuOptions} from './SudokuOptions';
 import {has as _has, repeat as _repeat} from 'lodash';
 import {SudokuInfo} from './SudokuInfo';
-import {SUDOKU_DEFAULT_RANK, SUDOKU_EMPTY_VALUE} from './consts';
+import {SUDOKU_DEFAULT_RANK, SUDOKU_STANDARD_CHARACTERS} from './consts';
 import {calcFixedCount, getHash} from '../global.helper';
 
 export class Sudoku {
@@ -26,7 +26,7 @@ export class Sudoku {
   name?: string;
 }
 
-export const getFixedValuesEmpty = (sdk: Sudoku) => _repeat(SUDOKU_EMPTY_VALUE, sdk.rank * sdk.rank);
+export const getFixedValuesEmpty = (sdk: Sudoku) => _repeat(SUDOKU_STANDARD_CHARACTERS.empty, sdk.rank * sdk.rank);
 
 export const consolidate = (sdk: Sudoku) => {
   sdk.values = sdk.values || sdk.fixed || getFixedValuesEmpty(sdk);

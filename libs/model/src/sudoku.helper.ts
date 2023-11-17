@@ -3,8 +3,8 @@ import {checkSudoku, PlaySudoku} from './lib/PlaySudoku';
 import {
   cloneDeep as _clone,
   extend as _extend,
-  find as _find,
   filter as _filter,
+  find as _find,
   forEach as _forEach,
   includes as _includes,
   intersection as _intersection,
@@ -12,23 +12,24 @@ import {
   isBoolean as _isBoolean,
   isFunction as _isFunction,
   isNumber as _isNumber,
-  isObject as _isObject,
   isString as _isString,
   keys as _keys,
   random as _random,
   reduce as _reduce,
   remove as _remove
 } from 'lodash';
-import {EditSudokuEndGenerationMode, MoveDirection, PlaySudokuCellAlignment, SudokuGroupType} from './lib/enums';
+import {MoveDirection, PlaySudokuCellAlignment, SudokuEndGenerationMode, SudokuGroupType} from './lib/enums';
 import {getAlgorithms, TRY_NUMBER_ALGORITHM} from './lib/Algorithms';
 import {Algorithm} from './lib/Algorithm';
 import {CellInfo} from './lib/CellInfo';
 import {
   AVAILABLE_DIRECTIONS,
-  AVAILABLE_VALUES, DELETE_VALUES, SUDOKU_DEFAULT_MAX_VAL_CYCLES,
+  AVAILABLE_VALUES,
+  DELETE_VALUES,
+  DYNAMIC_VALUES,
+  SUDOKU_DEFAULT_MAX_VAL_CYCLES,
   SUDOKU_DEFAULT_RANK,
-  SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2,
-  SUDOKU_EMPTY_VALUE
+  SUDOKU_STANDARD_CHARACTERS,
 } from './lib/consts';
 import {calcDifficulty, clear} from './lib/logic';
 import {Cell} from './lib/Cell';
@@ -59,7 +60,7 @@ export const cellId = (column: number, row: number) => `${column}.${row}`;
  * @param gmap
  */
 export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap): boolean => {
-  if (!gmap) return !!cell?.fixed && cell.value !== SUDOKU_DYNAMIC_VALUE && cell.value !== SUDOKU_DYNAMIC_VALUE2;
+  if (!gmap) return !!cell?.fixed && !isDynamic(cell.value);
   return !!cell?.fixed && !gmap.cellsX[cell.id];
 }
 
@@ -300,7 +301,7 @@ export const isSolved = (sdk: PlaySudoku): boolean => {
  */
 export const getValues = (sdk: PlaySudoku|EditSudoku|undefined): string => {
   let values = '';
-  traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || SUDOKU_EMPTY_VALUE}`)
+  traverseSchema(sdk, (cid) => values = `${values}${sdk?.cells[cid]?.value || SUDOKU_STANDARD_CHARACTERS.empty}`)
   return values;
 }
 
@@ -385,7 +386,7 @@ export const isValidGeneratorValue = (sch: EditSudoku|undefined, value: string):
   const mvalue = (value || '').toLowerCase();
   const available_pos = AVAILABLE_VALUES.indexOf(mvalue);
   const isvalue = available_pos > -1 && available_pos < (sch?.options?.rank || SUDOKU_DEFAULT_RANK);
-  return (value.length === 1 && isvalue) || [...DELETE_VALUES, SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2].indexOf(value) > -1;
+  return (value.length === 1 && isvalue) || [...DELETE_VALUES, ...DYNAMIC_VALUES].indexOf(value) > -1;
 }
 
 /**
@@ -422,7 +423,7 @@ export const geEditFixedCount = (sdk: EditSudoku|undefined): number => {
 
 export const getPlayFixedValues = (sdk: PlaySudoku|undefined): string => {
   let fixed = '';
-  if (sdk) _forEach(sdk?.cells||{}, c => fixed = `${fixed||''}${c?.fixed ? (c?.value||'') : SUDOKU_EMPTY_VALUE}`);
+  if (sdk) _forEach(sdk?.cells||{}, c => fixed = `${fixed||''}${c?.fixed ? (c?.value||'') : SUDOKU_STANDARD_CHARACTERS.empty}`);
   return fixed;
 }
 
@@ -527,7 +528,7 @@ export const moveOnDirection = (cid: string, o: Sudoku|EditSudokuOptions|undefin
 
 
 export const hasEndGenerationValue = (o?: PlaySudokuOptions): boolean => {
-  return !!o && [EditSudokuEndGenerationMode.afterN, EditSudokuEndGenerationMode.afterTime].indexOf(o.generator.generationEndMode)>-1;
+  return !!o && [SudokuEndGenerationMode.afterN, SudokuEndGenerationMode.afterTime].indexOf(o.generator.generationEndMode)>-1;
 }
 
 export const getMinNumbers = (rank: number|undefined): number => {
@@ -539,8 +540,7 @@ export const getMaxNumbers = (rank: number|undefined): number => {
 }
 
 export const hasXValues = (sdk: PlaySudoku|EditSudoku|undefined): boolean => {
-  return !!_find(sdk?.cells || [], (cell: any) =>
-    cell?.value === SUDOKU_DYNAMIC_VALUE);
+  return !!_find(sdk?.cells || [], (cell: any) => isDynamic(cell?.value));
 }
 
 export const buildSudokuInfo = (sdk: Sudoku, baseinfo?: Partial<SudokuInfo>, deleteCases = false): SudokuInfo => {
@@ -649,8 +649,8 @@ export const getSudokuForUserSettings = (sdk: PlaySudoku|undefined): Partial<Pla
 const setCellFixedValue = (sdk: Sudoku, cell: Cell) => {
   const cid = decodeCellId(cell.id);
   const index = (cid.row * sdk.rank) + cid.col;
-  const char = parseValue(cell.value, sdk.rank)||SUDOKU_EMPTY_VALUE;
-  sdk.fixed = sdk.fixed.substr(0, index) + char + sdk.fixed.substr(index+1);
+  const char = parseValue(cell.value, sdk.rank) || SUDOKU_STANDARD_CHARACTERS.empty;
+  sdk.fixed = sdk.fixed.substr(0, index) + char + sdk.fixed.substr(index + 1);
   sdk.values = sdk.fixed;
 }
 

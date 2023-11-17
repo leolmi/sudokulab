@@ -150,6 +150,9 @@ export class GeneratorDataManager extends DataManagerBase {
     // visualizza i messaggi
     if (data.message) this._sudokuLab.showMessage(data.message);
 
+    // propaga lo schema in lavorazione
+    this.generator.workingSchema$.next(data.status?.workingSchema);
+
     // TODO: altro??
   }
 

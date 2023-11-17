@@ -27,17 +27,6 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-<!--    <div class="space" *ngIf="hasXValues$|async"></div>-->
-<!--    <mat-form-field appearance="fill" *ngIf="hasXValues$|async" fxFlex>-->
-<!--      <mat-label>Valorization mode</mat-label>-->
-<!--      <mat-select [value]="opt.valorizationMode"-->
-<!--                  [disabled]="generator.running$|async"-->
-<!--                  (valueChange)="applyOption($event, 'valorizationMode')">-->
-<!--        <mat-option *ngFor="let vlm of availableValorizationModes" [value]="vlm.code">-->
-<!--          {{vlm.description}}-->
-<!--        </mat-option>-->
-<!--      </mat-select>-->
-<!--    </mat-form-field>-->
   </div>
   <!-- NUMBER OF NUMBERS -->
   <mat-label>Numbers ({{fixedCount$|async}} / <b>{{sdk.options.generator.fixedCount}}</b>)</mat-label>
@@ -49,7 +38,7 @@
     [thumbLabel]="true"
     [tickInterval]="1"
     [value]="sdk.options.generator.fixedCount"
-    (valueChange)="applyOption($event, 'fixedCount')"
+    (valueChange)="applyOption($event, 'fixedCount', 'number')"
     aria-labelledby="example-name-label">
   </mat-slider>
   <!-- DIFFICULTY RANGE -->
@@ -84,7 +73,7 @@
                     *ngIf="(status$|async)?.mode!==MODE.single"
                     [checked]="sdk.options.generator.excludeTryAlgorithm"
                     [disabled]="generator.running$|async"
-                    (change)="applyOption($event, 'excludeTryAlgorithm')">Exclude try algorithm</mat-slide-toggle>
+                    (change)="applyOption($event, 'excludeTryAlgorithm', 'boolean')">Exclude try algorithm</mat-slide-toggle>
   <!-- STOP -->
   <div fxLayout="row" fxLayoutAlign="start center"
        *ngIf="(status$|async)?.mode!==MODE.single">
@@ -107,7 +96,7 @@
              type="number"
              [disabled]="generator.running$|async"
              [value]="(sdk.options.generator.generationEndValue||1)+''"
-             (input)="applyOption($event, 'generationEndValue')">
+             (input)="applyOption($event, 'generationEndValue', 'number')">
     </mat-form-field>
   </div>
 
@@ -131,17 +120,30 @@
 <!--             (input)="applyOption($event, 'maxSchemaCycles')">-->
 <!--    </mat-form-field>-->
 <!--  </div>-->
+
+  <!-- VALUES & CYCLES -->
   <div fxLayout="row" fxLayoutAlign="start center"
        *ngIf="((status$|async)?.dynamics||0)>0">
+    <!-- VALUES MODE -->
+    <mat-form-field appearance="fill" fxFlex>
+      <mat-label>Values mode</mat-label>
+      <mat-select [value]="sdk.options.generator.valCyclesMode"
+                  [disabled]="generator.running$|async"
+                  (valueChange)="applyOption($event, 'valCyclesMode')">
+        <mat-option *ngFor="let stm of availableValuesModes" [value]="stm.code">
+          {{stm.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="space"></div>
+    <!-- MAX VALUES CYCLES -->
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>Max value cycles</mat-label>
       <input matInput
              [disabled]="generator.running$|async"
              type="number"
              [value]="sdk.options.generator.maxValCycles.toString()"
-             (input)="applyOption($event, 'maxValCycles')">
+             (input)="applyOption($event, 'maxValCycles', 'number')">
     </mat-form-field>
-    <div class="space"></div>
-    <div fxFlex></div>
   </div>
 </div>

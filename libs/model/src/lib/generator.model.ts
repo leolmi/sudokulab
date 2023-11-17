@@ -63,6 +63,7 @@ export class GeneratorStatus {
   mode: GeneratorMode;
   running?: boolean;
   stopping?: boolean;
+  workingSchema?: Sudoku;
   generatedSchema?: Sudoku;
   generatedSchemas?: Sudoku[];
 }

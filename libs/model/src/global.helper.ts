@@ -4,27 +4,24 @@ import {
   cloneDeep as _clone,
   extend as _extend,
   get as _get,
-  isEqual as _isEqual,
   isString as _isString,
-  keys as _keys, reduce as _reduce,
+  reduce as _reduce,
   set as _set,
   trimEnd as _trimEnd,
   trimStart as _trimStart
 } from 'lodash';
-import { SudokulabWindowService } from './lib/services';
+import {SudokulabWindowService} from './lib/services';
 import {
+  DYNAMIC_VALUES,
   SDK_PREFIX,
   SDK_PREFIX_DEBUG,
   SUDOKU_COMPACT_WIDTH_1,
-  SUDOKU_COMPACT_WIDTH_2,
-  SUDOKU_DYNAMIC_VALUE, SUDOKU_DYNAMIC_VALUE2,
-  SUDOKU_EMPTY_VALUE,
+  SUDOKU_COMPACT_WIDTH_2, SUDOKU_STANDARD_CHARACTERS,
   SUDOKULAB_DARK_THEME,
   SUDOKULAB_DEBUG_KEY,
   SUDOKULAB_LIGHT_THEME,
   SUDOKULAB_SETTINGS_KEY
 } from './lib/consts';
-import { Sudoku } from './lib/Sudoku';
 
 export function guid(): string {
   return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, c => {
@@ -160,11 +157,11 @@ export const debug = (handler: () => any, level?: string): void => isDebugMode(l
  * Restituisce vero se il valore rappresenta una cella dinamica
  * @param v
  */
-export const isDynamic = (v: string) => v === SUDOKU_DYNAMIC_VALUE || v === SUDOKU_DYNAMIC_VALUE2;
+export const isDynamic = (v: string) => [...DYNAMIC_VALUES].indexOf(v)>-1;
 
 export const isValue = (v?: string, acceptX = false): boolean => {
   const effv = (v || '').trim();
-  return effv !== '' && effv !== SUDOKU_EMPTY_VALUE && (acceptX || !isDynamic(effv));
+  return effv !== '' && effv !== SUDOKU_STANDARD_CHARACTERS.empty && (acceptX || !isDynamic(effv));
 }
 
 export const calcFixedCount = (fixed?: string): number =>

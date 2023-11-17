@@ -2,8 +2,8 @@ import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
   DIFFICULTY_RANGES,
-  EditSudokuEndGenerationMode,
-  EditSudokuValorizationMode,
+  SudokuEndGenerationMode,
+  SudokuValorizationMode,
   GENERATOR_DATA,
   GeneratorData,
   GeneratorMode,
@@ -20,6 +20,8 @@ import {map} from 'rxjs/operators';
 import {has as _has, keys as _keys} from 'lodash';
 import {ItemInfo} from '../../model';
 
+type ValueDataType = 'string'|'number'|'boolean'
+
 @Component({
   selector: 'sudokulab-generator-options',
   templateUrl: './generator-options.component.html',
@@ -35,7 +37,7 @@ export class GeneratorOptionsComponent {
   availableSymmetries: ItemInfo[];
   availableDifficulty: ItemInfo[];
   availableStopModes: ItemInfo[];
-  availableValorizationModes: ItemInfo[];
+  availableValuesModes: ItemInfo[];
   stopModeCountLabel$: Observable<string>;
   fixedCount$: Observable<number>;
   maxValCycles$: Observable<number>;
@@ -48,7 +50,7 @@ export class GeneratorOptionsComponent {
     this.status$ = generator.sdk$.pipe(map((sdk) => getGeneratorStatus(sdk)));
     this.isStopModeCount$ = generator.sdk$.pipe(map(ps => hasEndGenerationValue(ps?.options)));
     this.stopModeCountLabel$ = generator.sdk$.pipe(map(ps =>
-       ps?.options.generator.generationEndMode === EditSudokuEndGenerationMode.afterTime ? 'Seconds' : 'Builded schemas'));
+       ps?.options.generator.generationEndMode === SudokuEndGenerationMode.afterTime ? 'Seconds' : 'Builded schemas'));
     this.minNumbers$ = generator.sdk$.pipe(map(ps => getMinNumbers(ps?.sudoku?.rank)));
     this.maxNumbers$ = generator.sdk$.pipe(map(ps => getMaxNumbers(ps?.sudoku?.rank)));
     this.hasXValues$ = generator.sdk$.pipe(map(ps => hasXValues(ps)));
@@ -77,36 +79,46 @@ export class GeneratorOptionsComponent {
       code: r.value
     })))];
     this.availableStopModes = [{
-      code: EditSudokuEndGenerationMode.manual,
+      code: SudokuEndGenerationMode.manual,
       description: 'manual'
     }, {
-      code: EditSudokuEndGenerationMode.afterN,
+      code: SudokuEndGenerationMode.afterN,
       description: 'after N schemas'
     }, {
-      code: EditSudokuEndGenerationMode.afterTime,
+      code: SudokuEndGenerationMode.afterTime,
       description: 'after N seconds'
     }];
-    this.availableValorizationModes = [{
-      code: EditSudokuValorizationMode.sequential,
+    this.availableValuesModes = [{
+      code: SudokuValorizationMode.auto,
+      description: 'auto'
+    },{
+      code: SudokuValorizationMode.sequential,
       description: 'sequential'
     }, {
-      code: EditSudokuValorizationMode.random,
+      code: SudokuValorizationMode.random,
       description: 'random'
     }];
   }
 
-  private _getValue(e: any) {
+  private _getValue(e: any, dataTpe?: ValueDataType) {
     let value = e;
     if (_has(e, 'checked')) value = e.checked;
     if (e?.target) {
       const input = (<HTMLInputElement>e?.target);
       value = input.value;
     }
-    return value;
+    switch (dataTpe) {
+      case 'number':
+        return parseInt(value, 10);
+      case 'boolean':
+        return !!value;
+      default:
+        return value;
+    }
   }
 
-  applyOption(e: any, target: string) {
-    const value = this._getValue(e);
+  applyOption(e: any, target: string, dataType?: ValueDataType) {
+    const value = this._getValue(e, dataType);
     //use(this.options$, o => this._gen.updateGeneratorOptions(update(o, {[target]: value})));
     if (this.generator.manager) this.generator.manager.updateGeneratorOptions({[target]: value});
   }

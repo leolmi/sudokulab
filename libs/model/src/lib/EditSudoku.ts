@@ -1,12 +1,12 @@
-import { Dictionary } from '@ngrx/entity';
-import { EditSudokuOptions } from './EditSudokuOptions';
-import { EditSudokuCell } from './EditSudokuCell';
-import { EditSudokuGroup } from './EditSudokuGroup';
-import { applySudokuRules, cellId, getAvailables, getGroupRank, groupId } from '../sudoku.helper';
-import { SudokuGroupType } from './enums';
-import { remove as _remove } from 'lodash';
-import { SDK_PREFIX, SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE } from './consts';
-import { guid, isValue } from '../global.helper';
+import {Dictionary} from '@ngrx/entity';
+import {EditSudokuOptions} from './EditSudokuOptions';
+import {EditSudokuCell} from './EditSudokuCell';
+import {EditSudokuGroup} from './EditSudokuGroup';
+import {applySudokuRules, cellId, getAvailables, getGroupRank, groupId} from '../sudoku.helper';
+import {SudokuGroupType} from './enums';
+import {remove as _remove} from 'lodash';
+import {SDK_PREFIX} from './consts';
+import {guid, isDynamic, isValue} from '../global.helper';
 
 /**
  * Informazioni di cella per il generatore
@@ -16,7 +16,7 @@ export class GenerationMapCellInfo {
     this.id = cid;
     const position = sdk.cells[cid]?.position||0;
     const original_char = sdk.originalSchema?.charAt(position)||'';
-    this.isValueX = [SUDOKU_DYNAMIC_VALUE, SUDOKU_EMPTY_VALUE].indexOf(original_char)>-1;
+    this.isValueX = isDynamic(original_char);
     this.index = -1;
   }
 
