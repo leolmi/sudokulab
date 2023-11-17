@@ -34,7 +34,7 @@ export class Generator {
     const result = resolve(this._info);
     // se lo ha risolto...
     if (!!result.unique) {
-      console.log('SCHEMA: ', sudoku?.fixed, ' UNIQUE!!!');
+      //console.log('SCHEMA: ', sudoku?.fixed, ' UNIQUE!!!');
       const sol = this._info.getSolutionSudoku(result);
       // valuta le strategie di out
       if (sol && this._info.isARightSolution(sol)) {

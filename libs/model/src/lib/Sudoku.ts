@@ -29,8 +29,9 @@ export class Sudoku {
 export const getFixedValuesEmpty = (sdk: Sudoku) => _repeat(SUDOKU_STANDARD_CHARACTERS.empty, sdk.rank * sdk.rank);
 
 export const consolidate = (sdk: Sudoku) => {
-  sdk.values = sdk.values || sdk.fixed || getFixedValuesEmpty(sdk);
-  sdk.fixed = sdk.fixed || getFixedValuesEmpty(sdk);
+  const fixed = getFixedValuesEmpty(sdk);
+  sdk.values = sdk.values || sdk.fixed || fixed;
+  sdk.fixed = sdk.fixed || fixed;
   sdk._id = getHash(sdk.fixed);
 }
 

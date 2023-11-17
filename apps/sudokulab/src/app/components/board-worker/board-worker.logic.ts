@@ -90,7 +90,7 @@ export const calcInfoStep = (sdk: PlaySudoku): BoardWorkerData => {
       highlights.others[cellId(ci.col, i)] = true;
     }
   });
-  console.log('HIGLIGHTS', highlights);
+  // console.log('HIGLIGHTS', highlights);
   return {infos, highlights};
 }
 

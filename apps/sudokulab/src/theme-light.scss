@@ -77,6 +77,15 @@
     color: $color-accent-contrast;
   }
 
+  .color-success {
+    background-color: $color-success;
+    color: $color-success-contrast;
+  }
+  .color-error {
+    background-color: $color-error2;
+    color: $color-error-contrast;
+  }
+
   .color-accent-important {
     background-color: $color-accent !important;
     color: $color-accent-contrast !important;

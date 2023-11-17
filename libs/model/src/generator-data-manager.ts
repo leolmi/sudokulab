@@ -1,9 +1,16 @@
 import {GeneratorData} from "./lib/tokens";
-import {updateSchema} from "./manager.helper";
+import {handleKeyEvent, updateSchema} from "./manager.helper";
 import {GeneratorAction, GeneratorWorkerArgs, GeneratorWorkerData} from "./lib/generator.model";
 import {GeneratorOptions, PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 import {cloneDeep as _clone, extend as _extend} from "lodash";
-import {clearSchema, dowloadSchema, getGeneratorCodeAction, resetAvailable} from "./sudoku.helper";
+import {
+  clearSchema,
+  downloadPlaySudoku,
+  downloadSchema,
+  downloadSchemas,
+  getGeneratorCodeAction,
+  resetAvailable
+} from "./sudoku.helper";
 import {DataManagerBase} from "./data-manager.base";
 import {checkAvailable, SudokuLab} from "./lib/logic";
 import {debounceTime, distinctUntilChanged, filter, map, takeUntil} from "rxjs/operators";
@@ -56,6 +63,13 @@ export class GeneratorDataManager extends DataManagerBase {
         this.changed$.next();
       });
 
+    this.generator.value$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(key => {
+        handleKeyEvent(this.generator, <KeyboardEvent>{ key });
+        this.handleAction(GeneratorAction.check);
+      });
+
     this.generator.running$
       .pipe(distinctUntilChanged())
       .subscribe((run) => this.generator.disabled$.next(run));
@@ -65,9 +79,11 @@ export class GeneratorDataManager extends DataManagerBase {
     const sdk = _clone(this.generator.sdk$.value);
     switch (action) {
       case GeneratorAction.download:
-        return dowloadSchema(sdk);
+        return downloadPlaySudoku(sdk);
       case GeneratorAction.run:
       case GeneratorAction.stop:
+      case GeneratorAction.generate:
+        if (action === GeneratorAction.stop) this.generator.userStopping$.next(true);
         if (this._worker) this._worker.postMessage(<GeneratorWorkerArgs>{action, sdk});
         break;
       case GeneratorAction.clear:
@@ -81,14 +97,20 @@ export class GeneratorDataManager extends DataManagerBase {
       case GeneratorAction.upload:
         this._sudokuLab.upload().subscribe();
         break;
-      case GeneratorAction.downloadAll:
-        // scarica tutti gli schemi generati
-      case GeneratorAction.generate:
-        // genera uno schema con i valori inseriti
-      case GeneratorAction.openInLab:
-        // apre lo schema selezionato in lab
       case GeneratorAction.removeAll:
-        // elimina tutti gli schemi generati (conferma)
+        this.generator.schemas$.next([]);
+        break;
+      case GeneratorAction.downloadAll:
+        const schemas = this.generator.schemas$.value;
+        if (schemas.length>1) {
+          downloadSchemas(schemas);
+        } else if (schemas.length===1) {
+          downloadSchema(schemas[0]);
+        }
+        break;
+      case GeneratorAction.openInLab:
+        console.log(this.generator.schema$.value);
+        break;
       default:
         console.warn('not handled action', action);
         break;
@@ -133,6 +155,7 @@ export class GeneratorDataManager extends DataManagerBase {
     const stopping = !!data.status?.stopping;
     if (this.generator.stopping$.value !== stopping) {
       this.generator.stopping$.next(stopping);
+      this.generator.userStopping$.next(stopping);
       this.changed$.next();
     }
 

@@ -67,8 +67,8 @@ export class CouplesAlgorithm extends Algorithm {
                         const X2 = _difference(ZX, YZ);
                         if (X2.length === 1 && X2[0] === X[0] && Y[0] !== Z[0] && X[0] !== Z[0]) {
 
-                          console.log(`APPLICABILITA' DELL'ALGORITMO COUPLES:\n\tcell XY`, cell_XY,
-                            '\n\tcell YZ', cell_YZ, '\n\tcell ZX', cell_ZX);
+                          // console.log(`APPLICABILITA' DELL'ALGORITMO COUPLES:\n\tcell XY`, cell_XY,
+                          //   '\n\tcell YZ', cell_YZ, '\n\tcell ZX', cell_ZX);
 
                           // trovato la tripletta corretta...
                           // può eliminare X dalle celle che vedono contemporaneamente cell_XY & cell_ZX

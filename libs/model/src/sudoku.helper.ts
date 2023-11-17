@@ -27,7 +27,7 @@ import {
   AVAILABLE_VALUES,
   DELETE_VALUES,
   DYNAMIC_VALUES,
-  SUDOKU_DEFAULT_MAX_VAL_CYCLES,
+  SUDOKU_DEFAULT_MAX_VAL_CYCLES, SUDOKU_DEFAULT_MAXSPLIT,
   SUDOKU_DEFAULT_RANK,
   SUDOKU_STANDARD_CHARACTERS,
 } from './lib/consts';
@@ -99,6 +99,19 @@ export interface ResetSchemaOptions {
   onlyRealFixed?: boolean;
   allNotValue?: boolean;
   resetBefore?: boolean;
+}
+
+/**
+ * restituisce le info essenziali dello schema per la solvibilità
+ * @param sdk
+ */
+export const getFlatPlaySudoku = (sdk?: PlaySudoku) => {
+  const fixed = sdk?.sudoku?.fixed || getPlayFixedValues(sdk) || '';
+  const maxSplitSchema = sdk?.options?.maxSplitSchema || SUDOKU_DEFAULT_MAXSPLIT;
+  return new PlaySudoku({
+    sudoku: new Sudoku({fixed}),
+    options: new PlaySudokuOptions({maxSplitSchema})
+  });
 }
 
 /**
@@ -709,14 +722,31 @@ export const isEmptySchema = (sdk: PlaySudoku) => {
   return !sdk || !sdk?.sudoku || !_find(sdk?.cells||[], (cell: any) => !!cell?.value);
 }
 
-export const dowloadSchema = (sdk: PlaySudoku) => {
+export const downloadSchema = (schema: Sudoku) => {
+  const filename = getSchemaName(schema);
+  const schema_str = JSON.stringify(schema, null, 2);
+  const blob = new Blob([schema_str], { type: "application/json;" });
+  saveAs(blob, `${filename}.json`);
+}
+
+export const downloadPlaySudoku = (sdk: PlaySudoku) => {
   const schema: Sudoku = new Sudoku({
     fixed: sdk?.sudoku?.fixed || '',
     info: new SudokuInfo(sdk?.sudoku?.info)
   });
-  const filename = getSchemaName(schema);
-  const schema_str = JSON.stringify(schema, null, 2);
-  const blob = new Blob([schema_str], { type: "application/json;" });
+  downloadSchema(schema);
+}
+
+
+/**
+ * Salva un unico file con gli schemi passati
+ * @param schemas
+ */
+export const downloadSchemas = (schemas: Sudoku[]) => {
+  const obj = { schemas };
+  const filename = `sudokulab schemas ${Date.now()}`;
+  const serialization = JSON.stringify(obj, null, 2);
+  const blob = new Blob([serialization], { type: "application/json;" });
   saveAs(blob, `${filename}.json`);
 }
 
@@ -756,6 +786,10 @@ export const applyCellValue = (cell?: PlaySudokuCell, value?: string, options?: 
   if (!cell || (!options?.fixedValues && cell.fixed)) return false;
   if (!isValidValue(value || '', undefined, options)) return false;
   value = getRealUserValue(value || '', options);
+
+  // TODO: gestione toggle del X Value per il generatore...
+
+
   if (DELETE_VALUES.indexOf(value || '') > -1) value = '';
   if (!!options?.usePencil) {
     cell.value = '';

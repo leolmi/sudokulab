@@ -21,4 +21,27 @@
        fxFlex>
     <mat-icon>edit</mat-icon>
   </div>
+  <div class="key-number color-success"
+       *ngIf="usePlay && (playState$|async)==='play'"
+       matTooltip="play generation"
+       (click)="play()"
+       fxLayout="row" fxLayoutAlign="center center"
+       fxFlex>
+    <mat-icon>play_arrow</mat-icon>
+  </div>
+  <div class="key-number color-error"
+       *ngIf="usePlay && (playState$|async)==='stop'"
+       matTooltip="stop generation"
+       (click)="stop()"
+       fxLayout="row" fxLayoutAlign="center center"
+       fxFlex>
+    <mat-icon>stop</mat-icon>
+  </div>
+  <div class="key-number disabled"
+       *ngIf="usePlay && (playState$|async)==='stopping'"
+       matTooltip="stopping..."
+       fxLayout="row" fxLayoutAlign="center center"
+       fxFlex>
+    <mat-icon>pause</mat-icon>
+  </div>
 </div>

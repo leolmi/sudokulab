@@ -1,9 +1,15 @@
 import {BoardData} from "./lib/tokens";
 import {debounceTime, distinctUntilChanged, filter, map, take, takeUntil, withLatestFrom} from "rxjs/operators";
 import {BehaviorSubject} from "rxjs";
-import {BoardAction, BoardWorkerArgs, BoardWorkerData, BoardWorkerHighlights} from "./lib/board.model";
+import {
+  BoardAction,
+  BoardWorkerArgs,
+  BoardWorkerData,
+  BoardWorkerHighlights,
+  CLEAR_INFOS_ACTION
+} from "./lib/board.model";
 import {extend as _extend, isEmpty as _isEmpty} from 'lodash';
-import {dowloadSchema, getLabCodeAction} from "./sudoku.helper";
+import {downloadPlaySudoku, getLabCodeAction} from "./sudoku.helper";
 import {getUserData, loadUserData, saveUserData} from "./lib/userdata";
 import * as equal from "fast-deep-equal";
 import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
@@ -107,7 +113,9 @@ export class BoardDataManager extends DataManagerBase {
       });
 
     // dopo ogni modifica elimina le info di step
-    this.data.manager?.changed$.pipe(debounceTime(250)).subscribe(() => _sudokuLab.state.stepInfos$.next([]));
+    this.data.manager?.changed$
+      .pipe(debounceTime(250))
+      .subscribe(() => _sudokuLab.state.stepInfos$.next([]));
 
     this.data.sdk$.pipe(
       takeUntil(this._destroy$),
@@ -151,9 +159,10 @@ export class BoardDataManager extends DataManagerBase {
   handleAction(action?: BoardAction): boolean {
     switch (action) {
       case BoardAction.download:
-        dowloadSchema(this.data.sdk$.value);
+        downloadPlaySudoku(this.data.sdk$.value);
         return true;
       default:
+        if (CLEAR_INFOS_ACTION[action||'']) this._sudokuLab.state.stepInfos$.next([]);
         return false;
     }
   }
@@ -190,7 +199,9 @@ export class BoardDataManager extends DataManagerBase {
   }
 
   changed() {
-    if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{ sdk: this.data.sdk$.value });
+    const sdk = this.data.sdk$.value;
+    if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{ sdk });
+    if (!sdk.options.usePencil) this._sudokuLab.state.stepInfos$.next([]);
   }
 }
 

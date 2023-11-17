@@ -4,7 +4,7 @@ import {SolveStepResult} from './SolveStepResult';
 import {
   applySudokuRules,
   getAlgorithmsMap,
-  getAvailables,
+  getAvailables, getFlatPlaySudoku,
   getGroups,
   getRank,
   getValues,
@@ -29,14 +29,16 @@ import {DIFFICULTY_MAX, DIFFICULTY_RANGES, getAlgorithm, getAlgorithms, TRY_NUMB
 import {Algorithms, AlgorithmType} from '../enums';
 import {PlaySudokuGroup} from '../PlaySudokuGroup';
 import {addLine, debug, isValue} from '../../global.helper';
-import {SDK_PREFIX, SDK_PREFIX_DEBUG} from '../consts';
+import {SDK_PREFIX, SDK_PREFIX_DEBUG, SUDOKU_DEFAULT_MAXSPLIT} from '../consts';
 import {PlaySudokuCell} from "../PlaySudokuCell";
+import {Sudoku} from "../Sudoku";
+import {PlaySudokuOptions} from "../PlaySudokuOptions";
 
 export class Solver {
   private readonly _sdks: SudokuSolution[];
 
   constructor(sdk: PlaySudoku) {
-    const csdk = clear(sdk);
+    const csdk = getFlatPlaySudoku(sdk);
     this._sdks = [new SudokuSolution(csdk)];
   }
 
@@ -153,6 +155,11 @@ const _cannotSolve = (sdks: SudokuSolution[]): string => {
   return solvable ? '' : `No solvable schema`;
 };
 
+/**
+ * permette di lavorare su un clone del sudoku originale
+ * @param sdk
+ * @param handler
+ */
 const _onSudoku = <T>(sdk: PlaySudoku, handler: (sdk: PlaySudoku) => T) => {
   const changes: PlaySudoku = <PlaySudoku>_clone(sdk || {});
   return handler(changes);

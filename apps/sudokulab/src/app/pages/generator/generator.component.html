@@ -15,6 +15,8 @@
         [sudokuData]="generator"
         (changed)="changed()"
       ></svg-interactive-board>
+      <sudokulab-key-board [sudokuData]="generator"
+                           [usePlay]="true"></sudokulab-key-board>
       <div class="working-container compact-visible" *ngIf="generator.running$|async">
         <mat-progress-spinner class="working-spinner"
                               diameter="300"
@@ -24,7 +26,7 @@
         <div class="working-counter">{{(working$|async)||''}}</div>
       </div>
     </div>
-    <sudokulab-generator-toolbar></sudokulab-generator-toolbar>
+<!--    <sudokulab-generator-toolbar></sudokulab-generator-toolbar>-->
     <div class="bottom-board" fxFlex></div>
   </div>
   <div class="tools tools-right" fxFlex>

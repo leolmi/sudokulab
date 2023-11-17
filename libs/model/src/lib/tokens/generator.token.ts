@@ -22,6 +22,7 @@ export class GeneratorData extends SudokuData<GeneratorAction> {
     });
     this.running$ = new BehaviorSubject<boolean>(false);
     this.stopping$ = new BehaviorSubject<boolean>(false);
+    this.userStopping$ = new BehaviorSubject<boolean>(false);
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
     this.schema$ = new BehaviorSubject<Sudoku|null>(null);
     this.workingInfo$ = new BehaviorSubject<GeneratorWorkingInfo>({});
@@ -36,6 +37,10 @@ export class GeneratorData extends SudokuData<GeneratorAction> {
    * stato stopping del generatore
    */
   stopping$: BehaviorSubject<boolean>;
+  /**
+   * azione utente di stop
+   */
+  userStopping$: BehaviorSubject<boolean>;
   /**
    * elenco degli schemi generati
    */

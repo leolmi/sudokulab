@@ -1,15 +1,15 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, OnDestroy, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, OnDestroy} from '@angular/core';
 import {
-  BOARD_DATA,
   BoardAction,
-  BoardData,
-  Cell,
+  GeneratorAction,
+  GeneratorData,
   getAvailables,
   isValue,
   SUDOKU_DEFAULT_RANK,
+  SudokuData,
   use
 } from '@sudokulab/model';
-import {distinctUntilChanged, filter, map, mergeMap, switchMap, takeUntil} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, switchMap, takeUntil} from 'rxjs/operators';
 import {BehaviorSubject, combineLatest, Observable, Subject} from 'rxjs';
 import {Dictionary} from '@ngrx/entity';
 import {forEach as _forEach, reduce as _reduce} from 'lodash';
@@ -23,33 +23,36 @@ import {forEach as _forEach, reduce as _reduce} from 'lodash';
 export class KeyBoardComponent implements OnDestroy {
   private readonly _destroy$: Subject<void>;
   isPencil$: BehaviorSubject<boolean>;
-  private _board$: BehaviorSubject<BoardData>;
+  private _data$: BehaviorSubject<SudokuData<any>>;
 
   numbers$: Observable<string[]>;
   status$: Observable<Dictionary<boolean>>;
+  playState$: Observable<string>;
   usedStatus$: Observable<Dictionary<boolean>>;
 
   @Input()
-  set boardData(bd: BoardData) {
-    this._board$.next(bd);
+  set sudokuData(sd: SudokuData<any>) {
+    this._data$.next(sd);
   }
 
-  @Input() usePencil: boolean = false;
+  @Input() usePlay: boolean = false;
+
+  @Input() usePencil = false;
 
   constructor() {
     this._destroy$ = new Subject<void>();
-    this._board$ = new BehaviorSubject<BoardData>(new BoardData());
+    this._data$ = new BehaviorSubject<SudokuData<any>>(new SudokuData());
     this.isPencil$ = new BehaviorSubject<boolean>(false);
 
-    this.numbers$ = this._board$.pipe(
+    this.numbers$ = this._data$.pipe(
       takeUntil(this._destroy$),
-      switchMap((board) => board.sdk$.pipe(
+      switchMap((data) => data.sdk$.pipe(
         takeUntil(this._destroy$),
         map((sdk) => getAvailables(sdk?.sudoku?.rank || SUDOKU_DEFAULT_RANK).concat('x')))));
 
-    this.status$ = this._board$.pipe(
+    this.status$ = this._data$.pipe(
       takeUntil(this._destroy$),
-      switchMap((board) => board.sdk$.pipe(
+      switchMap((data) => data.sdk$.pipe(
         takeUntil(this._destroy$),
         map((sdk) => {
           const status: Dictionary<boolean> = {};
@@ -64,19 +67,25 @@ export class KeyBoardComponent implements OnDestroy {
           return status;
         }))));
 
-    this.usedStatus$ = this._board$.pipe(
+    this.usedStatus$ = this._data$.pipe(
       takeUntil(this._destroy$),
-      switchMap((board) => combineLatest([board.sdk$, board.activeCellId$]).pipe(
-        filter(() => board.isWorkerAvailable),
+      switchMap((data) => combineLatest([data.sdk$, data.activeCellId$]).pipe(
+        filter(() => data.isWorkerAvailable),
         map(([sdk, cellId]) => _reduce(sdk.cells[cellId]?.pencil||[], (s, v) =>
           ({ ...s, [v]: true }), {})))));
 
-    this._board$.pipe(
+    this._data$.pipe(
       takeUntil(this._destroy$),
-      switchMap((board) => board.sdk$.pipe(
+      switchMap((data) => data.sdk$.pipe(
         takeUntil(this._destroy$),
         distinctUntilChanged((s1,s2) => s1?.options.usePencil === s2?.options.usePencil))))
         .subscribe((s) => this.isPencil$.next(!!s?.options.usePencil));
+
+    this.playState$ = this._data$.pipe(
+      takeUntil(this._destroy$),
+      filter((data) => !!(<GeneratorData>data).userStopping$ && !!(<GeneratorData>data).running$),
+      switchMap((data) => combineLatest([(<GeneratorData>data).userStopping$, (<GeneratorData>data).running$]).pipe(
+        map(([stopping, running]) => stopping ? 'stopping' : (running ? 'stop' : 'play')))));
   }
 
   ngOnDestroy() {
@@ -86,11 +95,18 @@ export class KeyBoardComponent implements OnDestroy {
 
   clickOnNumber(num: string) {
     if (num === 'x') num = ' ';
-    use(this._board$, board => board.value$.next(num));
+    use(this._data$, data => data.value$.next(num));
   }
 
   togglePencil() {
     if (!this.usePencil) return;
-    use(this._board$, board => board.action$.next(BoardAction.pencil));
+    use(this._data$, data => data.action$.next(BoardAction.pencil));
+  }
+
+  play() {
+    use(this._data$, data => data.action$.next(GeneratorAction.run));
+  }
+  stop() {
+    use(this._data$, data => data.action$.next(GeneratorAction.stop));
   }
 }

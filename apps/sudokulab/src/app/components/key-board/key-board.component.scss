@@ -21,7 +21,8 @@
   width: 46px;
   height: 46px;
 
-  &.filled {
+  &.filled,
+  &.disabled {
     opacity: .2;
     cursor: not-allowed;
     pointer-events: none;

@@ -35,15 +35,18 @@ const _getGenerationMode = (status: GeneratorStatus): GeneratorMode => {
   // ma solo puro calcolo risolutivo poicé ha solo nomeri fissi
   if (status.total === status.fixed) return GeneratorMode.single;
 
+  // valori inseriti dall'utente
+  const userValues = status.dynamics+status.fixed;
+
   // **fixed**: gli schemi sono gerati sulla base delle possibili combinazioni
   // dei possibili valori dinamici
-  if (status.total === (status.dynamics+status.fixed)) return GeneratorMode.fixed;
+  if (status.total === userValues) return GeneratorMode.fixed;
 
   // **multiple**: il generatore deve aggiungere valori fissi possibili secondo
   // le logiche definite per raggiungere il numero di numeri fissi richiesti,
   // in questa casistica sono presenti cicli di valorizzazione aggiuntivi a quelli
   // dei numeri dinamici.
-  if (status.total > (status.dynamics+status.fixed)) return GeneratorMode.multiple;
+  if (status.total > userValues) return GeneratorMode.multiple;
 
   // **unknown**: non è possibile determinare la modalità di generazione degli schemi
   return GeneratorMode.unknown;

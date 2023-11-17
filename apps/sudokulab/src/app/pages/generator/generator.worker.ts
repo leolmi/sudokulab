@@ -12,7 +12,8 @@ import {
   PlaySudoku,
   SDK_DEFAULT_GENERATOR_TIMEOUT,
   Solver,
-  SudokuMessage
+  SudokuMessage,
+  rebuildSudoku, SDK_PREFIX, Sudoku, buildSudokuInfo
 } from "@sudokulab/model";
 import {cloneDeep as _clone, extend as _extend, keys as _keys} from 'lodash';
 import {buildValMap, nextValMap} from "./valorizations-map.builder";
@@ -72,43 +73,6 @@ const _checkRunningState = (): boolean => {
   return !!STATE.status.running;
 }
 
-//#region: TEST
-
-/**
- *
- * @param onend    (end callback)
- * @param duration (secondi)
- * @param i
- */
-const _testProcessStep = (onend: () => void, duration = 10, i = 0) => {
-  setTimeout(() => {
-    if (i < (duration * 2)) {
-      _checkRunningState();
-      if (STATE.status.running) {
-        _testProcessStep(onend, duration, ++i);
-      } else {
-        onend();
-      }
-    } else {
-      onend();
-    }
-  }, 500);
-}
-
-const _testProcess = () => {
-
-  _testProcessStep(() => {
-    const message = new SudokuMessage({
-      message: STATE.status.stopping ? 'worker is stopped' : 'finish generation!',
-      type: STATE.status.stopping ? MessageType.warning : MessageType.success
-    });
-    _stopProcess();
-    _postMessage({ message });
-  });
-}
-
-//#endregion
-
 /**
  * verifica che sia stata creata la mappa di valorizzazioni
  */
@@ -125,14 +89,15 @@ const _checkValMap = () => {
  */
 const _applyFixedValues = (): boolean => {
   if (STATE.valMap?.isDone) return false;
-  const values = STATE.valMap?.valuesForCells||{};
+  const values = STATE.valMap?.valuesForCells || {};
   _keys(values).forEach(cid => {
-    const cell = (STATE.activeSdk?.cells||{})[cid];
+    const cell = (STATE.activeSdk?.cells || {})[cid];
     if (cell) {
       cell.value = values[cid];
       cell.fixed = true;
     }
-  })
+  });
+  if (STATE.activeSdk) rebuildSudoku(STATE.activeSdk);
   return true;
 }
 
@@ -158,29 +123,43 @@ const _checkSchemas = (): boolean => {
 }
 
 
-const _publishSchema = () => {
-  const schema = _clone(STATE.activeSdk?.sudoku);
-  if (schema) STATE.status.generatedSchemas?.push(schema);
-  _postMessage({
-    status: {
-      ...STATE.status,
-      generatedSchema: schema
+const _publishSchema = (schema: Sudoku) => {
+  if (schema) {
+    // FILTRO SULLO SCHEMA
+    let accept = true;
+    // filtro su T-alg
+    if (schema.info.useTryAlgorithm && !!STATE.activeSdk?.options.generator.excludeTryAlgorithm) accept = false;
+    // filtro sulla difficoltà
+    const minDiff = STATE.activeSdk?.options.generator.minDiff||0;
+    if (minDiff>0 && schema.info.difficultyValue<minDiff) accept = false;
+    const maxDiff = STATE.activeSdk?.options.generator.maxDiff||0;
+    if (maxDiff>0 && schema.info.difficultyValue>maxDiff) accept = false;
+    if (accept) {
+      STATE.status.generatedSchemas?.push(schema);
+      STATE.status.generatedSchema = schema;
+      _postMessage();
     }
-  })
+    console.log(...SDK_PREFIX, `generated schema (accepted=${accept})`, schema);
+  }
 }
 
 /**
  * risolve lo schema attivo
  */
 const _solve = () => {
+  _notifyWorkingInfo();
   if (!STATE.activeSdk || !_checkRunningState()) return;
   const values = getPlayFixedValues(STATE.activeSdk);
   if (values) STATE.cache[values] = true;
   const solver = new Solver(STATE.activeSdk);
   const result = solver.solve();
   if (result.unique) {
-    _extend(STATE.activeSdk, result.unique.sdk);
-    _publishSchema();
+    const schema = _clone(result.unique.sdk?.sudoku||new Sudoku());
+    schema.info = buildSudokuInfo(schema, {
+      unique: true,
+      algorithms: result.unique.algorithms
+    }, true);
+    _publishSchema(schema);
   }
 }
 
@@ -208,6 +187,7 @@ const _checkNextCycle = (): boolean => {
     default:
       break;
   }
+
   // verifica lo stato del generatore
   switch (STATE.status.mode) {
     case GeneratorMode.fixed:
@@ -245,15 +225,19 @@ const _checkStartCycle = () => {
         break;
       case GeneratorMode.fixed:
         _buildActiveSchema();
-        _notifyWorkingInfo();
         _checkValMap();
-        if (_applyFixedValues()) _solve();
+        if (_applyFixedValues()) {
+          _notifyWorkingInfo();
+          _solve();
+        }
         break;
       case GeneratorMode.multiple:
         if (!_checkSchemas()) return _checkEnd();
-        _notifyWorkingInfo();
         _checkValMap();
-        if (_applyFixedValues()) _solve();
+        if (_applyFixedValues()) {
+          _notifyWorkingInfo();
+          _solve();
+        }
         break;
     }
     _checkEnd();
@@ -272,11 +256,6 @@ const _checkEnd = () => {
 
 const _startGenerator = () => {
   _startProcess();
-
-  // >>>> TEST
-  // return _testProcess();
-  // <<<< TEST
-
   _checkStartCycle();
 }
 
@@ -293,6 +272,8 @@ const _loadSdk = (sdk: PlaySudoku) => {
   STATE.status = new GeneratorStatus({
     fixed: status.fixed,
     dynamics: status.dynamics,
+    generated: status.generated,
+    total: status.total,
     mode: status.mode
   });
 }

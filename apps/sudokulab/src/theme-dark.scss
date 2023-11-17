@@ -77,6 +77,16 @@
     color: $color-accent-contrast-dark;
   }
 
+  .color-success {
+    background-color: $color-success-dark;
+    color: $color-success-contrast-dark;
+  }
+
+  .color-error {
+    background-color: $color-error2-dark;
+    color: $color-error-contrast-dark;
+  }
+
   .color-accent-important {
     background-color: $color-accent-dark !important;
     color: $color-accent-contrast-dark !important;

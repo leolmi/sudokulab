@@ -299,7 +299,7 @@ export class GeneratorInfo {
     // finalizza la costruzione dello schema
     finalizeSchema(this);
     // log schemacreato
-    console.log('NEW SCHEMA >>>> ', getValues(this.schema));
+    //console.log('NEW SCHEMA >>>> ', getValues(this.schema));
   }
 
   /**

@@ -8,6 +8,7 @@ import { PlaySudokuState } from './PlaySudokuState';
 import { cellId, getAvailables, getGroupRank, groupId } from '../sudoku.helper';
 import { SUDOKU_STANDARD_CHARACTERS } from './consts';
 import { guid } from '../global.helper';
+import {getSudoku} from "../generator.helper";
 
 export class PlaySudoku {
   constructor(ps?: Partial<PlaySudoku>) {
@@ -38,6 +39,11 @@ const _addGroup = (ps: PlaySudoku, type: SudokuGroupType, pos: number) => {
 }
 
 const _getValue = (v: string): string => (v||SUDOKU_STANDARD_CHARACTERS.empty) === SUDOKU_STANDARD_CHARACTERS.empty ? '' : v;
+
+
+export const rebuildSudoku = (ps: PlaySudoku) => {
+  ps.sudoku = getSudoku(ps);
+}
 
 export const checkSudoku = (ps: PlaySudoku) => {
   if (!ps?.sudoku) return;

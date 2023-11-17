@@ -440,6 +440,7 @@ export class SudokuLabLogic extends SudokuLab {
   activateSelectedSchema(id?: number) {
     if (!!id) this.state.selectedSudokuId$.next(id);
     const target = this.state.selectedSudokuId$.value;
+    this.state.stepInfos$.next([]);
     this.state.activeSudokuId$.next(target);
     const page = this.state.page$.value;
     if (page?.code === AvailablePages.lab) this._location.go(`/${page?.code}/${target}`);

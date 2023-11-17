@@ -10,5 +10,17 @@
   predefinito o applicato allo schema attuale;
 - [ ] riconoscimeto schema in immagini;
 - [ ] possibilità di spostare tute le logiche di calcolo in workers dedicati 
-  - immediato (playing)
-  - generatore
+  - immediato (playing);
+  - generatore;
+
+
+
+# TODO NEW VERSION
+
+- [x] vedere problema solver (2 soluzioni diverse da generatore e da player);
+- [ ] cambio pagina > su player non riapplica i dati utente;
+- [x] eliminazione delle info di soluzione su alcune azioni
+  - caricamento nuovo schema
+  - inserimento valori
+  - cancellazione di tutti i valori
+  - risoluzione automatica

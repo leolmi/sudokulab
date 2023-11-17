@@ -123,7 +123,7 @@
 
   <!-- VALUES & CYCLES -->
   <div fxLayout="row" fxLayoutAlign="start center"
-       *ngIf="((status$|async)?.dynamics||0)>0">
+       *ngIf="((status$|async)?.dynamics||0)>0||((status$|async)?.generated||0)>0">
     <!-- VALUES MODE -->
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>Values mode</mat-label>

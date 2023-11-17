@@ -22,6 +22,13 @@ export enum BoardAction {
   details = 'details',
 }
 
+export const CLEAR_INFOS_ACTION: any = {
+  [BoardAction.solve]: true,
+  [BoardAction.solveStep]: true,
+  [BoardAction.clear]: true,
+  [BoardAction.value]: true,
+}
+
 export class BoardWorkerHighlights {
   constructor() {
     this.cell = {};

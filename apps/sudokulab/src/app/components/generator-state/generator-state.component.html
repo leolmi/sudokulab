@@ -5,11 +5,12 @@
          fxLayout="column" fxLayoutAlign="center">
       <div>no schema</div>
     </div>
-    <svg-board class="thumbnail"
-               *ngFor="let sdk of generator.schemas$|async"
-               [sudoku]="sdk"
-               matTooltip="click to open in player"
-               (click)="openInLab(sdk)"></svg-board>
+    <div *ngFor="let sdk of generator.schemas$|async" class="thumbnail">
+      <svg-board [sudoku]="sdk"
+                 matTooltip="click to open in player"
+                 (click)="openInLab(sdk)"></svg-board>
+      <div class="thumbnail-description">{{sdk|schemaName}}</div>
+    </div>
     <sudokulab-thumbnail [workingMode]="true"
                          *ngIf="!!(generator.running$|async)"
                          [sudoku]="sudoku$|async"
