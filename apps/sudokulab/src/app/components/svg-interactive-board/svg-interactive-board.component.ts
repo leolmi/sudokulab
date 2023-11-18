@@ -17,6 +17,10 @@ import {map} from "rxjs/operators";
 import {forEach as _forEach, reduce as _reduce} from 'lodash';
 import {Dictionary} from "@ngrx/entity";
 
+interface PopupValue {
+  text: string;
+}
+
 const GEOMETRY: any = {
   width: 10,
   height: 10,
@@ -32,7 +36,27 @@ const GEOMETRY: any = {
     '7': {x:1.5, y:9},
     '8': {x:4.5, y:9},
     '9': {x:7.5, y:9},
-  }
+  },
+  popup: {
+    width: 14,
+    values: [
+      { text: '1', transform: 'translate(0, -10px)' },
+      { text: '2', transform: 'translate(6px, -8.5px)' },
+      { text: '3', transform: 'translate(10.6px, -3.2px)' },
+      { text: '4', transform: 'translate(10.6px, 3.2px)' },
+      { text: '5', transform: 'translate(6px, 8.5px)' },
+      { text: '6', transform: 'translate(0px, 10px)' },
+      { text: '7', transform: 'translate(-6px, 8.5px)' },
+      { text: '8', transform: 'translate(-10.6px, 3.2px)' },
+      { text: '9', transform: 'translate(-10.6px, -3.2px)' },
+      { text: 'x', transform: 'translate(-6px, -8.5px)' },
+    ]
+  },
+  bigLines: [
+    { x1: 30, y1: 0, x2: 30, y2: 90},
+    { x1: 60, y1: 0, x2: 60, y2: 90},
+    { x1: 0, y1: 30, x2: 90, y2: 30},
+    { x1: 0, y1: 60, x2: 90, y2: 60}]
 }
 
 class SvgSize {
@@ -50,8 +74,8 @@ class SvgCell {
     this.cell = c;
     this.id = c?.id;
     const size = getCellCoords(c);
-    this.x = size.x
-    this.y = size.y
+    this.x = size?.x||0
+    this.y = size?.y||0
     this.text = (o?.characters||{})[c?.value]||c?.value;
     this.textX = this.x + (GEOMETRY.width/2);
     this.textY = this.y + (GEOMETRY.height/2);
@@ -80,7 +104,7 @@ class SvgCell {
   template: `<svg class="svg-interactive-board"
                   [class.pencil]="pencil$|async"
                   [class.disabled]="disabled$|async"
-                  viewBox="0 0 90 90">
+                  viewBox="-10 -10 110 110">
     <g>
       <!-- CONTORNO (light) -->
       <rect x="0" y="0" width="90" height="90"
@@ -95,6 +119,8 @@ class SvgCell {
               [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
               [class.highlight-secondary]="((highlights$|async)?.others||{})[cell.id]"
               (click)="select(cell)"
+              (mousedown)="showpopup(cell)"
+              (touchstart)="showpopup(cell)"
               [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
               [attr.x]="cell.x" [attr.y]="cell.y"></rect>
         <text class="svg-board-cell-text"
@@ -115,21 +141,43 @@ class SvgCell {
           </g>
         </ng-container>
       </g>
-      <!-- LINNE SPESSE VERTICALI -->
-      <rect x="30" y="-1" width="30" height="100"
+
+      <!-- LINNE SPESSE -->
+      <line *ngFor="let ln of GEOMETRY.bigLines"
+            [attr.x1]="ln.x1" [attr.y1]="ln.y1" [attr.x2]="ln.x2" [attr.y2]="ln.y2"
             class="svg-board-line"
-            fill="transparent"
-            [attr.stroke-width]="GEOMETRY.lineBigWidth"></rect>
-      <!-- LINNE SPESSE ORIZZONTALI -->
-      <rect x="-1" y="30" width="100" height="30"
-            class="svg-board-line"
-            fill="transparent"
-            [attr.stroke-width]="GEOMETRY.lineBigWidth"></rect>
+            [attr.stroke-width]="GEOMETRY.lineBigWidth"></line>
+
       <!-- SELEZIONE -->
       <rect class="svg-board-cell svg-selection-cell"
+            *ngIf="(selection$|async) as sel"
             [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
-            [attr.x]="(selection$|async)?.x"
-            [attr.y]="(selection$|async)?.y"></rect>
+            [attr.x]="sel?.x"
+            [attr.y]="sel?.y"></rect>
+    </g>
+
+    <g *ngIf="popup$|async as pop"
+       (mouseup)="hidepopup()" (mouseleave)="hidepopup()"
+       (touchend)="hidepopup()" (touchcancel)="hidepopup()">
+      <circle class="svg-board-popup-selection"
+              [attr.cx]="pop.textX" [attr.cy]="pop.textY"
+              [attr.r]="GEOMETRY.popup.width"/>
+      <text class="popup-watch-value"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            [attr.x]="pop.textX"
+            [attr.y]="pop.textY">{{watchValue$|async}}</text>
+      <text *ngFor="let pv of GEOMETRY.popup.values"
+            class="popup-value"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            (mouseup)="hidepopup(pv)"
+            (touchend)="hidepopup(pv)"
+            (mouseover)="watchvalue(pv)"
+            (touchmove)="watchvalue(pv)"
+            [style.transform]="pv.transform"
+            [attr.x]="pop.textX"
+            [attr.y]="pop.textY">{{pv.text}}</text>
     </g>
   </svg>`,
   styleUrls: ['./svg-interactive-board.component.scss']
@@ -144,8 +192,12 @@ export class SvgInteractiveBoard implements OnDestroy {
   disabled$: BehaviorSubject<boolean>
   currentCellId$: BehaviorSubject<string>;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
-  selection$: Observable<SvgSize>;
+  selection$: Observable<SvgSize|undefined>;
   GEOMETRY = GEOMETRY;
+
+  popup$: BehaviorSubject<SvgCell|undefined>;
+  watchValue$: BehaviorSubject<string|undefined>;
+
 
   @Input()
   set sudokuData(sd: SudokuData<any>) {
@@ -172,7 +224,8 @@ export class SvgInteractiveBoard implements OnDestroy {
     this.currentCellId$ = new BehaviorSubject<string>('');
     this.disabled$ = new BehaviorSubject<boolean>(false);
     this.highlights$ = new BehaviorSubject<BoardWorkerHighlights>(BoardWorkerHighlights.empty);
-
+    this.popup$ = new BehaviorSubject<SvgCell|undefined>(undefined);
+    this.watchValue$ = new BehaviorSubject<string | undefined>(undefined);
     this.pencil$ = this.sdk$.pipe(map(sdk => !!sdk?.options?.usePencil));
     this.cells$ = this.sdk$.pipe(map(sdk => getCells(sdk)));
     this.selection$ = combineLatest([this.sdk$, this.currentCellId$]).pipe(
@@ -189,12 +242,16 @@ export class SvgInteractiveBoard implements OnDestroy {
     this._subscriptions['disabled'] = useOn(this._sudokuData.disabled$, this.disabled$, this._destroy$);
   }
 
+  private _apply(e: KeyboardEvent) {
+    const sdk = handleKeyEvent(this.sudokuData, e);
+    this.changed.emit(sdk);
+  }
+
   @HostListener('window:keyup', ['$event'])
   keyEvent(e: KeyboardEvent) {
     if (this.sudokuData.disabled$.value) return;
     clearEvent(e);
-    const sdk = handleKeyEvent(this.sudokuData, e);
-    this.changed.emit(sdk);
+    this._apply(e);
   }
 
   select(cell: SvgCell) {
@@ -206,9 +263,36 @@ export class SvgInteractiveBoard implements OnDestroy {
     this._destroy$.next();
     this._destroy$.unsubscribe();
   }
+
+  showpopup(cell: SvgCell) {
+    if (this.sudokuData.disabled$.value) return;
+    this.select(cell);
+    this.watchValue$.next(cell.text);
+    this.popup$.next(cell);
+  }
+
+  hidepopup(v?: PopupValue) {
+    this.watchValue$.next(undefined);
+    if (v) {
+      const key = calcKey(v.text, this.sdk$.value, this.popup$.value);
+      this._apply(<KeyboardEvent>{key});
+    }
+    this.popup$.next(undefined);
+  }
+
+  watchvalue(v?: PopupValue){
+    this.watchValue$.next(v?.text);
+  }
 }
 
-const getCellCoords = (cell?: PlaySudokuCell): SvgSize => {
+const calcKey = (text: string, sdk: PlaySudoku, cell?: SvgCell): string => {
+  if (sdk.options.acceptX && text==='x')
+    return isDynamic(cell?.text||'') ? ' ' : 'x';
+  return (!sdk.options.acceptX && isDynamic(text)) ? ' ' : text;
+}
+
+const getCellCoords = (cell?: PlaySudokuCell): SvgSize|undefined => {
+  if (!cell) return undefined;
   const dic = decodeCellId(cell?.id||'');
   return { x: dic.col * GEOMETRY.width, y: dic.row * GEOMETRY.height };
 }

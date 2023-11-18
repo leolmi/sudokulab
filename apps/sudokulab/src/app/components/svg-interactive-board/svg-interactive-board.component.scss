@@ -12,6 +12,7 @@
     transform: scale(.9);
     transform-origin: center;
     transform-box: border-box;
+    pointer-events: none;
   }
 }
 
@@ -28,6 +29,24 @@
     font-weight: bold;
     animation: svg-pulse 2s infinite;
   }
+}
+
+.popup-value {
+  font-size: 5px;
+  font-weight: 500;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  transition: font-size ease-in-out;
+  user-select: none;
+  &:hover {
+    font-size: 8px;
+  }
+}
+
+.popup-watch-value {
+  font-size: 10px;
+  font-weight: bold;
+  user-select: none;
 }
 
 .svg-board-cell-values-text {

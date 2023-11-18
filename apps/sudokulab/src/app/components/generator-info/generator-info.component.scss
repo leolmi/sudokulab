@@ -22,3 +22,11 @@
     }
   }
 }
+
+::ng-deep {
+  .compact {
+    .generator-info-toolbar {
+      padding-left: 0;
+    }
+  }
+}

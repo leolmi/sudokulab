@@ -151,6 +151,15 @@
       fill: $color-background-contrast;
     }
   }
+  .svg-board-popup-selection {
+    fill: $color-background;
+  }
+  .popup-value {
+    fill: $color-background-contrast;
+  }
+  .popup-watch-value {
+    fill: $color-primary;
+  }
   .svg-interactive-board {
     .svg-board-background {
       fill: $color-background-board;

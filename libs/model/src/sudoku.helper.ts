@@ -786,15 +786,15 @@ export const applyCellValue = (cell?: PlaySudokuCell, value?: string, options?: 
   if (!cell || (!options?.fixedValues && cell.fixed)) return false;
   if (!isValidValue(value || '', undefined, options)) return false;
   value = getRealUserValue(value || '', options);
-
-  // TODO: gestione toggle del X Value per il generatore...
-
-
-  if (DELETE_VALUES.indexOf(value || '') > -1) value = '';
   if (!!options?.usePencil) {
+    if (DELETE_VALUES.indexOf(value || '') > -1) value = '';
     cell.value = '';
     cell.pencil = !value ? [] : toggleValue(cell.pencil, value);
   } else {
+    if (DELETE_VALUES.indexOf(value || '') > -1) {
+      if (options?.acceptX && (isValue(cell.value) || !cell.value)) value = SUDOKU_STANDARD_CHARACTERS.dynamic;
+      if (!options?.acceptX || isDynamic(cell.value)) value = '';
+    }
     cell.pencil = [];
     cell.value = (value || '').trim();
     if (options?.fixedValues) cell.fixed = !!cell.value;

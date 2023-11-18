@@ -189,6 +189,15 @@
       fill: $color-background-contrast-dark;
     }
   }
+  .svg-board-popup-selection {
+    fill: $color-background-dark;
+  }
+  .popup-value {
+    fill: $color-background-contrast-dark;
+  }
+  .popup-watch-value {
+    fill: $color-accent-popup-dark;
+  }
   .svg-interactive-board {
     .svg-board-background {
       fill: $color-background-board-dark;

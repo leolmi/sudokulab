@@ -29,6 +29,7 @@ export class KeyBoardComponent implements OnDestroy {
   status$: Observable<Dictionary<boolean>>;
   playState$: Observable<string>;
   usedStatus$: Observable<Dictionary<boolean>>;
+  iconX$: Observable<string>;
 
   @Input()
   set sudokuData(sd: SudokuData<any>) {
@@ -74,18 +75,25 @@ export class KeyBoardComponent implements OnDestroy {
         map(([sdk, cellId]) => _reduce(sdk.cells[cellId]?.pencil||[], (s, v) =>
           ({ ...s, [v]: true }), {})))));
 
-    this._data$.pipe(
-      takeUntil(this._destroy$),
-      switchMap((data) => data.sdk$.pipe(
-        takeUntil(this._destroy$),
-        distinctUntilChanged((s1,s2) => s1?.options.usePencil === s2?.options.usePencil))))
-        .subscribe((s) => this.isPencil$.next(!!s?.options.usePencil));
-
     this.playState$ = this._data$.pipe(
       takeUntil(this._destroy$),
       filter((data) => !!(<GeneratorData>data).userStopping$ && !!(<GeneratorData>data).running$),
       switchMap((data) => combineLatest([(<GeneratorData>data).userStopping$, (<GeneratorData>data).running$]).pipe(
         map(([stopping, running]) => stopping ? 'stopping' : (running ? 'stop' : 'play')))));
+
+    this.iconX$ = this._data$.pipe(
+      takeUntil(this._destroy$),
+      switchMap((data) => data.sdk$.pipe(
+        takeUntil(this._destroy$),
+        distinctUntilChanged((s1,s2) => s1?.options.acceptX === s2?.options.acceptX),
+        map((sdk) => sdk?.options?.acceptX ? 'photo_filter' : 'check_box_outline_blank'))))
+
+    this._data$.pipe(
+      takeUntil(this._destroy$),
+      switchMap((data) => data.sdk$.pipe(
+        takeUntil(this._destroy$),
+        distinctUntilChanged((s1,s2) => s1?.options.usePencil === s2?.options.usePencil))))
+      .subscribe((s) => this.isPencil$.next(!!s?.options.usePencil));
   }
 
   ngOnDestroy() {

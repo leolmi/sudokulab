@@ -9,7 +9,7 @@
        [matTooltipDisabled]="kn!=='x'"
        (click)="clickOnNumber(kn)"
        fxFlex>
-    <mat-icon *ngIf="kn==='x'">check_box_outline_blank</mat-icon>
+    <mat-icon *ngIf="kn==='x'">{{iconX$|async}}</mat-icon>
     <span *ngIf="kn!=='x'">{{kn}}</span>
   </div>
   <div class="key-number"
