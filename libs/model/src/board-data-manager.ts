@@ -10,7 +10,7 @@ import {
 } from "./lib/board.model";
 import {extend as _extend, isEmpty as _isEmpty} from 'lodash';
 import {downloadPlaySudoku, getLabCodeAction} from "./sudoku.helper";
-import {getUserData, loadUserData, saveUserData} from "./lib/userdata";
+import {getUserData, loadUserData, saveUserData} from "./lib/schemadata";
 import * as equal from "fast-deep-equal";
 import {PlaySudokuOptions} from "./lib/PlaySudokuOptions";
 import {handleKeyEvent, updateSchema} from "./manager.helper";
@@ -76,14 +76,10 @@ export class BoardDataManager extends DataManagerBase {
         this.data.info$.next(undefined);
       });
 
-    // carica i dati utente & effettua la verifica
+    // carica i dati utente alla modifica dello schema
     this.data.sdk$
       .pipe(distinctUntilChanged((s1,s2) => s1?.id === s2?.id))
-      .subscribe(s => {
-        const sdk = loadUserData(s);
-        this.data.sdk$.next(sdk);
-        if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{sdk});
-      });
+      .subscribe(s => this.loadUserData());
 
     // intercetta le actions
     this.data.action$.pipe(
@@ -172,6 +168,12 @@ export class BoardDataManager extends DataManagerBase {
    */
   saveUserData() {
     this.data.userData$.next(saveUserData(this.data.sdk$.value));
+  }
+
+  loadUserData() {
+    const sdk = loadUserData(this.data.sdk$.value);
+    this.data.sdk$.next(sdk);
+    if (this._worker) this._worker.postMessage(<BoardWorkerArgs>{sdk});
   }
 
   /**

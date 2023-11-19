@@ -3,6 +3,8 @@ import {PlaySudoku} from "./PlaySudoku";
 import {SudokuMessage} from "./SudokuMessage";
 import {SolveStepResult} from "./logic";
 import {AlgorithmResultLine} from "./AlgorithmResult";
+import {PlaySudokuOptions} from "./PlaySudokuOptions";
+import {UserData} from "./UserData";
 
 export const BOARD_WORKER_USER_DATA_KEY = 'SUDOKULAB_WBOARD_USERDATA';
 
@@ -80,10 +82,10 @@ export interface SchemaData {
 /**
  * dati utente sulle modifiche agli schemi
  */
-export class BoardUserData {
-  constructor(d?: Partial<BoardUserData>) {
-    this.schema = {};
-    Object.assign(this, d || {});
+export class BoardUserData extends UserData {
+  constructor(ud?: Partial<BoardUserData>) {
+    super(ud);
+    this.schema = ud?.schema||{};
   }
   schema: Dictionary<SchemaData>;
 }

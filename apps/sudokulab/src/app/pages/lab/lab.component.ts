@@ -93,6 +93,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
 
   ngAfterViewInit() {
     this._element$.next(this.board);
+    this.boardData.manager?.loadUserData();
   }
 
   ngOnDestroy() {

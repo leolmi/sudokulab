@@ -1,5 +1,6 @@
 import {BehaviorSubject, Subject} from "rxjs";
 import {PlaySudoku} from "../PlaySudoku";
+import {UserData} from "../UserData";
 
 export class SudokuData<T> {
   constructor(ps?: Partial<PlaySudoku>) {
@@ -9,7 +10,7 @@ export class SudokuData<T> {
     this.activeCellId$ = new BehaviorSubject<string>('');
     this.value$ = new Subject<string>();
     this.action$ = new Subject<T>();
-    this.userData$ = new BehaviorSubject<any>({});
+    this.userData$ = new BehaviorSubject<UserData|undefined>(undefined);
   }
 
   disabled$: BehaviorSubject<boolean>;
@@ -18,5 +19,5 @@ export class SudokuData<T> {
   value$: Subject<string>;
   isWorkerAvailable: boolean;
   action$: Subject<T>;
-  userData$: BehaviorSubject<any>;
+  userData$: BehaviorSubject<UserData|undefined>;
 }

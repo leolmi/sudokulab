@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import {BOARD_DATA, BoardData, PlaySudoku, Sudoku, SudokuLab, use} from '@sudokulab/model';
+import {BOARD_DATA, BoardData, BoardUserData, PlaySudoku, Sudoku, SudokuLab, use} from '@sudokulab/model';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {distinctUntilChanged, map, take} from 'rxjs/operators';
 import {DestroyComponent} from '../DestroyComponent';
@@ -47,7 +47,7 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
       .pipe(map(([aid, sid]) => !!sid && sid !== aid));
     this.userChanges$ = combineLatest([sudokuLab.state.userSettings$, this.schemas$, _board.userData$])
       .pipe(map(([us, schemas, udata]) =>
-        _board.isWorkerAvailable ? (udata?.schema||{}) : getSchemasMap(schemas, us)));
+        _board.isWorkerAvailable ? ((<BoardUserData>udata)?.schema||{}) : getSchemasMap(schemas, us)));
   }
 
   select(schema: Sudoku) {

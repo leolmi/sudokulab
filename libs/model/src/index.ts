@@ -1,6 +1,6 @@
 export * from './lib/enums';
 export * from './lib/consts';
-export * from './lib/userdata';
+export * from './lib/schemadata';
 export * from './lib/Cell';
 export * from './lib/CellInfo';
 export * from './lib/Sudoku';

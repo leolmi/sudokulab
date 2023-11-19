@@ -37,7 +37,7 @@
   transform-box: fill-box;
   transform-origin: 50% 50%;
   transition: font-size ease-in-out;
-  user-select: none;
+  // user-select: none;
   &:hover {
     font-size: 8px;
   }

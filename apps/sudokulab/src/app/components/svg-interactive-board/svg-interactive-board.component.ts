@@ -13,7 +13,7 @@ import {
   useOn
 } from "@sudokulab/model";
 import {BehaviorSubject, combineLatest, Observable, Subject, Subscription} from "rxjs";
-import {map} from "rxjs/operators";
+import {distinctUntilChanged, map} from "rxjs/operators";
 import {forEach as _forEach, reduce as _reduce} from 'lodash';
 import {Dictionary} from "@ngrx/entity";
 
@@ -104,7 +104,7 @@ class SvgCell {
   template: `<svg class="svg-interactive-board"
                   [class.pencil]="pencil$|async"
                   [class.disabled]="disabled$|async"
-                  viewBox="-10 -10 110 110">
+                  [attr.viewBox]="viewBox$|async">
     <g>
       <!-- CONTORNO (light) -->
       <rect x="0" y="0" width="90" height="90"
@@ -119,8 +119,8 @@ class SvgCell {
               [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
               [class.highlight-secondary]="((highlights$|async)?.others||{})[cell.id]"
               (click)="select(cell)"
-              (mousedown)="showpopup(cell)"
-              (touchstart)="showpopup(cell)"
+              (mousedown)="showpopup($event, cell)"
+              (touchstart)="showpopup($event, cell)"
               [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
               [attr.x]="cell.x" [attr.y]="cell.y"></rect>
         <text class="svg-board-cell-text"
@@ -157,8 +157,11 @@ class SvgCell {
     </g>
 
     <g *ngIf="popup$|async as pop"
-       (mouseup)="hidepopup()" (mouseleave)="hidepopup()"
-       (touchend)="hidepopup()" (touchcancel)="hidepopup()">
+       (mouseup)="hidepopup()"
+       (mouseleave)="hidepopup()"
+       (touchmove)="touchmove($event)"
+       (touchend)="hidepopup()"
+       (touchcancel)="hidepopup()">
       <circle class="svg-board-popup-selection"
               [attr.cx]="pop.textX" [attr.cy]="pop.textY"
               [attr.r]="GEOMETRY.popup.width"/>
@@ -173,8 +176,8 @@ class SvgCell {
             dominant-baseline="middle"
             (mouseup)="hidepopup(pv)"
             (touchend)="hidepopup(pv)"
-            (mouseover)="watchvalue(pv)"
-            (touchmove)="watchvalue(pv)"
+            (mouseover)="watchvalue($event, pv)"
+            (touchmove)="watchvalue($event, pv)"
             [style.transform]="pv.transform"
             [attr.x]="pop.textX"
             [attr.y]="pop.textY">{{pv.text}}</text>
@@ -193,6 +196,7 @@ export class SvgInteractiveBoard implements OnDestroy {
   currentCellId$: BehaviorSubject<string>;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
   selection$: Observable<SvgSize|undefined>;
+  viewBox$: Observable<string>;
   GEOMETRY = GEOMETRY;
 
   popup$: BehaviorSubject<SvgCell|undefined>;
@@ -231,6 +235,10 @@ export class SvgInteractiveBoard implements OnDestroy {
     this.selection$ = combineLatest([this.sdk$, this.currentCellId$]).pipe(
       map(([sdk, cid])=> (sdk?.cells||{})[cid]),
       map((cell) => getCellCoords(cell)));
+    this.viewBox$ = this.sudokuData.userData$.pipe(
+      map(ud => ud?.options?.usePopupKeys),
+      distinctUntilChanged(),
+      map(popk => popk ? '-10 -10 110 110' : '0 0 90 90'));
   }
 
 
@@ -264,8 +272,11 @@ export class SvgInteractiveBoard implements OnDestroy {
     this._destroy$.unsubscribe();
   }
 
-  showpopup(cell: SvgCell) {
-    if (this.sudokuData.disabled$.value) return;
+  showpopup(e: any, cell: SvgCell) {
+    // console.log('TOUCHSTART', e);
+    // clearEvent(e);
+    const ud = this.sudokuData.userData$.value;
+    if (this.sudokuData.disabled$.value || !ud?.options?.usePopupKeys) return;
     this.select(cell);
     this.watchValue$.next(cell.text);
     this.popup$.next(cell);
@@ -280,7 +291,16 @@ export class SvgInteractiveBoard implements OnDestroy {
     this.popup$.next(undefined);
   }
 
-  watchvalue(v?: PopupValue){
+  touchmove(e: any) {
+    // const x = e.touches[0]?.clientX;
+    // const y = e.touches[0]?.clientY;
+    // console.log(`TOUCH x=${x}  y=${y}`, e);
+    clearEvent(e);
+  }
+
+  watchvalue(e: any, v?: PopupValue){
+    clearEvent(e);
+    // console.log('TOUCHMOVE 1', e);
     this.watchValue$.next(v?.text);
   }
 }

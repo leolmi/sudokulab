@@ -15,7 +15,7 @@ import {DataManagerBase} from "./data-manager.base";
 import {checkAvailable, SudokuLab} from "./lib/logic";
 import {debounceTime, distinctUntilChanged, filter, map, takeUntil} from "rxjs/operators";
 import {NgZone} from "@angular/core";
-import {loadGeneratorUserData, saveGeneratorUserData} from "./lib/userdata";
+import {loadGeneratorUserData, saveGeneratorUserData} from "./lib/schemadata";
 
 export class GeneratorDataManagerOptions {
   constructor(o?: Partial<GeneratorDataManagerOptions>) {

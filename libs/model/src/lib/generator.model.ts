@@ -1,7 +1,7 @@
 import {SudokuMessage} from "./SudokuMessage";
 import {PlaySudoku} from "./PlaySudoku";
 import {Sudoku} from "./Sudoku";
-import {PlaySudokuOptions} from "./PlaySudokuOptions";
+import {UserData} from "./UserData";
 
 export const SDK_DEFAULT_GENERATOR_TIMEOUT = 250;
 export const SDK_GENERATOR_USER_DATA_KEY = 'SUDOKULAB_GENERATOR_USERDATA';
@@ -89,12 +89,10 @@ export interface GeneratorWorkingInfo {
  * - opzioni
  * - valori inseriti
  */
-export class GeneratorUserData {
-  constructor(d?: Partial<GeneratorUserData>) {
-    this.values = '';
-    Object.assign(this, d || {});
-    this.options = new PlaySudokuOptions(d?.options);
+export class GeneratorUserData extends UserData {
+  constructor(ud?: Partial<GeneratorUserData>) {
+    super(ud);
+    this.values = ud?.values||'';
   }
-  options: PlaySudokuOptions;
   values: string;
 }

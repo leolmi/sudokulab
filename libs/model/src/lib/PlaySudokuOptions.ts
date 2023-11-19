@@ -21,6 +21,7 @@ export class PlaySudokuOptions {
   constructor(o?: Partial<PlaySudokuOptions>) {
     this.generator = new GeneratorOptions();
     this.usePencil = false;
+    this.usePopupKeys = false;
     this.showAvailables = false;
     this.maxSplitSchema = SUDOKU_DEFAULT_MAXSPLIT;
     this.excludeTryAlgorithm = false;
@@ -33,6 +34,7 @@ export class PlaySudokuOptions {
     this.generator = new GeneratorOptions(this.generator||{});
   }
   usePencil: boolean;
+  usePopupKeys: boolean;
   showAvailables: boolean;
   maxSplitSchema: number;
   excludeTryAlgorithm: boolean;
