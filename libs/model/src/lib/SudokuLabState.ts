@@ -48,6 +48,11 @@ export class SudokuLabState {
 
     this.isCompact$ = this.compactLevel$.pipe(map(cl => cl>0));
 
+    this.currentSchema$ = combineLatest([
+      this.activeSudokuId$.pipe(filter(asi => !!asi), distinctUntilChanged()),
+      this.schemas$.pipe(filter(ss => (ss||[]).length>0))
+    ]).pipe(map(([sid, schemas]) => schemas.find(s => s._id === sid)));
+
     this._effects();
   }
 
@@ -168,4 +173,9 @@ export class SudokuLabState {
    * stato del generator
    */
   workingInfo$: BehaviorSubject<WorkingInfo>;
+
+  /**
+   * scehma corrente
+   */
+  currentSchema$: Observable<Sudoku|undefined>;
 }

@@ -13,6 +13,9 @@ export class LabExecutor extends SudokulabPageExecutor {
       case 'camera':
         logic.camera().subscribe();
         break;
+      case 'analyze':
+        logic.analyze().subscribe();
+        break;
       // case 'popupdetails': return facade.action$.next(BoardAction.details);
       default:
         logic.emit(`lab.${code}`);

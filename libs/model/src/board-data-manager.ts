@@ -42,16 +42,14 @@ export class BoardDataManagerOptions {
 export class BoardDataManager extends DataManagerBase {
   private _options: BoardDataManagerOptions;
   private _worker: Worker|undefined;
-  data: BoardData;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
 
   constructor(private _zone: NgZone,
               private _sudokuLab: SudokuLab,
-              data?: BoardData,
+              private _data?: BoardData,
               o?: Partial<BoardDataManagerOptions>) {
-    super(data);
+    super(_data);
     this._options = new BoardDataManagerOptions(o);
-    this.data = data || new BoardData();
     this.highlights$ = new BehaviorSubject<BoardWorkerHighlights>(BoardWorkerHighlights.empty);
 
     if (!this._options.skipValues) this.data.value$

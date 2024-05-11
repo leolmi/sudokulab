@@ -131,6 +131,11 @@ export abstract class SudokuLab {
   abstract updatePageStatus(ps: any): void;
 
   /**
+   * analizza lo schema sudoku
+   */
+  abstract analyze(sdk?: PlaySudoku): Observable<Sudoku | undefined>;
+
+  /**
    * emette un'azione da parte della pagina gestibile anche esternamente all'esecutore della pagina
    * @param internal_code
    */

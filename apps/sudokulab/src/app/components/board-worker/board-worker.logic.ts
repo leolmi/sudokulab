@@ -3,14 +3,14 @@ import {
   Algorithms,
   applyCellValue,
   BoardWorkerData,
-  BoardWorkerHighlights,
+  BoardWorkerHighlights, buildSudokuInfo,
   cellId,
   checkAvailable,
   decodeCellId,
   DEFAULT_MESSAGES,
   MessageType,
   PlaySudoku,
-  resetAvailable,
+  resetAvailable, SDK_PREFIX, SolveAllResult,
   Solver,
   SolveStepResult,
   solveStepToCell,
@@ -30,6 +30,15 @@ export const checkSchema = (sdk: PlaySudoku): boolean => {
 }
 
 
+const checkResults = (result: SolveAllResult) => {
+  if (!result.unique) return;
+  const schema = result.unique.sdk.sudoku;
+  if (schema) {
+    schema.info = buildSudokuInfo(schema, { unique: true, algorithms: result.unique.algorithms }, true);
+    // deve manadare al server le info....
+  }
+}
+
 /**
  * risolve lo schema
  * @param sdk
@@ -40,7 +49,9 @@ export const solveSchema = (sdk: PlaySudoku): SudokuMessage|undefined => {
   const result = solver.solve();
   if (result.unique) {
     message = DEFAULT_MESSAGES.solved;
+    checkResults(result);
     _extend(sdk, result.unique.sdk);
+    console.log(...SDK_PREFIX, 'schema uniq solved', result);
   } else if (result.multiple) {
     message = new SudokuMessage({
       message: 'Sudoku has multiple results!',

@@ -153,6 +153,18 @@ export class SudokuLabLogic extends SudokuLab {
   }
 
   /**
+   * verifica lo schema tra quelli presenti
+   * @param sdk
+   */
+  checkSchemas(sdk: PlaySudoku) {
+    const schemas = _clone(this.state.schemas$.value);
+    const xs = schemas.find(s => s._id === sdk._id);
+    if (!xs || !sdk.sudoku) return;
+    xs.info = sdk.sudoku.info;
+    this.state.schemas$.next(schemas);
+  }
+
+  /**
    * Apre le info autore
    */
   authorInfo() {
@@ -246,42 +258,48 @@ export class SudokuLabLogic extends SudokuLab {
    * Analizza lo schema
    * @param sdk
    */
-  analyze(sdk: PlaySudoku): Observable<Sudoku | undefined> {
-    const solver = new Solver(sdk);
-    let message: SudokuMessage | undefined = undefined;
-    const check_message = solver.check();
-    if (!!check_message) {
-      message = new SudokuMessage({message: check_message, type: MessageType.warning});
-    } else {
-      let schema: Sudoku;
-      const result = solver.solve();
-      if (result.unique) {
-        schema = <Sudoku>_clone(result.unique.sdk.sudoku);
-        schema.info = buildSudokuInfo(schema, {
-          unique: true,
-          algorithms: result.unique.algorithms
-        }, true);
-        sdk.sudoku = schema;
-        clearSchema(sdk);
-        this.remoteCheckSchema(sdk)
-          .subscribe(() => this.activateSelectedSchema(sdk._id));
-      } else if (result.multiple) {
-        schema = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
-        schema.info = new SudokuInfo({
-          rank: schema.rank,
-          fixedCount: calcFixedCount(schema.fixed)
-        });
-        sdk.sudoku = schema;
-      } else {
-        message = new SudokuMessage({
-          message: 'wrong schema',
-          type: MessageType.warning
-        });
-        console.log(message.message, result);
-      }
-    }
-    if (!!message) this.showMessage(message);
-    return of(undefined);
+  analyze(sdk?: PlaySudoku): Observable<Sudoku | undefined> {
+    return this.state.currentSchema$.pipe(
+      take(1),
+      map(sudoku => {
+        if (!sdk) sdk = new PlaySudoku({ sudoku })
+        const solver = new Solver(sdk);
+        let message: SudokuMessage | undefined = undefined;
+        const check_message = solver.check();
+        if (!!check_message) {
+          message = new SudokuMessage({message: check_message, type: MessageType.warning});
+        } else {
+          let schema: Sudoku;
+          const result = solver.solve();
+          if (result.unique) {
+            schema = <Sudoku>_clone(result.unique.sdk.sudoku);
+            schema.info = buildSudokuInfo(schema, {
+              unique: true,
+              algorithms: result.unique.algorithms
+            }, true);
+            sdk.sudoku = schema;
+            clearSchema(sdk);
+            this.checkSchemas(sdk);
+            this.remoteCheckSchema(sdk)
+              .subscribe(() => this.activateSelectedSchema(sdk?._id));
+          } else if (result.multiple) {
+            schema = <Sudoku>_clone(result.solutions[0].sdk.sudoku);
+            schema.info = new SudokuInfo({
+              rank: schema.rank,
+              fixedCount: calcFixedCount(schema.fixed)
+            });
+            sdk.sudoku = schema;
+          } else {
+            message = new SudokuMessage({
+              message: 'wrong schema',
+              type: MessageType.warning
+            });
+            console.log(message.message, result);
+          }
+        }
+        if (!!message) this.showMessage(message);
+        return undefined;
+      }));
   }
 
   /**

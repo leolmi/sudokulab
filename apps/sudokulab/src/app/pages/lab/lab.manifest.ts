@@ -17,6 +17,7 @@ export class LabManifest extends SudokulabPage {
     DEFAULT_LAB_BUTTONS.step,
     DEFAULT_BUTTONS.separator,
     DEFAULT_LAB_BUTTONS.solve,
+    DEFAULT_LAB_BUTTONS.analyze,
     DEFAULT_BUTTONS.separator,
     DEFAULT_LAB_BUTTONS.download,
     DEFAULT_BUTTONS.upload,
