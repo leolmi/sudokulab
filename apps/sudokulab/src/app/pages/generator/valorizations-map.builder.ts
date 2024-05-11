@@ -2,7 +2,8 @@ import {
   checkAvailable,
   getDynamicCells,
   PlaySudoku,
-  SUDOKU_DEFAULT_MAX_VAL_CYCLES, SUDOKU_DEFAULT_MAX_VAL_CYCLES_FACTOR,
+  SUDOKU_DEFAULT_MAX_VAL_CYCLES,
+  SUDOKU_DEFAULT_MAX_VAL_CYCLES_FACTOR,
   SudokuValorizationMode
 } from "@sudokulab/model";
 import {

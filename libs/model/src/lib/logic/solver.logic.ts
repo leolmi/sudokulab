@@ -43,6 +43,7 @@ export class Solver {
   }
 
   private _solveOne(sol: SudokuSolution) {
+    checkAvailable(sol.sdk);
     const result = solveStep(sol.sdk);
     if (!!result?.sdk) {
       _extend(sol.sdk, result.sdk);
