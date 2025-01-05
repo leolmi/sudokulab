@@ -5,5 +5,6 @@ export * from './Twins.algorithm';
 export * from './Chains.algorithm';
 export * from './Couples.algorithm';
 export * from './TryNumber.algorithm';
+export * from './XWings.algorithm';
 export * from './factors';
 export * from './factory';

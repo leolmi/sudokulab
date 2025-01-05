@@ -4,11 +4,11 @@ import {SolveStepResult} from './SolveStepResult';
 import {
   applySudokuRules,
   getAlgorithmsMap,
-  getAvailables, getFlatPlaySudoku,
+  getAvailables,
+  getFlatPlaySudoku,
   getGroups,
   getRank,
   getValues,
-  getValuesOnCells,
   isSolved
 } from '../../sudoku.helper';
 import {
@@ -29,10 +29,8 @@ import {DIFFICULTY_MAX, DIFFICULTY_RANGES, getAlgorithm, getAlgorithms, TRY_NUMB
 import {Algorithms, AlgorithmType} from '../enums';
 import {PlaySudokuGroup} from '../PlaySudokuGroup';
 import {addLine, debug, isValue} from '../../global.helper';
-import {SDK_PREFIX, SDK_PREFIX_DEBUG, SUDOKU_DEFAULT_MAXSPLIT} from '../consts';
+import {SDK_PREFIX, SDK_PREFIX_DEBUG} from '../consts';
 import {PlaySudokuCell} from "../PlaySudokuCell";
-import {Sudoku} from "../Sudoku";
-import {PlaySudokuOptions} from "../PlaySudokuOptions";
 
 export class Solver {
   private readonly _sdks: SudokuSolution[];
@@ -334,6 +332,47 @@ export const pushError = (sdk: PlaySudoku|undefined, error: string) => {
   if (!sdk || !error) return;
   sdk.state.error = `${sdk.state.error ? `${sdk.state.error}\n` : ''}${error}`;
 }
+
+/**
+ * dictionary con i valori presenti per le celle che li contengono
+ * { n: [cid1, ..., cidN] }
+ */
+export type GroupValuesOnCells = Dictionary<string[]>;
+
+/**
+ * restituisce un dictionary con i valori presenti per le celle che li contengono
+ * { n: [cid1, ..., cidN] }
+ * @param g
+ */
+export const getGroupValues = (g: PlaySudokuGroup|undefined): GroupValuesOnCells => {
+  const res: GroupValuesOnCells = {};
+  const aoc = g?.availableOnCells||{};
+  _forEach(aoc, (r, d) => {
+    const vs = d.split(',').map(sv => parseInt(sv, 10));
+    _forEach(r, (b, cid) => {
+      if (b) {
+        vs.forEach(v => {
+          const vid = `${v}`;
+          res[vid] = res[vid]||[];
+          if (!(res[vid]||[]).includes(cid)) (res[vid]||[]).push(cid);
+        });
+      }
+    })
+  });
+  return res;
+}
+
+/**
+ * restituisce un dictionary con i valori presenti N volte nel gruppo, per le celle che li contengono
+ * { n: [cid1, ..., cidN] }
+ * @param gvc
+ * @param N
+ */
+export const getGroupNOnCells = (gvc: GroupValuesOnCells, N = 2): GroupValuesOnCells  => {
+  return _reduce(gvc, (r, cids, n) =>
+    ((cids||[]).length===N) ? { ...r, [n]: cids } : r, <GroupValuesOnCells>{});
+}
+
 
 /**
  * Restituisce un dictionary con i valori a cui sono associate le coppie di celle che li possono ospitare

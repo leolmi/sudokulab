@@ -1,13 +1,19 @@
-import {Algorithm} from '../Algorithm';
-import {PlaySudoku} from '../PlaySudoku';
-import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
-import {Dictionary} from '@ngrx/entity';
-import {extend as _extend, forEach as _forEach, includes as _includes, keys as _keys, reduce as _reduce, remove as _remove} from 'lodash';
-import {checkAvailable, getGroupCouples, getGroupExplicitCouples} from '../logic';
-import {getUserCoord, getGroups} from '../../sudoku.helper';
-import {AlgorithmType} from '../enums';
-import {debug, isValue} from '../../global.helper';
-import {SDK_PREFIX_DEBUG} from "../consts";
+import { Algorithm } from '../Algorithm';
+import { PlaySudoku } from '../PlaySudoku';
+import { AlgorithmResult, AlgorithmResultLine } from '../AlgorithmResult';
+import { Dictionary } from '@ngrx/entity';
+import {
+  extend as _extend,
+  forEach as _forEach,
+  includes as _includes,
+  keys as _keys,
+  reduce as _reduce,
+  remove as _remove
+} from 'lodash';
+import { checkAvailable, getGroupCouples, getGroupExplicitCouples } from '../logic';
+import { getGroups, getUserCoord } from '../../sudoku.helper';
+import { AlgorithmType } from '../enums';
+import { isValue } from '../../global.helper';
 
 export const TWINS_ALGORITHM = 'Twins';
 

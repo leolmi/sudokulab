@@ -37,7 +37,7 @@ export class PlaySudokuGroup {
   availableCounter: Dictionary<Dictionary<boolean>>;
   /**
    * Valori per cella del gruppo
-   * { v1: cid1..cidN, v2:.... }
+   * { v1: counterV1, v2:counterV2, ... }
    */
   valuesOnCells: Dictionary<number>;
 }

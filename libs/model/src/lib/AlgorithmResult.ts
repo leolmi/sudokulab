@@ -35,19 +35,34 @@ export class AlgorithmResult {
     this.applied = false;
     Object.assign(this, r || {});
   }
-  // algoritmo di riferimento
+
+  /**
+   * algoritmo di riferimento
+   */
   algorithm: string;
-  // valori
+  /**
+   * valori
+   */
   values: string;
-  // valore (opzionale)
+  /**
+   * valore (opzionale)
+   */
   value?: string;
-  // item descrittivi dell'esecuzione dell'algoritmo
+  /**
+   * item descrittivi dell'esecuzione dell'algoritmo
+   */
   descLines: AlgorithmResultLine[];
-  // sviluppo dello schema in altri sotto-schemi
+  /**
+   * sviluppo dello schema in altri sotto-schemi
+   */
   cases: PlaySudoku[];
-  // celle interessate
+  /**
+   * celle interessate
+   */
   cells: string[];
-  // se vero l'algoritmo è stato applicato
+  /**
+   * se vero l'algoritmo è stato applicato
+   */
   applied: boolean;
 
   /**

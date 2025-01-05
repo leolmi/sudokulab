@@ -4,6 +4,7 @@ import {TwinsAlgorithm} from "./Twins.algorithm";
 import {AlignmentOnGroupAlgorithm} from "./AlignmentOnGroup.algorithm";
 import {CouplesAlgorithm} from "./Couples.algorithm";
 import {ChainsAlgorithm} from "./Chains.algorithm";
+import { XWingsAlgorithm } from './XWings.algorithm';
 import {TryNumberAlgorithm} from "./TryNumber.algorithm";
 import {Algorithm} from "../Algorithm";
 import {includes as _includes} from 'lodash';
@@ -18,6 +19,7 @@ export const _getAlgorithms = (): Algorithm[] => {
       new TwinsAlgorithm(),
       new AlignmentOnGroupAlgorithm(),
       new CouplesAlgorithm(),
+      new XWingsAlgorithm(),
       new ChainsAlgorithm(),
       new TryNumberAlgorithm());
   }
