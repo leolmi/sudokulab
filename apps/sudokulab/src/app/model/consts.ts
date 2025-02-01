@@ -30,7 +30,7 @@ export const DEFAULT_LAB_BUTTONS = {
   stepinfo: {icon: 'support', code: 'calcStep', tooltip: 'Info next step', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
   step: {icon: 'skip_next', code: 'solveStep', tooltip: 'Solve next step', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
   solve: {icon: 'auto_fix_high', code: 'solve', tooltip: 'Solve all schema', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
-  analyze: {icon: 'play_circle_outline', code: 'analyze', tooltip: 'Analyze schema', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
+  analyze: {icon: 'cloud_sync', code: 'analyze', tooltip: 'Analyze schema', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
   download: {icon: 'download', code: 'download', tooltip: 'Download current schema', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
   camera: {icon: 'camera', code: 'camera', tooltip: 'Acquire by camera', disabledKey: DEFAULT_LAB_PAGE_STATUS.not_available_camera },
   clear : {icon: 'border_clear', code: 'clear', tooltip: 'Clear schema', disabledKey: DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema},
