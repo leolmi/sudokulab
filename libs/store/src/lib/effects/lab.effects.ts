@@ -327,6 +327,7 @@ export class LabEffects {
       [SudokuActions.updatePageStatus({
         status: {
           has_no_lab_schema: !sdk,
+          has_no_try_schema: !sdk?.sudoku?.info?.useTryAlgorithm,
           not_available_camera: !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices,
           available_visible: !!sdk?.options?.showAvailables
         }

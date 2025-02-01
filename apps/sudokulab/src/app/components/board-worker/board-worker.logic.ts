@@ -15,7 +15,7 @@ import {
   SolveStepResult,
   solveStepToCell,
   SUDOKU_DEFAULT_RANK,
-  SudokuMessage
+  SudokuMessage, TRY_NUMBER_ALGORITHM
 } from "@sudokulab/model";
 import {extend as _extend, isEmpty as _isEmpty, last as _last} from "lodash";
 
@@ -77,6 +77,21 @@ export const solveSchemaStep = (sdk: PlaySudoku): BoardWorkerHighlights => {
   (last?.result?.cells || []).forEach(c => hl.cellValue[c] = true);
   _extend(sdk, last?.sdk || {});
   return hl;
+}
+
+/**
+ * risolve lo schema fino all'algoritmo specificato
+ * @param sdk
+ */
+export const solveSchemaToTry = (sdk: PlaySudoku): void => {
+  let stepRes: SolveStepResult|undefined;
+  let _sdk = sdk;
+  do {
+    const infos = solveStepToCell(_sdk, [Algorithms.tryNumber]);
+    stepRes = _last(infos);
+    if (stepRes?.sdk) _sdk = stepRes.sdk;
+  } while (stepRes?.sdk);
+  _extend(sdk, _sdk);
 }
 
 export interface InfoStepResult {

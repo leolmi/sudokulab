@@ -12,7 +12,7 @@ import {
   BOARD_DATA,
   BoardData,
   getBoardStyle,
-  isEmptySchema,
+  isEmptySchema, isNoTrySchema,
   PlaySudoku,
   SUDOKU_DEFAULT_RANK,
   SudokuLab
@@ -86,6 +86,7 @@ export class LabComponent extends DestroyComponent implements OnDestroy, AfterVi
       [AvailablePages.lab]: {
         [DEFAULT_LAB_PAGE_STATUS.has_no_lab_schema]: isEmptySchema(sdk),
         [DEFAULT_LAB_PAGE_STATUS.not_available_camera]: true,
+        [DEFAULT_LAB_PAGE_STATUS.has_no_try_schema]: isNoTrySchema(sdk),
         [DEFAULT_LAB_PAGE_STATUS.available_visible_checked]: !!sdk?.options?.showAvailables,
       }
     }

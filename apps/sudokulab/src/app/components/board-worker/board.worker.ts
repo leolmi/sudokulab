@@ -7,6 +7,7 @@ import {
   setCellValue,
   solveSchema,
   solveSchemaStep,
+  solveSchemaToTry,
   toggleAvalable,
   togglePencil
 } from "./board-worker.logic";
@@ -40,6 +41,10 @@ addEventListener('message', ({ data }) => {
       case BoardAction.solveStep:
         const hls = solveSchemaStep(sdk);
         if (hls) postMessage(<BoardWorkerData>{sdk, highlights: hls});
+        break;
+      case BoardAction.solveToTry:
+        solveSchemaToTry(sdk);
+        postMessage(<BoardWorkerData>{sdk});
         break;
       case BoardAction.calcStep:
         const dat = calcInfoStep(sdk);

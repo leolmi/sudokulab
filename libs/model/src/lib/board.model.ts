@@ -13,6 +13,7 @@ export enum BoardAction {
   check = 'check',
   solve = 'solve',
   solveStep = 'solveStep',
+  solveToTry = 'solveToTry',
   calcStep = 'calcStep',
   clear = 'clear',
   pencil = 'pencil',

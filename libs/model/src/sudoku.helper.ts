@@ -757,6 +757,14 @@ export const isEmptySchema = (sdk: PlaySudoku) => {
   return !sdk || !sdk?.sudoku || !_find(sdk?.cells||[], (cell: any) => !!cell?.value);
 }
 
+/**
+ * vero se è uno schema valido ma senza l'utilizzo del try alghoritm
+ * @param sdk
+ */
+export const isNoTrySchema = (sdk: PlaySudoku) => {
+  return !isEmptySchema(sdk) && !sdk?.sudoku?.info?.useTryAlgorithm;
+}
+
 export const downloadSchema = (schema: Sudoku) => {
   const filename = getSchemaName(schema);
   const schema_str = JSON.stringify(schema, null, 2);
