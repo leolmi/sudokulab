@@ -21,7 +21,7 @@ import {
 import {MoveDirection, PlaySudokuCellAlignment, SudokuEndGenerationMode, SudokuGroupType} from './lib/enums';
 import {getAlgorithms, TRY_NUMBER_ALGORITHM} from './lib/Algorithms';
 import {Algorithm} from './lib/Algorithm';
-import {CellInfo} from './lib/CellInfo';
+import {CellInfo, GroupInfo} from './lib/CellInfo';
 import {
   AVAILABLE_DIRECTIONS,
   AVAILABLE_VALUES,
@@ -51,7 +51,11 @@ import {PlaySudokuState} from "./lib/PlaySudokuState";
 import {BoardAction} from "./lib/board.model";
 import {GeneratorAction} from "./lib/generator.model";
 
-
+/**
+ * restituisce la cella del modello a oggetti SudokuPlay column (0-index) row (0-index)
+ * @param column
+ * @param row
+ */
 export const cellId = (column: number, row: number) => `${column}.${row}`;
 
 /**
@@ -62,6 +66,14 @@ export const cellId = (column: number, row: number) => `${column}.${row}`;
 export const isFixedNotX = (cell: EditSudokuCell, gmap?: EditSudokuGenerationMap): boolean => {
   if (!gmap) return !!cell?.fixed && !isDynamic(cell.value);
   return !!cell?.fixed && !gmap.cellsX[cell.id];
+}
+
+/**
+ * vero se la cella esiste e non è né valorizzata né fissa
+ * @param cell
+ */
+export const isEmptyCell = (cell?: Cell): boolean => {
+  return !!cell && !cell.fixed && !cell.value;
 }
 
 export const parseValue = (raw: string, rank?: number, o?: PlaySudokuOptions): string => {
@@ -191,7 +203,15 @@ export const decodeCellId = (id: string, rank: number = SUDOKU_DEFAULT_RANK): Ce
 
   const grank = !!rank ? getGroupRank(rank) : 0;
   const gpos = !!grank ? Math.floor(row / grank) * grank + Math.floor(col / grank) : -1;
-  return new CellInfo(col, row, gpos);
+  return new CellInfo(col, row, gpos, id);
+}
+
+export const decodeGroupId = (id: string): GroupInfo => {
+  const parts = (id || '').split('.');
+  const type = <SudokuGroupType>parts[0];
+  const pos = parseInt(parts[1] || '-1', 10);
+
+  return new GroupInfo(type, pos, id);
 }
 
 export const groupId = (type: SudokuGroupType, pos: number) => `${type}.${pos}`;
@@ -601,6 +621,21 @@ export const getGroups = (sdk: PlaySudoku, cids: string[]): PlaySudokuGroup[] =>
   return <PlaySudokuGroup[]>groups
     .map(gid => sdk.groups[gid])
     .filter(g => !!g);
+}
+
+/**
+ * restituisce i gruppi per tipo
+ * @param sdk
+ * @param type
+ */
+export const getGroupsByType = (sdk: PlaySudoku, type: SudokuGroupType): PlaySudokuGroup[] => {
+  const groups: PlaySudokuGroup[] = [];
+  const rank = sdk.sudoku?.rank||SUDOKU_DEFAULT_RANK;
+  for(let i = 0; i<rank; i++) {
+    const g = sdk.groups[groupId(type, i)];
+    if (g) groups.push(g);
+  }
+  return groups;
 }
 
 /**

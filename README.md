@@ -40,5 +40,5 @@ $ npm run build
 
 so run start script
 ````
-$ npm run start
+$ npm start
 ````

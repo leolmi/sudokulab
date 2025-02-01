@@ -1,12 +1,12 @@
-import { Algorithm } from '../Algorithm';
-import { PlaySudoku } from '../PlaySudoku';
+import {Algorithm} from '../Algorithm';
+import {PlaySudoku} from '../PlaySudoku';
 import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
-import { find as _find, keys as _keys } from 'lodash';
-import { checkAvailable } from '../logic';
-import { isValue } from '../../global.helper';
-import { PlaySudokuCell } from '../PlaySudokuCell';
-import { AlgorithmType } from '../enums';
+import {find as _find, keys as _keys} from 'lodash';
+import {isValue} from '../../global.helper';
+import {PlaySudokuCell} from '../PlaySudokuCell';
+import {AlgorithmType} from '../enums';
 import {getUserCoord} from "../../sudoku.helper";
+import {applyAlgorithm} from "./algorithms.common";
 
 export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
 
@@ -25,40 +25,39 @@ export class OneCellForValueAlgorithm extends Algorithm {
   title = 'esiste una sola cella nel gruppo che possa ospitare quel determinato valore';
   description = 'Rappresenta l\'approccio più basico e più immediato al quale è stato associato un punteggio minimo';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    let ocid = '';
-    let ocvl = '';
-    let applied = false;
-    let cell: PlaySudokuCell|undefined = undefined;
-    const xg = _find(sdk.groups, (g) => {
-      const ov = _find(g?.availableOnCells||{}, (vls, v) => {
-        ocvl = v;
-        return _keys(vls || {}).length === 1;
+
+    return applyAlgorithm(this, sdk, (o) => {
+
+      let ocid = '';
+      let ocvl = '';
+      // let applied = false;
+      let cell: PlaySudokuCell | undefined = undefined;
+      const xg = _find(sdk.groups, (g) => {
+        const ov = _find(g?.availableOnCells || {}, (vls, v) => {
+          ocvl = v;
+          return _keys(vls || {}).length === 1;
+        });
+        if (!!ov) ocid = _keys(ov)[0];
+        return !!ov
       });
-      if (!!ov) ocid = _keys(ov)[0];
-      return !!ov
-    });
 
-    if (!!xg) {
-      cell = sdk.cells[ocid];
-      if (cell && !isValue(cell.value)) {
-        applied = true;
-        cell.value = ocvl;
-        checkAvailable(sdk);
+      if (!!xg) {
+        cell = sdk.cells[ocid];
+        if (cell && !isValue(cell.value)) {
+          o.applied = true;
+          cell.value = ocvl;
+
+        }
       }
-    }
 
-    return new AlgorithmResult({
-      algorithm: this.id,
-      applied,
-      value: cell?.value,
-      //description: getDescription(applied, cell),
-      descLines: [new AlgorithmResultLine({
+      o.value = cell?.value;
+      o.cells[ocid] = true;
+      o.descLines = [new AlgorithmResultLine({
         cell: cell?.id,
-        description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`,
+        description: `Cell ${getUserCoord(cell?.id || 'unknown')} has been assigned the value "${cell?.value}"`,
         withValue: true
-      })],
-      cells: [ocid]
-    }, sdk);
+      })]
+    });
   }
 }
 

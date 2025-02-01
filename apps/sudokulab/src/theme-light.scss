@@ -199,6 +199,14 @@
     }
     .svg-board-cell-values-text {
       fill: $color-accent;
+
+      &.highlight-cell {
+        fill: white;
+      }
+    }
+    .svg-board-highlight-group {
+      stroke: $color-primary;
+      fill: rgba(98, 127, 255, 0.1);
     }
     &.pencil {
       .svg-board-line {

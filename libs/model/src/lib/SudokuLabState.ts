@@ -22,6 +22,7 @@ export class SudokuLabState {
   constructor(env?: any) {
     this.env$ = new BehaviorSubject<any>(env||{});
     this.token$ = new BehaviorSubject<string>('');
+    this.keyboardLock$ = new BehaviorSubject<boolean>(false);
     this.operationStatus$ = new BehaviorSubject<number>(-1);
     this.theme$ = new BehaviorSubject<string>(getUserSetting('sudoku.theme')||SUDOKULAB_DEFAULT_THEME);
     this.waiting$ = new BehaviorSubject<boolean>(false);
@@ -127,6 +128,11 @@ export class SudokuLabState {
    * stato degli elementi per pagina
    */
   pagesStatus$: BehaviorSubject<Dictionary<Dictionary<boolean>>>;
+
+  /**
+   * blocca la lettura degli eventi da tastiera
+   */
+  keyboardLock$: BehaviorSubject<boolean>;
 
   /**
    * modalità di rappresentazione dei valori in cella

@@ -1,4 +1,4 @@
-import {MessageType, MoveDirection} from './enums';
+import {MessageType, MoveDirection, SudokuGroupType} from './enums';
 import {Dictionary} from '@ngrx/entity';
 import {SudokuMessage} from "./SudokuMessage";
 
@@ -88,4 +88,10 @@ export const DEFAULT_MESSAGES = {
   solved: new SudokuMessage({message: 'Sudoku successfully solved!', type: MessageType.success}),
   ended: new SudokuMessage({message: 'Generation ended!', type: MessageType.success}),
   userEnded: new SudokuMessage({message: 'Generation stopped!', type: MessageType.warning})
+}
+
+export const CELL_GROUP_TYPE: any = {
+  'col': SudokuGroupType.column,
+  'row': SudokuGroupType.row,
+  'sqr': SudokuGroupType.square
 }

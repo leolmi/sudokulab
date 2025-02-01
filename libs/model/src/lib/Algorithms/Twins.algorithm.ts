@@ -14,6 +14,7 @@ import { checkAvailable, getGroupCouples, getGroupExplicitCouples } from '../log
 import { getGroups, getUserCoord } from '../../sudoku.helper';
 import { AlgorithmType } from '../enums';
 import { isValue } from '../../global.helper';
+import {notifyApplied} from "./algorithms.common";
 
 export const TWINS_ALGORITHM = 'Twins';
 

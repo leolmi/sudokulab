@@ -11,10 +11,27 @@
   .schemas-container {
     height: 100%;
   }
-  .open-button {
+  .schemas-buttons-bar {
     position: fixed;
     bottom: 50px;
     right: 50px;
+  }
+  .search-button {
+    opacity: .2;
+    transition: opacity ease-in-out .5s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+  .open-button {
+    margin-left: 10px;
+  }
+  .close-search-bar {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    z-index: 10;
   }
 }
 

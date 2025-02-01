@@ -27,6 +27,17 @@
     </button>
   </div>
   <div class="list-container" fxFlex>
+    <div class="search-bar" *ngIf="searchVisible$|async" fxLayout="row" fxLayoutAlign="start center">
+      <mat-form-field appearance="outline" class="no-wrapper-padding" fxFlex>
+        <mat-label>Search</mat-label>
+        <input matInput
+               [value]="searchText$|async"
+               (focusin)="focus(true)"
+               (focusout)="focus(false)"
+               (input)="applySearch($event)">
+      </mat-form-field>
+      <mat-icon class="close-search-bar" (click)="closeSearchBar()">close</mat-icon>
+    </div>
     <cdk-virtual-scroll-viewport
       class="schemas-container"
       itemSize="32" >
@@ -38,14 +49,24 @@
         [hasChanges]="!!((userChanges$|async)||{})[schema._id]"
         [schema]="schema"></sudokulab-schemas-item>
     </cdk-virtual-scroll-viewport>
-    <button mat-fab
-            class="open-button"
-            color="accent"
-            matTooltip="open selected schema"
-            *ngIf="canOpen$|async"
-            (click)="open()"
-            aria-label="Open player schema">
-      <mat-icon>play_arrow</mat-icon>
-    </button>
+    <div class="schemas-buttons-bar" fxLayout="row">
+      <button mat-fab
+              class="search-button"
+              matTooltip="search for schema"
+              *ngIf="canSearch$|async"
+              (click)="search()"
+              aria-label="Opena search for schema">
+        <mat-icon>search</mat-icon>
+      </button>
+      <button mat-fab
+              class="open-button"
+              color="accent"
+              matTooltip="open selected schema"
+              *ngIf="canOpen$|async"
+              (click)="open()"
+              aria-label="Open player schema">
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+    </div>
   </div>
 </div>

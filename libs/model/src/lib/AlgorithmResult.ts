@@ -8,9 +8,10 @@ export class AlgorithmResultLine {
   constructor(l?: Partial<AlgorithmResultLine>) {
     this.description = '';
     this.cell = '';
-    this.others = [];
     this.withValue = false;
     Object.assign(this, l || {});
+    this.others = l?.others||[];
+    this.groups = l?.groups||[];
   }
   // descrizione dell'item
   description: string;
@@ -18,6 +19,8 @@ export class AlgorithmResultLine {
   cell: string;
   // altre celle coinvolte nell'applicazione dell'algorito
   others: string[];
+  // gruppi coinvolti nell'applicazione dell'algorito
+  groups: string[];
   // se vero l'applicazione porta alla valorizzazione della cella
   withValue: boolean;
 }

@@ -6,7 +6,7 @@ import {
   BoardWorkerHighlights, buildSudokuInfo,
   cellId,
   checkAvailable,
-  decodeCellId,
+  decodeCellId, decodeGroupId,
   DEFAULT_MESSAGES,
   MessageType,
   PlaySudoku,
@@ -112,7 +112,8 @@ export const calcInfoStep = (sdk: PlaySudoku): BoardWorkerData => {
 export const getLineHighlights = (line?: AlgorithmResultLine): BoardWorkerHighlights => {
   const hl = BoardWorkerHighlights.empty;
   if (line?.cell) hl.cell[line.cell] = true;
-  (line?.others||[]).forEach(o => hl.others[o] = true);
+  (line?.others||[]).forEach(cid => hl.others[cid] = true);
+  hl.groups = (line?.groups||[]).map(gid => decodeGroupId(gid));
   return hl;
 }
 

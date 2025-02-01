@@ -2,10 +2,10 @@ import {Algorithm} from '../Algorithm';
 import {PlaySudoku} from '../PlaySudoku';
 import {AlgorithmResult, AlgorithmResultLine} from '../AlgorithmResult';
 import {find as _find} from 'lodash';
-import {checkAvailable} from '../logic';
 import {AlgorithmType} from '../enums';
 import {getUserCoord} from "../../sudoku.helper";
 import {isValue} from '../../global.helper';
+import {applyAlgorithm} from "./algorithms.common";
 
 export const ONE_VALUE_FOR_CELL_ALGORITHM = 'OneValueForCell';
 
@@ -28,23 +28,19 @@ export class OneValueForCellAlgorithm extends Algorithm {
   title = 'esiste un solo valore possibile per la cella nel gruppo';
   description = 'Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un punteggio più alto rispetto al precedente';
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    const cell = _find(sdk.cells, c => (!isValue(c?.value) && c?.availables || []).length === 1);
 
-    if (!!cell) {
-      cell.value = cell.availables[0];
-      checkAvailable(sdk);
-    }
-
-    return new AlgorithmResult({
-      algorithm: this.id,
-      applied: !!cell,
-      value: cell?.value,
-      descLines: [new AlgorithmResultLine({
-        cell: cell?.id,
-        description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`,
-        withValue: true
-      })],
-      cells: !!cell ? [cell.id] : undefined
-    }, sdk);
+    return applyAlgorithm(this, sdk, (o) => {
+      const cell = _find(sdk.cells, c => (!isValue(c?.value) && c?.availables || []).length === 1);
+      if (cell) {
+        cell.value = cell.availables[0];
+        o.cells[cell.id] = true;
+        o.applied = true;
+        o.descLines = [new AlgorithmResultLine({
+          cell: cell?.id,
+          description: `Cell ${getUserCoord(cell?.id||'unknown')} has been assigned the value "${cell?.value}"`,
+          withValue: true
+        })]
+      }
+    });
   }
 }

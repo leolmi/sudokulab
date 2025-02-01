@@ -1,6 +1,6 @@
 import {BoardData} from "./lib/tokens";
 import {debounceTime, distinctUntilChanged, filter, map, take, takeUntil, withLatestFrom} from "rxjs/operators";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {
   BoardAction,
   BoardWorkerArgs,
@@ -43,6 +43,7 @@ export class BoardDataManager extends DataManagerBase {
   private _options: BoardDataManagerOptions;
   private _worker: Worker|undefined;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
+  keyboardLock$: Observable<boolean>;
 
   constructor(private _zone: NgZone,
               private _sudokuLab: SudokuLab,
@@ -51,6 +52,7 @@ export class BoardDataManager extends DataManagerBase {
     super(_data);
     this._options = new BoardDataManagerOptions(o);
     this.highlights$ = new BehaviorSubject<BoardWorkerHighlights>(BoardWorkerHighlights.empty);
+    this.keyboardLock$ = _sudokuLab.state.keyboardLock$.asObservable();
 
     if (!this._options.skipValues) this.data.value$
       .pipe(takeUntil(this._destroy$))
@@ -68,7 +70,7 @@ export class BoardDataManager extends DataManagerBase {
     // chiude gli highlights
     this.highlights$
       .pipe(filter(hl => !isEmptyHihlights(hl)),
-        debounceTime(5000))
+        debounceTime(10000))
       .subscribe((hl) => {
         this.highlights$.next(BoardWorkerHighlights.empty);
         this.data.info$.next(undefined);

@@ -8,6 +8,7 @@ import { AlgorithmType, SudokuGroupType } from '../enums';
 import { SUDOKU_DEFAULT_RANK } from '../consts';
 import { cellId, decodeCellId, getUserCoord, groupId } from '../../sudoku.helper';
 import { CellInfo } from '../CellInfo';
+import {applyAlgorithm, notifyApplied, NotifyAppliedArgs} from "./algorithms.common";
 
 export const XWINGS_ALGORITHM = 'XWings';
 
@@ -41,11 +42,11 @@ interface XAlignInfo {
  * quelle due posizioni si trovano nelle stesse due colonne (o due righe), si può eliminare quel
  * numero da tutte le altre posizioni ancora possibili delle due colonne (o due righe).
  *
- * fattore: +20
+ * fattore: +150
  */
 export class XWingsAlgorithm extends Algorithm {
   id = XWINGS_ALGORITHM;
-  // il twins è più difficile da vedere e usare se sono molti i numeri mancanti
+  // x-wings è più difficile da vedere e usare se sono molti i numeri mancanti
   factor = '+150';
   name = 'X-Wings';
   icon = 'grid_view';
@@ -53,66 +54,51 @@ export class XWingsAlgorithm extends Algorithm {
   title = 'Quando due righe (o due colonne) contengono solamente due posizioni possibili per un dato numero e quelle due posizioni si trovano nelle stesse due colonne (o due righe), si può eliminare quel numero da tutte le altre posizioni ancora possibili delle due colonne (o due righe).';
   description = `Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate`;
   apply = (sdk: PlaySudoku): AlgorithmResult => {
-    let applied = false;
-    const descLines: AlgorithmResultLine[] = [];
+    return applyAlgorithm(this, sdk, (o) => {
+      // per entrambe le tipologie di gruppo sviluppa l'algoritmo
+      [SudokuGroupType.row, SudokuGroupType.column].forEach(t1 => {
+        // tipo complementare
+        // const t2 = (t1 === SudokuGroupType.row) ? SudokuGroupType.column : SudokuGroupType.row;
+        const rank = sdk.sudoku?.rank || SUDOKU_DEFAULT_RANK;
+        for (let i1 = 0; i1 < rank; i1++) {
+          // 1. ricerca nel gruppo quelle coppie di celle che possono ospitare univocamente un determinato valore
+          const info1 = _getGroupInfo(sdk, t1, i1);
+          _forEach(info1.couples, (cids1, n1) => {
+            if ((cids1 || []).length === 2 && n1) {
+              // scorre gli altri gruppi dello stesso tipo alla ricerca di uno
+              // con coppie attigue
+              for (let i2 = i1+1; i2 < rank; i2++) {
+                const info2 = _getGroupInfo(sdk, t1, i2);
 
-    // per entrambe le tipologie di gruppo sviluppa l'algoritmo
-    [SudokuGroupType.row, SudokuGroupType.column].forEach(t1 => {
-      // tipo complementare
-      // const t2 = (t1 === SudokuGroupType.row) ? SudokuGroupType.column : SudokuGroupType.row;
-      const rank = sdk.sudoku?.rank || SUDOKU_DEFAULT_RANK;
-      for (let i1 = 0; i1 < rank; i1++) {
-        // 1. ricerca nel gruppo quelle coppie di celle che possono ospitare univocamente un determinato valore
-        const info1 = _getGroupInfo(sdk, t1, i1);
-        _forEach(info1.couples, (cids1, n1) => {
-          if ((cids1 || []).length === 2 && n1) {
-            // scorre gli altri gruppi dello stesso tipo alla ricerca di uno
-            // con coppie attigue
-            for (let i2 = i1+1; i2 < rank; i2++) {
-              const info2 = _getGroupInfo(sdk, t1, i2);
-
-              // 2. se presenti in più occorrenze > ricerca delle coppie allineate tra i tipi 1
-              _forEach(info2.couples, (cids2, n2) => {
-                if (n2 === n1) {
-                  _parseXAlign(cids1 || [], cids2 || [], t1, rank, (xa) => {
-                    // 3. se presenti > eliminazione valori delle coppie nelle altre celle del tipo 2
-                    const g = sdk.groups[xa.group];
-                    if (g) {
-                      g.cells.forEach(cid => {
-                        if (!xa.cells.includes(cid)) {
-                          const cell = sdk.cells[cid];
-                          if (cell && !cell.value && !cell.fixed) {
-                            const removed = _remove(cell.availables || [], v => v === n1);
-                            if (removed.length > 0) {
-                              applied = true;
-                              const ids = (cids1 || []).concat(...(cids2 || []));
-                              descLines.push(new AlgorithmResultLine({
-                                cell: cid,
-                                others: ids,
-                                description: `Found x-wings ${ids.map(tid => getUserCoord(tid)).join(' ')} per il valore [${n1}],
-so [${removed.join(',')}] have been removed on ${getUserCoord(cid)}`
-                              }));
+                // 2. se presenti in più occorrenze > ricerca delle coppie allineate tra i tipi 1
+                _forEach(info2.couples, (cids2, n2) => {
+                  if (n2 === n1) {
+                    _parseXAlign(cids1 || [], cids2 || [], t1, rank, (xa) => {
+                      // 3. se presenti > eliminazione valori delle coppie nelle altre celle del tipo 2
+                      const g = sdk.groups[xa.group];
+                      if (g) {
+                        g.cells.forEach(cid => {
+                          if (!xa.cells.includes(cid)) {
+                            const cell = sdk.cells[cid];
+                            if (cell && !cell.value && !cell.fixed) {
+                              const removed = _remove(cell.availables || [], v => v === n1);
+                              const cids = (cids1 || []).concat(...(cids2 || []));
+                              const args = <NotifyAppliedArgs>{cid: cell.id, removed, cids};
+                              notifyApplied(this, o, args);
                             }
                           }
-                        }
-                      })
-                    }
-                  });
-                }
-              });
+                        })
+                      }
+                    });
+                  }
+                });
+              }
             }
-          }
-        });
-      }
+          });
+        }
+      });
+
     });
-
-    if (applied) checkAvailable(sdk);
-
-    return new AlgorithmResult({
-      algorithm: this.id,
-      applied,
-      descLines
-    }, sdk);
   }
 }
 

@@ -6,6 +6,7 @@ import { checkAvailable } from '../logic';
 import { PlaySudokuCell } from '../PlaySudokuCell';
 import { AlgorithmType } from '../enums';
 import {getUserCoord} from "../../sudoku.helper";
+import {applyAlgorithm} from "./algorithms.common";
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';
 
@@ -37,7 +38,7 @@ const _valorize = (sdk: PlaySudoku, cell: PlaySudokuCell, av: string): PlaySudok
  */
 export class TryNumberAlgorithm extends Algorithm {
   id = TRY_NUMBER_ALGORITHM;
-  factor = '+200+(4*NU*NEP)';
+  factor = '+240+(4*NU*NEP)';
   name = 'Try number in cell';
   icon = 'generating_tokens';
   type = AlgorithmType.solver;
@@ -47,30 +48,28 @@ export class TryNumberAlgorithm extends Algorithm {
     // ricerca la cella con minor numero di valori possibili fra quelle non valorizzate
     const minc = _minBy(_values(sdk.cells), (c) => c?.value ? 1000 : c?.availables.length || 1000);
     if ((minc?.availables || []).length <= 1) return AlgorithmResult.none(this);
-    const cases: PlaySudoku[] = [];
-    if (minc) {
-      const minvalues = _clone(minc.availables);
-      const template = _clone(sdk);
-      minvalues.forEach((av, index) => {
-        if (index === 0) {
-          _valorize(sdk, minc, av);
-        } else if (!!template) {
-          const clone = _clone(template);
-          cases.push(_valorize(clone, minc, av));
-        }
-      });
-    }
 
-    return new AlgorithmResult({
-      algorithm: this.id,
-      applied: (!!minc && cases.length > 0),
-      cells: !!minc ? [minc.id] : [],
-      descLines: [new AlgorithmResultLine({
-        description: `The schema has been split on cell ${getUserCoord(minc?.id||'unknown')} using the values [${(minc?.availables||[]).join(',')}]`,
-        cell: minc?.id,
-        withValue: true
-      })],
-      cases
-    }, sdk);
+    return applyAlgorithm(this, sdk, (o) => {
+      if (minc) {
+        const minvalues = _clone(minc.availables);
+        const template = _clone(sdk);
+        minvalues.forEach((av, index) => {
+          if (index === 0) {
+            _valorize(sdk, minc, av);
+          } else if (!!template) {
+            const clone = _clone(template);
+            o.cases.push(_valorize(clone, minc, av));
+          }
+        });
+        o.doCheckAvailable = false;
+        o.applied = true;
+        o.cells[minc.id] = true;
+        o.descLines = [new AlgorithmResultLine({
+          description: `The schema has been split on cell ${getUserCoord(minc?.id||'unknown')} using the values [${(minc?.availables||[]).join(',')}]`,
+          cell: minc?.id,
+          withValue: true
+        })];
+      }
+    });
   }
 }

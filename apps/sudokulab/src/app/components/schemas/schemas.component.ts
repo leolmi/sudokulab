@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
-import {BOARD_DATA, BoardData, BoardUserData, PlaySudoku, Sudoku, SudokuLab, use} from '@sudokulab/model';
+import {BOARD_DATA, BoardData, BoardUserData, clearEvent, PlaySudoku, Sudoku, SudokuLab, use} from '@sudokulab/model';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
-import {distinctUntilChanged, map, take} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, map, take} from 'rxjs/operators';
 import {DestroyComponent} from '../DestroyComponent';
 import {ItemInfo} from '../../model';
 import {isEqual as _isEqual, reduce as _reduce, values as _values} from 'lodash';
@@ -20,6 +20,9 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   counter$: Observable<number>;
   total$: Observable<number>;
   canOpen$: Observable<boolean>;
+  canSearch$: Observable<boolean>;
+  searchVisible$: BehaviorSubject<boolean>;
+  searchText$: BehaviorSubject<string>;
   userChanges$: Observable<Dictionary<any>>;
 
   constructor(public sudokuLab: SudokuLab,
@@ -35,16 +38,20 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
     }];
 
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
+    this.searchText$ = new BehaviorSubject<string>('');
+    this.searchVisible$ = new BehaviorSubject<boolean>(false);
 
-    combineLatest([this.sudokuLab.state.schemas$, this.sudokuLab.state.schemasOptions$]).pipe(
-      distinctUntilChanged(([s1,o1],[s2,o2]) =>
-        (s1||[]).length === (s2||[]).length && _isEqual(o1, o2)))
-      .subscribe(([ss, o]) => this.schemas$.next(filterSchemas(ss, o)));
+    combineLatest([this.sudokuLab.state.schemas$, this.sudokuLab.state.schemasOptions$, this.searchText$.pipe(debounceTime(500))]).pipe(
+      distinctUntilChanged(([s1,o1, t1],[s2,o2, t2]) =>
+        (s1||[]).length === (s2||[]).length && _isEqual(o1, o2) && t1 === t2))
+      .subscribe(([ss, o, txt]) => this.schemas$.next(filterSchemas(ss, o, txt)));
 
     this.counter$ = this.schemas$.pipe(map(sch => (sch||[]).length));
     this.total$ = this.sudokuLab.state.schemas$.pipe(map(sch => (sch||[]).length));
     this.canOpen$ = combineLatest([this.sudokuLab.state.activeSudokuId$, this.sudokuLab.state.selectedSudokuId$])
       .pipe(map(([aid, sid]) => !!sid && sid !== aid));
+    this.canSearch$ = combineLatest([this.sudokuLab.state.schemas$, this.searchVisible$])
+      .pipe(map(([sch, vis]) => (sch||[]).length>0 && !vis));
     this.userChanges$ = combineLatest([sudokuLab.state.userSettings$, this.schemas$, _board.userData$])
       .pipe(map(([us, schemas, udata]) =>
         _board.isWorkerAvailable ? ((<BoardUserData>udata)?.schema||{}) : getSchemasMap(schemas, us)));
@@ -67,6 +74,19 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
     this.sudokuLab.activateSelectedSchema();
   }
 
+  search() {
+    this.searchVisible$.next(true);
+  }
+
+  closeSearchBar() {
+    this.searchVisible$.next(false);
+    this.searchText$.next('');
+  }
+
+  applySearch(e: any) {
+    this.searchText$.next(e.target.value||'');
+  }
+
   applySort(sortBy: string) {
     this.sudokuLab.updateSchemasOptions({ sortBy })
   }
@@ -78,6 +98,9 @@ export class SchemasComponent extends DestroyComponent implements OnDestroy {
   toggleTry() {
     const o = this.sudokuLab.state.schemasOptions$.value;
     this.sudokuLab.updateSchemasOptions({ try: !o.try });
+  }
+  focus(on: boolean) {
+    this.sudokuLab.state.keyboardLock$.next(on);
   }
 }
 

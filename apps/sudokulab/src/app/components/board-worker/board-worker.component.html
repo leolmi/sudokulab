@@ -1,9 +1,11 @@
 <div class="sudokulab-board" [class.lines]="!(board.sdk$|async)">
   <div class="empty-text" *ngIf="!(board.sdk$|async)">{{emptyText}}</div>
   <svg-interactive-board
+    *ngIf="board.manager"
     [sudokuData]="board"
     [valueMode]="(valueMode$|async)||''"
-    [highlights]="board.manager?.highlights$|async"
+    [highlights]="board.manager.highlights$|async"
+    [keyboardLocked]="board.manager.keyboardLock$|async"
     (changed)="changed()"
   ></svg-interactive-board>
 </div>

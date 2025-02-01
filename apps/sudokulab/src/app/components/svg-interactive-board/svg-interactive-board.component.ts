@@ -1,5 +1,6 @@
 import {Component, EventEmitter, HostListener, Input, OnDestroy, Output} from "@angular/core";
 import {
+  BoardWorkerHighlightGroup,
   BoardWorkerHighlights,
   clearEvent,
   decodeCellId,
@@ -9,7 +10,7 @@ import {
   PlaySudoku,
   PlaySudokuCell,
   PlaySudokuOptions,
-  SudokuData,
+  SudokuData, SudokuGroupType,
   useOn
 } from "@sudokulab/model";
 import {BehaviorSubject, combineLatest, Observable, Subject, Subscription} from "rxjs";
@@ -121,8 +122,10 @@ class SvgCell {
               (click)="select(cell)"
               (mousedown)="showpopup($event, cell)"
               (touchstart)="showpopup($event, cell)"
-              [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
-              [attr.x]="cell.x" [attr.y]="cell.y"></rect>
+              [attr.width]="GEOMETRY.width"
+              [attr.height]="GEOMETRY.height"
+              [attr.x]="cell.x"
+              [attr.y]="cell.y"></rect>
         <text class="svg-board-cell-text"
               text-anchor="middle"
               dominant-baseline="middle"
@@ -135,6 +138,7 @@ class SvgCell {
           <!-- AVAILABLE VALUES -->
           <g *ngFor="let vl of cell.values">
             <text class="svg-board-cell-values-text"
+                  [class.highlight-cell]="((highlights$|async)?.cell||{})[cell.id]"
                   text-anchor="start"
                   [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
                   [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)">{{valueMode=='dot'?'∎':vl}}</text>
@@ -154,6 +158,15 @@ class SvgCell {
             [attr.width]="GEOMETRY.width" [attr.height]="GEOMETRY.height"
             [attr.x]="sel?.x"
             [attr.y]="sel?.y"></rect>
+
+      <!-- GRUPPI EVIDENZIATI -->
+      <rect class="svg-board-highlight-group"
+            *ngFor="let group of (highlightGroups$|async)"
+            [attr.x]="group.x"
+            [attr.y]="group.y"
+            [attr.width]="group.width"
+            [attr.height]="group.height"
+      ></rect>
     </g>
 
     <g *ngIf="popup$|async as pop"
@@ -195,6 +208,8 @@ export class SvgInteractiveBoard implements OnDestroy {
   disabled$: BehaviorSubject<boolean>
   currentCellId$: BehaviorSubject<string>;
   highlights$: BehaviorSubject<BoardWorkerHighlights>;
+  highlightGroups$: Observable<BoardWorkerHighlightGroup[]>;
+  keyboardLocked$: BehaviorSubject<boolean>;
   selection$: Observable<SvgSize|undefined>;
   viewBox$: Observable<string>;
   GEOMETRY = GEOMETRY;
@@ -218,6 +233,11 @@ export class SvgInteractiveBoard implements OnDestroy {
     if (hl) this.highlights$.next(hl);
   }
 
+  @Input()
+  set keyboardLocked(lock: boolean|null|undefined) {
+    this.keyboardLocked$.next(!!lock);
+  }
+
   @Output()
   changed: EventEmitter<PlaySudoku> = new EventEmitter<PlaySudoku>();
 
@@ -226,6 +246,7 @@ export class SvgInteractiveBoard implements OnDestroy {
     this._sudokuData = new SudokuData<any>();
     this.sdk$ = new BehaviorSubject<PlaySudoku>(new PlaySudoku());
     this.currentCellId$ = new BehaviorSubject<string>('');
+    this.keyboardLocked$ = new BehaviorSubject<boolean>(false);
     this.disabled$ = new BehaviorSubject<boolean>(false);
     this.highlights$ = new BehaviorSubject<BoardWorkerHighlights>(BoardWorkerHighlights.empty);
     this.popup$ = new BehaviorSubject<SvgCell|undefined>(undefined);
@@ -239,6 +260,7 @@ export class SvgInteractiveBoard implements OnDestroy {
       map(ud => ud?.options?.usePopupKeys),
       distinctUntilChanged(),
       map(popk => popk ? '-10 -10 110 110' : '0 0 90 90'));
+    this.highlightGroups$ = this.highlights$.pipe(map(h => getHighlightGroups(h)));
   }
 
 
@@ -257,7 +279,7 @@ export class SvgInteractiveBoard implements OnDestroy {
 
   @HostListener('window:keyup', ['$event'])
   keyEvent(e: KeyboardEvent) {
-    if (this.sudokuData.disabled$.value) return;
+    if (this.sudokuData.disabled$.value || this.keyboardLocked$.value) return;
     clearEvent(e);
     this._apply(e);
   }
@@ -320,3 +342,32 @@ const getCellCoords = (cell?: PlaySudokuCell): SvgSize|undefined => {
 const getCells = (sdk: PlaySudoku): SvgCell[] =>
   _reduce(sdk?.cells||[], (cells, c) =>
     c ? cells.concat(new SvgCell(c, sdk?.options)) : cells, <SvgCell[]>[]);
+
+const getHighlightGroups = (h: BoardWorkerHighlights): BoardWorkerHighlightGroup[] => {
+  return h.groups.map(gi => {
+    switch (gi.type) {
+      case SudokuGroupType.column:
+        return <BoardWorkerHighlightGroup>{
+          x: gi.pos * GEOMETRY.width,
+          y: 0,
+          width: GEOMETRY.width,
+          height: GEOMETRY.height * 9
+        }
+      case SudokuGroupType.square:
+        return <BoardWorkerHighlightGroup>{
+          x: ((gi.pos%3)*3)*GEOMETRY.width,
+          y: (Math.floor(gi.pos/3)*3)*GEOMETRY.height,
+          width: GEOMETRY.width * 3,
+          height: GEOMETRY.height * 3
+        }
+      default:
+      case SudokuGroupType.row:
+        return <BoardWorkerHighlightGroup>{
+          x: 0,
+          y: gi.pos * GEOMETRY.height,
+          width: GEOMETRY.width * 9,
+          height: GEOMETRY.height
+        }
+    }
+  })
+}

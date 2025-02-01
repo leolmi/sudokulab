@@ -5,6 +5,7 @@ import {SolveStepResult} from "./logic";
 import {AlgorithmResultLine} from "./AlgorithmResult";
 import {PlaySudokuOptions} from "./PlaySudokuOptions";
 import {UserData} from "./UserData";
+import {GroupInfo} from "./CellInfo";
 
 export const BOARD_WORKER_USER_DATA_KEY = 'SUDOKULAB_WBOARD_USERDATA';
 
@@ -36,11 +37,13 @@ export class BoardWorkerHighlights {
     this.cell = {};
     this.cellValue = {};
     this.others = {};
+    this.groups = [];
   }
 
   cell: Dictionary<boolean>;
   cellValue: Dictionary<boolean>;
   others: Dictionary<boolean>;
+  groups: GroupInfo[];
 
   static get empty() {
     return new BoardWorkerHighlights();
@@ -88,4 +91,14 @@ export class BoardUserData extends UserData {
     this.schema = ud?.schema||{};
   }
   schema: Dictionary<SchemaData>;
+}
+
+/**
+ * rappresenta l'evidenziazione di un gruppo
+ */
+export class BoardWorkerHighlightGroup {
+  x: number = 0;
+  y: number = 0;
+  width: number = 0;
+  height: number = 0;
 }
