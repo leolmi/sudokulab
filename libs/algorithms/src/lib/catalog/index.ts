@@ -5,7 +5,6 @@ export * from './Twins.algorithm';              // OK
 export * from './AlignmentOnGroup.algorithm';   // OK
 export * from './Couples.algorithm';            // OK
 export * from './Bug.algorithm';                // OK
-
 export * from './XWings.algorithm';             // OK
 export * from './YWings.algorithm';     // TODO...
 export * from './XYWings.algorithm';    // TODO...
