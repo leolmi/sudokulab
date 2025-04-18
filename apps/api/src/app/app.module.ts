@@ -1,20 +1,21 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SudokuModule } from './sudoku/sudoku.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { SudokuModule } from './sudoku/sudoku.module';
+import { AppLoggerMiddleware } from './app.logger';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'public')
-    }),
-    AuthModule,
+    ServeStaticModule.forRoot({ rootPath: join(__dirname, 'public') }),
     SudokuModule
   ],
   controllers: [AppController],
   providers: [AppService]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(AppLoggerMiddleware).forRoutes('/*path');
+  }
+}

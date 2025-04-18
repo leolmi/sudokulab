@@ -1,0 +1,70 @@
+<h2 mat-dialog-title class="user-select-none">Keep Schema</h2>
+<mat-dialog-content class="schema-keeper-content">
+  <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
+  @switch (keeperMode$|async) {
+    @case (KeeperMode.chooser) {
+      <div class="keeper-page page-chooser drop-enabled"
+           [class.dragging]="dragging$|async"
+           (dragenter)="allowDrop($event)"
+           (dragover)="allowDrop($event)"
+           (dragend)="dragExit()"
+           (dragleave)="dragExit()"
+           (drop)="drop($event)">
+        @for (btn of chooserButtons; track btn.mode) {
+          <button mat-icon-button
+                  class="chooser-button"
+                  [disabled]="!!btn.disabled"
+                  (click)="setMode(btn.mode)">
+            <mat-icon>{{btn.icon}}</mat-icon>
+            <div class="chooser-button-title">{{btn.title}}</div>
+          </button>
+        }
+        <div class="drop-here-area" fxLayout="row" fxLayoutAlign="center center">
+          <div class="label">drop here</div>
+        </div>
+      </div>
+      <div class="keeper-chooser-label"
+           [class.hidden]="dragging$|async">Choose keeper mode or drag a json file here</div>
+    }
+    @case (KeeperMode.schema) {
+      <div class="keeper-page page-keeper">
+        <sudoku-board (onReady)="boardReady($event)"></sudoku-board>
+        @if (manager) {
+          <schema-toolbar [manager]="manager" [template]="toolbarTemplate"></schema-toolbar>
+        }
+      </div>
+    }
+    @case (KeeperMode.text) {
+      <div class="keeper-page page-keeper">
+        <div class="keeper-text-length">
+          {{textLength$|async}}
+          <span class="text-postfix">/{{DEFAULT_TOTAL_RANK}}</span>
+        </div>
+        <mat-form-field class="full-width">
+          <mat-label>String of numbers</mat-label>
+          <input matInput
+                 autofocus
+                 #textInput
+                 maxlength="81"
+                 class="font-family-monospace font-size-24"
+                 (input)="keepText($event)">
+        </mat-form-field>
+      </div>
+    }
+    @case (KeeperMode.image) {
+      <div class="keeper-page page-keeper">
+        IMAGE... (todo)
+      </div>
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions>
+  @if ((keeperMode$|async)!==KeeperMode.chooser) {
+    <button mat-button (click)="setMode()">Back</button>
+  }
+  <div fxFlex></div>
+  <button mat-button mat-dialog-close>Cancel</button>
+  @if ((keeperMode$|async)!==KeeperMode.chooser) {
+    <button mat-button [disabled]="!(valid$|async)" (click)="load()">Load</button>
+  }
+</mat-dialog-actions>

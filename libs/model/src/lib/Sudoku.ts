@@ -1,44 +1,56 @@
-import {SudokuOptions} from './SudokuOptions';
-import {has as _has, repeat as _repeat} from 'lodash';
-import {SudokuInfo} from './SudokuInfo';
-import {SUDOKU_DEFAULT_RANK, SUDOKU_STANDARD_CHARACTERS} from './consts';
-import {calcFixedCount, getHash} from '../global.helper';
+import { SudokuCell } from './sudoku-cell';
+import { SudokuInfo, SudokuInfoEx } from './sudoku-info';
+import { buildSudokuCells, getBaseValues, getCellsSchema } from '../model.helper';
 
+/**
+ * Informazioni di base dello schema
+ */
 export class Sudoku {
   constructor(s?: Partial<Sudoku>) {
-    this._id = 0;
-    this.rank = SUDOKU_DEFAULT_RANK;
-    this.values = '';
-    this.fixed = '';
-    Object.assign(this, s || {});
-    consolidate(this);
-    this.options = new SudokuOptions(s?.options);
+    Object.assign(<any>this, s || {});
+
+    this.name = s?.name||'';
+    this.values = s?.values||getBaseValues();
     this.info = new SudokuInfo(s?.info);
-    this.info.rank = this.rank;
-    this.info.fixedCount = calcFixedCount(this.fixed);
+    this._id = this.values;
   }
-  _id: number;
-  rank: number;
+
+  _id: string;
+  name: string;
   values: string;
-  fixed: string;
-  options: SudokuOptions;
   info: SudokuInfo;
-  name?: string;
 }
 
-export const getFixedValuesEmpty = (sdk: Sudoku) => _repeat(SUDOKU_STANDARD_CHARACTERS.empty, sdk.rank * sdk.rank);
+/**
+ * estensione della classe Sudoku
+ */
+export class SudokuEx extends Sudoku {
+  constructor(s?: Partial<SudokuEx>) {
+    super(s);
 
-export const consolidate = (sdk: Sudoku) => {
-  const fixed = getFixedValuesEmpty(sdk);
-  sdk.values = sdk.values || sdk.fixed || fixed;
-  sdk.fixed = sdk.fixed || fixed;
-  sdk._id = getHash(sdk.fixed);
+    this.cells = [];
+    checkCells(this, s?.cells);
+    this.info = new SudokuInfoEx(s?.info);
+  }
+
+  cells: SudokuCell[];
+  override info: SudokuInfoEx;
 }
 
-export const isSudoku = (sdk: any): boolean => {
-  return !!sdk?._id
-    && _has(sdk, 'rank')
-    && _has(sdk, 'fixed')
-    && _has(sdk, 'values')
-    && _has(sdk, 'info');
+/**
+ * verifica la consistenza dei dati fondamentali: `cells`, `values`
+ * @param sdk
+ * @param cells
+ */
+const checkCells = (sdk: SudokuEx, cells?: SudokuCell[]): void => {
+  if ((cells || []).length > 0) {
+    sdk.cells = (cells || []).map(c => new SudokuCell(c));
+  } else if (sdk.values) {
+    sdk.cells = buildSudokuCells(sdk.values);
+  }
+  const bvalues = getBaseValues();
+  if (sdk.values||bvalues === bvalues) {
+    sdk.values = getCellsSchema(sdk.cells);
+    sdk._id = sdk.values;
+  }
 }

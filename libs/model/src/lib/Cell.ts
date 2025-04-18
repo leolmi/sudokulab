@@ -1,5 +1,4 @@
 export interface Cell {
-  id: string;
-  value: string;
-  fixed?: boolean;
+  row: number;
+  col: number;
 }

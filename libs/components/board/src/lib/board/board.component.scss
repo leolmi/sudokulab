@@ -1,0 +1,231 @@
+@use 'sass:color';
+
+:host {
+  width: 100%;
+  outline: none !important;
+}
+
+.svg-interactive-board {
+  width: 100%;
+  outline: none !important;
+  font-family: Arial, monospace;
+
+  &.disabled {
+    opacity: .4;
+  }
+
+  &:not(.focused) {
+    .svg-board-cell {
+      &.svg-selection-cell {
+        stroke-width: .3;
+        transform: scale(.97);
+      }
+    }
+  }
+}
+
+@keyframes svg-pulse {
+  0% {
+    transform: scale(0.95);
+  }
+  70% {
+    transform: scale(2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.svg-board-cell {
+  transition: fill .5s ease-in-out;
+  fill: transparent;
+
+  &.svg-selection-cell {
+    stroke-width: 1;
+    transform: scale(.9);
+    transform-origin: center;
+    transform-box: border-box;
+    pointer-events: none;
+  }
+}
+
+
+.svg-board-cell-text {
+  font-size: 6px;
+  font-weight: 100;
+  transition: fill .5s ease-in-out;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  opacity: var(--board-cell-opacity);
+  &.fixed,
+  &.dynamic {
+    font-weight: bolder;
+    opacity: 1;
+  }
+  &.svg-pulse {
+    font-weight: bold;
+    animation: svg-pulse 2s infinite;
+  }
+}
+
+.svg-board-coord-text {
+  font-size: 2.5px;
+  font-weight: 100;
+}
+
+
+.svg-board-highlight-group {
+  stroke-width: .5;
+  fill: transparent;
+  user-select: none;
+  pointer-events: none;
+}
+
+.popup-value {
+  font-size: 5px;
+  font-weight: 500;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  transition: font-size ease-in-out;
+  // user-select: none;
+  &:hover {
+    font-size: 8px;
+  }
+}
+
+.popup-watch-value {
+  font-size: 10px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.svg-board-cell-values-text {
+  font-size: 2px;
+  opacity: .4;
+
+  &.user-values {
+    opacity: 1;
+    font-size: 2.1px;
+    font-weight: bold;
+  }
+}
+
+.svg-board-line,
+.svg-board-cell-text,
+.svg-board-cell-values-text {
+  user-select: none;
+  pointer-events: none;
+}
+
+
+
+.svg-interactive-board {
+  --board-color-background-board: rgba(1,1,1,.01);
+  --board-color-accent: rgb(255, 64, 129);
+  --board-color-accent-02: rgba(255, 64, 129, 0.2);
+  --board-color-accent-08: rgba(255, 64, 129, 0.8);
+  --board-color-background2: #ddd;
+  --board-color-error2: orangered;
+  --board-color-error2-transp: rgba(255, 69, 0, 0.4);
+  --board-color-background-contrast: #333;
+  --board-color-primary: #3f51b5;
+  --board-color-primary-contrast: rgba(98, 127, 255, 0.1);
+  --board-cell-opacity: 0.8;
+  --board-cell-border: #dddddd;
+
+  .svg-board-background {
+    fill: var(--board-color-background-board);
+  }
+  .svg-board-cell {
+    stroke: var(--board-cell-border);
+    &.svg-selection-cell {
+      stroke: var(--board-color-accent);
+    }
+    //&.dynamic {
+    //  fill: var(--board-color-background2);
+    //}
+    &.error {
+      fill: var(--board-color-error2-transp);
+    }
+  }
+  .svg-board-coord-text {
+    &.highlight {
+      fill: var(--board-color-accent);
+      font-weight: bold;
+    }
+  }
+  .svg-board-line {
+    stroke: var(--board-color-background-contrast);
+  }
+  .svg-board-cell-text {
+    fill: var(--board-color-background-contrast);
+    &.error {
+      fill: var(--board-color-error2);
+    }
+    &.svg-pulse {
+      fill: var(--board-color-accent);
+    }
+  }
+  .svg-board-coord-text {
+    fill: var(--board-color-background-contrast);
+    &:not(.highlight) {
+      opacity: .3;
+    }
+  }
+  .svg-board-cell-values-text {
+    fill: var(--board-color-accent);
+
+    &.highlight-cell {
+      fill: white;
+    }
+  }
+  .svg-board-highlight-group {
+    stroke: var(--board-color-primary);
+    fill: var(--board-color-primary-contrast);
+  }
+  &.pencil {
+    .svg-board-line {
+      stroke: var(--board-color-accent);
+    }
+  }
+  &.values-mode-dots {
+    .svg-board-cell-values-text {
+      transform: translate(-0.4px, -0.4px);
+    }
+  }
+
+  g {
+    &.highlight {
+      .svg-board-cell {
+        fill: var(--board-color-accent-08);
+      }
+      .svg-board-cell-text {
+        fill: white;
+      }
+    }
+    &.highlight-secondary {
+      .svg-board-cell {
+        fill: var(--board-color-accent-02);
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .theme-dark {
+    .svg-interactive-board {
+      --board-color-background-board: rgba(50,50,50,.9);
+      --board-color-accent: yellowgreen;
+      --board-color-accent-02: rgba(154, 205, 50, 0.2);
+      --board-color-accent-08: rgba(154, 205, 50, 0.8);
+      --board-color-background2: #ddd;
+      --board-color-error2: orangered;
+      --board-color-error2-transp: rgba(255, 69, 0, 0.4);
+      --board-color-background-contrast: whitesmoke;
+      --board-color-primary: rgba(181, 112, 63, 1);
+      --board-color-primary-contrast: rgba(181, 112, 63, 0.05);
+      --board-cell-border: rgba(221, 221, 221, 0.2);
+      --board-cell-opacity: 0.5;
+    }
+  }
+}

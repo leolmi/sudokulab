@@ -1,0 +1,37 @@
+::ng-deep {
+  .options-tool {
+    .mat-form-field {
+      min-width: 60px;
+    }
+  }
+}
+
+.options-tool {
+  padding: 50px 50px 0 20px;
+}
+
+.options-line {
+  margin-top: 10px;
+}
+
+.space {
+  width: 10px;
+}
+
+.options-editor {
+  margin-bottom: 16px;
+  padding: 10px 0;
+}
+
+.algorithms-line {
+  >.algorithm-tag {
+    display: inline-block;
+    margin-right: 10px;
+  }
+}
+
+.algorithms-label {
+  width: 100%;
+  display: block;
+  padding: 10px 16px;
+}

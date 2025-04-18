@@ -1,8 +1,3 @@
 const gulp = require('gulp');
-require('./tools/gulp/deploy');
+require('./utils/gulp/deploy');
 
-gulp.task('deploy', gulp.series(
-  'build_frontend',
-  'build_backend',
-  'compose',
-  'end'));

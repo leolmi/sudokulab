@@ -1,10 +1,8 @@
 import { Document } from 'mongoose';
 
 export interface SudokuDoc extends Document {
-  readonly _id: number;
-  readonly rank: number;
+  readonly _id: string;
+  readonly name: string;
   readonly values: string;
-  readonly fixed: string;
-  readonly options: any;
   readonly info: any;
 }

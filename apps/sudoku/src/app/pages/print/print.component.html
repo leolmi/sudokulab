@@ -1,0 +1,17 @@
+<div class="sudokulab-page sudokulab-page-print" fxLayout="row">
+  <div class="print-container" fxFlex>
+    <div class="print-title">{{pagesCount$|async}}<span class="opacity-4"> pages with </span>{{schemaCount$|async}}<span class="opacity-4"> schemas</span></div>
+    <div class="pages-container">
+      @for (page of printDocument.pages$|async; track page.id; let index = $index) {
+        <print-page [pageId]="page.id" [index]="index"></print-page>
+      }
+      <print-page mode="add"></print-page>
+    </div>
+  </div>
+  <schemas-browser
+    persistenceKey="print"
+    (clickOnSchema)="printDocument.addSchema($event.values)"
+    [activeSchema]="printDocument.activePageSchema$|async"
+    [allowCompact]="true"
+  ></schemas-browser>
+</div>

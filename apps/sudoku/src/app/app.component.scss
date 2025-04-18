@@ -1,0 +1,56 @@
+::ng-deep {
+  .layout-narrow {
+    .sudokulab-toolbar {
+      .logo {
+        font-size: .8em;
+      }
+    }
+  }
+}
+
+.sudokulab-toolbar {
+  min-height: 56px;
+}
+
+.title {
+  padding: 0 20px;
+  font-weight: 100;
+  opacity: .5;
+}
+
+.logo {
+  font-weight: 100;
+  font-size: 1.2em;
+  user-select: none;
+  cursor: pointer;
+
+  .sub-title {
+    font-size: .35em;
+    font-weight: 100;
+    opacity: .5;
+    line-height: 1;
+  }
+
+}
+.github-logo-image {
+  width: 40px;
+  height: 40px;
+}
+
+
+.author-popup {
+  >img {
+    width: 40px
+  }
+  .author-data {
+    line-height: 1.4;
+    margin: 0 10px;
+    font-size: 19px;
+    font-weight: 100;
+
+    .author-name {
+      opacity: .6;
+      font-size: 13px;
+    }
+  }
+}

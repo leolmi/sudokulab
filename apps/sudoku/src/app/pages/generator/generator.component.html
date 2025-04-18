@@ -1,0 +1,76 @@
+@if (manager) {
+  @if (manager.isRunning$|async) {
+    <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
+  }
+}
+<div class="sudokulab-page page-fill" fxLayout="row">
+  <div class="page-space" fxFlex></div>
+  <div class="page-content" [fxLayout]="layout$|async">
+
+
+  <div class="generator-options narrow-hidden" fxLayout="column" fxFlex>
+    <div class="stat-monitor" fxLayout="column">
+      @for (l of lines$|async; track l.description) {
+        <div class="stat-line"
+             [class.evidence]="!!l.evidence"
+             fxLayout="row" fxLayoutAlign="start center">
+          <div class="stat-line-desc">{{l.description}}</div>
+          <div class="stat-line-value">{{l.value}}</div>
+        </div>
+      }
+      <div class="stat-line evidence" fxLayout="row" fxLayoutAlign="start center">
+        <div class="stat-line-desc">Values to add</div>
+        <div class="stat-line-value">{{(valuesToAdd$|async)}}</div>
+      </div>
+    </div>
+    @if (manager) {
+      <generator-options
+        [manager]="manager"
+        [options]="options$|async"
+        (onOptionsChanged)="updateOptions($event)"
+      ></generator-options>
+    }
+  </div>
+  <div class="generator-board">
+    <sudoku-board
+      [logic]="logic"
+      (onReady)="ready($event)"
+      (pasteSchemaRequest)="pasteSchema($event)"
+    ></sudoku-board>
+    @if (manager) {
+      <schema-toolbar
+        [manager]="manager"
+        [template]="toolbarTemplate"
+      ></schema-toolbar>
+    }
+  </div>
+  <div class="generator-results narrow-visible">
+    @if (manager) {
+      <generator-schemas
+        [manager]="manager"
+        (clickOnSchema)="clickOnGeneratedSchema($event)"
+      ></generator-schemas>
+    }
+  </div>
+  <div class="generator-options narrow-visible">
+    @if (manager) {
+      <generator-options
+        [manager]="manager"
+        [options]="options$|async"
+        (onOptionsChanged)="updateOptions($event)"
+      ></generator-options>
+    }
+  </div>
+  <div class="generator-results narrow-hidden" fxFlex>
+    @if (manager) {
+      <generator-schemas
+        [manager]="manager"
+        (clickOnSchema)="clickOnGeneratedSchema($event)"
+      ></generator-schemas>
+    }
+  </div>
+
+
+  </div>
+  <div class="page-space" fxFlex></div>
+</div>

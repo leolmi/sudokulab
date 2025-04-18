@@ -1,0 +1,103 @@
+
+@if (status$|async; as status) {
+  <svg class="svg-interactive-board"
+       #board
+       [ngClass]="class$|async"
+       [class.disabled]="status.isDisabled"
+       [class.focused]="isFocused$|async"
+       [class.coord]="status.isCoord"
+       [style.height.px]="height$|async"
+       [attr.viewBox]="status.isCoord?'-5 -5 100 100':'-0.5 -0.5 91 91'">
+    <g>
+      <!-- CONTORNO (light) -->
+      <rect x="0" y="0" width="90" height="90"
+            class="svg-board-line svg-board-background"
+            stroke-width="0"
+      ></rect>
+      @if (status.isCoord) {
+        @for (crd of GEOMETRY.coords; track crd.text) {
+          <!-- COORDS -->
+          <text class="svg-board-coord-text"
+                text-anchor="middle"
+                dominant-baseline="hanging"
+                [attr.x]="crd.x"
+                [attr.y]="crd.y"
+                [class.highlight]="crd.col===(currentCellCol$|async) || crd.row===(currentCellRow$|async)"
+          >{{crd.text}}</text>
+        }
+      }
+
+      @for (cell of (cells$|async); track cell.id) {
+        <g [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
+           [class.highlight-secondary]="((highlights$|async)?.secondaryCell||{})[cell.id]">
+          <rect class="svg-board-cell"
+                [attr.stroke-width]="GEOMETRY.line.thin"
+                [class.error]="cell.error"
+                [class.dynamic]="cell.isDynamic"
+                [class.current]="cell.id === (currentCellId$|async)"
+                (click)="select(cell)"
+                [attr.width]="GEOMETRY.cell.width"
+                [attr.height]="GEOMETRY.cell.height"
+                [attr.x]="cell.x"
+                [attr.y]="cell.y"
+          ></rect>
+
+          @if (cell.text) {
+            <!-- CELL TEXT -->
+            <text class="svg-board-cell-text"
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                  [class.fixed]="cell.isFixed"
+                  [class.dynamic]="cell.isDynamic"
+                  [class.error]="cell.error"
+                  [class.svg-pulse]="((highlights$|async)?.cellValue||{})[cell.id]"
+                  [attr.x]="cell.textX"
+                  [attr.y]="cell.textY"
+            >{{cell.text}}</text>
+          } @else {
+            <!-- AVAILABLE VALUES -->
+            @for (vl of cell.getValues(status); track $index) {
+              <text class="svg-board-cell-values-text"
+                    [class.user-values]="cell.userValues.length>0"
+                    [class.highlight-cell]="((highlights$|async)?.cell||{})[cell.id]"
+                    text-anchor="start"
+                    [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
+                    [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)"
+              >{{(status.valuesMode=='dots')?'∎':vl}}</text>
+            }
+          }
+        </g>
+      }
+
+      <!-- LINNE SPESSE -->
+      @for (ln of GEOMETRY.lines.big; track ln.id) {
+        <line [attr.x1]="ln.x1" [attr.y1]="ln.y1" [attr.x2]="ln.x2" [attr.y2]="ln.y2"
+              class="svg-board-line"
+              [attr.stroke-width]="GEOMETRY.line.big"
+        ></line>
+      }
+
+      <!-- SELEZIONE -->
+      @if (manager) {
+        @if (manager.selection$|async; as sel) {
+          <rect class="svg-board-cell svg-selection-cell"
+                [attr.width]="GEOMETRY.cell.width"
+                [attr.height]="GEOMETRY.cell.height"
+                [attr.x]="sel?.x"
+                [attr.y]="sel?.y"
+          ></rect>
+        }
+      }
+
+      <!-- GRUPPI EVIDENZIATI -->
+      @for (group of hlgroups$|async; track group) {
+        <rect class="svg-board-highlight-group"
+              [attr.x]="group.x"
+              [attr.y]="group.y"
+              [attr.width]="group.width"
+              [attr.height]="group.height"
+        ></rect>
+      }
+    </g>
+  </svg>
+}

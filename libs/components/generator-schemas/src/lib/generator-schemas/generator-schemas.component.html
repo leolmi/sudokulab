@@ -1,0 +1,33 @@
+<div class="generator-schemas-container">
+  @for (sdk of store.generated$|async; track sdk.values) {
+    <div class="generator-schema">
+      <div class="generator-schema-content sdk-color-hover"
+           fxLayout="column" fxLayoutAlign="start center">
+        <sudoku-board-preview
+          [schema]="sdk"
+          (click)="previewClick(sdk)"
+          (dblclick)="openInPlayer(sdk)"
+        ></sudoku-board-preview>
+        <div class="schema-details" fxFlex>{{sdk.info.fixedCount}}n {{sdk.info.difficulty}} ({{sdk.info.difficultyValue}})</div>
+      </div>
+    </div>
+  }
+  @if (manager) {
+    @if (manager.isRunning$|async) {
+      <!-- GENERATION PREVIEW -->
+      <div class="generator-schema generator-stat-preview">
+        <div class="generator-schema-content"
+             fxLayout="column" fxLayoutAlign="start center">
+          @if (manager.generationStat$|async; as stat) {
+            <sudoku-board-preview [schema]="stat.currentSchema"></sudoku-board-preview>
+            <div class="schema-details" fxFlex>{{generationDesc$|async}}</div>
+            <mat-progress-spinner
+              [mode]="(progressMode$|async)||'indeterminate'"
+              [value]="(progress$|async)||0"
+            ></mat-progress-spinner>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

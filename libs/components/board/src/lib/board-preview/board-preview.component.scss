@@ -1,0 +1,47 @@
+::ng-deep {
+  .theme-dark,
+  .theme-light .theme-inverse {
+    .sudoku-board-preview {
+
+      .svg-board-cell {
+        fill: #ccc;
+      }
+
+      .grid {
+        stroke: #aaa;
+      }
+    }
+  }
+
+  .theme-light,
+  .theme-dark .theme-inverse{
+    .sudoku-board-preview {
+
+      .svg-board-cell {
+        fill: #333;
+      }
+
+      .grid {
+        stroke: #aaa;
+      }
+    }
+  }
+
+  .board-active-contrast {
+    &.active {
+      .sudoku-board-preview {
+
+        .svg-board-cell {
+          fill: var(--sdk-color-accent-contrast);
+        }
+
+        .grid {
+          stroke: var(--sdk-color-accent-contrast);
+        }
+      }
+    }
+  }
+}
+
+
+

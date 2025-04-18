@@ -1,97 +1,121 @@
-import {MessageType, MoveDirection, SudokuGroupType} from './enums';
-import {Dictionary} from '@ngrx/entity';
-import {SudokuMessage} from "./SudokuMessage";
+import { Dictionary } from './types';
 
-export const featureName = 'sudoku';
+export const SUDOKU_DEBUG_LEVELS_KEY = 'SDK-DEBUG-LEVELS';
+export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
+export const DEFAULT_AVAILABLES = ['1','2','3','4','5','6','7','8','9'];
+export const SDK_PREFIX = ['%cSudokuLab', 'color:#111;background-color:yellowgreen;padding:2px 6px;'];
+export const SUDOKU_USER_OPTIONS_FEATURE = 'sudoku_options';
+export const SUDOKU_APP_USER_OPTIONS_KEY = 'SUDOKUAPP-USER-OPTIONS';
+export const SUDOKULAB_SESSION_DEVELOP = 'develop';
+export const SUDOKULAB_SESSION_STANDARD = 'standard';
+export const SUDOKULAB_TITLE = 'SudokuLab';
+export const SUDOKULAB_AUTHOR = 'leo.olmi 2021';
+
+export const DEFAULT_THEME = 'light';
+export const DEFAULT_RANK = 9;
+export const DEFAULT_TOTAL_RANK = DEFAULT_RANK*DEFAULT_RANK;
+export const SUDOKU_MIN_FIXED_CELLS = 14;
+export const DEFAULT_PRINT_TEMPLATE = 'Couple-A4V';
+export const DEFAULT_CATALOG_URL = 'assets/catalog.json';
+
+export const GENERATOR_MIN_NUMBERS = 16;
+export const GENERATOR_DEFAULT_NUMBERS = 22;
+export const GENERATOR_MAX_NUMBERS = 40;
+
+export const TRY_NUMBER_ALGORITHM = 'TryNumber';
+
+export enum GroupType {
+  column = 'column',
+  row = 'row',
+  square = 'square'
+}
+
+export const THEME_ICON: any = {
+  light: 'light_mode',
+  dark: 'dark_mode'
+}
+export const THEME_OTHER: any = {
+  light: 'dark',
+  dark: 'light'
+}
+export const THEME_CLASS: any = {
+  light: 'theme-light',
+  dark: 'theme-dark'
+}
+
+export const AllGroupTypes = [GroupType.row, GroupType.column, GroupType.square];
+
+export const GroupTypeMap: any = {
+  col: GroupType.column,
+  row: GroupType.row,
+  sqr: GroupType.square
+}
+
+export const CellTypeBy: any = {
+  [GroupType.column]: 'col',
+  [GroupType.row]: 'row',
+  [GroupType.square]: 'sqr',
+}
+
 /**
  * caratteri standard x schemi sudoku
  */
-export const SUDOKU_STANDARD_CHARACTERS: any = {
-  dynamic: 'x',
-  dynamic2: '?',
+export const STANDARD_CHARACTERS: any = {
+  dynamic: '?',
+  dynamic2: 'x',
   empty: '0'
 }
+
 /**
- * RANK di sudoku predefinito
+ * tipologia di algoritmo
  */
-export const SUDOKU_DEFAULT_RANK = 9;
-/**
- * massimo numero di split di schema per le soluzioni
- */
-export const SUDOKU_DEFAULT_MAXSPLIT = 5000;
-/**
- * massimo numero di schemi diversi creati in fase di generazione
- */
-export const SUDOKU_DEFAULT_MAX_SCHEMA_COUNT = 100;
-/**
- * Massimo numero di cicli per le valorizzazioni con lo stesso
- * set di celle dinamiche
- */
-export const SUDOKU_DEFAULT_MAX_VAL_CYCLES = 500;
-/**
- * fattore di moltiplicazione del massimo numero di cicli èer
- * un confronto sul numero di possibili valorizzazioni calcolato
- * con le celle dinamiche
- */
-export const SUDOKU_DEFAULT_MAX_VAL_CYCLES_FACTOR = 1.1;
-
-export const SUDOKULAB_LIGHT_THEME = 'light';
-export const SUDOKULAB_DARK_THEME = 'dark';
-export const SUDOKULAB_NUMBER_VALUES_MODE = 'number';
-
-export const SUDOKULAB_SESSION_DEVELOP = 'develop';
-export const SUDOKULAB_SESSION_STANDARD = 'standard';
-
-export const SUDOKULAB_TITLE = 'SudokuLab';
-export const SUDOKULAB_AUTHOR = 'leo.olmi 2021';
-export const SUDOKULAB_SETTINGS_KEY = 'SUDOKULAB-USER-SETTINGS';
-export const SUDOKULAB_DEBUG_KEY = 'SUDOKULAB-DEBUG-STATUS';
-export const SUDOKULAB_DEFAULT_THEME = SUDOKULAB_LIGHT_THEME;
-export const SUDOKULAB_DEFAULT_VALUES_MODE = SUDOKULAB_NUMBER_VALUES_MODE;
-export const SUDOKULAB_BASIC_AUTHORIZATION = 'SUDOKULAB-BASIC';
-
-export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
-
-export const SUDOKU_COMPACT_WIDTH_1 = 1450;
-export const SUDOKU_COMPACT_WIDTH_2 = 640;
-
-
-export const SDK_PREFIX = ['%cSUDOKULAB', 'color:steelblue;'];
-export const SDK_PREFIX_DEBUG = ['%cSUDOKULAB', 'color:#ff4081;'];
-export const SDK_PREFIX_W = ['\u001b[34m[SUDOKULAB]\u001b[0m'];
-
-export const DELETE_VALUES = ['delete', 'Delete', '.', ' '];
-export const DYNAMIC_VALUES = [SUDOKU_STANDARD_CHARACTERS.dynamic, SUDOKU_STANDARD_CHARACTERS.dynamic2];
-
-export const SUDOKULAB_MANAGE_OPERATION = {
-  resyncAll: 'resyncAll'
+export enum AlgorithmType {
+  /**
+   * risolutivo
+   */
+  solver = 'solver',
+  /**
+   * contributivo
+   */
+  support = 'support'
 }
 
-export const OPERATION_NEED_RELOAD_DOCS = {
-  [SUDOKULAB_MANAGE_OPERATION.resyncAll]: true
+export enum Symmetry {
+  none = 'none',
+  vertical = 'vertical',
+  horizontal = 'horizontal',
+  doubleMedian = 'doubleMedian',
+  diagonalNWSE = 'diagonalNWSE',
+  diagonalNESW = 'diagonalNESW',
+  doubleDiagonal = 'doubleDiagonal',
+  central = 'central'
 }
 
-export const AVAILABLE_DIRECTIONS: Dictionary<MoveDirection> = {
-  ArrowDown: MoveDirection.down,
-  ArrowUp: MoveDirection.up,
-  ArrowRight: MoveDirection.right,
-  ArrowLeft: MoveDirection.left,
-  Enter: MoveDirection.next,
-  Backspace: MoveDirection.prev,
-  '0': MoveDirection.next
+export enum EndGenerationMode {
+  manual = 'manual',
+  afterN = 'afterN',
+  afterTime = 'afterTime'
 }
 
-export const AVAILABLE_VALUES = '123456789abcdefg'; // (max = 16x16)
-
-export const DEFAULT_MESSAGES = {
-  todo: new SudokuMessage({message: 'Not implemented yet', type: MessageType.warning}),
-  solved: new SudokuMessage({message: 'Sudoku successfully solved!', type: MessageType.success}),
-  ended: new SudokuMessage({message: 'Generation ended!', type: MessageType.success}),
-  userEnded: new SudokuMessage({message: 'Generation stopped!', type: MessageType.warning})
+export enum ValorizationMode {
+  auto = 'auto',
+  sequential = 'sequential',
+  random = 'random'
 }
 
-export const CELL_GROUP_TYPE: any = {
-  'col': SudokuGroupType.column,
-  'row': SudokuGroupType.row,
-  'sqr': SudokuGroupType.square
+export const DIFFICULTY_UNRATED = 'UNRATED';
+export const DIFFICULTY_MAX = 'EXTREME';
+export const DIFFICULTY_MIN = 'EASY';
+export const DIFFICULTY_VALUES: any = {
+  EASY: 600,
+  MEDIUM: 800,
+  HARD: 1000,
+  VERYHARD: 1600,
+  EXTREME: 1000000000
 }
+export const DIFFICULTY_RANGES = [
+  {value: DIFFICULTY_VALUES.EASY, label: 'EASY'},
+  {value: DIFFICULTY_VALUES.MEDIUM, label: 'MEDIUM'},
+  {value: DIFFICULTY_VALUES.HARD, label: 'HARD'},
+  {value: DIFFICULTY_VALUES.VERYHARD, label: 'VERYHARD'}
+]

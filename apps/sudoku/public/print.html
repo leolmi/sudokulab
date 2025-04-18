@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SudokuLab</title>
+  <style>
+    html, body {font-family:Arial,sans-serif;font-size:20px;height: 100%;margin:0;padding:0;}
+    .title-postfix {opacity:.4;}
+    [layout-row] {display: flex;flex-flow: row nowrap;align-items: stretch;align-content: stretch;}
+    [layout-row] [flex] {flex: 1;}
+    [layout-row] [inverse] {flex-flow: row-reverse nowrap;}
+    [layout-col] {display: flex;flex-flow: column nowrap;align-items: stretch;align-content: stretch;}
+    [layout-col] [flex] {flex: 1;}
+    [layout-col] [inverse] {flex-flow: column-reverse nowrap;}
+    [layout-fill] {height: 100%;}
+    [layout-expand] {position: absolute;top: 0;bottom: 0;left: 0;right: 0;}
+    [centered] {display: flex;align-items: center;}
+    [centered-center], [centered-middle] {display: flex;justify-content: center;align-items: center;}
+    [centered-left] {display: flex;justify-content: flex-start;align-items: center;}
+    [centered-right] {display: flex;justify-content: flex-end;align-items: center;}
+    header {height:60px;background-color:#0a0a0a1a;padding:0 20px;}
+    section {}
+    footer {height:24px;background-color:#0a0a0a1a;font-size:.8em}
+    .schema-info {width:30%;height:100%;margin:6% 0;}
+    .schema-info-4s {width: 3%;height: 100%;}
+    .schema-info-4s.info-top {margin: 2% 0;transform:translateX(-42px) scale(0.6);}
+    .schema-info-4s.info-bottom {margin: 50% 0 0;transform:translateX(-24px) scale(0.6);}
+    .schema-info-line {padding:6px 6%;line-height:1;}
+    .info-title {font-size:.8em;}
+    .info-sub-title {font-size:.4em;opacity:0.6;}
+    .info-num {margin-right:10px;border-radius:50%;padding:6px;background-color:#0a0a0a1a;font-size:1.1em;}
+    .schema-container {height:100%}
+    .schema-container.right {margin-top:20%;}
+    .schema {}
+    .board {width:80%;margin:6%;font-size:7px;font-weight:bold;}
+  </style>
+  <script>
+    function read() {
+      if (!window.data) {
+        setTimeout(() => read(), 250);
+      } else {
+        const e = document.getElementById('sudokulab-content');
+        if (!!e) e.innerHTML = window.data.html||'empty content';
+        document.title = `SudokuLab`;
+        setTimeout(() => window.print(), 250);
+      }
+    }
+  </script>
+</head>
+<body layout-col>
+  <div id="sudokulab-content"></div>
+  <script>read();</script>
+</body>
+</html>

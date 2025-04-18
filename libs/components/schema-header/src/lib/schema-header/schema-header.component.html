@@ -1,0 +1,68 @@
+<div class="schemalab-tool sudoku-info"
+  [class.compact]="">
+  @if (schema$|async; as sdk) {
+    @if (!(isEmpty$|async)) {
+      @if (sdk?.info) {
+        <div fxLayout="column">
+          <div class="schemalab-info-toolbar" fxLayout="row" fxLayoutAlign="start center">
+            @if ((sdk.info.fixedCount||0)>0) {
+              <div class="info-rounded info-fixed" matTooltip="Number of fixed numbers">{{sdk.info.fixedCount}}</div>
+            }
+            @if (sdk.info.useTryAlgorithm) {
+              <div class="info-rounded info-t-type" matTooltip="Number of try-algorithm usage">T{{sdk.info.tryAlgorithmCount}}</div>
+            }
+            @if (sdk.info.difficulty) {
+              <div fxFlex fxLayout="column">
+                <div class="difficulty">
+                  <div class="difficulty-text">{{sdk.info.difficulty||''}}</div>
+                </div>
+                <div class="difficulty-value">{{sdk.info.difficultyValue||''}}</div>
+              </div>
+            } @else {
+              <div fxFlex></div>
+            }
+            <button mat-icon-button
+                    matTooltip="uniq solution"
+                    aria-label="uniq solution">
+              <mat-icon>looks_one</mat-icon>
+            </button>
+            @if (difficultyMap$|async; as dfmap) {
+              <button mat-icon-button
+                      [matMenuTriggerFor]="menuDiff"
+                      aria-label="SudokuLab algorithms"
+                      [matTooltip]="sdk.info.algorithmCount+' solution algorithms'"
+                      [matBadge]="sdk.info.algorithmCount+''"
+                      [matBadgeDisabled]="!sdk.info.algorithmCount"
+                      class="compact-visible">
+                <mat-icon>info</mat-icon>
+              </button>
+              <mat-menu #menuDiff="matMenu">
+                @for (item of dfmap; track item.name) {
+                  <button mat-menu-item class="menu-item-alg">
+                    <div fxLayout="row" fxLayoutAlign="start center">
+                      <mat-icon>{{item.icon}}</mat-icon>
+                      <div class="alg-value"> x {{item.value}}</div>
+                      <span fxFlex>{{item.name}}</span>
+                    </div>
+                  </button>
+                }
+              </mat-menu>
+            }
+          </div>
+        </div>
+  <!--    <div *ngIf="((difficultyMap$|async)||[]).length>0 && !!!(compact$|async)" class="difficulty-map" fxLayout="column">-->
+  <!--      <div class="tool-label">Algorithms needed for the solution:</div>-->
+  <!--      <div class="algorithm-item"-->
+  <!--           *ngFor="let item of (difficultyMap$|async)||[]">-->
+  <!--        <div class="algorithm-content" fxLayout="row" fxLayoutAlign="start center">-->
+  <!--          <mat-icon>{{item.icon}}</mat-icon>-->
+  <!--          <div class="alg-name">{{item.name}}</div>-->
+  <!--          <div class="alg-value" fxFlex>{{item.value}}</div>-->
+  <!--        </div>-->
+  <!--      </div>-->
+  <!--    </div>-->
+      }
+    }
+  }
+</div>
+

@@ -1,0 +1,14 @@
+import { InjectionToken } from '@angular/core';
+import { MenuItem } from './menu-item';
+
+export abstract class SudokuPageManifest {
+  abstract title: string;
+  abstract route: string;
+  abstract icon: string;
+  abstract menu?: MenuItem[];
+  abstract narrowMenu?: MenuItem[];
+  lastRoute?: string;
+  disabled?: boolean;
+}
+
+export const SUDOKU_PAGES = new InjectionToken<SudokuPageManifest[]>('SUDOKU_PAGES');

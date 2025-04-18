@@ -1,0 +1,23 @@
+::ng-deep {
+  .schemas-dialog-content {
+    .schemas-browser {
+      height: 400px;
+      min-height: 400px;
+    }
+  }
+
+  .layout-narrow {
+    .schemas-toolbar {
+      .mat-mdc-form-field-infix {
+        width: calc(100% - 140px) !important;
+      }
+    }
+
+    .schemas-dialog-content {
+      .schemas-browser {
+        height: 100% !important;
+        min-height: 200px;
+      }
+    }
+  }
+}

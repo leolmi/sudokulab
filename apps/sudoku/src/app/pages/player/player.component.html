@@ -1,0 +1,65 @@
+@if (store.isFilling$|async) {
+  <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
+}
+<div class="sudokulab-page page-fill" fxLayout="row">
+  <div class="page-space" fxFlex></div>
+  <div class="page-content" [fxLayout]="layout$|async">
+    <div class="lateral narrow-hidden" fxFlex fxLayout="column">
+      @if (manager) {
+        <schema-header [schema]="manager.sudoku$|async"></schema-header>
+        <div class="stat-monitor" fxLayout="column">
+          @if (isEmpty$|async) {
+            <div class="empty-schema">Empty schema</div>
+          } @else {
+            @for (l of stat$|async; track l.description) {
+              <div class="stat-line" fxLayout="row" fxLayoutAlign="start center">
+                <div class="stat-line-desc">{{l.description}}</div>
+                <div class="stat-line-value">{{l.value}}</div>
+              </div>
+            }
+          }
+        </div>
+        <div fxFlex>
+          <step-viewer
+            [sequence]="manager.sequence$|async"
+            (onClickItem)="openHighlights($event)"
+            (onApplyItem)="manager.applyStep($event)"
+          ></step-viewer>
+        </div>
+      }
+    </div>
+    <div class="schema-container" fxLayout="column">
+      @if (manager) {
+        <schema-header class="narrow-visible" [schema]="manager.sudoku$|async"></schema-header>
+      }
+      <sudoku-board
+        [logic]="logic"
+        (onReady)="ready($event)"
+        (pasteSchemaRequest)="pasteSchema($event)"
+      ></sudoku-board>
+      @if (manager) {
+        <schema-toolbar
+          [showProgress]="true"
+          [manager]="manager"
+          [template]="toolbarTemplate"
+        ></schema-toolbar>
+      }
+    </div>
+    <div class="lateral narrow-hidden highlights-container" fxFlex>
+      @if (manager) {
+        <highlights-editor [manager]="manager"></highlights-editor>
+      }
+    </div>
+    <div class="lateral narrow-visible" fxLayout="column">
+      @if (manager) {
+        <step-viewer
+          [autoHeight]="true"
+          [sequence]="manager.sequence$|async"
+          (onClickItem)="openHighlights($event)"
+          (onApplyItem)="manager.applyStep($event)"
+        ></step-viewer>
+      }
+    </div>
+  </div>
+  <div class="page-space" fxFlex></div>
+</div>

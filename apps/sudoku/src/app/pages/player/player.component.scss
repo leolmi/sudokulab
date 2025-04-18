@@ -1,0 +1,48 @@
+::ng-deep {
+  .layout-narrow {
+    .schema-container {
+      width: 100% !important;
+    }
+  }
+}
+
+.empty-schema {
+  opacity: .5;
+  text-align: center;
+  padding: 50px 10px;
+  overflow: hidden;
+  user-select: none;
+}
+
+.schema-container {
+  width: 40%;
+  padding: 20px;
+}
+
+.height-500 {
+  min-height: 500px;
+}
+
+.toolbar {
+  height: 64px;
+  padding: 0 16px;
+}
+
+.clear-button {
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  opacity: .2;
+  transition: opacity ease-in-out .5s;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.separator {
+  width: 24px;
+}
+
+.footer-container {
+  padding: 20px 50px;
+}

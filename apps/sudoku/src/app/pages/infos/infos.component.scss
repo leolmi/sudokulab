@@ -1,0 +1,122 @@
+.sudokulab-page-help {
+  box-sizing: border-box;
+  position: relative;
+  overflow: auto;
+
+  .help-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    .help-content {
+      max-width: 1000px;
+    }
+  }
+}
+
+[evidence] {
+  padding: 20px;
+}
+
+[ndr] {
+  opacity: .5;
+  font-style: italic;
+}
+
+[underline] {
+  text-decoration: underline;
+}
+
+[code] {
+  font-family: monospace;
+  font-size: 2em;
+}
+
+[bold] {
+  font-weight: bold;
+}
+
+.author-name {
+  text-decoration: none;
+}
+
+.help-content {
+  // max-width: 1000px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-container {
+  text-align: center;
+  .help-image {
+    max-width: 100%;
+    margin: 20px 0;
+    border: rgba(10, 10, 10, .3) 1px solid;
+  }
+}
+
+.sudokulab-page-help {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+
+  .help-content {
+    padding: 40px;
+  }
+}
+
+.logo-container {
+  margin-bottom: 80px;
+}
+
+.github-logo {
+  max-width: 50px;
+  display: block;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.help-line {
+  margin-top: 35px;
+}
+
+.logo {
+  font-size: 3em;
+  font-weight: 100;
+  padding: .5em;
+  border-radius: 1em;
+  background: rgba(10,10,10,.1);
+}
+
+.project-info {
+  padding: 50px 0;
+  text-align: center;
+}
+
+.schema-t {
+  padding: 5px;
+  background-color: var(--sdk-color-accent);
+  color: var(--sdk-color-accent-contrast);
+  // background-color: #ff4081;
+  // color: whitesmoke;
+  border-radius: 50%;
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+.toolbar-commands {
+  .mat-icon {
+    border-radius: 50%;
+    padding: 4px;
+    //background-color: $color-hover;
+    margin-top: 10px;
+  }
+}
+
+.small-image {
+  max-width: 300px !important;
+  max-height: 300px !important;
+}
+

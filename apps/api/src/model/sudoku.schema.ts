@@ -1,36 +1,78 @@
-import * as mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 
-export const SudokuOptionsSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  locked: { type: Boolean, default: false},
-  editable: { type: Boolean, default: true }
-});
+@Schema()
+class Info extends Document {
+  /**
+   * dimensione schema
+   */
+  @Prop()
+  rank: number;
+  /**
+   * numero di valori fissi
+   */
+  @Prop()
+  fixedCount: number;
+  /**
+   * simmetria dei valori
+   */
+  @Prop()
+  symmetry: string;
+  /**
+   * schema a soluzione unica
+   */
+  @Prop()
+  unique: boolean;
+  /**
+   * difficolta di base (easy/medium/hard)
+   */
+  @Prop()
+  difficulty: string;
+  /**
+   * valore della difficoltà
+   */
+  @Prop()
+  difficultyValue: number;
+  /**
+   * mappa dell'utilizzo degli algoritmi di risoluzione
+   */
+  @Prop({ type: Object })
+  difficultyMap: any;
+  /**
+   * versione dello schema sudoku
+   */
+  @Prop()
+  version: string;
+  /**
+   * origine dello schema sudoku
+   */
+  @Prop()
+  origin: string;
+}
 
-export const SudokuAlgorithmResult = new mongoose.Schema({
-  algorithm: { type: String, required: true },
-  cases: [{ type: mongoose.Schema.Types.Mixed }],
-  cells: [String],
-  applied: { type: Boolean, default: false}
-});
+@Schema()
+class Sudoku extends Document {
+  /**
+   * fixed values string for id
+   */
+  @Prop()
+  _id: string;
+  /**
+   * nome
+   */
+  @Prop()
+  name: string;
+  /**
+   * fixed values string
+   */
+  @Prop()
+  values: string;
+  /**
+   * informazioni sullo schema
+   */
+  @Prop()
+  info: Info;
+}
 
-export const SudokuInfoSchema = new mongoose.Schema({
-  symmetry: String,
-  difficulty: String,
-  compiled: { type: Boolean, default: false},
-  unique: { type: Boolean, default: false},
-  sudokulab: { type: Boolean, default: false},
-  useTryAlgorithm: { type: Boolean, default: false},
-  algorithms: [SudokuAlgorithmResult],
-  difficultyMap: { type: mongoose.Schema.Types.Mixed },
-  difficultyValue: { type: Number, default: 0 }
-});
-
-export const SudokuSchema = new mongoose.Schema({
-  _id: { type: Number, required: true },
-  rank: { type: Number, required: true },
-  values: { type: String, required: true },
-  fixed: { type: String, required: true },
-  options: SudokuOptionsSchema,
-  info: SudokuInfoSchema
-});
+export const SudokuSchema = SchemaFactory.createForClass(Sudoku);

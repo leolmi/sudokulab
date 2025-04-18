@@ -1,0 +1,36 @@
+.schema-toolbar {
+  position: relative;
+  height: 48px;
+  padding: 0 4px;
+
+  --mdc-linear-progress-track-height: 10px;
+  --mdc-linear-progress-active-indicator-height: 10px;
+
+  &.progress {
+    margin-top: 20px;
+  }
+}
+
+.toolbar-progress {
+  position: absolute;
+  width: calc(100% - 8px);
+  top: -20px;
+  left: 4px;
+}
+
+.schemas-toolbar-button {
+  cursor: pointer;
+  font-size: 2em;
+  font-weight: bold;
+  display: block;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  user-select: none;
+
+  &.disabled {
+    opacity: .4;
+    pointer-events: none;
+    cursor: default;
+  }
+}

@@ -10,13 +10,34 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@sudokulab/model": ["libs/model/src/index.ts"],
-      "@sudokulab/store": ["libs/store/src/index.ts"]
+      "@olmi/algorithms": ["libs/algorithms/src/index.ts"],
+      "@olmi/board": ["libs/components/board/src/index.ts"],
+      "@olmi/common": ["libs/components/common/src/index.ts"],
+      "@olmi/generator-options": [
+        "libs/components/generator-options/src/index.ts"
+      ],
+      "@olmi/generator-schemas": [
+        "libs/components/generator-schemas/src/index.ts"
+      ],
+      "@olmi/highlights-editor": [
+        "libs/components/highlights-editor/src/index.ts"
+      ],
+      "@olmi/image-manager": ["libs/components/image-manager/src/index.ts"],
+      "@olmi/logic": ["libs/logic/src/index.ts"],
+      "@olmi/model": ["libs/model/src/index.ts"],
+      "@olmi/schema-details": ["libs/components/schema-details/src/index.ts"],
+      "@olmi/schema-header": ["libs/components/schema-header/src/index.ts"],
+      "@olmi/schema-keeper": ["libs/components/schema-keeper/src/index.ts"],
+      "@olmi/schema-toolbar": ["libs/components/schema-toolbar/src/index.ts"],
+      "@olmi/schemas-browser": ["libs/components/schemas-browser/src/index.ts"],
+      "@olmi/solve-to-dialog": ["libs/components/solve-to-dialog/src/index.ts"],
+      "@olmi/step-viewer": ["libs/components/step-viewer/src/index.ts"],
+      "@olmi/templates": ["libs/templates/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

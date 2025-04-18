@@ -1,0 +1,38 @@
+<div class="schema-toolbar"
+     [class.progress]="showProgress"
+     fxLayout="row" fxLayoutAlign="start stretch">
+  @if (showProgress && manager) {
+    <mat-progress-bar
+      class="toolbar-progress"
+      mode="determinate"
+      [value]="percent$|async"
+    ></mat-progress-bar>
+  }
+  @if (status$|async; as sts) {
+    @for (btn of buttons$|async; track $index) {
+      @if (!(sts.hidden||{})[btn.code||'']) {
+        @if (btn.icon) {
+          <div class="schemas-toolbar-button sdk-color-hover sdk-color-border"
+               fxLayout="row" fxLayoutAlign="center center"
+               [class.sdk-colors-accent]="!!(sts.active||{})[btn.code||'']"
+               [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
+               [ngClass]="'sdk-colors-'+btn.color"
+               (click)="clickOnButton(btn)"
+               fxFlex>
+            <mat-icon>{{btn.icon}}</mat-icon>
+          </div>
+        } @else {
+          <div class="schemas-toolbar-button sdk-color-hover sdk-color-border"
+               fxLayout="row" fxLayoutAlign="center center"
+               [class.sdk-colors-accent]="!!(sts.active||{})[btn.code||'']"
+               [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
+               [ngClass]="'sdk-colors-'+btn.color"
+               (click)="clickOnButton(btn)"
+               fxFlex>
+            <span>{{ btn.text }}</span>
+          </div>
+        }
+      }
+    }
+  }
+</div>

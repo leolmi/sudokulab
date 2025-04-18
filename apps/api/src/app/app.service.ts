@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { SUDOKULAB_AUTHOR, SUDOKULAB_SESSION_STANDARD, SUDOKULAB_TITLE, SudokulabInfo } from '@sudokulab/model';
-import { VERSION } from './app.version';
+import { SUDOKULAB_AUTHOR, SUDOKULAB_SESSION_STANDARD, SUDOKULAB_TITLE, SudokulabInfo, VERSION } from '@olmi/model';
+
 
 @Injectable()
 export class AppService {
+
   getData(): SudokulabInfo {
     return new SudokulabInfo({
       version: VERSION,

@@ -1,0 +1,99 @@
+::ng-deep {
+  schema-header {
+    margin: 10px;
+    user-select: none;
+
+    .mat-mdc-icon-button {
+      .mat-badge-content {
+        margin: var(--mat-badge-container-overlap-offset, -18px) !important;
+        z-index: 2;
+      }
+    }
+  }
+}
+
+.difficulty-map {
+  margin-top: 50px;
+}
+
+.schemalab-info-toolbar {
+  height: 60px;
+  margin-bottom: 20px;
+}
+
+.info-rounded {
+  border-radius: 50%;
+  padding: 6px;
+  text-align: center;
+  font-size: 32px;
+  margin-right: 10px;
+  min-width: 36px;
+  cursor: default;
+}
+
+.info-fixed {
+  background-color: var(--sdk-color-accent);
+  color: var(--sdk-color-accent-contrast);
+}
+.info-t-type {
+  background-color: var(--sdk-color-secondary);
+  color: var(--sdk-color-secondary-contrast);
+}
+
+
+.difficulty {
+  font-size: 40px;
+  padding: 0 10px;
+  position: relative;
+  height: 1.1em;
+  .difficulty-text {
+    position: absolute;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+}
+
+.difficulty-value {
+  font-size: 12px;
+  opacity: .6;
+  padding-left: 12px;
+}
+
+.algorithm-content {
+  height: 32px;
+  padding: 0 10px;
+  > .mat-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+  }
+  .alg-name {
+    padding-left: 10px;
+    width: 300px;
+    font-size: 20px;
+  }
+}
+
+::ng-deep {
+  .menu-item-alg {
+    .mat-icon {
+      margin-right: 0 !important;
+    }
+    .alg-value {
+      width: 50px;
+      font-size: 18px;
+      margin-left: 6px;
+    }
+  }
+
+  .layout-compact {
+    .difficulty {
+      font-size: 32px !important;
+    }
+    .info-rounded {
+      font-size: 24px !important;
+      min-width: 24px !important;
+    }
+  }
+}

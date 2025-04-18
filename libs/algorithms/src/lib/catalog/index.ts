@@ -1,0 +1,13 @@
+export * from './TryNumber.algorithm';          // OK
+export * from './OneCellForValue.algorithm';    // OK
+export * from './OneValueForCell.algorithm';    // OK
+export * from './Twins.algorithm';              // OK
+export * from './AlignmentOnGroup.algorithm';   // OK
+export * from './Couples.algorithm';            // OK
+export * from './Bug.algorithm';                // OK
+
+export * from './XWings.algorithm';             // OK
+export * from './YWings.algorithm';     // TODO...
+export * from './XYWings.algorithm';    // TODO...
+export * from './Chains.algorithm';             // OK
+export * from './Swordfish.algorithm';  // TODO...

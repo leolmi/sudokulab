@@ -1,39 +1,83 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { SudokuService } from './sudoku.service';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
-import { ImgDto, ManageDto, OcrResult } from '@sudokulab/model';
-import { AuthGuard } from '@nestjs/passport';
-import { DevelopGuard } from '../app.develop.guard';
+import { Sudoku, SudokuEx } from '@olmi/model';
+import { PathDto } from '../../model/path.dto';
+import { ImgDto } from '../../model/img.dto';
+import { OcrResult } from '../../model/ocr.result';
+import { badRequest } from '../../model/consts';
 
+
+/**
+ * GESTIONE DEGLI SCHEMI
+ *
+ *  - get    /sudoku/list
+ *  - post   /sudoku/convert    { path }
+ *  - post   /sudoku/check      Sudoku
+ *  - post   /sudoku/upload     { path }
+ *  - post   /sudoku/ocr        { data }
+ *  - post   /sudoku/refresh
+ */
 @Controller('sudoku')
 export class SudokuController {
   constructor(private readonly sudokuService: SudokuService) {}
 
+  /**
+   * enumera tutti gli schemi presenti
+   */
   @Get('list')
-  async getAll(): Promise<SudokuDoc[]> {
-    return this.sudokuService.getAll();
+  async getSchemas(): Promise<SudokuDoc[]> {
+    return this.sudokuService.getSchemas();
   }
 
+  /**
+   * converte cli schemi nel file passato all'ultima versione
+   * @param args
+   */
+  @Post('convert')
+  convert(@Body() args: PathDto): Promise<Sudoku[]> {
+    if (!args.path) badRequest('undefined path');
+    return this.sudokuService.convert(args.path);
+  }
+
+  /**
+   * verifica lo schema passato aggiornandolo
+   * @param sudokuDto
+   */
   @Post('check')
-  async check(@Body() sudokuDto: SudokuDto) {
+  async check(@Body() sudokuDto: SudokuDto): Promise<SudokuEx|undefined> {
+    if (!sudokuDto.values) badRequest('undefined schema data');
     return this.sudokuService.check(sudokuDto);
   }
 
+  /**
+   * aggiunge tutti gli schemi che trova nel file specificato
+   * @param args
+   */
+  @Post('upload')
+  async upload(@Body() args: PathDto): Promise<any> {
+    if (!args.path) badRequest('undefined path');
+    const result = await this.sudokuService.acquire(args.path);
+    if (result.error) badRequest(result.error);
+    return result.data;
+  }
+
+  /**
+   * ricava i numeri dello schema rappresentato in figura
+   * @param img
+   */
   @Post('ocr')
   async ocr(@Body() img: ImgDto): Promise<OcrResult> {
+    if (!img.data) badRequest('undefined image data');
     return await this.sudokuService.ocr(img);
   }
 
-  @Post('manage')
-  // @UseGuards(AuthGuard('google'))
-  async manage(@Body() data: ManageDto) {
-    return this.sudokuService.manage(data);
-  }
-
-  @Post('managedev')
-  @UseGuards(new DevelopGuard())
-  async managedev(@Body() data: ManageDto) {
-    return this.sudokuService.manage(data);
+  /**
+   * ricalcola tutti gli schemi in catalogo
+   */
+  @Post('refresh')
+  async refreshAll(): Promise<any> {
+    return this.sudokuService.refreshAll();
   }
 }

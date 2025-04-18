@@ -1,0 +1,15 @@
+<div class="user-shape-definition">
+  @if (image$|async; as img) {
+    <div class="image-container" fxLayout="column">
+      <svg
+      ></svg>
+
+
+
+<!--      <img [src]="img" alt="schema image"/>-->
+<!--      <crop-area (cropChanged)="cropChanged($event)" class="crop-area"></crop-area>-->
+    </div>
+  } @else {
+    <div class="empty-image">no image data</div>
+  }
+</div>

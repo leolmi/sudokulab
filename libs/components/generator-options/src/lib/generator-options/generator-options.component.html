@@ -1,0 +1,169 @@
+@if (options$|async; as opt) {
+  <div class="schemalab-tool options-tool compact-size-600"
+       fxLayout="column">
+    <!-- NUMBER OF NUMBERS -->
+    <mat-label>Total fixed numbers ({{fixedCount$|async}} / <b>{{opt.fixedCount}}</b>)</mat-label>
+    <mat-slider
+      [disabled]="disabled$|async"
+      [max]="GENERATOR_MAX_NUMBERS"
+      [min]="GENERATOR_MIN_NUMBERS"
+      [step]="1"
+      [discrete]="true"
+      [showTickMarks]="true"
+      aria-labelledby="fixed numbers count">
+      <input matSliderThumb
+             [ngModel]="opt.fixedCount"
+             (valueChange)="updateOptions('fixedCount', $event)" #slider>
+    </mat-slider>
+    <!-- SYMMETRY -->
+    <div class="options-line" fxLayout="row" fxLayoutAlign="start center">
+      @if (isMultischema$|async) {
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Symmetry</mat-label>
+          <mat-select [value]="opt.symmetry"
+                      [disabled]="disabled$|async"
+                      (valueChange)="updateOptions('symmetry', $event)">
+            <mat-option *ngFor="let sym of AVAILABLE_SYMMETRIES" [value]="sym.code">
+              {{sym.description}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+    <!-- DIFFICULTY RANGE -->
+    <div class="options-line" fxLayout="row" fxLayoutAlign="start center">
+      <mat-form-field appearance="fill" fxFlex>
+        <mat-label>Difficulty (min)</mat-label>
+        <mat-select [value]="opt.difficultyLimitMin"
+                    [disabled]="disabled$|async"
+                    placeholder="undefined"
+                    (valueChange)="updateOptions('difficultyLimitMin', $event)">
+          @for (dif of AVAILABLE_DIFFICULTIES; track dif.code) {
+            <mat-option [value]="dif.code">{{dif.description}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="space"></div>
+      <mat-form-field appearance="fill" fxFlex>
+        <mat-label>(max)</mat-label>
+        <mat-select [value]="opt.difficultyLimitMax"
+                    [disabled]="disabled$|async"
+                    placeholder="undefined"
+                    (valueChange)="updateOptions('difficultyLimitMax', $event)">
+          @for (dif of AVAILABLE_DIFFICULTIES; track dif.code) {
+            <mat-option [value]="dif.code">{{dif.description}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="options-line" fxLayout="row" fxLayoutAlign="space-around center">
+      <!-- EXCLUDE TRY ALGORITHM -->
+      <mat-checkbox
+        [disabled]="disabled$|async"
+        [checked]="opt.allowTryAlgorithm"
+        (change)="updateOptions('allowTryAlgorithm', $event.checked)"
+      >Allow try algorithm</mat-checkbox>
+      @if (isMultischema$|async) {
+        <!-- CHANGE SCHEMA AFTER GENERATION -->
+        <mat-checkbox
+          [disabled]="disabled$|async"
+          [checked]="opt.oneForSchema"
+          (change)="updateOptions('oneForSchema', $event.checked)"
+        >One result for schema</mat-checkbox>
+      }
+    </div>
+    <!-- STOP -->
+    <div class="options-line"  fxLayout="row" fxLayoutAlign="start center">
+      <!-- STOP MODE -->
+      <mat-form-field appearance="fill" fxFlex>
+        <mat-label>Stop mode</mat-label>
+        <mat-select [value]="opt.endMode"
+                    [disabled]="disabled$|async"
+                    (valueChange)="updateOptions('endMode', $event)">
+          @for (stm of AVAILABLE_STOP_MODES; track stm.code) {
+            <mat-option [value]="stm.code">{{stm.description}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @switch (opt.endMode) {
+        @case (EndGenerationMode.afterN) {
+          <div class="space"></div>
+          <!-- NUMBER OF STOP SCHEMA -->
+          <mat-form-field appearance="fill" fxFlex>
+            <mat-label>builded schemas</mat-label>
+            <input matInput
+                   type="number"
+                   [disabled]="disabled$|async"
+                   [value]="(opt.maxSchemas||1)+''"
+                   (input)="updateOptions('maxSchemas', $event, 'number', 'target.value')">
+          </mat-form-field>
+        }
+        @case (EndGenerationMode.afterTime) {
+          <div class="space"></div>
+          <!-- NUMBER OF SECONDS -->
+          <mat-form-field appearance="fill" fxFlex>
+            <mat-label>seconds</mat-label>
+            <input matInput
+                   type="number"
+                   [disabled]="disabled$|async"
+                   [value]="(opt.maxSeconds||60)+''"
+                   (change)="updateOptions('maxSeconds', $event, 'number', 'target.value')">
+          </mat-form-field>
+        }
+      }
+    </div>
+    <!-- VALUES & CYCLES -->
+    @if (hasNewOrDynamicFixed$|async) {
+      <div class="options-line unset-field-width"  fxLayout="row" fxLayoutAlign="start center">
+        <!-- VALUES MODE (DISABLED) -->
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Values mode</mat-label>
+          <mat-select [value]="opt.valuesMode"
+                      [disabled]="true"
+                      (valueChange)="updateOptions('valuesMode', $event)">
+            @for (vlm of AVAILABLE_VALUES_MODES; track vlm.code) {
+              <mat-option [value]="vlm.code">{{vlm.description}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <div class="space"></div>
+        <!-- MAX SOLVE CYCLES -->
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Max solve cycles</mat-label>
+          <input matInput
+                 [disabled]="disabled$|async"
+                 type="number"
+                 [value]="opt.maxSolveCycles"
+                 (change)="updateOptions('maxSolveCycles', $event, 'number', 'target.value')">
+        </mat-form-field>
+        <div class="space"></div>
+        <!-- MAX FILL CYCLES -->
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Max fill cycles</mat-label>
+          <input matInput
+                 [disabled]="disabled$|async"
+                 type="number"
+                 [value]="opt.maxSchemaFillCycles"
+                 (change)="updateOptions('maxSchemaFillCycles', $event, 'number', 'target.value')">
+        </mat-form-field>
+      </div>
+    }
+    <!-- ALGORITHMS -->
+    <div class="options-line algorithms-line">
+      <mat-label class="algorithms-label">Use this algorithms</mat-label>
+      @for (alg of algorithms; track alg.name) {
+        @if (alg.id !== TRY_NUMBER_ALGORITHM || opt.allowTryAlgorithm) {
+          <mat-checkbox
+            class="algorithm-tag"
+            [disabled]="disabled$|async"
+            [checked]="((algMap$|async)||{})[alg.id]"
+            (change)="updateAlgMap(alg, $event.checked)"
+          >
+            {{alg.name}}
+          </mat-checkbox>
+        }
+      }
+    </div>
+  </div>
+
+}

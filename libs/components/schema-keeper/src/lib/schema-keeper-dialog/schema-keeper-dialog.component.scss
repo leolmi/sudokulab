@@ -1,0 +1,114 @@
+.schema-keeper-content {
+  width: 500px;
+  max-width: 100vw;
+  min-height: 200px;
+
+  .keeper-page {
+
+    &.page-chooser {
+      //padding-top: 25px;
+      --sdk-keeper-button-size: 70px;
+      text-align: center;
+      position: relative;
+
+      .chooser-button {
+        margin: 20px;
+        --mdc-icon-button-state-layer-size: calc(2*var(--sdk-keeper-button-size));
+        --mdc-icon-button-icon-size: var(--sdk-keeper-button-size);
+        position: relative;
+        border: 1px var(--sdk-color-border) solid;
+        padding-top: 20px;
+
+        &.mat-mdc-icon-button {
+          border-radius: 6px !important;
+        }
+        .mat-icon {
+          height: var(--sdk-keeper-button-size);
+          width: var(--sdk-keeper-button-size);
+          font-size: var(--sdk-keeper-button-size);
+        }
+        .chooser-button-title {
+          position: absolute;
+          bottom: 10px;
+          left: 0;
+          width: 100%;
+          font-size: 12px;
+          text-align: center;
+          user-select: none;
+        }
+      }
+
+      .drop-here-area {
+        opacity: 0;
+        transition: opacity ease-in-out .4s;
+        pointer-events: none;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        border: var(--sdk-color-border) 4px dashed;
+        border-radius: 10%;
+
+        .label {
+          font-size: 24px;
+          font-variant: all-small-caps;
+        }
+      }
+
+      &.dragging {
+        .drop-here-area {
+          opacity: 1;
+        }
+        .chooser-button {
+          pointer-events: none;
+          opacity: 0;
+        }
+      }
+    }
+  }
+
+  .keeper-chooser-label {
+    user-select: none;
+    text-align: center;
+    width: 100%;
+    opacity: .6;
+    padding: 10px 0;
+  }
+
+  .keeper-text-length {
+    text-align: center;
+    width: 100%;
+    padding: 40px 0;
+    font-size: 32px;
+    .text-postfix {
+      opacity: .5;
+    }
+  }
+}
+
+::ng-deep {
+  .schema-keeper-content {
+    .chooser-button {
+      .mat-ripple,
+      .mat-focus-indicator,
+      .mat-mdc-button-touch-target,
+      .mat-mdc-button-persistent-ripple {
+        border-radius: 6px !important;
+      }
+    }
+  }
+
+  .layout-narrow {
+    .schema-keeper-content {
+      width: unset;
+
+      .keeper-page {
+        &.page-chooser {
+          --sdk-keeper-button-size: 50px !important;
+        }
+      }
+    }
+  }
+}
+

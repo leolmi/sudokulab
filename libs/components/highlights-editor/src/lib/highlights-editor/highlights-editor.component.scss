@@ -1,0 +1,16 @@
+.highlights-editor {
+  position: relative;
+  height: 100%;
+
+  .highlights-toolbar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    opacity: .4;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+

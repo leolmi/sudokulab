@@ -1,0 +1,340 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use './theme-light';
+@use './theme-dark';
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Roboto, Helvetica Neue, monospace;
+  overflow: hidden;
+  color-scheme: light dark;
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: Roboto,
+    density: 0
+  ));
+}
+
+.cdk-global-scrollblock {
+  overflow: hidden !important;
+}
+
+.top-loading-bar {
+  position: fixed !important;
+  z-index: 10;
+  left: 0;
+  width: 100%;
+}
+
+.app-root {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+body {
+  background-color: var(--sdk-color-background);
+  color: var (--sdk-color-foreground);
+
+  --mat-sys-primary: var(--sdk-color-accent);
+  --mat-sys-primary-container: var(--sdk-color-accent);
+  --mat-badge-background-color: var(--sdk-color-accent);
+  --mat-badge-text-color: var(--sdk-color-accent-contrast);
+
+
+  &.theme-light {
+    color-scheme: light;
+  }
+  &.theme-dark {
+    color-scheme: dark;
+  }
+
+  .landscape-visible {
+    display: none !important;
+  }
+  &.layout-landscape {
+    .landscape-hidden {
+      display: none !important;
+    }
+    .landscape-visible {
+      display: block !important;
+    }
+  }
+
+  .portrait-visible {
+    display: none !important;
+  }
+  &.layout-portrait {
+    .portrait-hidden {
+      display: none !important;
+    }
+    .portrait-visible {
+      display: block !important;
+    }
+  }
+
+  .narrow-visible {
+    display: none !important;
+  }
+  &.layout-narrow {
+    .narrow-hidden {
+      display: none !important;
+    }
+    .narrow-visible {
+      display: block !important;
+    }
+  }
+}
+
+.invisible,
+.hidden {
+  visibility: hidden;
+}
+
+.opacity-6 {
+  opacity: .6;
+}
+.opacity-4 {
+  opacity: .4;
+}
+
+
+button {
+  .mat-icon {
+    color: inherit !important;
+  }
+}
+
+.fill-foreground {
+  fill: var(--sdk-color-foreground);
+}
+
+.separator-v {
+  height: 10px;
+  margin-bottom: 10px;
+  border-bottom: var(--sdk-color-border) 1px solid;
+}
+
+.separator-h {
+  width: 10px;
+  margin-right: 10px;
+  border-right: var(--sdk-color-border) 1px solid;
+}
+
+
+.sudokulab-page {
+  .page-content {
+    width: 100%;
+  }
+}
+.layout-narrow {
+  .sudokulab-page {
+    .page-content {
+      max-width: 800px;
+    }
+  }
+}
+
+
+
+.logo-lab {
+  color: var(--sdk-color-accent);
+}
+
+.mat-mdc-menu-content {
+  .separator {
+    height: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(1, 1, 1, .1);
+    width: 100% !important;
+  }
+}
+
+.full-width {
+  width: 100% !important;
+}
+
+.full-height {
+  height: 100% !important;
+}
+
+.mat-mdc-form-field {
+  &.full-height {
+    .mat-mdc-form-field-flex {
+      height: 100%;
+      .mat-mdc-form-field-infix {
+        height: 100%;
+      }
+    }
+  }
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.font-family-monospace {
+  font-family: monospace !important;
+}
+.font-size-24 {
+  font-size: 24px !important;
+}
+
+.page-container {
+  position: relative;
+}
+.layout-narrow {
+  .page-container {
+    overflow: auto;
+  }
+}
+
+.sudokulab-page {
+  position: absolute;
+  height: 100%;
+  background-color: var(--sdk-color-background);
+  color: var(--sdk-color-foreground);
+
+  &.page-fill {
+    width: 100%;
+  }
+  &.page-padding {
+    padding: 50px;
+  }
+}
+
+.route-active,
+.active {
+  color: var(--sdk-color-accent-contrast) !important;
+  background-color: var(--sdk-color-accent) !important;
+}
+
+.stat-monitor {
+  padding: 20px;
+
+  .stat-line {
+    min-height: 24px;
+
+    .stat-line-desc {
+      min-width: 180px;
+    }
+    .stat-line-value {
+      margin-left: 10px;
+      font-weight: bold;
+    }
+
+    &.evidence {
+      .stat-line-value {
+        color: var(--sdk-color-accent) !important;
+      }
+    }
+  }
+}
+
+.user-select-none {
+  user-select: none;
+}
+
+.elevation-z10 {
+  box-shadow: 0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14), 0px 4px 18px 3px rgba(0, 0, 0, 0.12)
+}
+
+
+// COLORS
+.sdk-colors {
+  background-color: var(--sdk-color-background);
+  color: var(--sdk-color-foreground);
+}
+.sdk-colors-accent {
+  background-color: var(--sdk-color-accent);
+  color: var(--sdk-color-accent-contrast);
+}
+.sdk-colors-secondary {
+  background-color: var(--sdk-color-secondary);
+  color: var(--sdk-color-secondary-contrast);
+}
+.sdk-color-hover {
+  &:hover {
+    background-color: var(--sdk-color-hover);
+  }
+}
+
+.sdk-color-border {
+  border-color: var(--sdk-color-border);
+}
+
+:not([disabled]) {
+  &.sdk-color-error {
+    color: var(--sdk-color-error);
+  }
+
+  &.sdk-color-warning {
+    color: var(--sdk-color-warning);
+  }
+
+  &.sdk-color-success {
+    color: var(--sdk-color-success);
+  }
+
+  &.sdk-color-accent {
+    color: var(--sdk-color-accent);
+  }
+
+  &.sdk-color-secondary {
+    color: var(--sdk-color-secondary);
+  }
+}
+
+// NOTIFIES
+
+// mdc-snackbar mat-mdc-snack-bar-container ng-tns-c808971067-1 ng-trigger ng-trigger-state type-success ng-star-inserted
+
+// mdc-snackbar__surface mat-mdc-snackbar-surface ng-tns-c808971067-3
+
+.mdc-snackbar {
+  &.type-success {
+    .mat-mdc-snackbar-surface {
+      background-color: var(--sdk-color-success);
+      color: var(--sdk-color-success-contrast);
+    }
+  }
+  &.type-warning {
+    .mat-mdc-snackbar-surface {
+      background-color: var(--sdk-color-warning);
+      color: var(--sdk-color-warning-contrast);
+    }
+  }
+  &.type-error {
+    .mat-mdc-snackbar-surface {
+      background-color: var(--sdk-color-error);
+      color: var(--sdk-color-error-contrast);
+    }
+  }
+  &.type-info {
+
+  }
+}
+
+.unset-field-width {
+  .mat-mdc-form-field-infix {
+    width: unset !important;
+  }
+}
+
+.layout-narrow {
+  .mat-mdc-dialog-panel {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: unset !important;
+
+    .mat-mdc-dialog-surface {
+      border-radius: 0 !important;
+    }
+    .mat-mdc-dialog-content {
+      max-height: unset !important;
+    }
+  }
+}

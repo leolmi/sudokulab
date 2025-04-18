@@ -1,0 +1,19 @@
+<div class="highlights-editor">
+  <mat-form-field class="full-width full-height">
+    <mat-label>highlights</mat-label>
+    <textarea [cdkTextareaAutosize]="false"
+              [value]="text$|async"
+              class="full-height font-family-monospace"
+              matInput
+              (input)="setText($event)"></textarea>
+  </mat-form-field>
+  <div class="highlights-toolbar" fxLayout="row" fxLayoutAlign="start center">
+    <div fxFlex></div>
+    <button mat-icon-button (click)="toggleLink()">
+      <mat-icon>{{(active$|async)?'link':'link_off'}}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="clear()">
+      <mat-icon>delete_sweep</mat-icon>
+    </button>
+  </div>
+</div>

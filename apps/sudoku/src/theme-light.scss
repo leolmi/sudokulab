@@ -1,0 +1,19 @@
+body {
+  --sdk-color-background: white;
+  --sdk-color-foreground: #111;
+  --sdk-color-off :#ddd;
+  --sdk-color-accent: rgb(255, 64, 129);
+  --sdk-color-accent-contrast: white;
+  --sdk-color-accent-contrast-40: rgba(255, 255, 255, 0.4);
+  --sdk-color-secondary: rgb(82 78 91);
+  --sdk-color-secondary-contrast: white;
+  --sdk-color-border: rgba(17, 17, 17, 0.1);
+  --sdk-color-hover: rgba(1,1,1,.1);
+
+  --sdk-color-success: green;
+  --sdk-color-success-contrast: white;
+  --sdk-color-warning: orange;
+  --sdk-color-warning-contrast: #111;
+  --sdk-color-error: red;
+  --sdk-color-error-contrast: white;
+}

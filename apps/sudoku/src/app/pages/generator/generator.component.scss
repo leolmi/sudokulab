@@ -1,0 +1,17 @@
+::ng-deep {
+  .layout-narrow {
+    .generator-board {
+      width: 100% !important;
+    }
+  }
+}
+
+.generator-board {
+  width: 40%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.generator-results {
+  position: relative;
+}

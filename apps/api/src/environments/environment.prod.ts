@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  debug: process.env.SUDOKULAB_DEBUG,
+  debug: !!process.env.SUDOKULAB_DEBUG,
   managementKey: process.env.SUDOKULAB_MANAGEMENT_KEY,
   google: {
     mail: process.env.GOOGLE_MAIL || '',
@@ -12,5 +12,6 @@ export const environment = {
     process.env.MONGOLAB_URI ||
     process.env.MONGOHQ_URL ||
     process.env.OPENSHIFT_MONGODB_DB_URL + process.env.OPENSHIFT_APP_NAME ||
+    process.env.SUDOKULAB_MONGODB_URL ||
     'mongodb://localhost/sudokulab'
 };

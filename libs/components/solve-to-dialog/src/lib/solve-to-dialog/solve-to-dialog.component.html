@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Solve to step</h2>
+<mat-dialog-content class="step-to-dialog-content">
+  <div class="items-container">
+    <cdk-virtual-scroll-viewport
+      class="steps-container"
+      itemSize="24">
+      @for (step of items$|async; let index = $index; track index;) {
+        <div class="step-item"
+             [class.active]="(activeStep$|async)===index"
+             [class.secondary]="!step.value"
+             (click)="clickOnItem(index)"
+             fxLayout="row" fxLayoutAlign="start center">
+          <span class="step-index">{{(index+1)}}</span>
+          <span class="step-algorithm" fxFlex>{{step.description}}</span>
+          <mat-icon>{{step.icon}}</mat-icon>
+        </div>
+      }
+    </cdk-virtual-scroll-viewport>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button
+          [disabled]="!(activeStep$|async)"
+          (click)="select()"
+          cdkFocusInitial
+  >Go</button>
+</mat-dialog-actions>

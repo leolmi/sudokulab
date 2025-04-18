@@ -1,0 +1,14 @@
+body {
+  &.theme-dark {
+    --sdk-color-background: #333;
+    --sdk-color-foreground: white;
+    --sdk-color-off :#444;
+    --sdk-color-accent: yellowgreen;
+    --sdk-color-accent-contrast: #333;
+    --sdk-color-accent-contrast-40: rgba(51, 51, 51, 0.4);
+    --sdk-color-secondary: #ff5252;
+    --sdk-color-secondary-contrast: #333;
+    --sdk-color-border: rgba(250, 250, 250, 0.2);
+    --sdk-color-hover: rgba(250,250,250,.1);
+  }
+}
