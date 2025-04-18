@@ -1,5 +1,4 @@
-import { MenuItem } from '../../model';
-
+import { MenuItem } from '@olmi/common';
 
 const GENERATOR_MENU = <MenuItem[]>[
   {

@@ -5,7 +5,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { SUDOKU_STATE } from './app.state';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import {
@@ -19,11 +18,10 @@ import {
   toggleClass
 } from '@olmi/model';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { MenuItem, SudokuPageManifest } from './model';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './pages';
 import { LayoutModule } from '@angular/cdk/layout';
 import { keys as _keys } from 'lodash';
-import { AppUserOptions, SUDOKU_STORE } from '@olmi/common';
+import { AppUserOptions, MenuItem, SUDOKU_STATE, SUDOKU_STORE, SudokuPageManifest } from '@olmi/common';
 
 
 @Component({

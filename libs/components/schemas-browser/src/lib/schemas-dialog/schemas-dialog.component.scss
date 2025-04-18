@@ -3,6 +3,7 @@
     .schemas-browser {
       height: 400px;
       min-height: 400px;
+      width: 500px;
     }
   }
 
@@ -17,6 +18,7 @@
       .schemas-browser {
         height: 100% !important;
         min-height: 200px;
+        width: unset !important;
       }
     }
   }

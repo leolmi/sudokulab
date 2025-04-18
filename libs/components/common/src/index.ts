@@ -1,3 +1,5 @@
+export * from './lib/common/menu-item';
+export * from './lib/common/app.state';
 export * from './lib/common/destroy.component.base';
 export * from './lib/common/manager.component.base';
 export * from './lib/common/interaction';
@@ -7,3 +9,4 @@ export * from './lib/common/store';
 export * from './lib/common/user-options';
 export * from './lib/common/logic.manager';
 export * from './lib/common/logic.worker';
+export * from './lib/common/sudoku-page.manifest';

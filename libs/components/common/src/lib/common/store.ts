@@ -88,7 +88,7 @@ export class SudokuStore {
     return this.catalog$.value.find(s => isEqualCaseInsensitive(s.name, schema) || s.values.startsWith(schema));
   }
 
-  getSudokuEx(schema: string, userValues?: string): Promise<SudokuEx|undefined> {
+  getSudokuEx(schema: string): Promise<SudokuEx|undefined> {
     return new Promise<SudokuEx|undefined>((res) => {
       let sdk = this.catalog$.value.find(s => isEqualCaseInsensitive(s.name, schema) || s.values.startsWith(schema));
       if (isExtendedSudoku(sdk)) {
@@ -100,7 +100,7 @@ export class SudokuStore {
           const sol = solve(csdk);
           const solved = getSolution(sol);
           if (solved) {
-            clearSchema(solved.cells, { userValues });
+            clearSchema(solved.cells);
             _extend(csdk, solved);
             this.catalog$.next(catalog);
           }

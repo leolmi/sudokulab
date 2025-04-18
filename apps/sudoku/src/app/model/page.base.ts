@@ -1,8 +1,7 @@
 import { AfterViewInit, Component, inject, OnDestroy, Type } from '@angular/core';
-import { SUDOKU_STATE } from '../app.state';
 import { Router } from '@angular/router';
 import { filter, Subject } from 'rxjs';
-import { SUDOKU_API, SUDOKU_NOTIFIER, SUDOKU_STORE } from '@olmi/common';
+import { SUDOKU_API, SUDOKU_NOTIFIER, SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 @Component({

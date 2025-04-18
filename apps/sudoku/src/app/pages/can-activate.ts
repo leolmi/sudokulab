@@ -1,7 +1,7 @@
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { inject } from '@angular/core';
-import { SUDOKU_PAGES } from '../model';
 import { FALLBACK_PAGE_ROUTE } from './default.routes';
+import { SUDOKU_PAGES } from '@olmi/common';
 
 
 export function canActivatePage(route: string): CanActivateFn {

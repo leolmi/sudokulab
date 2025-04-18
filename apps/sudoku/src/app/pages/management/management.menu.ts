@@ -1,4 +1,4 @@
-import { MenuItem } from '../../model';
+import { MenuItem } from '@olmi/common';
 
 export const MAIN: MenuItem[] = [
   {

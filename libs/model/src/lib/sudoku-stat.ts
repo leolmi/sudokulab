@@ -13,9 +13,10 @@ export class SudokuStat extends SudokuInfoEx {
     this.hasErrors = !!s?.hasErrors;
     this.isSolvable = !!s?.isSolvable;
     this.isComplete = !!s?.isComplete;
-    this.isEmpty = (s?.fixedCount||0)===0;
-    this.cellCount = s?.cellCount||this.rank*this.rank;
-
+    this.userValues = s?.userValues || '';
+    // calcolati:
+    this.isEmpty = (s?.fixedCount || 0) === 0;
+    this.cellCount = s?.cellCount || this.rank * this.rank;
     this.rankStr = s?.rankStr || `${this.rank}x${this.rank}`;
     this.totalMissingCount = this.cellCount - this.fixedCount;
   }
@@ -44,6 +45,10 @@ export class SudokuStat extends SudokuInfoEx {
    * numero di valori inseriti
    */
   userCount: number;
+  /**
+   * valori presenti nello schema (fissi+utente)
+   */
+  userValues: string;
   /**
    * numero di valori mancanti
    */

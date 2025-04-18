@@ -7,6 +7,7 @@ import {
   getAllGroups,
   getByVisibles,
   getGroupCells,
+  groupCoord,
   onValuesMap,
   SudokuCell
 } from '@olmi/model';
@@ -74,9 +75,9 @@ export class ChainsAlgorithm extends Algorithm {
                             .find(c => {
                               onRemoved(c, v1, (removed) => {
                                 res.applied = true;
-                                res.highlights = getHighlights(c, all);
+                                res.highlights = getHighlights(c, all, [g1,g2,g3]);
                                 res.descLines = getSingleResultLine(c,
-                                  `On cell ${c.coord} the possible values [${removed.join(',')}] have been removed`);
+                                  `Found ${this.name} on ${groupCoord(g1)},${groupCoord(g2)},${groupCoord(g3)} with value "${v1}", so on cell ${c.coord} the possible values [${removed.join(',')}] have been removed`);
 
                                 // console.log(`[${this.name}] g1:`, g1, '\n\tg2', g2, '\n\tg3', g3, '\n\tvalue', v1, '\n\tids 1', ids1, '\n\tids 2', ids2, '\n\tids3', ids3);
                               });

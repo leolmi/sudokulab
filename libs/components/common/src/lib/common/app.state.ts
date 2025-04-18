@@ -1,10 +1,11 @@
 import { inject, InjectionToken } from '@angular/core';
-import { MenuItem, SUDOKU_PAGES } from './model';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, filter, map, Observable, take } from 'rxjs';
 import { cloneDeep as _clone, keys as _keys, values as _values } from 'lodash';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Dictionary, Layout } from '@olmi/model';
+import { SUDOKU_PAGES } from './sudoku-page.manifest';
+import { MenuItem } from './menu-item';
 
 const MAX_WIDTH = 1400;
 const COMPACT_WIDTH = 800;

@@ -1,4 +1,4 @@
-import { SudokuPageManifest } from '../../model';
+import { SudokuPageManifest } from '@olmi/common';
 import { MAIN, NARROW } from './player.menu';
 
 export const PLAYER_PAGE_ROUTE = 'player';

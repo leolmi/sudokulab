@@ -62,6 +62,9 @@
             <div class="title" fxFlex>{{sdk.name}}</div>
             <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
           </div>
+          @if (sdk | userPlaying) {
+            <mat-icon class="play-info">edit</mat-icon>
+          }
           @if (sdk.info.useTryAlgorithm) {
             <div class="t-info">T{{sdk.info.tryAlgorithmCount}}</div>
           }

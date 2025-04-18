@@ -1,5 +1,5 @@
-import { SudokuPageManifest } from '../../model';
 import { MAIN, NARROW } from './print.menu';
+import { SudokuPageManifest } from '@olmi/common';
 
 export const PRINT_PAGE_ROUTE = 'print';
 

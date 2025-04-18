@@ -1,4 +1,4 @@
-import { SudokuPageManifest } from '../../model';
+import { SudokuPageManifest } from '@olmi/common';
 
 export const INFOS_PAGE_ROUTE = 'infos';
 

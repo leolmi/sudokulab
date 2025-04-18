@@ -645,12 +645,14 @@ export const getStat = (cells: SudokuCell[], info?: Partial<SudokuInfo>): Sudoku
     if (isEmptyDynamic(c)) stat.dynamicEmptyCount++;
     if (!isEmptyCell(c) && !isFixedOrDynamic(c)) stat.userCount++;
     if (c.error && !isFixedOrDynamic(c)) stat.hasErrors = true;
+    stat.userValues = `${stat.userValues}${c.text||'0'}`;
   });
   stat.percent = (stat.userCount / (stat.cellCount - stat.fixedCount)) * 100;
   stat.isSolvable = isSolvableCells(cells);
   stat.isComplete = stat.missingCount <= 0;
   stat.fixedAndDynamicCount = stat.fixedCount + stat.dynamicCount - _fixed_dynamic_count;
-  return stat;
+  // rigenera la classe per aggiornare i valori calcolati
+  return new SudokuStat(stat);
 }
 
 /**

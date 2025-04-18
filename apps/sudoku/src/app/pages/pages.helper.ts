@@ -6,12 +6,11 @@ import {
   startCase as _startCase,
   sortBy as _sortBy
 } from 'lodash';
-import { MenuItem } from '../model';
 import { BoardManager, BoardStatus } from '@olmi/board';
 import { Router } from '@angular/router';
-import { SudokuState } from '../app.state';
 import { getStandardSchemaName, Sudoku, SudokuStat } from '@olmi/model';
 import { saveAs } from 'file-saver';
+import { MenuItem, SudokuState } from '@olmi/common';
 
 export class StatLine {
   description: string = '';

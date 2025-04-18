@@ -39,14 +39,14 @@ export const onCell = (cells: BoardCell[], cell: Cell|undefined|null, handler: (
  * @param cls
  * @param check
  */
-export const parseCells = (cls?: BoardCell[]|undefined|null, check = false): BoardCell[] => {
+export const parseCells = (cls?: BoardCell[]|undefined|null, check = false, values?: string): BoardCell[] => {
   const eff_cls: BoardCell[] = [];
-  forEachCell((c) => {
+  forEachCell((c, ci) => {
     const xc = (cls || []).find(cc => cc.col == c.col && cc.row === c.row);
     const x = c.col * GEOMETRY.cell.width;
     const y = c.row * GEOMETRY.cell.height;
     if (xc || !check) {
-      eff_cls.push(new BoardCell({
+      const bc = new BoardCell({
         ...xc,
         ...c,
         x,
@@ -54,7 +54,9 @@ export const parseCells = (cls?: BoardCell[]|undefined|null, check = false): Boa
         textX: x + (GEOMETRY.cell.width / 2),
         textY: y + (GEOMETRY.cell.height / 2),
         id: cellId(c.col, c.row)
-      }));
+      });
+      if (!bc.isFixed && (values||'').charAt(ci)) bc.text = getCellValue((values||'').charAt(ci));
+      eff_cls.push(bc);
     }
   })
   return eff_cls;
@@ -125,7 +127,13 @@ export const buildSchemaBoard = (v?: string): BoardCell[] => {
   return buildSudokuCells(v).map(sc => new BoardCell(sc));
 }
 
-export const getBoardCells = (source: Sudoku|SudokuEx|string|null|undefined, preview = false): BoardCell[] => {
+/**
+ * restituisce le celle per la griglia
+ * @param source
+ * @param preview
+ * @param values
+ */
+export const getBoardCells = (source: Sudoku|SudokuEx|string|null|undefined, preview = false, values?: string): BoardCell[] => {
   let cells: SudokuCell[] = [];
   if (_isString(source)) {
     cells = buildSudokuCells(`${source||''}`, { onlyValues: preview });
@@ -136,7 +144,7 @@ export const getBoardCells = (source: Sudoku|SudokuEx|string|null|undefined, pre
       cells = buildSudokuCells(`${(<Sudoku>source)?.values||''}`, { onlyValues: preview });
     }
   }
-  return parseCells(<BoardCell[]>cells, true);
+  return parseCells(<BoardCell[]>cells, true, values);
 }
 
 export class Coding {

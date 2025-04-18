@@ -1,4 +1,4 @@
-import { SudokuPageManifest } from '../../model';
+import { SudokuPageManifest } from '@olmi/common';
 import { MAIN } from './management.menu';
 import { environment } from '../../../environment/environment';
 

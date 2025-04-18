@@ -48,7 +48,7 @@ export class BugAlgorithm extends Algorithm {
             res.applied = true;
             res.highlights = getHighlights(cell);
             res.descLines = getSingleResultLine(cell,
-              `Found ${this.name} on cell ${cell.coord}, so [${removed.join(',')}] have been removed from this`);
+              `Found ${this.name} on cell ${cell.coord} (the only one with three available values), so [${removed.join(',')}] have been removed from this`);
           })
         }
       }

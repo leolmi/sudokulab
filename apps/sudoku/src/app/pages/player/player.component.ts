@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BoardComponent, BoardManager, PLAYER_BOARD_USER_OPTIONS_FEATURE } from '@olmi/board';
+import {
+  BoardComponent,
+  BoardManager,
+  PLAYER_BOARD_USER_OPTIONS_FEATURE,
+  PLAYER_BOARD_USER_VALUES_PREFIX_KEY
+} from '@olmi/board';
 import { CommonModule, Location } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,10 +23,9 @@ import { SDK_PREFIX, Sudoku } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SchemasDialogComponent } from '@olmi/schemas-browser';
-import { MenuItem } from '../../model';
 import { SchemaHeaderComponent } from '@olmi/schema-header';
 import { SchemaKeeperDialogComponent } from '@olmi/schema-keeper';
-import { AppUserOptions } from '@olmi/common';
+import { AppUserOptions, MenuItem } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
@@ -134,9 +138,9 @@ export class PlayerComponent extends PageBase {
   private _openSchema(sdk?: Sudoku) {
     if (!sdk) return;
     const o = AppUserOptions.getFeatures<any>(PLAYER_BOARD_USER_OPTIONS_FEATURE);
-    const uvs = (<any>o.playing||{})[sdk.values];
+    // const uvs = (<any>o.playing||{})[sdk.values];
     this.store
-      .getSudokuEx(sdk.values, uvs)
+      .getSudokuEx(sdk.values)
       .then(sdkx => {
         if (sdkx) {
           this.manager?.load(<Sudoku>sdkx);
@@ -202,6 +206,7 @@ export class PlayerComponent extends PageBase {
   ready(manager: BoardManager) {
     if (!this.manager) {
       this.manager = manager;
+      this.manager.usePersistence = true;
       this._init();
     }
   }

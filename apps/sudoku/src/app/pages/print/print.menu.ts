@@ -1,6 +1,6 @@
-import { MenuItem } from '../../model';
 import { PrintPage } from '@olmi/model';
 import { TEMPLATES } from '@olmi/templates';
+import { MenuItem } from '@olmi/common';
 
 const BUTTON_PRINT_CODE = 'print-launch';
 const BUTTON_CLEAR_CODE = 'print-clear';

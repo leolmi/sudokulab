@@ -1,6 +1,7 @@
 import { DEFAULT_RANK, GroupType, SudokuCell, SudokuGroup } from '@olmi/model';
 
 export const PLAYER_BOARD_USER_OPTIONS_FEATURE = 'player_board';
+export const PLAYER_BOARD_USER_VALUES_PREFIX_KEY = 'SUDOKULAB-';
 export const GENERATOR_BOARD_USER_OPTIONS_FEATURE = 'generator_board';
 export const GENERATOR_OPTIONS_FEATURE = 'generator_options';
 

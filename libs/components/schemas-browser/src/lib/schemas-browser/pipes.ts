@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Sudoku } from '@olmi/model';
+import { AppUserOptions } from '@olmi/common';
 
 @Pipe({
   name: 'itemTooltip',
@@ -12,5 +13,18 @@ export class ItemTooltipPipe implements PipeTransform {
     return sdk ?
       `${sdk.info.fixedCount} ${sdk.info.difficulty||'unknown'} (${sdk.info.difficultyValue})${sdk.info.tryAlgorithmCount>0?` T${sdk.info.tryAlgorithmCount}`:''}`
       : 'unknown';
+  }
+}
+
+
+@Pipe({
+  name: 'userPlaying',
+  standalone: true
+})
+export class UserPlayingPipe implements PipeTransform {
+  constructor() {}
+
+  transform(sdk: Sudoku|undefined): boolean {
+    return !!AppUserOptions.getUserValues(sdk?._id);
   }
 }

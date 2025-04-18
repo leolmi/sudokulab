@@ -33,9 +33,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatOptionModule } from '@angular/material/core';
-import { AppUserOptions, SUDOKU_STORE } from '@olmi/common';
-import { SUDOKU_STATE } from '../../../../../../apps/sudoku/src/app/app.state';
-import { ItemTooltipPipe } from './item-tooltip.pipe';
+import { AppUserOptions, SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
+import { ItemTooltipPipe, UserPlayingPipe } from './pipes';
 
 class FilterSortOptions {
   constructor(o?: Partial<FilterSortOptions>) {
@@ -68,7 +67,8 @@ class FilterSortOptions {
     MatButtonModule,
     MatInputModule,
     MatMenuModule,
-    ItemTooltipPipe
+    ItemTooltipPipe,
+    UserPlayingPipe
   ],
   templateUrl: './schemas-browser.component.html',
   styleUrl: './schemas-browser.component.scss',
@@ -85,6 +85,8 @@ export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
   schemas$: Observable<Sudoku[]>;
   activeSchema$: BehaviorSubject<string>;
   skipScrollTo$: BehaviorSubject<boolean>;
+  playing$: BehaviorSubject<boolean>;
+  algorithms$: BehaviorSubject<string[]>;
 
   total$: Observable<number>;
   filtered$: Observable<number>;
@@ -109,6 +111,16 @@ export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
   @Input()
   allowCompact = false;
 
+  @Input()
+  set onlyPlaying(p: boolean|null|undefined) {
+    this.playing$.next(!!p);
+  }
+
+  @Input()
+  set algorithms(a: string[]|null|undefined) {
+    this.algorithms$.next(a||[]);
+  }
+
   @Output()
   clickOnSchema: EventEmitter<Sudoku> = new EventEmitter<Sudoku>();
 
@@ -118,17 +130,21 @@ export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
     this.options$ = new BehaviorSubject<FilterSortOptions>(new FilterSortOptions());
     this.activeSchema$ = new BehaviorSubject<string>('');
     this.skipScrollTo$ = new BehaviorSubject<boolean>(false);
+    this.playing$ = new BehaviorSubject<boolean>(false);
+    this.algorithms$ = new BehaviorSubject<string[]>([]);
 
     this.total$ = this.store.catalog$.pipe(map(ctg => ctg?.length||0));
 
-    this.schemas$ = combineLatest([this.store.catalog$, this.options$]).pipe(
+    this.schemas$ = combineLatest([this.store.catalog$, this.options$, this.playing$, this.algorithms$]).pipe(
       debounceTime(100),
-      map(([catalog, o]: [Sudoku[], FilterSortOptions]) => {
+      map(([catalog, o, play, algs]: [Sudoku[], FilterSortOptions, boolean, string[]]) => {
         const res = catalog.filter(s =>
           checkName(o, s) &&
           checkSchema(o, s) &&
           checkDifficulty(o, s) &&
-          checkTry(o, s))
+          checkTry(o, s) &&
+          checkPlaying(play, s) &&
+          checkAlgorithms(algs, s))
         const sorted = _sortBy(res, sdk => sortByField(o, sdk));
         if (o.sortMode === 'desc') sorted.reverse();
         return sorted;
@@ -208,6 +224,14 @@ const checkTry = (o: FilterSortOptions, s: Sudoku): boolean => {
   return !o.hideTrySchemas || !s.info.useTryAlgorithm;
 }
 
+const checkPlaying = (playing: boolean, sdk: Sudoku): boolean => {
+  return !playing || !!AppUserOptions.getUserValues(sdk._id);
+}
+
+const checkAlgorithms = (algs: string[], sdk: Sudoku): boolean => {
+  return algs.length<1 || !algs.find(a => !sdk.info.difficultyMap[a]);
+}
+
 const sortByField = (o: FilterSortOptions, sdk: Sudoku): any => {
   switch (o.sortBy) {
     case 'difficulty': return sdk.info.difficultyValue;
@@ -216,3 +240,4 @@ const sortByField = (o: FilterSortOptions, sdk: Sudoku): any => {
     default: return sdk.name;
   }
 }
+

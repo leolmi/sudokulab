@@ -55,7 +55,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
                   onCell(cells, cell, (xc) => {
                     onRemoved(xc, v, (removed) => {
                       res.applied = true;
-                      res.highlights = getHighlights(xc, ids, [cg]);
+                      res.highlights = getHighlights(xc, ids, [g, cg]);
                       res.descLines = getSingleResultLine(xc,
                         `On group ${groupCoord(g)} the values [${removed.join(',')}] are aligned so, on group ${groupCoord(cg)} in ${xc.coord} this values have been removed from available`);
                     });

@@ -1,4 +1,4 @@
-import { SudokuPageManifest } from '../../model';
+import { SudokuPageManifest } from '@olmi/common';
 import { MAIN, NARROW } from './generator.menu';
 
 export const GENERATOR_PAGE_ROUTE = 'generator';

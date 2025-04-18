@@ -2,8 +2,6 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { SUDOKU_STATE, SudokuState } from './app.state';
-import { SUDOKU_PAGES } from './model';
 import {
   GeneratorPageManifest,
   InfosPageManifest,
@@ -19,8 +17,11 @@ import {
   Notifier,
   SUDOKU_API,
   SUDOKU_NOTIFIER,
+  SUDOKU_PAGES,
   SUDOKU_PRINT_DOCUMENT,
+  SUDOKU_STATE,
   SUDOKU_STORE,
+  SudokuState,
   SudokuStore
 } from '@olmi/common';
 import { printDocumentFactory } from './pages/print/print-document.factory';

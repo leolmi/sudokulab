@@ -1,5 +1,5 @@
-import { MenuItem } from '../../model';
 import { Sudoku } from '@olmi/model';
+import { MenuItem } from '@olmi/common';
 
 const BUTTON_SCHEMAS = 'button-code-schemas';
 const BUTTON_KEEPER = 'button-code-keeper';

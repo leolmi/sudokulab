@@ -1,4 +1,4 @@
-import { BehaviorSubject, combineLatest, debounceTime, map, Observable, of, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, Observable, of, Subject, takeUntil } from 'rxjs';
 import {
   BoardCell,
   BoardChangeEvent,
@@ -26,7 +26,7 @@ import {
   update,
   ValueOptions
 } from '@olmi/model';
-import { Notifier } from '@olmi/common';
+import { AppUserOptions, Notifier } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
 
 /**
@@ -50,6 +50,8 @@ export class BoardManager {
   isRunning$: BehaviorSubject<boolean>;
   isStopping$: BehaviorSubject<boolean>;
   selection$: BehaviorSubject<BoardCell|undefined>;
+
+  usePersistence: boolean = false;
 
   constructor(private board: BoardComponent,
               private notifier?: Notifier) {
@@ -92,11 +94,15 @@ export class BoardManager {
       .pipe(takeUntil(this._destroy$))
       .subscribe(s => this._board!.status = s);
 
-    combineLatest([this.cells$, this.sudoku$])
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(([cells, sdk]) => {
+    combineLatest([this.cells$, this.sudoku$]).pipe(
+      takeUntil(this._destroy$),
+      filter(([cells, sdk]) => (cells||[]).length>0))
+      .subscribe(([cells, sdk]: [BoardCell[], Sudoku]) => {
         this._board!.cells = cells;
-        this.stat$.next(mergeStat(getStat(cells), sdk));
+        const stat = getStat(cells);
+        if (!stat.isEmpty && sdk._id && this.usePersistence)
+          AppUserOptions.setUserValues(sdk._id, stat.userValues);
+        this.stat$.next(mergeStat(stat, sdk));
       });
 
     this._highlights$
@@ -207,8 +213,10 @@ export class BoardManager {
 
   load(s: string|Sudoku) {
     const sdk = isString(s) ? new Sudoku({ values: s }) : <Sudoku>s;
+    this.cells$.next([]);
     this.sudoku$.next(sdk);
-    this.cells$.next(getBoardCells(sdk));
+    const values = this.usePersistence ? AppUserOptions.getUserValues(sdk._id) : '';
+    this.cells$.next(getBoardCells(sdk, false, values));
     this._refreshStatus();
     this.clearHighlights();
   }
