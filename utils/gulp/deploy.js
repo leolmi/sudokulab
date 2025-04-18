@@ -37,16 +37,21 @@ function checkFolder(root, ...items) {
  */
 function copyFolder(source, dest) {
   const files = fs.readdirSync(source);
-  (files||[]).forEach(pt => {
-    const fp = path.resolve(source, pt);
-    const dp = path.join(dest, pt)
-    const fstat = fs.statSync(fp);
+  (files||[]).forEach(n => {
+    const spt = path.resolve(source, n);
+    const dpt = path.join(dest, n);
+    const fstat = fs.statSync(spt);
     if (fstat.isFile()) {
-      fs.copyFileSync(fp, dp);
-      fs.unlinkSync(fp);
+      fs.copyFileSync(spt, dpt);
+      fs.unlinkSync(spt);
     } else if (fstat.isDirectory()) {
-      checkFolder(dest, pt);
-      copyFolder(fp, dp);
+      console.log(`create folder "${n}" in `, dest);
+      try {
+        checkFolder(dest, n);
+        copyFolder(spt, dpt);
+      } catch (err) {
+        console.error(`error while coping folder "${spt}" to "${dpt}"`);
+      }
     }
   });
 }
