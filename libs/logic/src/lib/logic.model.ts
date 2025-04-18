@@ -6,7 +6,8 @@ import {
   SudokuEx,
   SUDOKULAB_TITLE,
   SudokuStat,
-  ValueOptions, VERSION
+  ValueOptions,
+  VERSION
 } from '@olmi/model';
 import { BehaviorSubject, Subject } from 'rxjs';
 
