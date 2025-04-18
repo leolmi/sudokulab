@@ -8,7 +8,7 @@ import { AppLoggerMiddleware } from './app.logger';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({ rootPath: join(__dirname, 'public') }),
+    ServeStaticModule.forRoot({ rootPath: join(__dirname, 'public/browser') }),
     SudokuModule
   ],
   controllers: [AppController],

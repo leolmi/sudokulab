@@ -10,7 +10,7 @@
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/sudoku",
+        "outputPath": "dist/apps/api/public",
         "index": "apps/sudoku/src/index.html",
         "browser": "apps/sudoku/src/main.ts",
         "polyfills": ["zone.js"],
