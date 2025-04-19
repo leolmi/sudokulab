@@ -61,6 +61,7 @@
   &.dynamic {
     font-weight: bolder;
     opacity: 1;
+    font-size: 7px;
   }
   &.svg-pulse {
     font-weight: bold;
@@ -130,7 +131,7 @@
   --board-color-background-contrast: #333;
   --board-color-primary: #3f51b5;
   --board-color-primary-contrast: rgba(98, 127, 255, 0.1);
-  --board-cell-opacity: 0.8;
+  --board-cell-opacity: 1;
   --board-cell-border: #dddddd;
 
   .svg-board-background {
@@ -225,7 +226,7 @@
       --board-color-primary: rgba(181, 112, 63, 1);
       --board-color-primary-contrast: rgba(181, 112, 63, 0.05);
       --board-cell-border: rgba(221, 221, 221, 0.2);
-      --board-cell-opacity: 0.5;
+      --board-cell-opacity: 0.8;
     }
   }
 }

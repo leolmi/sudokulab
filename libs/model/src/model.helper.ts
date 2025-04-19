@@ -32,6 +32,7 @@ import {
   isString as _isString,
   keys as _keys,
   padEnd as _padEnd,
+  random as _random,
   reduce as _reduce,
   repeat as _repeat,
   uniqBy as _uniqBy
@@ -791,3 +792,12 @@ export const refreshSchemaValues = (sdk?: SudokuEx): void => {
  * @param def
  */
 export const getDiffValue = (diff?: string, def = DIFFICULTY_MIN): number => DIFFICULTY_VALUES[`${diff||def}`.toUpperCase()]||0;
+
+/**
+ * restituisce l'identità di uno schema scelto randomicamente dall'elenco
+ * @param sdks
+ */
+export const getRandomId = (sdks: Sudoku[]): string => {
+  const index = _random(0, sdks.length);
+  return sdks[index]?._id||'';
+}

@@ -8,6 +8,7 @@ export * from './generator';
 export * from './highlights';
 export * from './layout';
 export * from './logic';
+export * from './menu-item';
 export * from './notifier';
 export * from './pos';
 export * from './print-page';

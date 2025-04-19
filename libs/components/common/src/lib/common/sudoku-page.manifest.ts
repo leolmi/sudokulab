@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
-import { MenuItem } from './menu-item';
+import { MenuItem } from '@olmi/model';
+
 
 export abstract class SudokuPageManifest {
   abstract title: string;

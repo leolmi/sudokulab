@@ -19,13 +19,13 @@ import { PLAYER_PAGE_ROUTE } from './player.manifest';
 import { PageBase } from '../../model/page.base';
 import { calcMenuStatus, defaultHandleMenuItem, downloadSchema, getStatLines, StatLine } from '../pages.helper';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './player.logic';
-import { SDK_PREFIX, Sudoku } from '@olmi/model';
+import { MenuItem, SDK_PREFIX, Sudoku } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SchemasDialogComponent } from '@olmi/schemas-browser';
 import { SchemaHeaderComponent } from '@olmi/schema-header';
 import { SchemaKeeperDialogComponent } from '@olmi/schema-keeper';
-import { AppUserOptions, MenuItem } from '@olmi/common';
+import { AppUserOptions } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
@@ -88,14 +88,18 @@ export class PlayerComponent extends PageBase {
     this._game$ = new BehaviorSubject<string>(o.game||'');
 
     const route = inject(ActivatedRoute);
-    route.params
-      .pipe(filter(p => !!(<any>p)?.id))
-      .subscribe(p => this._game$.next((<any>p)?.id));
+    route.params.subscribe(p => {
+      const sid = (<any>p)?.id || '';
+      if (this._game$.value !== sid) this._game$.next(sid);
+    });
 
     this.store.isFilled$
       .pipe(takeUntil(this._destroy$), distinctUntilChanged())
-      .subscribe((filled) =>
-        this.state.updateStatus(getStoreStatus(filled)));
+      .subscribe((filled) => {
+        this.state.updateStatus(getStoreStatus(filled));
+        if (filled && !this._game$.value && !!this.store.schemaOfTheDay$.value)
+          this._game$.next(this.store.schemaOfTheDay$.value);
+      });
 
     this.state.menuHandler = (item) =>
       defaultHandleMenuItem(this._router, this.state, item, this.manager,
@@ -177,7 +181,10 @@ export class PlayerComponent extends PageBase {
         isAvailable: true,
         isNotify: true,
         isPasteEnabled: true,
-      }));
+      }), {
+        editMode: 'play',
+        isDynamic: false,
+      });
 
     if (this.manager) {
       // intercetta lo schema vuoto

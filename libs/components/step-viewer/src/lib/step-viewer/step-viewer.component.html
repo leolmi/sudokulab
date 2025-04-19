@@ -1,7 +1,7 @@
 <div class="step-viewer-container"
      [class.auto-height]="autoHeight$|async">
   <div class="step-viewer-scroller" fxLayout="column">
-    @for (item of items$|async; track item.id; let first = $first; let last = $last; let index = $index) {
+    @for (item of items$|async; track item.id; let first = $first; let last = $last; let index = $index; let count = $count) {
       <div class="step-viewer-item"
            fxLayout="row"
            fxLayoutAlign="start stretch"
@@ -25,7 +25,7 @@
                 <mat-icon class="navigator-dot"
                           [class.applied]="aindex>=index"
                           [class.current]="aindex===index"
-                          (click)="applyStep(index)">fiber_manual_record</mat-icon>
+                          (click)="applyStep(index)">{{ (count>2 && aindex===index) ? 'room_service' : 'fiber_manual_record' }}</mat-icon>
               }
               @if (!last) {
                 <div class="navigator-link navigator-link-down"

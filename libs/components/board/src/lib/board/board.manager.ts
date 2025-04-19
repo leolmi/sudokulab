@@ -221,8 +221,8 @@ export class BoardManager {
     this.clearHighlights();
   }
 
-  options(o: Partial<BoardStatus>) {
-    update(this.status$, o);
+  options(o: Partial<BoardStatus>, fixed?: Partial<BoardStatus>) {
+    update(this.status$, { ...o, ...fixed });
   }
 
   toggleOption(pn: string) {

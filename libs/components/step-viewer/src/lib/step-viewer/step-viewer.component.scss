@@ -128,9 +128,5 @@
     &:hover {
       color: var(--sdk-color-accent)
     }
-    &.current {
-      border-radius: 50%;
-      border: currentColor 1px solid;
-    }
   }
 }

@@ -48,6 +48,7 @@
   }
   <div class="viewport-container" fxFlex>
     <cdk-virtual-scroll-viewport
+      scrollWindow
       class="schemas-container"
       itemSize="54">
       @for (sdk of schemas$|async; track sdk.values) {

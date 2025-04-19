@@ -9,13 +9,15 @@
       <span class="sub-title compact-visible">{{state.title$|async}}</span>
     </div>
     <mat-menu #authorMenu="matMenu">
-      @for (pitem of state.pages; track pitem.route) {
-        <button mat-menu-item
-                [class.active]="pitem.route === (state.page$|async)"
-                (click)="pageButtonClick(pitem)">
-          <mat-icon>{{pitem.icon}}</mat-icon>
-          <span>{{pitem.title}}</span>
-        </button>
+      @for (page of state.pages; track page.route) {
+        @if (!!page.route) {
+          <button mat-menu-item
+                  [class.active]="page.route === (state.page$|async)"
+                  (click)="state.navigateToPage(page)">
+            <mat-icon>{{page.icon}}</mat-icon>
+            <span>{{page.title}}</span>
+          </button>
+        }
       }
       <div class="separator-v"></div>
       <button (click)="clickOnLogo()" mat-menu-item>
@@ -37,61 +39,55 @@
       </button>
     </mat-menu>
     <div fxFlex></div>
-    <button mat-icon-button
-            matTooltip="toggle theme"
-            (click)="toggleTheme()">
-      <mat-icon>{{themeIcon$|async}}</mat-icon>
-    </button>
-    <button mat-icon-button
-            matTooltip="reset all settings"
-            (click)="resetSettings()">
-      <mat-icon>settings_backup_restore</mat-icon>
-    </button>
     <div fxLayout="row">
       <!-- MENU DI PAGINA -->
-      @for (item of state.menu$|async; track item.code) {
-        @if (item.separator) {
-          <div class="separator-h"></div>
-        } @else if (item.subMenu) {
-          <button mat-icon-button
-                  [matMenuTriggerFor]="pagesubmenu"
-                  (click)="buildSubMenu(item)"
-                  [matTooltip]="item.text||''"
-                  [matTooltipDisabled]="!item.text"
-                  aria-label="sub menu">
-            <mat-icon>{{item.icon}}</mat-icon>
-          </button>
-        } @else {
-          <button mat-icon-button
-                  [matTooltip]="item.text||''"
-                  [matTooltipDisabled]="!item.text"
-                  [disabled]="['execute','private'].includes(item.logic||'') && ((state.status$|async)||{})[item.code||'']===false"
-                  [class.active]="item.logic==='switch' && !!((state.status$|async)||{})[item.code||'']"
-                  [ngClass]="'sdk-color-'+item.color"
-                  (click)="toolbarButtonClick(item)">
-            <mat-icon>{{ item.icon }}</mat-icon>
-          </button>
+      @for (item of state.menu$|async; track $index) {
+        @if (!item.hidden) {
+          @if (item.separator) {
+            <div class="separator-h"></div>
+          } @else if (item.subMenu) {
+            <button mat-icon-button
+                    [matMenuTriggerFor]="pagesubmenu"
+                    (click)="buildSubMenu(item)"
+                    [matTooltip]="item.text||''"
+                    [matTooltipDisabled]="!item.text"
+                    aria-label="sub menu">
+              <mat-icon>{{item.icon}}</mat-icon>
+            </button>
+          } @else {
+            <button mat-icon-button
+                    [matTooltip]="item.text||''"
+                    [matTooltipDisabled]="!item.text"
+                    [disabled]="['execute','private'].includes(item.logic||'') && ((state.status$|async)||{})[item.code||'']===false"
+                    [class.active]="item.logic==='switch' && !!((state.status$|async)||{})[item.code||'']"
+                    [ngClass]="'sdk-color-'+item.color"
+                    (click)="state.handleMenuItem(item)">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </button>
+          }
         }
       }
       <!-- MENU POPUP DI PAGINA -->
       <mat-menu #pagesubmenu="matMenu">
         @for (mitem of pageSubMenu$|async; track $index) {
-          @if (mitem.separator) {
-            <div class="separator-v"></div>
-          } @else {
-            <button mat-menu-item
-                    [disabled]="['execute','private'].includes(mitem.logic||'') && ((state.status$|async)||{})[mitem.code||'']===false"
-                    [class.active]="mitem.logic==='switch' && !!((state.status$|async)||{})[mitem.code||'']"
-                    [class.route-active]="mitem.logic==='navigate' && ((state.status$|async)||{})[mitem.owner||''] === mitem.property"
-                    [ngClass]="'sdk-color-'+mitem.color"
-                    (click)="toolbarButtonClick(mitem)">
-              <mat-icon>{{mitem.icon}}</mat-icon>
-              @if (mitem.isDynamicText) {
-                <span>{{((state.status$|async)||{})['caption_'+(mitem.code||'')]}}</span>
-              } @else {
-                <span>{{mitem.text}}</span>
-              }
-            </button>
+          @if (!mitem.hidden) {
+            @if (mitem.separator) {
+              <div class="separator-v"></div>
+            } @else {
+              <button mat-menu-item
+                      [disabled]="['execute','private'].includes(mitem.logic||'') && ((state.status$|async)||{})[mitem.code||'']===false"
+                      [class.active]="mitem.logic==='switch' && !!((state.status$|async)||{})[mitem.code||'']"
+                      [class.route-active]="mitem.logic==='navigate' && ((state.status$|async)||{})[mitem.owner||''] === mitem.property"
+                      [ngClass]="'sdk-color-'+mitem.color"
+                      (click)="state.handleMenuItem(mitem)">
+                <mat-icon>{{mitem.icon}}</mat-icon>
+                @if (mitem.isDynamicText) {
+                  <span>{{((state.status$|async)||{})['caption_'+(mitem.code||'')]}}</span>
+                } @else {
+                  <span>{{mitem.text}}</span>
+                }
+              </button>
+            }
           }
         }
       </mat-menu>

@@ -1,15 +1,10 @@
-import { PrintPage } from '@olmi/model';
+import { MenuItem, PrintPage, SYSTEM_MENU_ITEMS } from '@olmi/model';
 import { TEMPLATES } from '@olmi/templates';
-import { MenuItem } from '@olmi/common';
 
 const BUTTON_PRINT_CODE = 'print-launch';
 const BUTTON_CLEAR_CODE = 'print-clear';
 
 export const MAIN = <MenuItem[]>[
-  {
-    code: 'print-sep-1',
-    separator: true
-  },
   {
     code: BUTTON_PRINT_CODE,
     property: 'print',
@@ -34,24 +29,30 @@ export const MAIN = <MenuItem[]>[
       owner: 'template',
       text: tmp.name,
       property: tmp.name,
-      icon: tmp.icon||'dashboard',
-    })
-  }
+      icon: tmp.icon || 'dashboard',
+    }),
+  },
+  {
+    separator: true
+  },
+  SYSTEM_MENU_ITEMS.lightTheme,
+  SYSTEM_MENU_ITEMS.darkTheme,
+  SYSTEM_MENU_ITEMS.restoreSettings,
 ]
 
 export const NARROW = <MenuItem[]>[
+  {
+    code: BUTTON_PRINT_CODE,
+    property: 'print',
+    icon: 'print',
+    text: 'Print document',
+    logic: 'private'
+  },
   {
     code: 'print-narrow-menu',
     icon: 'more_vert',
     text: 'menu',
     subMenu: [
-      {
-        code: BUTTON_PRINT_CODE,
-        property: 'print',
-        icon: 'print',
-        text: 'Print document',
-        logic: 'private'
-      },
       {
         code: 'print-clear',
         property: 'clear',
@@ -70,7 +71,13 @@ export const NARROW = <MenuItem[]>[
         text: tmp.name,
         property: tmp.name,
         icon: tmp.icon||'dashboard',
-      })
+      }),
+      {
+        separator: true
+      },
+      SYSTEM_MENU_ITEMS.lightTheme,
+      SYSTEM_MENU_ITEMS.darkTheme,
+      SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   }
 

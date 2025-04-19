@@ -82,7 +82,10 @@ export class GeneratorComponent extends PageBase {
     });
 
     // assegna le opzioni iniziali
-    this.manager?.options(uo);
+    this.manager?.options(uo, {
+      editMode: 'schema',
+      isDynamic: true,
+    });
     if ((<any>uo).schema) this.manager?.load((<any>uo).schema);
 
     if (this.manager) {

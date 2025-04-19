@@ -1,5 +1,3 @@
-import { Dictionary } from './types';
-
 export const SUDOKU_DEBUG_LEVELS_KEY = 'SDK-DEBUG-LEVELS';
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
 export const DEFAULT_AVAILABLES = ['1','2','3','4','5','6','7','8','9'];
@@ -11,7 +9,9 @@ export const SUDOKULAB_SESSION_STANDARD = 'standard';
 export const SUDOKULAB_TITLE = 'SudokuLab';
 export const SUDOKULAB_AUTHOR = 'leo.olmi 2021';
 
-export const DEFAULT_THEME = 'light';
+export const THEME_LIGHT = 'light';
+export const THEME_DARK = 'dark';
+export const DEFAULT_THEME = THEME_LIGHT;
 export const DEFAULT_RANK = 9;
 export const DEFAULT_TOTAL_RANK = DEFAULT_RANK*DEFAULT_RANK;
 export const SUDOKU_MIN_FIXED_CELLS = 14;
@@ -31,16 +31,16 @@ export enum GroupType {
 }
 
 export const THEME_ICON: any = {
-  light: 'light_mode',
-  dark: 'dark_mode'
+  [THEME_LIGHT]: 'light_mode',
+  [THEME_DARK]: 'dark_mode'
 }
 export const THEME_OTHER: any = {
-  light: 'dark',
-  dark: 'light'
+  [THEME_LIGHT]: THEME_DARK,
+  [THEME_DARK]: THEME_LIGHT
 }
 export const THEME_CLASS: any = {
-  light: 'theme-light',
-  dark: 'theme-dark'
+  [THEME_LIGHT]: 'theme-light',
+  [THEME_DARK]: 'theme-dark'
 }
 
 export const AllGroupTypes = [GroupType.row, GroupType.column, GroupType.square];
@@ -119,3 +119,31 @@ export const DIFFICULTY_RANGES = [
   {value: DIFFICULTY_VALUES.HARD, label: 'HARD'},
   {value: DIFFICULTY_VALUES.VERYHARD, label: 'VERYHARD'}
 ]
+
+
+export const SYSTEM_MENU_CODE: any = {
+  restoreSettings: 'system-restore-settings',
+  darkTheme: 'system-dark-theme',
+  lightTheme: 'system-light-theme',
+}
+
+export const SYSTEM_MENU_ITEMS: any = {
+  lightTheme: {
+    code: 'system-light-theme',
+    icon: 'light_mode',
+    text: 'Switch to light theme',
+    logic: 'system',
+  },
+  darkTheme: {
+    code: 'system-dark-theme',
+    icon: 'dark_mode',
+    text: 'Switch to dark theme',
+    logic: 'system',
+  },
+  restoreSettings: {
+    code: 'system-restore-settings',
+    icon: 'settings_backup_restore',
+    text: 'Restore default settings',
+    logic: 'system',
+  }
+}

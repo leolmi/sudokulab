@@ -8,9 +8,9 @@ import {
 } from 'lodash';
 import { BoardManager, BoardStatus } from '@olmi/board';
 import { Router } from '@angular/router';
-import { getStandardSchemaName, Sudoku, SudokuStat } from '@olmi/model';
+import { getStandardSchemaName, MenuItem, Sudoku, SudokuStat } from '@olmi/model';
 import { saveAs } from 'file-saver';
-import { MenuItem, SudokuState } from '@olmi/common';
+import { SudokuState } from '@olmi/common';
 
 export class StatLine {
   description: string = '';

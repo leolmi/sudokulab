@@ -2,6 +2,7 @@ import { BehaviorSubject, take } from 'rxjs';
 import { inject, InjectionToken } from '@angular/core';
 import { cloneDeep as _clone, extend as _extend, isArray as _isArray } from 'lodash';
 import {
+  getRandomId,
   isEqualCaseInsensitive,
   isExtendedSudoku,
   LogicExecutor,
@@ -17,6 +18,7 @@ export class SudokuStore {
   private readonly _interaction: Interaction;
   generated$: BehaviorSubject<SudokuEx[]>;
   catalog$: BehaviorSubject<Sudoku[]>;
+  schemaOfTheDay$: BehaviorSubject<string>;
 
   isFilling$: BehaviorSubject<boolean>;
   isFilled$: BehaviorSubject<boolean>;
@@ -29,6 +31,7 @@ export class SudokuStore {
     this.isDownload$ = new BehaviorSubject<boolean>(!!this._interaction.env.management);
     this.generated$ = new BehaviorSubject<SudokuEx[]>([]);
     this.catalog$ = new BehaviorSubject<Sudoku[]>([]);
+    this.schemaOfTheDay$ = new BehaviorSubject<string>('');
   }
 
   private _updateCatalogItem(id: string, handler: (ctg: Sudoku[], item: Sudoku|undefined) => boolean) {
@@ -114,6 +117,7 @@ export class SudokuStore {
     if (_isArray(sdks)) {
       this.isFilling$.next(false);
       this.catalog$.next(sdks);
+      this.schemaOfTheDay$.next(getRandomId(sdks));
       this.isFilled$.next(true);
     }
   }
@@ -123,10 +127,6 @@ export class SudokuStore {
     const schema_str = JSON.stringify(this.catalog$.value||[], null, 2);
     const blob = new Blob([schema_str], { type: "application/json;" });
     saveAs(blob, 'sudokulab-store.json');
-  }
-
-  keep(schema: string) {
-    // TODO: carica uno schema
   }
 }
 

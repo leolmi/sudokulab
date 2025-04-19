@@ -1,4 +1,3 @@
-export * from './lib/common/menu-item';
 export * from './lib/common/app.state';
 export * from './lib/common/destroy.component.base';
 export * from './lib/common/manager.component.base';

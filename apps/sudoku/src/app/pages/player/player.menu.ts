@@ -1,5 +1,4 @@
-import { Sudoku } from '@olmi/model';
-import { MenuItem } from '@olmi/common';
+import { MenuItem, Sudoku, SYSTEM_MENU_ITEMS } from '@olmi/model';
 
 const BUTTON_SCHEMAS = 'button-code-schemas';
 const BUTTON_KEEPER = 'button-code-keeper';
@@ -32,16 +31,6 @@ export const SOLVES = <MenuItem[]>[
     operation: 'solve-to-try',
     logic: 'execute'
   },
-  {
-    code: 'sep-solve-1',
-    separator: true
-  },
-  {
-    code: 'solve-help',
-    text: `Show next move`,
-    icon: 'support',
-    operation: 'help'
-  }
 ];
 
 export const OPERATIONS = <MenuItem[]>[
@@ -76,7 +65,6 @@ export const OPERATIONS = <MenuItem[]>[
     logic: 'private'
   },
   {
-    code: 'sep-operations-1',
     separator: true
   },
   {
@@ -93,31 +81,27 @@ export const OPERATIONS = <MenuItem[]>[
     text: `Coordinates`,
     icon: 'grid_4x4'
   },
-  {
-    code: 'sep-operations-2',
-    separator: true
-  },
-  {
-    code: 'is-pencil',
-    property: 'isPencil',
-    logic: 'switch',
-    text: `Pencil`,
-    icon: 'edit'
-  },
 ]
 
 
 
 export const MAIN = <MenuItem[]>[
   {
-    code: 'player-sep-1',
-    separator: true
-  },
-  {
     code: 'player-solve',
-    icon: 'play_arrow',
-    text: 'Solve',
-    subMenu: SOLVES
+    icon: 'playlist_play',
+    text: 'Solve menu',
+    subMenu: [
+      ...SOLVES,
+      {
+        separator: true
+      },
+      {
+        code: 'solve-help',
+        text: `Show next move`,
+        icon: 'support',
+        operation: 'help'
+      },
+    ]
   },
   {
     code: 'player-clear',
@@ -129,10 +113,17 @@ export const MAIN = <MenuItem[]>[
     code: 'player-operations',
     icon: 'more_vert',
     text: 'Player operations',
-    subMenu: OPERATIONS
+    subMenu: [
+      ...OPERATIONS,
+      {
+        separator: true
+      },
+      SYSTEM_MENU_ITEMS.lightTheme,
+      SYSTEM_MENU_ITEMS.darkTheme,
+      SYSTEM_MENU_ITEMS.restoreSettings,
+    ]
   },
   {
-    code: 'player-sep-2',
     separator: true
   },
   {
@@ -153,13 +144,35 @@ export const MAIN = <MenuItem[]>[
 
 export const NARROW = <MenuItem[]>[
   {
+    code: BUTTON_KEEPER,
+    icon: 'apps_outage',
+    text: 'Open schema',
+    logic: 'private',
+    property: 'keeper'
+  },
+  {
+    code: BUTTON_SCHEMAS,
+    icon: 'grid_on',
+    text: 'Available schemas',
+    logic: 'private',
+    property: 'browse'
+  },
+  {
+    separator: true
+  },
+  {
+    code: 'solve-help',
+    text: `Show next move`,
+    icon: 'support',
+    operation: 'help'
+  },
+  {
     code: 'player-narrow-menu',
     icon: 'more_vert',
     text: 'menu',
     subMenu: [
       ...SOLVES,
       {
-        code: 'sep-solve-n-1',
         separator: true
       },
       {
@@ -169,28 +182,15 @@ export const NARROW = <MenuItem[]>[
         text: 'Clear schema',
       },
       {
-        code: 'sep-solve-n-2',
         separator: true
       },
       ...OPERATIONS,
       {
-        code: 'sep-solve-n-3',
         separator: true
       },
-      {
-        code: BUTTON_KEEPER,
-        icon: 'apps_outage',
-        text: 'Open schema',
-        logic: 'private',
-        property: 'keeper'
-      },
-      {
-        code: BUTTON_SCHEMAS,
-        icon: 'grid_on',
-        text: 'Available schemas',
-        logic: 'private',
-        property: 'browse'
-      },
+      SYSTEM_MENU_ITEMS.lightTheme,
+      SYSTEM_MENU_ITEMS.darkTheme,
+      SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   },
 ]

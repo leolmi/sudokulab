@@ -2,10 +2,9 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { PageBase } from '../../model/page.base';
-import { NotificationType } from '@olmi/model';
+import { MenuItem, NotificationType } from '@olmi/model';
 import { BehaviorSubject, catchError, of } from 'rxjs';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { MenuItem } from '@olmi/common';
 
 @Component({
   imports: [
