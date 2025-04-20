@@ -1,0 +1,26 @@
+::ng-deep {
+
+  .schemas-toolbar {
+    .mdc-floating-label {
+      &:not(.mdc-floating-label--float-above) {
+        opacity: .5;
+      }
+    }
+  }
+
+  .layout-compact {
+    .allow-compact {
+      .schemas-toolbar {
+        display: none !important;
+      }
+    }
+  }
+}
+
+.schemas-toolbar {
+  margin: 10px;
+}
+
+.margin-last-button {
+  margin-right: 6px;
+}

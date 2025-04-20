@@ -87,6 +87,25 @@ body {
       display: block !important;
     }
   }
+
+  .compact-visible {
+    display: none !important;
+  }
+  &.layout-compact {
+    --mdc-icon-button-state-layer-size: 32px;
+    --sdk-menu-separator-size: 4px;
+
+    .mat-mdc-menu-item {
+      min-height: 42px !important;
+    }
+
+    .compact-hidden {
+      display: none !important;
+    }
+    .compact-visible {
+      display: block !important;
+    }
+  }
 }
 
 .invisible,
@@ -113,14 +132,14 @@ button {
 }
 
 .separator-v {
-  height: 10px;
-  margin-bottom: 10px;
+  height: var(--sdk-menu-separator-size);
+  margin-bottom: var(--sdk-menu-separator-size);
   border-bottom: var(--sdk-color-border) 1px solid;
 }
 
 .separator-h {
-  width: 10px;
-  margin-right: 10px;
+  width: var(--sdk-menu-separator-size);
+  margin-right: var(--sdk-menu-separator-size);
   border-right: var(--sdk-color-border) 1px solid;
 }
 

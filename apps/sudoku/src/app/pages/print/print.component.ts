@@ -7,9 +7,9 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { PRINT_USER_OPTIONS_FEATURE } from './print.model';
 import { Dictionary, MenuItem, PrintPage, PrintPageEx, Sudoku } from '@olmi/model';
 import { keys as _keys, reduce as _reduce } from 'lodash';
-import { SchemasBrowserComponent } from '@olmi/schemas-browser';
+import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
 import { AppUserOptions, PrintDocument, SUDOKU_PRINT_DOCUMENT, SudokuStore } from '@olmi/common';
-import { map, Observable, takeUntil } from 'rxjs';
+import { BehaviorSubject, map, Observable, takeUntil } from 'rxjs';
 import { getStatus } from './print.menu';
 import { TEMPLATES } from '@olmi/templates';
 
@@ -21,6 +21,7 @@ import { TEMPLATES } from '@olmi/templates';
     FlexLayoutModule,
     PrintPageComponent,
     SchemasBrowserComponent,
+    SchemasToolbarComponent
   ],
   selector: 'sudoku-print',
   templateUrl: './print.component.html',
@@ -32,11 +33,13 @@ export class PrintComponent extends PageBase {
 
   printDocument = inject(SUDOKU_PRINT_DOCUMENT);
 
+  schemas$: BehaviorSubject<Sudoku[]>;
   pagesCount$: Observable<number>;
   schemaCount$: Observable<number>;
 
   constructor() {
     super();
+    this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
     this.printDocument.template$.subscribe(template => {
       this.state.updateStatus({ template });
       AppUserOptions.updateFeature(PRINT_USER_OPTIONS_FEATURE, { template });
@@ -68,6 +71,10 @@ export class PrintComponent extends PageBase {
         }
         break;
     }
+  }
+
+  setSchemas(sdks?: Sudoku[]) {
+    this.schemas$.next(sdks||[]);
   }
 }
 

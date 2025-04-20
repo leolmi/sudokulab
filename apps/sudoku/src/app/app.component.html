@@ -6,7 +6,7 @@
          (click)="menuTrigger.openMenu()"
          matTooltip="author info" fxLayout="column">
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
-      <span class="sub-title compact-visible">{{state.title$|async}}</span>
+      <span class="sub-title">{{state.title$|async}}</span>
     </div>
     <mat-menu #authorMenu="matMenu">
       @for (page of state.pages; track page.route) {

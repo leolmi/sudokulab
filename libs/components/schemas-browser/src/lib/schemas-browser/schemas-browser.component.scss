@@ -3,12 +3,9 @@
     .schemas-browser {
       &.allow-compact {
         width: 64px;
-
         .schema-item {
           padding: 5px 0;
         }
-
-        .schemas-toolbar,
         .schema-info,
         .t-info,
         .alg-info,
@@ -18,39 +15,33 @@
       }
     }
   }
-
-  .schemas-toolbar {
-    .mdc-floating-label {
-      &:not(.mdc-floating-label--float-above) {
-        opacity: .5;
-      }
-    }
-  }
 }
 
 
 .schemas-browser {
   height: 100%;
   font-size: 16px;
+  //position: relative;
 }
 
-.schemas-toolbar {
-  margin: 10px;
-}
+//.schemas-toolbar {
+//  margin: 10px;
+//}
 
-.viewport-container {
-  position: relative;
-  overflow-y: auto;
-}
+//.viewport-container {
+//  position: relative;
+//  overflow-y: auto;
+//  height: calc(100% - var(--sdk-schemas-toolbar-height));
+//}
 
-.schemas-container {
-  position: absolute;
-  overflow-x: hidden;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+//.schemas-container {
+//  position: absolute;
+//  overflow-x: hidden;
+//  top: 0;
+//  left: 0;
+//  width: 100%;
+//  height: 100%;
+//}
 
 .schema-item {
   padding: 5px 10px;
@@ -102,6 +93,9 @@
   color: var(--sdk-color-secondary-contrast);
 }
 
-.margin-last-button {
-  margin-right: 6px;
+.schemas-placeholder {
+  min-height: 300px;
+  > div {
+    opacity: .5;
+  }
 }

@@ -8,10 +8,15 @@
       <print-page mode="add"></print-page>
     </div>
   </div>
-  <schemas-browser
-    persistenceKey="print"
-    (clickOnSchema)="printDocument.addSchema($event.values)"
-    [activeSchema]="printDocument.activePageSchema$|async"
-    [allowCompact]="true"
-  ></schemas-browser>
+  <div class="schemas-browser-tool" fxLayout="column">
+    <schemas-toolbar persistenceKey="print" (onFilter)="setSchemas($event)"></schemas-toolbar>
+    <div class="schemas-container" fxFlex>
+      <schemas-browser
+        [schemas]="schemas$|async"
+        [activeSchema]="printDocument.activePageSchema$|async"
+        [allowCompact]="true"
+        (clickOnSchema)="printDocument.addSchema($event.values)"
+      ></schemas-browser>
+    </div>
+  </div>
 </div>

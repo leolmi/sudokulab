@@ -1,13 +1,12 @@
-import { AfterViewInit, Component, inject, Input } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexModule } from '@angular/flex-layout';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { SchemasBrowserComponent } from '@olmi/schemas-browser';
+import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { Algorithm, Sudoku } from '@olmi/model';
 import { SUDOKU_STORE } from '@olmi/common';
-import { saveAs } from 'file-saver';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { getAlgorithms } from '@olmi/algorithms';
@@ -28,19 +27,30 @@ export class SchemasDialogArgs {
     MatMenuModule,
     SchemasBrowserComponent,
     MatIcon,
-    MatBadge
+    MatBadge,
+    SchemasToolbarComponent
   ],
   template: `
-    <h2 mat-dialog-title>Open Schema</h2>
-    <mat-dialog-content class="schemas-dialog-content">
-      <schemas-browser
-        persistenceKey="dialog"
-        [activeSchema]="(activeSchema$|async)?.values||''"
+    <!-- HEADER -->
+    <div mat-dialog-title>
+      <schemas-toolbar
         [onlyPlaying]="playing$|async"
         [algorithms]="algorithms$|async"
+        persistenceKey="dialog"
+        (onFilter)="setSchemaList($event)"
+      ></schemas-toolbar>
+    </div>
+
+    <!-- BODY -->
+    <mat-dialog-content class="schemas-dialog-content">
+      <schemas-browser
+        [activeSchema]="(activeSchema$|async)?.values||''"
         (clickOnSchema)="setSelection($event)"
+        [schemas]="schemas$|async"
       ></schemas-browser>
     </mat-dialog-content>
+
+    <!-- ACTIONS -->
     <mat-dialog-actions>
       @if (store.isDownload$|async) {
         <button mat-button (click)="download()">Download</button>
@@ -85,11 +95,13 @@ export class SchemasDialogComponent implements AfterViewInit {
   algorithms$: BehaviorSubject<string[]>;
   algCount$: Observable<number>;
   availableAlgorithms: Algorithm[];
+  schemas$: BehaviorSubject<Sudoku[]>;
 
   constructor() {
     this.activeSchema$ = new BehaviorSubject<Sudoku|undefined>(undefined);
     this.playing$ = new BehaviorSubject<boolean>(false);
     this.algorithms$ = new BehaviorSubject<string[]>([]);
+    this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
 
     this.algCount$ = this.algorithms$.pipe(map(algs => (algs||[]).length));
     this.availableAlgorithms = getAlgorithms();
@@ -131,5 +143,9 @@ export class SchemasDialogComponent implements AfterViewInit {
       algs.push(alg.id);
     }
     this.algorithms$.next(algs);
+  }
+
+  setSchemaList(sdks?: Sudoku[]) {
+    this.schemas$.next(sdks||[])
   }
 }

@@ -3,6 +3,9 @@
     .sudokulab-toolbar {
       .logo {
         font-size: .8em;
+        .sub-title {
+          margin-top: 0 !important;
+        }
       }
     }
   }
@@ -29,6 +32,7 @@
     font-weight: 100;
     opacity: .5;
     line-height: 1;
+    margin-top: 4px;
   }
 
 }

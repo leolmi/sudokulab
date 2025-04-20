@@ -1,80 +1,32 @@
-<div class="schemas-browser" [class.allow-compact]="allowCompact" fxLayout="column">
-  @if (options$|async; as opt) {
-    <div class="schemas-toolbar" fxLayout="row" fxLayoutAlign="start center">
-      <mat-form-field appearance="outline" class="no-wrapper-padding" fxFlex>
-        <mat-label>Search</mat-label>
-        <input matInput [value]="opt.text||''" (input)="updateOptions($event.target, 'text', 'value')">
-        <mat-label class="schemas-counter">
-          {{filtered$|async}}
-          @if (((total$|async)||0) > ((filtered$|async)||0)) {
-            <span class="schemas-counter-total">/ {{total$|async}}</span>
-          }
-        </mat-label>
-        <button mat-icon-button
-                matSuffix
-                [attr.aria-label]="'sort by menu trigger'"
-                [matMenuTriggerFor]="sortbymenu"
-                [matTooltip]="'Sort by '+opt.sortBy"
-                aria-label="sort by menu">
-          <mat-icon>sort_by_alpha</mat-icon>
-        </button>
-        <button mat-icon-button
-                matSuffix
-                [attr.aria-label]="'Asc or desc sort'"
-                (click)="updateOptions((opt.sortMode==='desc')?'asc':'desc', 'sortMode')"
-                [matTooltip]="opt.sortMode + 'ending sort'">
-          <mat-icon>{{(opt.sortMode==='desc')?'south':'north'}}</mat-icon>
-        </button>
-        <button mat-icon-button
-                matSuffix
-                class="margin-last-button"
-                [attr.aria-label]="'hide try algorithm'"
-                (click)="updateOptions(!opt.hideTrySchemas, 'hideTrySchemas')"
-                [matTooltip]="(opt.hideTrySchemas?'Exclude':'Include')+' schemas that use the try algorithm'"
-                [class.active]="!opt.hideTrySchemas">
-          <mat-icon>generating_tokens</mat-icon>
-        </button>
-      </mat-form-field>
-      <mat-menu #sortbymenu="matMenu">
-        @for (sbi of sortByItems; track sbi.value) {
-          <button mat-menu-item
-                  [class.active]="sbi.value===opt.sortBy"
-                  (click)="updateOptions(sbi.value, 'sortBy')">
-            <span>{{sbi.text}}</span>
-          </button>
+@defer {
+  <div class="schemas-browser"
+       [class.allow-compact]="allowCompact">
+    @for (sdk of schemas$|async; track sdk.values) {
+      <div class="schema-item sdk-color-hover board-active-contrast"
+           [attr.id]="'s'+$index"
+           [class.active]="sdk.values===(activeSchema$|async)"
+           (click)="internalClickOnSchema(sdk)"
+           [matTooltip]="sdk | itemTooltip"
+           [matTooltipDisabled]="!(state.layout$|async)?.compact"
+           fxLayout="row" fxLayoutAlign="start center">
+        <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
+        <div class="schema-info" fxLayout="column" fxFlex>
+          <div class="title" fxFlex>{{sdk.name}}</div>
+          <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
+        </div>
+        @if (sdk | userPlaying) {
+          <mat-icon class="play-info">edit</mat-icon>
         }
-      </mat-menu>
-    </div>
-  }
-  <div class="viewport-container" fxFlex>
-    <div class="schemas-container">
-      @for (sdk of schemas$|async; track sdk.values) {
-        @defer (on viewport) {
-          <div class="schema-item sdk-color-hover board-active-contrast"
-               [attr.id]="'s'+$index"
-               [class.active]="sdk.values===(activeSchema$|async)"
-               (click)="internalClickOnSchema(sdk)"
-               [matTooltip]="sdk | itemTooltip"
-               [matTooltipDisabled]="!(state.layout$|async)?.compact"
-               fxLayout="row" fxLayoutAlign="start center">
-            <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
-            <div class="schema-info" fxLayout="column" fxFlex>
-              <div class="title" fxFlex>{{sdk.name}}</div>
-              <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
-            </div>
-            @if (sdk | userPlaying) {
-              <mat-icon class="play-info">edit</mat-icon>
-            }
-            @if (sdk.info.useTryAlgorithm) {
-              <div class="t-info">T{{sdk.info.tryAlgorithmCount}}</div>
-            }
-            <div class="alg-info">A{{sdk.info.algorithmCount}}</div>
-          </div>
-        } @placeholder {
-          <div class="schema-item-placeholder"
-               [attr.id]="'s'+$index"></div>
+        @if (sdk.info.useTryAlgorithm) {
+          <div class="t-info">T{{sdk.info.tryAlgorithmCount}}</div>
         }
-      }
-    </div>
+        <div class="alg-info">A{{sdk.info.algorithmCount}}</div>
+      </div>
+    }
   </div>
-</div>
+} @placeholder (minimum 500ms) {
+  <div class="schemas-browser schemas-placeholder"
+       fxLayout="row" fxLayoutAlign="center center">
+    <mat-spinner mode="indeterminate"></mat-spinner>
+  </div>
+}

@@ -31,6 +31,7 @@ import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { HighlightsEditorComponent } from '@olmi/highlights-editor';
 import { random } from 'lodash';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 
 const PLAYER_VISIBLE_STAT: any = {
@@ -57,6 +58,7 @@ const PLAYER_VISIBLE_STAT: any = {
     SchemaHeaderComponent,
     SchemaToolbarComponent,
     HighlightsEditorComponent,
+    MatProgressSpinner
   ],
   selector: 'sudoku-player',
   templateUrl: './player.component.html',

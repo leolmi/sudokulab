@@ -1,6 +1,6 @@
 {
   "name": "@olmi/sudoku",
-  "version": "2.0.14",
+  "version": "2.0.16",
   "license": "MIT",
   "scripts": {
     "start": "node dist/apps/api/main.js",

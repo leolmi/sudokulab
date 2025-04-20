@@ -109,16 +109,30 @@ print-page {
   padding: 0 5px;
 }
 
-schemas-browser {
+.schemas-browser-tool {
   width: 350px;
-}
 
+  .schemas-container {
+    position: relative;
+    overflow-y: auto;
+
+    .schemas-browser {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+  }
+}
 
 ::ng-deep {
   .layout-compact {
     .sudokulab-page-print {
-      schemas-browser {
-        width: 64px;
+      .schemas-browser-tool {
+        width: 64px !important;
+      }
+      schemas-toolbar {
+        display: none;
       }
     }
   }
