@@ -1,6 +1,5 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { AppService } from './app.service';
-import { Sudoku } from '@olmi/model';
+import {Controller, Get} from '@nestjs/common';
+import {AppService} from './app.service';
 
 @Controller()
 export class AppController {

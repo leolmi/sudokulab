@@ -26,7 +26,7 @@ import {
   update,
   ValueOptions
 } from '@olmi/model';
-import { AppUserOptions, Notifier } from '@olmi/common';
+import {AppUserOptions, Notifier, SudokuState} from '@olmi/common';
 import { clearCell } from '@olmi/logic';
 
 /**
@@ -179,6 +179,7 @@ export class BoardManager {
       if (operation === 'stop') this.isStopping$.next(true);
       if (this.board.logic) {
         this.board.logic.execute({
+          version: SudokuState.version||'',
           sudoku: new SudokuEx({ cells: this.cells$.value }),
           operation,
           options: {

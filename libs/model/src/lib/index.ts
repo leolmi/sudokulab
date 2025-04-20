@@ -24,5 +24,4 @@ export * from './sudoku-stat';
 export * from './sudokulab-info';
 export * from './types';
 export * from './value-options';
-export * from './version';
 export * from './highligths';

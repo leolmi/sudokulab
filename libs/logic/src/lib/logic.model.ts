@@ -1,15 +1,5 @@
-import {
-  GeneratorOptions,
-  getStat,
-  Sudoku,
-  SudokuCell,
-  SudokuEx,
-  SUDOKULAB_TITLE,
-  SudokuStat,
-  ValueOptions,
-  VERSION
-} from '@olmi/model';
-import { BehaviorSubject, Subject } from 'rxjs';
+import {GeneratorOptions, getStat, SudokuCell, SudokuEx, SUDOKULAB_TITLE, SudokuStat, ValueOptions} from '@olmi/model';
+import {BehaviorSubject, Subject} from 'rxjs';
 
 export interface ApplySudokuRulesOptions extends ValueOptions {
   /**
@@ -101,6 +91,7 @@ export class GeneratorContext {
   schema$: BehaviorSubject<SudokuEx|undefined>;
   session: GenerationSession;
   schemas: any;
+  version: string;
   ping$: Subject<any>;
 
   constructor() {
@@ -112,7 +103,7 @@ export class GeneratorContext {
 
   addSchema(s: SudokuEx|undefined) {
     if (s && !this.schemas[s.values]) {
-      s.info.origin = `${SUDOKULAB_TITLE} ${VERSION}`;
+      s.info.origin = `${SUDOKULAB_TITLE} ${this.version||''}`;
       this.schemas[s.values] = true;
       this.schema$.next(s);
     }

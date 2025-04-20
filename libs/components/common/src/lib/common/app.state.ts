@@ -34,6 +34,7 @@ const MATCHES: Dictionary<string> = {
 }
 
 export class SudokuState {
+  static version: string = '';
   private readonly _router = inject(Router);
   private readonly _doc = inject(DOCUMENT);
   private readonly _manifests = inject(SUDOKU_PAGES);
@@ -112,7 +113,10 @@ export class SudokuState {
 
     this._interaction.ping()
       .pipe(filter(i => !!i), take(1))
-      .subscribe((i: SudokulabInfo) => this.info$.next(i));
+      .subscribe((i: SudokulabInfo) => {
+        SudokuState.version = i?.version||'';
+        this.info$.next(i);
+      });
   }
 
   private _updateSystemMenuItems(menu?: MenuItem[]) {

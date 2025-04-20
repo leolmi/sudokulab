@@ -29,6 +29,7 @@ const operationToMode = (op?: LogicOperation|''): SolveMode => {
 }
 
 const execute = (args: LogicWorkerData) => {
+  if (args.version) generationContext.version = args.version;
   switch (args?.operation) {
     case 'solve':
     case 'solve-step':

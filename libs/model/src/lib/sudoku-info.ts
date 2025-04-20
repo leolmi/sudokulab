@@ -1,7 +1,6 @@
 import { DEFAULT_RANK, Symmetry } from './consts';
 import { AlgorithmResult } from './algorithm';
 import { Difficulty } from './difficulty';
-import { VERSION } from './version';
 
 /**
  * informazioni di base sullo schema
@@ -14,7 +13,7 @@ export class SudokuInfo extends Difficulty {
     this.fixedCount = i?.fixedCount||0;
     this.symmetry = i?.symmetry||Symmetry.none;
     this.unique = !!i?.unique;
-    this.version = i?.version||VERSION;
+    this.version = i?.version||'';
     this.origin = i?.origin||'';
   }
 
