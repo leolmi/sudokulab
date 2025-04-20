@@ -95,6 +95,7 @@ export class GeneratorContext {
   ping$: Subject<any>;
 
   constructor() {
+    this.version = '';
     this.schema$ = new BehaviorSubject<SudokuEx|undefined>(undefined);
     this.ping$ = new Subject<any>();
     this.schemas = {};
