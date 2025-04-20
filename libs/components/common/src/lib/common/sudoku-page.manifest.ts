@@ -10,6 +10,7 @@ export abstract class SudokuPageManifest {
   abstract narrowMenu?: MenuItem[];
   lastRoute?: string;
   disabled?: boolean;
+  default?: boolean;
 }
 
 export const SUDOKU_PAGES = new InjectionToken<SudokuPageManifest[]>('SUDOKU_PAGES');

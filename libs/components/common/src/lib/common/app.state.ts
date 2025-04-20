@@ -1,15 +1,17 @@
-import { inject, InjectionToken } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, filter, map, Observable, take } from 'rxjs';
-import { cloneDeep as _clone, keys as _keys, values as _values } from 'lodash';
-import { BreakpointObserver } from '@angular/cdk/layout';
+import {inject, InjectionToken} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
+import {BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable, take} from 'rxjs';
+import {cloneDeep as _clone, keys as _keys, values as _values} from 'lodash';
+import {BreakpointObserver} from '@angular/cdk/layout';
 import {
   DEFAULT_THEME,
   Dictionary,
   Layout,
-  MenuItem, SDK_PREFIX,
+  MenuItem,
+  SDK_PREFIX,
   setBodyClass,
   SUDOKU_USER_OPTIONS_FEATURE,
+  SudokulabInfo,
   SYSTEM_MENU_CODE,
   THEME_CLASS,
   THEME_DARK,
@@ -17,9 +19,10 @@ import {
   THEME_OTHER,
   toggleClass
 } from '@olmi/model';
-import { SUDOKU_PAGES, SudokuPageManifest } from './sudoku-page.manifest';
-import { AppUserOptions } from './user-options';
-import { DOCUMENT } from '@angular/common';
+import {SUDOKU_PAGES, SudokuPageManifest} from './sudoku-page.manifest';
+import {AppUserOptions} from './user-options';
+import {DOCUMENT} from '@angular/common';
+import {SUDOKU_API} from "./interaction";
 
 const MAX_WIDTH = 1400;
 const COMPACT_WIDTH = 800;
@@ -35,8 +38,11 @@ export class SudokuState {
   private readonly _doc = inject(DOCUMENT);
   private readonly _manifests = inject(SUDOKU_PAGES);
   private readonly _layout = inject(BreakpointObserver);
+  private readonly _interaction = inject(SUDOKU_API);
 
+  info$: BehaviorSubject<SudokulabInfo>;
   page$: BehaviorSubject<string>;
+  manifest$: BehaviorSubject<SudokuPageManifest|undefined>;
   menu$: BehaviorSubject<MenuItem[]>;
   title$: BehaviorSubject<string>;
   status$: BehaviorSubject<any>;
@@ -52,7 +58,9 @@ export class SudokuState {
   }
 
   constructor() {
+    this.info$ = new BehaviorSubject<SudokulabInfo>(new SudokulabInfo());
     this.page$ = new BehaviorSubject<string>('');
+    this.manifest$ = new BehaviorSubject<SudokuPageManifest|undefined>(this._manifests.find(m => m.default));
     this.menu$ = new BehaviorSubject<MenuItem[]>([]);
     this.title$ = new BehaviorSubject<string>('');
     this.status$ = new BehaviorSubject<any>({});
@@ -73,8 +81,11 @@ export class SudokuState {
         this.layout$.next(l);
       });
 
-    combineLatest([this.route$, this.layout$])
-      .subscribe(([url, l]: [string, Layout]) => this._loadState(url, l));
+    this.route$.pipe(distinctUntilChanged())
+      .subscribe(url => {
+        const manifest = this.pages.find(m => !!m.route && url.startsWith(`/${m.route}`));
+        if (manifest && this.manifest$.value?.route !== manifest.route) this.manifest$.next(manifest);
+      });
 
     this.theme$.subscribe(theme => {
       const other = THEME_OTHER[theme];
@@ -86,17 +97,22 @@ export class SudokuState {
     this.layout$.subscribe(l =>
       _keys(l).forEach(k =>
         toggleClass(this._doc.body, `layout-${k}`, (<any>l)[k])));
-  }
 
-  private _loadState(url: string, layout: Layout) {
-    const manifest = this.pages.find(m => !!m.route && url.startsWith(`/${m.route}`));
-    const menu = (!!layout?.narrow) ? manifest?.narrowMenu : manifest?.menu;
-    if (manifest) {
-      this.page$.next(manifest.route);
-      this.title$.next(manifest.title);
-    }
-    this._updateSystemMenuItems(menu);
-    this.menu$.next(menu||[]);
+    combineLatest([this.manifest$, this.info$, this.layout$]).pipe(
+      filter(([m,i,l]) => !!m && !!i))
+      .subscribe(([manifest, info, layout]) => {
+        const menu = (!!layout?.narrow) ? manifest?.narrowMenu : manifest?.menu;
+        if (manifest) {
+          this.page$.next(manifest.route);
+          this.title$.next(`${manifest.title} ${info.version}`);
+        }
+        this._updateSystemMenuItems(menu);
+        this.menu$.next(menu||[]);
+      })
+
+    this._interaction.ping()
+      .pipe(filter(i => !!i), take(1))
+      .subscribe((i: SudokulabInfo) => this.info$.next(i));
   }
 
   private _updateSystemMenuItems(menu?: MenuItem[]) {
@@ -140,9 +156,10 @@ export class SudokuState {
   }
 
   checkState() {
-    combineLatest([this.route$, this.layout$])
-      .pipe(take(1))
-      .subscribe(([url, l]: [string, Layout]) => this._loadState(url, l));
+
+    // combineLatest([this.route$, this.layout$])
+    //   .pipe(take(1))
+    //   .subscribe(([url, l]: [string, Layout]) => this._loadState(url, l));
   }
 
   updateStatus(chs: any) {

@@ -9,4 +9,5 @@ export class PlayerPageManifest extends SudokuPageManifest {
   menu = MAIN;
   narrowMenu = NARROW;
   icon = 'grid_on';
+  override default = true;
 }
