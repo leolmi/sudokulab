@@ -47,31 +47,34 @@
     </div>
   }
   <div class="viewport-container" fxFlex>
-    <cdk-virtual-scroll-viewport
-      scrollWindow
-      class="schemas-container"
-      itemSize="54">
+    <div class="schemas-container">
       @for (sdk of schemas$|async; track sdk.values) {
-        <div class="schema-item sdk-color-hover board-active-contrast"
-             [class.active]="sdk.values===(activeSchema$|async)"
-             (click)="internalClickOnSchema(sdk)"
-             [matTooltip]="sdk | itemTooltip"
-             [matTooltipDisabled]="!(state.layout$|async)?.compact"
-             fxLayout="row" fxLayoutAlign="start center">
-          <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
-          <div class="schema-info" fxLayout="column" fxFlex>
-            <div class="title" fxFlex>{{sdk.name}}</div>
-            <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
+        @defer (on viewport) {
+          <div class="schema-item sdk-color-hover board-active-contrast"
+               [attr.id]="'s'+$index"
+               [class.active]="sdk.values===(activeSchema$|async)"
+               (click)="internalClickOnSchema(sdk)"
+               [matTooltip]="sdk | itemTooltip"
+               [matTooltipDisabled]="!(state.layout$|async)?.compact"
+               fxLayout="row" fxLayoutAlign="start center">
+            <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
+            <div class="schema-info" fxLayout="column" fxFlex>
+              <div class="title" fxFlex>{{sdk.name}}</div>
+              <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
+            </div>
+            @if (sdk | userPlaying) {
+              <mat-icon class="play-info">edit</mat-icon>
+            }
+            @if (sdk.info.useTryAlgorithm) {
+              <div class="t-info">T{{sdk.info.tryAlgorithmCount}}</div>
+            }
+            <div class="alg-info">A{{sdk.info.algorithmCount}}</div>
           </div>
-          @if (sdk | userPlaying) {
-            <mat-icon class="play-info">edit</mat-icon>
-          }
-          @if (sdk.info.useTryAlgorithm) {
-            <div class="t-info">T{{sdk.info.tryAlgorithmCount}}</div>
-          }
-          <div class="alg-info">A{{sdk.info.algorithmCount}}</div>
-        </div>
+        } @placeholder {
+          <div class="schema-item-placeholder"
+               [attr.id]="'s'+$index"></div>
+        }
       }
-    </cdk-virtual-scroll-viewport>
+    </div>
   </div>
 </div>

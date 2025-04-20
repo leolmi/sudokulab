@@ -30,6 +30,7 @@ import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { HighlightsEditorComponent } from '@olmi/highlights-editor';
+import { random } from 'lodash';
 
 
 const PLAYER_VISIBLE_STAT: any = {
@@ -113,7 +114,7 @@ export class PlayerComponent extends PageBase {
       case 'browse': {
         const sudoku = this.store.getSudoku(this.game);
         this.openDialog<Sudoku>(SchemasDialogComponent, (sdk) =>
-          this._game$.next(sdk.values), { data: { sudoku } });
+          this._game$.next(sdk.values), { data: { sudoku }, autoFocus: false });
         break;
       }
       case 'solve-to': {
@@ -127,6 +128,11 @@ export class PlayerComponent extends PageBase {
       }
       case 'clear-highlights': {
         this.manager?.setHighlights();
+        break;
+      }
+      case 'random': {
+        const sdk = this.store.getRandomSchema();
+        this._openSchema(sdk);
         break;
       }
       case 'download': {

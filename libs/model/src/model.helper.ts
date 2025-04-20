@@ -797,7 +797,7 @@ export const getDiffValue = (diff?: string, def = DIFFICULTY_MIN): number => DIF
  * restituisce l'identità di uno schema scelto randomicamente dall'elenco
  * @param sdks
  */
-export const getRandomId = (sdks: Sudoku[]): string => {
+export const getRandomSchema = (sdks: Sudoku[]): Sudoku => {
   const index = _random(0, sdks.length);
-  return sdks[index]?._id||'';
+  return sdks[index];
 }

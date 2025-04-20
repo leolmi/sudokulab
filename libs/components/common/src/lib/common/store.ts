@@ -2,7 +2,7 @@ import { BehaviorSubject, take } from 'rxjs';
 import { inject, InjectionToken } from '@angular/core';
 import { cloneDeep as _clone, extend as _extend, isArray as _isArray } from 'lodash';
 import {
-  getRandomId,
+  getRandomSchema,
   isEqualCaseInsensitive,
   isExtendedSudoku,
   LogicExecutor,
@@ -117,9 +117,14 @@ export class SudokuStore {
     if (_isArray(sdks)) {
       this.isFilling$.next(false);
       this.catalog$.next(sdks);
-      this.schemaOfTheDay$.next(getRandomId(sdks));
+      const rs = getRandomSchema(sdks);
+      this.schemaOfTheDay$.next(rs._id);
       this.isFilled$.next(true);
     }
+  }
+
+  getRandomSchema(): Sudoku {
+    return getRandomSchema(this.catalog$.value);
   }
 
   download() {

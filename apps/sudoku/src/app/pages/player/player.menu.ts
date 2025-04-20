@@ -83,6 +83,29 @@ export const OPERATIONS = <MenuItem[]>[
   },
 ]
 
+const OPENSCHEMA = <MenuItem[]>[
+  {
+    code: BUTTON_KEEPER,
+    icon: 'apps_outage',
+    text: 'Open schema',
+    logic: 'private',
+    property: 'keeper'
+  },
+  {
+    code: 'player-schema-random',
+    icon: 'casino',
+    text: 'Open random schema',
+    logic: 'private',
+    property: 'random'
+  },
+  {
+    code: BUTTON_SCHEMAS,
+    icon: 'grid_on',
+    text: 'Available schemas',
+    logic: 'private',
+    property: 'browse'
+  },
+]
 
 
 export const MAIN = <MenuItem[]>[
@@ -110,6 +133,10 @@ export const MAIN = <MenuItem[]>[
     text: 'Clear schema',
   },
   {
+    separator: true
+  },
+  ...OPENSCHEMA,
+  {
     code: 'player-operations',
     icon: 'more_vert',
     text: 'Player operations',
@@ -123,40 +150,10 @@ export const MAIN = <MenuItem[]>[
       SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   },
-  {
-    separator: true
-  },
-  {
-    code: BUTTON_KEEPER,
-    icon: 'apps_outage',
-    text: 'Open schema',
-    logic: 'private',
-    property: 'keeper'
-  },
-  {
-    code: BUTTON_SCHEMAS,
-    icon: 'grid_on',
-    text: 'Available schemas',
-    logic: 'private',
-    property: 'browse'
-  },
 ]
 
 export const NARROW = <MenuItem[]>[
-  {
-    code: BUTTON_KEEPER,
-    icon: 'apps_outage',
-    text: 'Open schema',
-    logic: 'private',
-    property: 'keeper'
-  },
-  {
-    code: BUTTON_SCHEMAS,
-    icon: 'grid_on',
-    text: 'Available schemas',
-    logic: 'private',
-    property: 'browse'
-  },
+  ...OPENSCHEMA,
   {
     separator: true
   },

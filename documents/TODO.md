@@ -44,3 +44,5 @@
   - rilevazione delle celle
   - interpretazione carattere in cella
   - restituzione stringa dello schema
+
+- [ ] gioco a tempo (nelle pause diventa "blurizzato")

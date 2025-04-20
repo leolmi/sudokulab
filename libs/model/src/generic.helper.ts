@@ -154,3 +154,15 @@ export const stopEvent = (e: any) => {
 export const combine = (...paths: string[]) => {
   return paths.join('/').replace(/[^:]\/{2,}/g, '/');
 }
+
+
+export const scrollToElement = (doc: Document, id: string, position: ScrollLogicalPosition = 'center') => {
+  const ele = doc.getElementById(id);
+  if (ele) {
+    ele.scrollIntoView({
+      behavior: 'smooth',
+      block: position,
+      inline: 'nearest'
+    });
+  }
+}

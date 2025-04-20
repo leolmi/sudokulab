@@ -1,16 +1,6 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  inject,
-  Input,
-  OnDestroy,
-  Output,
-  ViewChild
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { containsCaseInsensitive, Sudoku } from '@olmi/model';
+import { AfterViewInit, Component, ElementRef, EventEmitter, inject, Input, Output } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { containsCaseInsensitive, scrollToElement, Sudoku } from '@olmi/model';
 import {
   BehaviorSubject,
   combineLatest,
@@ -18,13 +8,12 @@ import {
   map,
   Observable,
   shareReplay,
-  skip, Subject,
+  skip,
   take,
   takeUntil
 } from 'rxjs';
 import { cloneDeep as _clone, findIndex, get as _get, set as _set, sortBy as _sortBy } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
-import { CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { FlexModule } from '@angular/flex-layout';
 import { MatFormField } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,7 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatOptionModule } from '@angular/material/core';
-import { AppUserOptions, SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
+import { AppUserOptions, DestroyComponentBase, SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
 import { ItemTooltipPipe, UserPlayingPipe } from './pipes';
 
 class FilterSortOptions {
@@ -58,8 +47,6 @@ class FilterSortOptions {
     CommonModule,
     FlexModule,
     BoardPreviewComponent,
-    CdkFixedSizeVirtualScroll,
-    CdkVirtualScrollViewport,
     MatFormField,
     MatOptionModule,
     MatIconModule,
@@ -74,11 +61,9 @@ class FilterSortOptions {
   styleUrl: './schemas-browser.component.scss',
   standalone: true
 })
-export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
-  @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport|undefined;
-  private readonly _destroy$: Subject<void>;
+export class SchemasBrowserComponent extends DestroyComponentBase implements AfterViewInit {
   private _element: ElementRef;
-
+  private readonly _DOC = inject(DOCUMENT);
   readonly state = inject(SUDOKU_STATE)
   readonly store = inject(SUDOKU_STORE);
   options$: BehaviorSubject<FilterSortOptions>;
@@ -125,8 +110,8 @@ export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
   clickOnSchema: EventEmitter<Sudoku> = new EventEmitter<Sudoku>();
 
   constructor() {
+    super();
     this._element = inject(ElementRef);
-    this._destroy$ = new Subject<void>();
     this.options$ = new BehaviorSubject<FilterSortOptions>(new FilterSortOptions());
     this.activeSchema$ = new BehaviorSubject<string>('');
     this.skipScrollTo$ = new BehaviorSubject<boolean>(false);
@@ -169,11 +154,6 @@ export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  ngOnDestroy() {
-    this._destroy$.next();
-    this._destroy$.unsubscribe();
-  }
-
   ngAfterViewInit() {
     setTimeout(() => this._loadOptions());
   }
@@ -196,7 +176,7 @@ export class SchemasBrowserComponent implements OnDestroy, AfterViewInit {
       .subscribe(([schemas, active, skip]: [Sudoku[], string, boolean]) => {
         if (!skip) {
           const activeIndex = findIndex(schemas, s => s.values === active);
-          if (activeIndex > -1) this.viewPort?.scrollToIndex(activeIndex);
+          if (activeIndex > -1) scrollToElement(this._DOC, `s${activeIndex}`);
         } else {
           this.skipScrollTo$.next(false);
         }
