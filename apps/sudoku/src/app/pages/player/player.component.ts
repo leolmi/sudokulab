@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  BoardComponent,
-  BoardManager,
-  PLAYER_BOARD_USER_OPTIONS_FEATURE,
-  PLAYER_BOARD_USER_VALUES_PREFIX_KEY
-} from '@olmi/board';
+import { BoardComponent, BoardManager, PLAYER_BOARD_USER_OPTIONS_FEATURE } from '@olmi/board';
 import { CommonModule, Location } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,8 +25,6 @@ import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { HighlightsEditorComponent } from '@olmi/highlights-editor';
-import { random } from 'lodash';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 
 const PLAYER_VISIBLE_STAT: any = {
@@ -57,8 +50,7 @@ const PLAYER_VISIBLE_STAT: any = {
     StepViewerComponent,
     SchemaHeaderComponent,
     SchemaToolbarComponent,
-    HighlightsEditorComponent,
-    MatProgressSpinner
+    HighlightsEditorComponent
   ],
   selector: 'sudoku-player',
   templateUrl: './player.component.html',

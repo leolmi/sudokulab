@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { scrollToElement, Sudoku } from '@olmi/model';
-import { BehaviorSubject, combineLatest, take } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, take } from 'rxjs';
 import { findIndex } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
 import { FlexModule } from '@angular/flex-layout';
@@ -35,6 +35,8 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
   readonly state = inject(SUDOKU_STATE)
   schemas$: BehaviorSubject<Sudoku[]>;
   activeSchema$: BehaviorSubject<string>;
+  hideTooltip$: Observable<boolean>;
+  diameter$: Observable<number>;
 
   @Input()
   set activeSchema(s: string|null|undefined) {
@@ -60,6 +62,9 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
     this._skipScrollTo$ = new BehaviorSubject<boolean>(false);
     this.activeSchema$ = new BehaviorSubject<string>('');
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
+
+    this.hideTooltip$ = this.state.layout$.pipe(map(l => !this.allowCompact || !l.compact));
+    this.diameter$ = this.state.layout$.pipe(map(l => (l.compact && this.allowCompact) ? 30 : 100));
   }
 
   internalClickOnSchema(sdk: Sudoku) {

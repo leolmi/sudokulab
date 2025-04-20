@@ -3,12 +3,12 @@
        [class.allow-compact]="allowCompact">
     @for (sdk of schemas$|async; track sdk.values) {
       <div class="schema-item sdk-color-hover board-active-contrast"
+           fxLayout="row" fxLayoutAlign="start center"
            [attr.id]="'s'+$index"
            [class.active]="sdk.values===(activeSchema$|async)"
-           (click)="internalClickOnSchema(sdk)"
-           [matTooltip]="sdk | itemTooltip"
-           [matTooltipDisabled]="!(state.layout$|async)?.compact"
-           fxLayout="row" fxLayoutAlign="start center">
+           [matTooltip]="sdk|itemTooltip"
+           [matTooltipDisabled]="hideTooltip$|async"
+           (click)="internalClickOnSchema(sdk)">
         <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
         <div class="schema-info" fxLayout="column" fxFlex>
           <div class="title" fxFlex>{{sdk.name}}</div>
@@ -18,15 +18,15 @@
           <mat-icon class="play-info">edit</mat-icon>
         }
         @if (sdk.info.useTryAlgorithm) {
-          <div class="t-info">T{{sdk.info.tryAlgorithmCount}}</div>
+          <div class="t-info notranslate" translate="no">T{{sdk.info.tryAlgorithmCount}}</div>
         }
-        <div class="alg-info">A{{sdk.info.algorithmCount}}</div>
+        <div class="alg-info notranslate" translate="no">A{{sdk.info.algorithmCount}}</div>
       </div>
     }
   </div>
 } @placeholder (minimum 500ms) {
   <div class="schemas-browser schemas-placeholder"
        fxLayout="row" fxLayoutAlign="center center">
-    <mat-spinner mode="indeterminate"></mat-spinner>
+    <mat-spinner mode="indeterminate" [diameter]="diameter$|async"></mat-spinner>
   </div>
 }

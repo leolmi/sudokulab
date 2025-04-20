@@ -12,6 +12,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { getAlgorithms } from '@olmi/algorithms';
 import { remove as _remove } from 'lodash';
 import { MatBadge } from '@angular/material/badge';
+import { MatTooltip } from '@angular/material/tooltip';
 
 export class SchemasDialogArgs {
   sudoku?: Sudoku
@@ -28,7 +29,8 @@ export class SchemasDialogArgs {
     SchemasBrowserComponent,
     MatIcon,
     MatBadge,
-    SchemasToolbarComponent
+    SchemasToolbarComponent,
+    MatTooltip
   ],
   template: `
     <!-- HEADER -->
@@ -53,12 +55,19 @@ export class SchemasDialogArgs {
     <!-- ACTIONS -->
     <mat-dialog-actions>
       @if (store.isDownload$|async) {
-        <button mat-button (click)="download()">Download</button>
+        <button mat-icon-button
+                matTooltip="download all catalog"
+                (click)="download()">
+          <mat-icon>file_download</mat-icon>
+        </button>
       }
-      <button mat-icon-button (click)="togglePlaying()">
+      <button mat-icon-button
+              matTooltip="show only playing games"
+              (click)="togglePlaying()">
         <mat-icon>{{ (playing$|async)?'edit':'edit_off' }}</mat-icon>
       </button>
       <button mat-icon-button
+              matTooltip="Choose used algorithms filter"
               [matBadge]="(algCount$|async)+''"
               [matBadgeHidden]="((algCount$|async)||0)<1"
               [matMenuTriggerFor]="algmenu">

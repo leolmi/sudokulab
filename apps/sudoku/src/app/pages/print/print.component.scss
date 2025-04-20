@@ -110,11 +110,9 @@ print-page {
 }
 
 .schemas-browser-tool {
-  width: 350px;
-
   .schemas-container {
-    position: relative;
-    overflow-y: auto;
+    overflow: auto;
+    width: 350px;
 
     .schemas-browser {
       position: absolute;
@@ -128,11 +126,8 @@ print-page {
 ::ng-deep {
   .layout-compact {
     .sudokulab-page-print {
-      .schemas-browser-tool {
+      .schemas-container {
         width: 64px !important;
-      }
-      schemas-toolbar {
-        display: none;
       }
     }
   }

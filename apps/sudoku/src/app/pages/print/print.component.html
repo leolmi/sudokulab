@@ -9,7 +9,11 @@
     </div>
   </div>
   <div class="schemas-browser-tool" fxLayout="column">
-    <schemas-toolbar persistenceKey="print" (onFilter)="setSchemas($event)"></schemas-toolbar>
+    <schemas-toolbar
+      class="compact-hidden"
+      persistenceKey="print"
+      (onFilter)="setSchemas($event)"
+    ></schemas-toolbar>
     <div class="schemas-container" fxFlex>
       <schemas-browser
         [schemas]="schemas$|async"
