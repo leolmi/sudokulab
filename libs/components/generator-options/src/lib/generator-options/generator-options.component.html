@@ -166,6 +166,25 @@
         }
       }
     </div>
+    <!-- NUMBER OF WORKERS -->
+    <mat-label class="inner-label" [class.disabled]="disabled$|async">
+      Number of parallel workers ({{opt.workersLength}})
+    </mat-label>
+    <mat-slider
+      [max]="GENERATOR_MAX_WORKERS"
+      [min]="GENERATOR_MIN_WORKERS"
+      [step]="1"
+      [discrete]="true"
+      [showTickMarks]="true"
+      [disabled]="disabled$|async"
+      aria-labelledby="workers numbers count">
+      <input matSliderThumb
+             [ngModel]="opt.workersLength"
+             (valueChange)="updateOptions('workersLength', $event)" #slider>
+    </mat-slider>
+    @if (workersLengthChanged$|async) {
+      <div class="workers-number-alert sdk-colors-accent">the number of workers will be effective only after the page is reloaded</div>
+    }
   </div>
 
 }

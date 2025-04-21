@@ -12,6 +12,7 @@ import {
 import { cloneDeep as _clone, isBoolean as _isBoolean, isString, last as _last } from 'lodash';
 import {
   AlgorithmResult,
+  Dictionary,
   GenerationStat,
   GeneratorOptions,
   getCellsSchema,
@@ -44,6 +45,7 @@ export class BoardManager {
   status$: BehaviorSubject<BoardStatus>;
   stat$: BehaviorSubject<SudokuStat>;
   generationStat$: BehaviorSubject<GenerationStat|undefined>;
+  multiGenerationStat$: BehaviorSubject<Dictionary<GenerationStat|undefined>>;
   cells$: BehaviorSubject<BoardCell[]>;
   sequence$: BehaviorSubject<AlgorithmResult[]>;
   sudoku$: BehaviorSubject<Sudoku>;
@@ -66,6 +68,7 @@ export class BoardManager {
     this.isStopping$ = new BehaviorSubject<boolean>(false);
     this.selection$ = new BehaviorSubject<BoardCell|undefined>(<BoardCell|undefined>undefined);
     this.generationStat$ = new BehaviorSubject<GenerationStat|undefined>(undefined);
+    this.multiGenerationStat$ = new BehaviorSubject<Dictionary<GenerationStat|undefined>>({});
     this.sequence$ = new BehaviorSubject<AlgorithmResult[]>([]);
     this.generatorOptions$ = new BehaviorSubject<GeneratorOptions>(new GeneratorOptions());
     this._highlights$ = new BehaviorSubject<Highlights | string | undefined | null>(undefined);
@@ -86,6 +89,7 @@ export class BoardManager {
         this.isRunning$.next(!!data.isRunning);
         if (!data.isRunning) this.isStopping$.next(false);
         this.generationStat$.next(data.isRunning ? data.generationStat : undefined);
+        update(this.multiGenerationStat$, { [data.index]: data.isRunning ? data.generationStat : undefined });
         this._checkHighlights(data);
         this._checkNotifies(data);
       });

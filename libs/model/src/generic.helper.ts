@@ -1,5 +1,5 @@
 import { BehaviorSubject } from 'rxjs';
-import { cloneDeep as _clone, isFunction as _isFunction, isString as _isString } from 'lodash';
+import { cloneDeep as _clone, isFunction as _isFunction, isNumber as _isNumber, isString as _isString } from 'lodash';
 import { ValueType } from './lib';
 
 export function guid(): string {
@@ -26,6 +26,19 @@ export const getHash = (o: any): number => {
     hash |= 0;
   }
   return hash;
+}
+
+/**
+ * verifica che il valore sia un numero e nel range definito
+ * @param v
+ * @param min
+ * @param max
+ */
+export const checkNumber = (v: any, min: number, max: number): number => {
+  const n = _isNumber(v) ? <number>v : 0;
+  if (n < min) return min;
+  if (n > max) return max;
+  return n;
 }
 
 /**

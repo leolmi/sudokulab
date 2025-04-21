@@ -12,22 +12,10 @@
       </div>
     </div>
   }
-  @if (manager) {
-    @if (manager.isRunning$|async) {
-      <!-- GENERATION PREVIEW -->
-      <div class="generator-schema generator-stat-preview">
-        <div class="generator-schema-content"
-             fxLayout="column" fxLayoutAlign="start center">
-          @if (manager.generationStat$|async; as stat) {
-            <sudoku-board-preview [schema]="stat.currentSchema"></sudoku-board-preview>
-            <div class="schema-details" fxFlex>{{generationDesc$|async}}</div>
-            <mat-progress-spinner
-              [mode]="(progressMode$|async)||'indeterminate'"
-              [value]="(progress$|async)||0"
-            ></mat-progress-spinner>
-          }
-        </div>
-      </div>
-    }
+  @for (prv of previews; track $index) {
+    <generator-schema-preview
+      [index]="$index"
+      [manager]="manager"
+    ></generator-schema-preview>
   }
 </div>

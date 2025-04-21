@@ -14,6 +14,7 @@ import {
 import {
   Interaction,
   LogicManager,
+  MultiLogicManager,
   Notifier,
   SUDOKU_API,
   SUDOKU_NOTIFIER,
@@ -46,6 +47,6 @@ export const appConfig: ApplicationConfig = {
     { provide: SUDOKU_PAGES, useClass: ManagementPageManifest, multi: true },
     { provide: SUDOKU_STATE, useClass: SudokuState },
     { provide: SUDOKU_PAGE_PLAYER_LOGIC, useClass: LogicManager },
-    { provide: SUDOKU_PAGE_GENERATOR_LOGIC, useClass: LogicManager }
+    { provide: SUDOKU_PAGE_GENERATOR_LOGIC, useClass: MultiLogicManager }
   ],
 };

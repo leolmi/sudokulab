@@ -3,6 +3,7 @@ import { ValueOptions } from './value-options';
 import { Sudoku } from './sudoku';
 import { guid } from '../generic.helper';
 import { GenerationStat } from './generator';
+import { EventEmitter } from '@angular/core';
 
 export type LogicOperation = 'check'|'solve'|'stop'|'solve-step'|'solve-to'|'solve-to-try'|'clear'|'help'|'generate'|'skip'|'generation-result'|'generation-ping'|'assign'|'toggle'|'build';
 
@@ -47,12 +48,14 @@ export class LogicWorkerData extends LogicWorkerArgs {
   constructor(a?: Partial<LogicWorkerData>) {
     super(a);
 
+    this.index = a?.index||0;
     this.allowHidden = !!a?.allowHidden;
     this.isRunning = !!a?.isRunning;
     this.error = getGlobalErrorMessage(this.sudoku)||a?.error||'';
     this.generationStat = a?.generationStat;
   }
 
+  index: number;
   error?: any;
   allowHidden: boolean;
   isRunning?: boolean;
@@ -66,4 +69,9 @@ export interface LogicExecutor {
    * @param args
    */
   execute(args: Partial<LogicWorkerArgs>): string;
+
+  /**
+   * evento di ritorno dal worker
+   */
+  completed: EventEmitter<LogicWorkerData>;
 }

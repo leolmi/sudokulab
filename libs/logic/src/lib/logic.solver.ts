@@ -1,5 +1,6 @@
 import {
-  AlgorithmType, buildSudokuCells,
+  AlgorithmType,
+  buildSudokuCells,
   hasErrors,
   isComplete,
   SDK_PREFIX,
@@ -7,7 +8,8 @@ import {
   SolveSolution,
   SolveWork,
   Sudoku,
-  SudokuCell, SudokuEx
+  SudokuCell,
+  SudokuEx
 } from '@olmi/model';
 import { findFirstAppliedAlgorithm, getAlgorithm } from '@olmi/algorithms';
 import {
@@ -97,7 +99,7 @@ const initSolver = (cells: SudokuCell[], o?: Partial<SolveOptions>): SolveWork =
 const endSolver = (work: SolveWork) => {
   work.end = Date.now();
   checkToStepItem(work);
-  if (!!work.options?.debug) console.log(...SDK_PREFIX, 'solver ends', work);
+  if (!!work.options?.debug) console.log(...SDK_PREFIX, `solver ends in ${(work.end-work.start).toFixed(0)}mls`, work);
 }
 
 /**

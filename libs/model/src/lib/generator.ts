@@ -21,6 +21,7 @@ export class GeneratorOptions extends SolveOptions {
     this.allowTryAlgorithm = !!o?.allowTryAlgorithm;
     this.oneForSchema = !!o?.oneForSchema;
     this.useAlgorithms = o?.useAlgorithms||[];
+    this.workersLength = o?.workersLength||1;
   }
 
   endMode: EndGenerationMode;
@@ -34,6 +35,7 @@ export class GeneratorOptions extends SolveOptions {
   maxSeconds: number;
   symmetry: Symmetry;
   useAlgorithms: string[];
+  workersLength: number;
 }
 
 

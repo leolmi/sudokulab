@@ -1,4 +1,4 @@
 import { InjectionToken } from '@angular/core';
-import { LogicManager } from '@olmi/common';
+import { LogicExecutor } from '@olmi/model';
 
-export const SUDOKU_PAGE_PLAYER_LOGIC = new InjectionToken<LogicManager>('SUDOKU_PAGE_PLAYER_LOGIC');
+export const SUDOKU_PAGE_PLAYER_LOGIC = new InjectionToken<LogicExecutor>('SUDOKU_PAGE_PLAYER_LOGIC');

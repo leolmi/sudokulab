@@ -24,12 +24,12 @@ import {
   NEXT_DIRECTION
 } from './board.model';
 import { BehaviorSubject, map, Observable, of } from 'rxjs';
-import { cloneDeep as _clone, isFunction, isNumber as _isNumber, isString as _isString } from 'lodash';
+import { cloneDeep as _clone, isNumber as _isNumber, isString as _isString } from 'lodash';
 import {
   Coding,
   isCopyKeys,
   isDeleteKey,
-  isDirectionKey, isPasteKeys,
+  isDirectionKey,
   isSkippedKey,
   moveOnDirection,
   parseCells
@@ -41,12 +41,14 @@ import {
   DEFAULT_RANK,
   getCell,
   getCellsSchema,
-  Highlights, isSchemaString,
+  Highlights,
+  isSchemaString,
+  LogicExecutor,
   NotificationType,
   SudokuCell,
   update
 } from '@olmi/model';
-import { LogicManager, SUDOKU_NOTIFIER } from '@olmi/common';
+import { SUDOKU_NOTIFIER } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 
 @Component({
@@ -122,7 +124,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   @Input()
-  logic: LogicManager|undefined;
+  logic: LogicExecutor|undefined;
 
   @Output()
   selectionChanged: EventEmitter<BoardCell|undefined> = new EventEmitter<BoardCell|undefined>();

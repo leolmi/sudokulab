@@ -4,7 +4,9 @@ import {
   Algorithm,
   EndGenerationMode,
   GENERATOR_MAX_NUMBERS,
+  GENERATOR_MAX_WORKERS,
   GENERATOR_MIN_NUMBERS,
+  GENERATOR_MIN_WORKERS,
   GeneratorOptions,
   getFixedCount,
   getTypedValue,
@@ -23,8 +25,8 @@ import {
   AVAILABLE_SYMMETRIES,
   AVAILABLE_VALUES_MODES,
   getAlgorithmsMap,
-  isMultischema,
-  hasNewOrDynamicFixed
+  hasNewOrDynamicFixed,
+  isMultischema
 } from './generator-options.helper';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { FormsModule } from '@angular/forms';
@@ -32,7 +34,7 @@ import { MatInput } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { getAlgorithms } from '@olmi/algorithms';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { ManagerComponentBase } from '@olmi/common';
+import { ManagerComponentBase, MultiLogicManager } from '@olmi/common';
 
 @Component({
   selector: 'generator-options',
@@ -62,6 +64,9 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
   readonly AVAILABLE_VALUES_MODES = AVAILABLE_VALUES_MODES;
   readonly GENERATOR_MAX_NUMBERS = GENERATOR_MAX_NUMBERS;
   readonly GENERATOR_MIN_NUMBERS = GENERATOR_MIN_NUMBERS;
+  readonly GENERATOR_MAX_WORKERS = GENERATOR_MAX_WORKERS;
+  readonly GENERATOR_MIN_WORKERS = GENERATOR_MIN_WORKERS;
+  readonly TRY_NUMBER_ALGORITHM = TRY_NUMBER_ALGORITHM;
   readonly EndGenerationMode = EndGenerationMode;
   readonly algorithms: Algorithm[];
 
@@ -72,6 +77,7 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
   isMultischema$: Observable<boolean> = of(false);
   hasNewOrDynamicFixed$: Observable<boolean> = of(false);
   fixedCount$: Observable<number> = of(0);
+  workersLengthChanged$: Observable<boolean>;
 
   @Input()
   set options(o: GeneratorOptions | null | undefined) {
@@ -90,6 +96,9 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
 
     this.options$.subscribe(o =>
       this.algMap$.next(getAlgorithmsMap(this.algorithms, o.useAlgorithms)));
+
+    this.workersLengthChanged$ = this.options$.pipe(map(o =>
+      (o.workersLength||GENERATOR_MIN_WORKERS) !== MultiLogicManager.count));
   }
 
   ngOnInit() {
@@ -120,6 +129,4 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
     }
     this.updateOptions('useAlgorithms', as);
   }
-
-  protected readonly TRY_NUMBER_ALGORITHM = TRY_NUMBER_ALGORITHM;
 }
