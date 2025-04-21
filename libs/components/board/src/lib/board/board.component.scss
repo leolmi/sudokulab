@@ -88,16 +88,9 @@
   transform-box: fill-box;
   transform-origin: 50% 50%;
   transition: font-size ease-in-out;
-  // user-select: none;
   &:hover {
     font-size: 8px;
   }
-}
-
-.popup-watch-value {
-  font-size: 10px;
-  font-weight: bold;
-  user-select: none;
 }
 
 .svg-board-cell-values-text {

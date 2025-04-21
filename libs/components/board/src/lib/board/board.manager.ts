@@ -1,4 +1,4 @@
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, Observable, of, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, Subject, takeUntil } from 'rxjs';
 import {
   BoardCell,
   BoardChangeEvent,
@@ -11,7 +11,8 @@ import {
 } from '@olmi/board';
 import { cloneDeep as _clone, isBoolean as _isBoolean, isString, last as _last } from 'lodash';
 import {
-  AlgorithmResult, GenerationStat,
+  AlgorithmResult,
+  GenerationStat,
   GeneratorOptions,
   getCellsSchema,
   getStat,
@@ -26,7 +27,7 @@ import {
   update,
   ValueOptions
 } from '@olmi/model';
-import {AppUserOptions, Notifier, SudokuState} from '@olmi/common';
+import { AppUserOptions, Notifier, SudokuState } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
 
 /**
@@ -216,7 +217,7 @@ export class BoardManager {
     const sdk = isString(s) ? new Sudoku({ values: s }) : <Sudoku>s;
     this.cells$.next([]);
     this.sudoku$.next(sdk);
-    const values = this.usePersistence ? AppUserOptions.getUserValues(sdk._id) : '';
+    const values = this.usePersistence ? AppUserOptions.getUserValues(sdk._id) : undefined;
     this.cells$.next(getBoardCells(sdk, false, values));
     this._refreshStatus();
     this.clearHighlights();

@@ -1,5 +1,6 @@
 @defer {
   <div class="schemas-browser"
+       #container
        [class.allow-compact]="allowCompact">
     @for (sdk of schemas$|async; track sdk.values) {
       <div class="schema-item sdk-color-hover board-active-contrast"

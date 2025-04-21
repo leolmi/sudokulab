@@ -16,13 +16,13 @@ import { map, Observable } from 'rxjs';
   ],
   template: `
     <div class="print-template-container" fxLayout="column">
-      <div class="print-page-area"
+      <div class="print-page-area top"
            [class.active]="(printDocument.activeArea$|async)===pageId+'.0'"
            (click)="setActive(0)"
            fxFlex>
         <sudoku-board-preview [schema]="schemaTop$|async"></sudoku-board-preview>
       </div>
-      <div class="print-page-area top-line"
+      <div class="print-page-area top-line bottom"
            [class.active]="(printDocument.activeArea$|async)===pageId+'.1'"
            (click)="setActive(1)"
            fxFlex>

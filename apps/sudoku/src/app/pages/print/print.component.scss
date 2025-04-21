@@ -1,4 +1,7 @@
 .sudokulab-page-print {
+  --sdk-page-print-padding: 50px;
+  --sdk-page-print-size: 80px;
+
   width: 100%;
   overflow: hidden;
 }
@@ -6,7 +9,7 @@
 .pages-container {
   height: 100%;
   overflow: auto;
-  padding: 50px;
+  padding: 80px var(--sdk-page-print-padding);
   box-sizing: border-box;
   position: relative;
 }
@@ -14,35 +17,14 @@
 .print-title {
   position: absolute;
   width: 100%;
-  padding: 20px 80px;
+  padding: 20px calc(var(--sdk-page-print-padding) + 30px);
   font-size: 1.2em;
 }
 
-.print-page-add {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  cursor: pointer;
-
-  > mat-icon {
-    font-size: 80px;
-    width: 80px;
-    height: 80px;
-    position: absolute;
-    top: calc(50% - 40px);
-    left: calc(50% - 40px);
-  }
-
-  &:hover {
-    background-color: var(--sdk-color-hover);
-  }
-}
 
 print-page {
-  height: 320px;
-  width: 240px;
+  height: calc(var(--sdk-page-print-size) * 4);
+  width: calc(var(--sdk-page-print-size) * 3);
   margin: 10px;
   border: var(--sdk-color-border) 1px solid;
   background-color: white;
@@ -63,52 +45,6 @@ print-page {
   }
 }
 
-.print-page {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  .print-page-content {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-  }
-  &.add-page-mode {
-    .print-page-area {
-      opacity: 0;
-      pointer-events: none;
-    }
-  }
-}
-
-.print-page-toolbar {
-  position: absolute;
-  width: 100%;
-  z-index: 10;
-  color: #666 !important;
-  background-color: white;
-  opacity: .2;
-
-  >button {
-    color: inherit;
-  }
-
-  &:hover {
-    opacity: 0.98;
-  }
-}
-
-.print-page-footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 24px;
-  color: #666;
-  padding: 0 5px;
-}
-
 .schemas-browser-tool {
   .schemas-container {
     overflow: auto;
@@ -126,6 +62,13 @@ print-page {
 ::ng-deep {
   .layout-compact {
     .sudokulab-page-print {
+      --sdk-page-print-padding: 20px;
+      --sdk-page-print-size: 50px;
+
+      .print-title {
+        font-size: .9em;
+      }
+
       .schemas-container {
         width: 64px !important;
       }

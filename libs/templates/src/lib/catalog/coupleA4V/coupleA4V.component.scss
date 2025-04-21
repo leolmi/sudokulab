@@ -1,3 +1,19 @@
-.print-page-area {
-  padding: 11px 54px;
+::ng-deep {
+  .print-page-area {
+
+    &.top {
+      .sudoku-board-preview {
+        left: calc(var(--sdk-print-page-board-distance-min) / 2);
+        top: var(--sdk-print-page-board-distance-min);
+      }
+    }
+
+    &.bottom {
+      .sudoku-board-preview {
+        left: unset;
+        right: calc(var(--sdk-print-page-board-distance-min) / 2);
+        bottom: var(--sdk-print-page-board-distance-min);
+      }
+    }
+  }
 }

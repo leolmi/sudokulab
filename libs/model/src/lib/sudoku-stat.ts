@@ -1,4 +1,5 @@
 import { SudokuInfoEx } from './sudoku-info';
+import { UserValues } from './user-values';
 
 export class SudokuStat extends SudokuInfoEx {
   constructor(s?: Partial<SudokuStat>) {
@@ -13,7 +14,7 @@ export class SudokuStat extends SudokuInfoEx {
     this.hasErrors = !!s?.hasErrors;
     this.isSolvable = !!s?.isSolvable;
     this.isComplete = !!s?.isComplete;
-    this.userValues = s?.userValues || '';
+    this.userValues = new UserValues(s?.userValues);
     // calcolati:
     this.isEmpty = (s?.fixedCount || 0) === 0;
     this.cellCount = s?.cellCount || this.rank * this.rank;
@@ -48,7 +49,7 @@ export class SudokuStat extends SudokuInfoEx {
   /**
    * valori presenti nello schema (fissi+utente)
    */
-  userValues: string;
+  userValues: UserValues;
   /**
    * numero di valori mancanti
    */

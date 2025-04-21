@@ -7,14 +7,15 @@ import {
   BoardManager,
   BoardStatus,
   GENERATOR_BOARD_USER_OPTIONS_FEATURE,
-  GENERATOR_OPTIONS_FEATURE
+  GENERATOR_OPTIONS_FEATURE,
+  getBoardCells
 } from '@olmi/board';
 import { MAIN } from './generator.menu';
 import { calcMenuStatus, defaultHandleMenuItem, getStatLines, StatLine } from '../pages.helper';
-import { BehaviorSubject, combineLatest, debounceTime, map, Observable, of, skip, takeUntil } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, of, skip, takeUntil } from 'rxjs';
 import { SUDOKU_PAGE_GENERATOR_LOGIC } from './generator.logic';
 import { GeneratorOptionsComponent } from '@olmi/generator-options';
-import { GeneratorOptions, Sudoku, SudokuStat } from '@olmi/model';
+import { GeneratorOptions, Sudoku, SudokuCell, SudokuStat } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { GeneratorSchemasComponent } from '@olmi/generator-schemas';
 import { AppUserOptions } from '@olmi/common';
@@ -53,6 +54,8 @@ export class GeneratorComponent extends PageBase {
   valuesToAdd$: Observable<string> = of('none');
   options$: BehaviorSubject<GeneratorOptions>;
   layout$: Observable<string>;
+  generationCells$: Observable<SudokuCell[]> = of([]);
+  isRunning$: Observable<boolean> = of(false);
 
   constructor() {
     super();
@@ -89,6 +92,8 @@ export class GeneratorComponent extends PageBase {
     if ((<any>uo).schema) this.manager?.load((<any>uo).schema);
 
     if (this.manager) {
+      this.isRunning$  = this.manager.isRunning$.pipe(map(r => r));
+
       this.lines$ = this.manager.stat$.pipe(map(s => getStatLines(s, { visible: GENERATOR_VISIBLE_STAT })));
       // aggiorna lo stato del menu e salva le impostazioni utente al variare delle opzioni
       combineLatest([this.manager.status$, this.manager.isRunning$, this.manager.isStopping$, this.options$, this.manager.stat$])
@@ -112,6 +117,9 @@ export class GeneratorComponent extends PageBase {
 
       this.valuesToAdd$ = combineLatest([this.manager.stat$, this.options$])
         .pipe(map(([stat, o]: [SudokuStat, GeneratorOptions]) => getValuesToAdd(stat, o)));
+
+      this.generationCells$ = this.manager.generationStat$.pipe(map(s =>
+        getBoardCells(s?.currentSchema)));
     }
   }
 
@@ -120,6 +128,15 @@ export class GeneratorComponent extends PageBase {
       this.manager = manager;
       this._init();
     }
+  }
+
+  readyGen(m: BoardManager) {
+    m?.options({
+      isDisabled: true,
+      editMode: 'schema',
+      isCoord: true,
+      isDynamic: true
+    });
   }
 
   updateOptions(o: GeneratorOptions) {

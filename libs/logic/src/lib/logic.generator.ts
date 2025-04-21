@@ -2,17 +2,20 @@ import { GenerationSession, GeneratorContext } from './logic.model';
 import {
   GeneratorOptions,
   getCellsSchema,
-  LogicWorkerData, refreshSchemaValues,
+  LogicWorkerData,
+  refreshSchemaValues,
+  SDK_PREFIX,
   setCellFixedValue,
   SudokuEx,
   ValorizationMode
 } from '@olmi/model';
-import { solve } from './logic.solver';
-import { getSolution, isSchemaHandled } from './logic.helper';
+import { isSchemaHandled } from './logic.helper';
 import { cloneDeep as _clone, random as _random } from 'lodash';
 import {
-  addDynamicCell, calcSolution,
+  addDynamicCell,
+  calcSolution,
   clearDynamics,
+  generateNewSchema,
   isSchemaComplete,
   isSchemaFilled,
   isSessionComplete,
@@ -28,8 +31,9 @@ import {
  */
 const completeSchema = (ctx: GeneratorContext): void => {
   ctx.session.skipSchema = false;
-  // genera lo schema per il calcolo
-  ctx.session.currentSchema = new SudokuEx({ cells: _clone(ctx.session.originalCells) });
+  // genera lo schema per il calcolo ed aggiorna le statistiche relative
+  generateNewSchema(ctx);
+
   let complete = false;
   // aggiunge celle dinamiche fino al raggiungimento del numero di valori richiesto
   while (!isSchemaComplete(ctx) || complete) {
@@ -38,6 +42,8 @@ const completeSchema = (ctx: GeneratorContext): void => {
   }
   // resetta il contatore per le valorizzazioni
   ctx.session.schemaFillCycle = 0;
+  if (ctx.session.options.debug)
+    console.log(...SDK_PREFIX, 'builded schema', ctx.session.currentSchema?.values, '\n\tstat', ctx.session.currentStat);
 }
 
 /**

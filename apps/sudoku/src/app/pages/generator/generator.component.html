@@ -34,13 +34,21 @@
   <div class="generator-board">
     <sudoku-board
       [logic]="logic"
+      [class.display-none]="isRunning$|async"
       (onReady)="ready($event)"
       (pasteSchemaRequest)="pasteSchema($event)"
     ></sudoku-board>
     @if (manager) {
+      @if (manager.isRunning$|async) {
+        <sudoku-board
+          (onReady)="readyGen($event)"
+          [cells]="generationCells$|async"
+        ></sudoku-board>
+      }
       <schema-toolbar
         [manager]="manager"
         [template]="toolbarTemplate"
+        [disabled]="manager.isRunning$|async"
       ></schema-toolbar>
     }
   </div>

@@ -87,7 +87,7 @@ export class BoardComponent implements OnInit, OnDestroy {
    * celle dello schema
    * @param cs
    */
-  @Input() set cells(cs: BoardCell[]|undefined|null) {
+  @Input() set cells(cs: SudokuCell[]|undefined|null) {
     this.cells$.next(parseCells(cs))
   }
 

@@ -32,6 +32,8 @@ const getStandardNumericButtons = (): ToolbarButton[] => {
 // "nums,clear,pencil"
 // "nums,clear,play"
 
+export const BUTTON_STOP_CODE = 'tb-stop';
+
 export const StandardToolbarButtons = <Dictionary<ToolbarButton[]>>{
   nums: getStandardNumericButtons(),
   clear: [{
@@ -56,7 +58,7 @@ export const StandardToolbarButtons = <Dictionary<ToolbarButton[]>>{
     color: 'accent'
   }, {
     icon: 'stop',
-    code: 'tb-stop',
+    code: BUTTON_STOP_CODE,
     operation: 'stop',
     color: 'secondary'
   }],

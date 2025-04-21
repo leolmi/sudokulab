@@ -2,7 +2,9 @@
   <div class="schemalab-tool options-tool compact-size-600"
        fxLayout="column">
     <!-- NUMBER OF NUMBERS -->
-    <mat-label>Total fixed numbers ({{fixedCount$|async}} / <b>{{opt.fixedCount}}</b>)</mat-label>
+    <mat-label [class.disabled]="disabled$|async">
+      Total fixed numbers ({{fixedCount$|async}} / <b>{{opt.fixedCount}}</b>)
+    </mat-label>
     <mat-slider
       [disabled]="disabled$|async"
       [max]="GENERATOR_MAX_NUMBERS"
@@ -150,7 +152,7 @@
     }
     <!-- ALGORITHMS -->
     <div class="options-line algorithms-line">
-      <mat-label class="algorithms-label">Use this algorithms</mat-label>
+      <mat-label class="algorithms-label" [class.disabled]="disabled$|async">Use this algorithms</mat-label>
       @for (alg of algorithms; track alg.name) {
         @if (alg.id !== TRY_NUMBER_ALGORITHM || opt.allowTryAlgorithm) {
           <mat-checkbox

@@ -3,6 +3,10 @@
 @use './theme-light';
 @use './theme-dark';
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -35,9 +39,13 @@ html, body {
   position: relative;
 }
 
+.disabled {
+  opacity: var(--sdk-disabled-opacity);
+}
+
 body {
   background-color: var(--sdk-color-background);
-  color: var (--sdk-color-foreground);
+  color: var(--sdk-color-foreground);
 
   --mat-sys-primary: var(--sdk-color-accent);
   --mat-sys-primary-container: var(--sdk-color-accent);
@@ -111,6 +119,10 @@ body {
 .invisible,
 .hidden {
   visibility: hidden;
+}
+
+.display-none {
+  display: none;
 }
 
 .opacity-6 {
@@ -257,8 +269,8 @@ button {
   user-select: none;
 }
 
-.elevation-z10 {
-  box-shadow: 0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14), 0px 4px 18px 3px rgba(0, 0, 0, 0.12)
+.elevation-z5 {
+  box-shadow: var(--mat-sys-level5);
 }
 
 

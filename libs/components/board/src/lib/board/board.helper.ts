@@ -23,8 +23,14 @@ import {
   forEachCell,
   getStandardValue,
   groupId,
-  isDynamicChar, LogicWorkerData,
-  STANDARD_CHARACTERS, Sudoku, SudokuCell, SudokuEx, SudokuInfoEx
+  isDynamicChar,
+  LogicWorkerData,
+  STANDARD_CHARACTERS,
+  Sudoku,
+  SudokuCell,
+  SudokuEx,
+  SudokuInfoEx,
+  UserValues
 } from '@olmi/model';
 import { nextInRow, nextInSquare, nextPrev } from './board.internal';
 
@@ -38,8 +44,9 @@ export const onCell = (cells: BoardCell[], cell: Cell|undefined|null, handler: (
  * aggiunge le informazioni essenziali per la board alle celle
  * @param cls
  * @param check
+ * @param uv
  */
-export const parseCells = (cls?: BoardCell[]|undefined|null, check = false, values?: string): BoardCell[] => {
+export const parseCells = (cls?: SudokuCell[]|undefined|null, check = false, uv?: UserValues): BoardCell[] => {
   const eff_cls: BoardCell[] = [];
   forEachCell((c, ci) => {
     const xc = (cls || []).find(cc => cc.col == c.col && cc.row === c.row);
@@ -55,7 +62,8 @@ export const parseCells = (cls?: BoardCell[]|undefined|null, check = false, valu
         textY: y + (GEOMETRY.cell.height / 2),
         id: cellId(c.col, c.row)
       });
-      if (!bc.isFixed && (values||'').charAt(ci)) bc.text = getCellValue((values||'').charAt(ci));
+      if (!bc.isFixed && (uv?.uv||'').charAt(ci)) bc.text = getCellValue((uv?.uv||'').charAt(ci));
+      if (uv && uv.cv[bc.coord]) bc.userValues = uv.cv![bc.coord]||[];
       eff_cls.push(bc);
     }
   })
@@ -131,9 +139,9 @@ export const buildSchemaBoard = (v?: string): BoardCell[] => {
  * restituisce le celle per la griglia
  * @param source
  * @param preview
- * @param values
+ * @param uv
  */
-export const getBoardCells = (source: Sudoku|SudokuEx|string|null|undefined, preview = false, values?: string): BoardCell[] => {
+export const getBoardCells = (source: Sudoku|SudokuEx|string|null|undefined, preview = false, uv?: UserValues): BoardCell[] => {
   let cells: SudokuCell[] = [];
   if (_isString(source)) {
     cells = buildSudokuCells(`${source||''}`, { onlyValues: preview });
@@ -144,7 +152,7 @@ export const getBoardCells = (source: Sudoku|SudokuEx|string|null|undefined, pre
       cells = buildSudokuCells(`${(<Sudoku>source)?.values||''}`, { onlyValues: preview });
     }
   }
-  return parseCells(<BoardCell[]>cells, true, values);
+  return parseCells(<BoardCell[]>cells, true, uv);
 }
 
 export class Coding {

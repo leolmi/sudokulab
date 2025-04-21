@@ -1,7 +1,7 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { scrollToElement, Sudoku } from '@olmi/model';
-import { BehaviorSubject, combineLatest, map, Observable, take } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, Observable, take } from 'rxjs';
 import { findIndex } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
 import { FlexModule } from '@angular/flex-layout';
@@ -37,12 +37,16 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
   activeSchema$: BehaviorSubject<string>;
   hideTooltip$: Observable<boolean>;
   diameter$: Observable<number>;
+  container$: BehaviorSubject<ElementRef|undefined>;
+
+  @ViewChild('container') set container(c: ElementRef) {
+    this.container$.next(c);
+  }
 
   @Input()
   set activeSchema(s: string|null|undefined) {
     if (this.activeSchema$.value !== s) {
       this.activeSchema$.next(s||'');
-      setTimeout(() => this.scrollToActive(), 150);
     }
   }
 
@@ -62,17 +66,19 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
     this._skipScrollTo$ = new BehaviorSubject<boolean>(false);
     this.activeSchema$ = new BehaviorSubject<string>('');
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
+    this.container$ = new BehaviorSubject<ElementRef|undefined>(undefined);
 
     this.hideTooltip$ = this.state.layout$.pipe(map(l => !this.allowCompact || !l.compact));
     this.diameter$ = this.state.layout$.pipe(map(l => (l.compact && this.allowCompact) ? 30 : 100));
+
+    combineLatest([this.container$, this.activeSchema$])
+      .pipe(filter(([c, as]) => !!c && !!as))
+      .subscribe(() =>
+        setTimeout(() =>
+          this._scrollToActive(), 150));
   }
 
-  internalClickOnSchema(sdk: Sudoku) {
-    this._skipScrollTo$.next(true)
-    this.clickOnSchema.emit(sdk);
-  }
-
-  scrollToActive() {
+  private _scrollToActive() {
     combineLatest([this.schemas$, this.activeSchema$, this._skipScrollTo$])
       .pipe(take(1))
       .subscribe(([schemas, active, skip]: [Sudoku[], string, boolean]) => {
@@ -82,7 +88,12 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
         } else {
           this._skipScrollTo$.next(false);
         }
-    });
+      });
+  }
+
+  internalClickOnSchema(sdk: Sudoku) {
+    this._skipScrollTo$.next(true)
+    this.clickOnSchema.emit(sdk);
   }
 }
 

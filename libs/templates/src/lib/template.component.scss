@@ -7,14 +7,32 @@
   cursor: pointer;
   width: 100%;
   text-align: center;
-  //padding: 11px 54px;
+  position: relative;
 
-  &.top-line {
-    border-top: var(--sdk-color-border) 1px dashed;
-  }
   &:hover {
     background-color: var(--sdk-color-hover);
   }
 }
 
+.top-line {
+  border-top: var(--sdk-color-off-light) 1px dashed;
+}
+.left-line {
+  border-left: var(--sdk-color-off-light) 1px dashed;
+}
+
+::ng-deep {
+  .print-page-area {
+    --sdk-print-page-board-distance-min: 10%;
+    --sdk-print-page-board-size: 70%;
+
+    .sudoku-board-preview {
+      position: absolute;
+      width: var(--sdk-print-page-board-size);
+      height: var(--sdk-print-page-board-size);
+
+      left: var(--sdk-print-page-board-distance-min);
+    }
+  }
+}
 

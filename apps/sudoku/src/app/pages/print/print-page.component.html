@@ -1,23 +1,25 @@
-<div class="print-page print-page-base"
+<div class="print-page"
      [class.background]="!(isAddMode$|async)"
-     [class.elevation-z10]="!(isAddMode$|async)"
+     [class.elevation-z5]="!(isAddMode$|async)"
      [class.add-page-mode]="isAddMode$|async">
+
+  <!-- PAGE TOOLBAR -->
   @if (!(isAddMode$|async)) {
     <div class="print-page-toolbar" fxLayout="row" fxLayoutAlign="start center">
       <div fxFlex></div>
       <button mat-icon-button (click)="clear()" matTooltip="clear content">
         <mat-icon>border_clear</mat-icon>
       </button>
-      @if (!(printDocument.isAlone$|async)) {
-        <button mat-icon-button (click)="remove()" matTooltip="remove this page">
-          <mat-icon>close</mat-icon>
-        </button>
-      }
+      <button mat-icon-button (click)="remove()" matTooltip="remove this page">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
   }
+
+  <!-- PAGE CONTENT -->
   <div class="print-page-content theme-light">
     @if (isAddMode$|async) {
-      <div class="print-page-add" (click)="add()" fxFlex>
+      <div class="print-page-add" (click)="add()" fxLayout="row" fxLayoutAlign="center center" fxFlex>
         <mat-icon>add</mat-icon>
       </div>
     } @else {
@@ -25,6 +27,7 @@
     }
   </div>
 
+  <!-- FOOTER (page numbers) -->
   <div class="print-page-footer" fxLayout="row" fxLayoutAlign="end center">
     @if (!(isAddMode$|async)) {
       <div class="page-number">{{(index+1)}}</div>

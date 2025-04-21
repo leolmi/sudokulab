@@ -2,6 +2,7 @@ body {
   --sdk-color-background: white;
   --sdk-color-foreground: #111;
   --sdk-color-off :#ddd;
+  --sdk-color-off-light :#eee;
   --sdk-color-accent: rgb(255, 64, 129);
   --sdk-color-accent-contrast: white;
   --sdk-color-accent-contrast-40: rgba(255, 255, 255, 0.4);
@@ -16,6 +17,8 @@ body {
   --sdk-color-warning-contrast: #111;
   --sdk-color-error: red;
   --sdk-color-error-contrast: white;
+
+  --sdk-disabled-opacity: 0.4;
 
   --sdk-schemas-toolbar-height: 76px;
   --sdk-menu-separator-size: 10px;

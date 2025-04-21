@@ -16,11 +16,11 @@ import {
   Symmetry,
   TRY_NUMBER_ALGORITHM
 } from '@olmi/model';
-import { isArray as _isArray, isObject as _isObject, keys as _keys, random as _random } from 'lodash';
+import { cloneDeep as _clone, isArray as _isArray, isObject as _isObject, keys as _keys, random as _random } from 'lodash';
 
 /**
  * vero se il numero di celle dinamiche e fisse è maggiore o uguale
- * al numero di valori richiesti (richiede che siano aggiornate le `ctx.session.stat`,
+ * al numero di valori richiesti (richiede che siano aggiornate le `ctx.session.currentStat`,
  * ossia le statistiche dello schema corrente)
  * @param ctx
  */
@@ -63,6 +63,14 @@ export const updateSchemaAdvanced = (ctx: GeneratorContext, logic: () => void): 
   })
 }
 
+/**
+ * genera un nuovo schema, aggiorna le statistiche e applica le regole del sudoku
+ * @param ctx
+ */
+export const generateNewSchema = (ctx: GeneratorContext) => {
+  updateSchemaAdvanced(ctx, () =>
+    ctx.session.currentSchema = new SudokuEx({ cells: _clone(ctx.session.originalCells) }));
+}
 
 /**
  * vero se la sessione è completata, ossia se la modalità di conclusione è stata raggiunta

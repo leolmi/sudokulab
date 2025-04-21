@@ -1,8 +1,17 @@
-.print-page-area {
-  &.top {
-    padding: 10px 8px;
-  }
-  &.bottom {
-    padding: 48px 8px 0px;
+::ng-deep {
+  .print-page-area {
+    --sdk-print-page-board-size: 80%;
+
+    &.top {
+      .sudoku-board-preview {
+      }
+    }
+
+    &.bottom {
+      .sudoku-board-preview {
+        bottom: 0;
+        right: var(--sdk-print-page-board-distance-min);
+      }
+    }
   }
 }

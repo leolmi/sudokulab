@@ -19,6 +19,7 @@ import {
   SudokuInfoEx,
   SudokuStat,
   UserValue,
+  UserValues,
   ValueOptions,
   ValuesMap
 } from './lib';
@@ -638,6 +639,7 @@ export const getStat = (cells: SudokuCell[], info?: Partial<SudokuInfo>): Sudoku
   });
   // celle contemporaneamente `fixed` e `dynamic`
   let _fixed_dynamic_count = 0;
+  stat.userValues = new UserValues();
   cells.forEach(c => {
     if (isEmptyCell(c) && !isFixedOrDynamic(c)) stat.missingCount++;
     if (c.isFixed) stat.fixedCount++;
@@ -645,8 +647,9 @@ export const getStat = (cells: SudokuCell[], info?: Partial<SudokuInfo>): Sudoku
     if (c.isFixed && c.isDynamic) _fixed_dynamic_count++;
     if (isEmptyDynamic(c)) stat.dynamicEmptyCount++;
     if (!isEmptyCell(c) && !isFixedOrDynamic(c)) stat.userCount++;
+    if (isEmptyCell(c) && (c.userValues||[]).length>0) stat.userValues.cv[c.coord] = [...c.userValues];
     if (c.error && !isFixedOrDynamic(c)) stat.hasErrors = true;
-    stat.userValues = `${stat.userValues}${c.text||'0'}`;
+    stat.userValues.uv = `${stat.userValues.uv}${c.text||'0'}`;
   });
   stat.percent = (stat.userCount / (stat.cellCount - stat.fixedCount)) * 100;
   stat.isSolvable = isSolvableCells(cells);
@@ -654,6 +657,14 @@ export const getStat = (cells: SudokuCell[], info?: Partial<SudokuInfo>): Sudoku
   stat.fixedAndDynamicCount = stat.fixedCount + stat.dynamicCount - _fixed_dynamic_count;
   // rigenera la classe per aggiornare i valori calcolati
   return new SudokuStat(stat);
+}
+
+export const isUnchangedOrComplete = (uv: UserValues, v: string): boolean => {
+  return uv.uv === v || uv.uv.indexOf('0')<0;
+}
+
+export const hasUserValues = (uv: UserValues): boolean => {
+  return _keys(uv.cv).length>0;
 }
 
 /**

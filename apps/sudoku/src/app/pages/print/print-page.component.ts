@@ -15,7 +15,7 @@ export type PageMode = 'page'|'add';
 @Component({
   selector: 'print-page',
   templateUrl: './print-page.component.html',
-  styleUrls: ['./print.component.scss'],
+  styleUrls: ['./print-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
