@@ -168,7 +168,7 @@
     </div>
     <!-- NUMBER OF WORKERS -->
     <mat-label class="inner-label" [class.disabled]="disabled$|async">
-      Number of parallel workers ({{opt.workersLength}})
+      Number of parallel workers ({{opt.workersLength||GENERATOR_MIN_WORKERS}})
     </mat-label>
     <mat-slider
       [max]="GENERATOR_MAX_WORKERS"

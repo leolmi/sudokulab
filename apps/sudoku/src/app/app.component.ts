@@ -24,7 +24,7 @@ import { SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
     MatMenuModule,
     MatTooltipModule,
     MatIcon,
-    MatIconButton
+    MatIconButton,
   ],
   selector: 'app-root',
   templateUrl: '/app.component.html',

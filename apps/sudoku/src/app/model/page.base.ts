@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnDestroy, Type } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { filter, Subject } from 'rxjs';
 import { SUDOKU_API, SUDOKU_NOTIFIER, SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
@@ -9,7 +9,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
   selector: 'page-base',
   template: ''
 })
-export class PageBase implements OnDestroy, AfterViewInit {
+export class PageBase implements OnDestroy {
   protected readonly _dialog = inject(MatDialog);
   protected readonly _router = inject(Router);
   protected readonly _destroy$: Subject<void>;
@@ -26,10 +26,6 @@ export class PageBase implements OnDestroy, AfterViewInit {
     this.state.menuHandler = undefined;
     this._destroy$.next();
     this._destroy$.unsubscribe();
-  }
-
-  ngAfterViewInit() {
-    this.state.checkState();
   }
 
   protected openDialog<T>(component: any, handler: (res: T) => void, data?: MatDialogConfig) {

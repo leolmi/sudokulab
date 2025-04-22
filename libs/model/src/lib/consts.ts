@@ -1,9 +1,9 @@
-export const SUDOKU_DEBUG_LEVELS_KEY = 'SDK-DEBUG-LEVELS';
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
 export const DEFAULT_AVAILABLES = ['1','2','3','4','5','6','7','8','9'];
 export const SDK_PREFIX = ['%cSudokuLab', 'color:#111;background-color:yellowgreen;padding:2px 6px;'];
+export const SUDOKU_DEBUG_LEVELS_KEY = 'SUDOKULAB-DEBUG-LEVELS';
+export const SUDOKU_APP_USER_OPTIONS_KEY = 'SUDOKULAB-USER-OPTIONS';
 export const SUDOKU_USER_OPTIONS_FEATURE = 'sudoku_options';
-export const SUDOKU_APP_USER_OPTIONS_KEY = 'SUDOKUAPP-USER-OPTIONS';
 export const SUDOKULAB_SESSION_DEVELOP = 'develop';
 export const SUDOKULAB_SESSION_STANDARD = 'standard';
 export const SUDOKULAB_TITLE = 'SudokuLab';
@@ -128,25 +128,32 @@ export const SYSTEM_MENU_CODE: any = {
   restoreSettings: 'system-restore-settings',
   darkTheme: 'system-dark-theme',
   lightTheme: 'system-light-theme',
+  globalDebug: 'system-debug-mode',
 }
 
 export const SYSTEM_MENU_ITEMS: any = {
   lightTheme: {
-    code: 'system-light-theme',
+    code: SYSTEM_MENU_CODE.lightTheme,
     icon: 'light_mode',
     text: 'Switch to light theme',
     logic: 'system',
   },
   darkTheme: {
-    code: 'system-dark-theme',
+    code: SYSTEM_MENU_CODE.darkTheme,
     icon: 'dark_mode',
     text: 'Switch to dark theme',
     logic: 'system',
   },
   restoreSettings: {
-    code: 'system-restore-settings',
+    code: SYSTEM_MENU_CODE.restoreSettings,
     icon: 'settings_backup_restore',
     text: 'Restore default settings',
+    logic: 'system',
+  },
+  globalDebug: {
+    code: SYSTEM_MENU_CODE.globalDebug,
+    icon: 'bug_report',
+    text: 'Debug mode',
     logic: 'system',
   }
 }

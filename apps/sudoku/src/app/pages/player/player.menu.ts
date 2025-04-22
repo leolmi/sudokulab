@@ -81,6 +81,7 @@ export const OPERATIONS = <MenuItem[]>[
     text: `Coordinates`,
     icon: 'grid_4x4'
   },
+  SYSTEM_MENU_ITEMS.globalDebug
 ]
 
 const OPENSCHEMA = <MenuItem[]>[

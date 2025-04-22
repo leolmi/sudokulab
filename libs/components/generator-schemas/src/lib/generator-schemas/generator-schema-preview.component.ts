@@ -29,6 +29,9 @@ import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
                 [mode]="(progressMode$|async)||'indeterminate'"
                 [value]="(progress$|async)||0"
               ></mat-progress-spinner>
+              <div class="schema-index" fxLayout="row" fxLayoutAlign="center center">
+                <div>{{(index+1)}}</div>
+              </div>
             }
           </div>
         </div>

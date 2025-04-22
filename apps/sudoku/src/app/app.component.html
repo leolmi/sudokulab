@@ -55,15 +55,17 @@
               <mat-icon>{{item.icon}}</mat-icon>
             </button>
           } @else {
-            <button mat-icon-button
-                    [matTooltip]="item.text||''"
-                    [matTooltipDisabled]="!item.text"
-                    [disabled]="['execute','private'].includes(item.logic||'') && ((state.status$|async)||{})[item.code||'']===false"
-                    [class.active]="item.logic==='switch' && !!((state.status$|async)||{})[item.code||'']"
-                    [ngClass]="'sdk-color-'+item.color"
-                    (click)="state.handleMenuItem(item)">
-              <mat-icon>{{ item.icon }}</mat-icon>
-            </button>
+            @if (state.status$|async; as status) {
+              <button mat-icon-button
+                      [matTooltip]="item.text||''"
+                      [matTooltipDisabled]="!item.text"
+                      [disabled]="item.disabled"
+                      [class.active]="item.active"
+                      [ngClass]="'sdk-color-'+item.color"
+                      (click)="state.handleMenuItem(item)">
+                <mat-icon>{{ item.icon }}</mat-icon>
+              </button>
+            }
           }
         }
       }
@@ -75,9 +77,9 @@
               <div class="separator-v"></div>
             } @else {
               <button mat-menu-item
-                      [disabled]="['execute','private'].includes(mitem.logic||'') && ((state.status$|async)||{})[mitem.code||'']===false"
-                      [class.active]="mitem.logic==='switch' && !!((state.status$|async)||{})[mitem.code||'']"
-                      [class.route-active]="mitem.logic==='navigate' && ((state.status$|async)||{})[mitem.owner||''] === mitem.property"
+                      [disabled]="mitem.disabled"
+                      [class.active]="mitem.active"
+                      [class.route-active]="mitem.routeActive"
                       [ngClass]="'sdk-color-'+mitem.color"
                       (click)="state.handleMenuItem(mitem)">
                 <mat-icon>{{mitem.icon}}</mat-icon>

@@ -1,5 +1,4 @@
 import { SUDOKU_DEBUG_LEVELS_KEY } from './lib';
-import { BehaviorSubject } from 'rxjs';
 import { remove as _remove} from 'lodash';
 
 const sanitizeLevel = (l: string): string => `${l||''}`.trim().toLowerCase();
@@ -18,8 +17,6 @@ const setLevels = (levels: string[]) => localStorage.setItem(SUDOKU_DEBUG_LEVELS
  * contesto per le opzioni utente
  */
 export class LocalContext {
-  //static levels$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>(getLevels());
-
   static toggleLevel = (...ls: string[]) => {
     const levels = getLevels();
     ls.map(l => sanitizeLevel(l)).forEach(sl => {
@@ -30,12 +27,10 @@ export class LocalContext {
       }
     });
     setLevels(levels);
-    //this.levels$.next(levels);
   }
 
   static clear = () => {
     localStorage.removeItem(SUDOKU_DEBUG_LEVELS_KEY);
-    //this.levels$.next([]);
   }
 
   /**

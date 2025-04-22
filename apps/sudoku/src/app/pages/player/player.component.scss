@@ -1,11 +1,3 @@
-::ng-deep {
-  .layout-narrow {
-    .schema-container {
-      width: 100% !important;
-    }
-  }
-}
-
 .player-splash {
   height: 100%;
   width: 100%;
@@ -17,11 +9,6 @@
   padding: 50px 10px;
   overflow: hidden;
   user-select: none;
-}
-
-.schema-container {
-  width: 40%;
-  padding: 6px;
 }
 
 .height-500 {

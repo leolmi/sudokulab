@@ -6,6 +6,9 @@ export class MenuItem {
   }
   separator?: boolean;
   hidden?: boolean;
+  active?: boolean;
+  disabled?: boolean;
+  routeActive?: boolean;
   code?: string;
   icon?: string;
   text?: string;

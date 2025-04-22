@@ -42,9 +42,29 @@
           text-overflow: ellipsis;
         }
 
+        .schema-index {
+          position: absolute;
+          width: 100%;
+          aspect-ratio: 1;
+          left: 0;
+          top: 0;
+          opacity: .7;
+          z-index: 2;
+          font-size: 70px;
+          font-weight: bold;
+          color: var(--sdk-color-accent);
+        }
+
         .mat-mdc-progress-spinner {
           position: absolute;
-          opacity: .6;
+          opacity: .7;
+        }
+
+        &:hover {
+          .schema-index,
+          .mat-mdc-progress-spinner {
+            opacity: 0;
+          }
         }
       }
 

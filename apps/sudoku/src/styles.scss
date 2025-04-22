@@ -237,6 +237,19 @@ button {
   }
 }
 
+.schema-container {
+  width: 40%;
+  aspect-ratio: 1;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.layout-narrow {
+  .schema-container {
+    width: 100% !important;
+  }
+}
+
+
 .route-active,
 .active {
   color: var(--sdk-color-accent-contrast) !important;

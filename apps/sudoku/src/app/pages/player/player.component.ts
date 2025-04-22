@@ -5,7 +5,17 @@ import { CommonModule, Location } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable, of, takeUntil } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  Observable,
+  of,
+  takeUntil,
+  withLatestFrom
+} from 'rxjs';
 import { StepViewerComponent, StepViewerItem } from '@olmi/step-viewer';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +24,7 @@ import { PLAYER_PAGE_ROUTE } from './player.manifest';
 import { PageBase } from '../../model/page.base';
 import { calcMenuStatus, defaultHandleMenuItem, downloadSchema, getStatLines, StatLine } from '../pages.helper';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './player.logic';
-import { MenuItem, SDK_PREFIX, Sudoku } from '@olmi/model';
+import { LocalContext, MenuItem, SDK_PREFIX, Sudoku } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SchemasDialogComponent } from '@olmi/schemas-browser';
@@ -80,20 +90,31 @@ export class PlayerComponent extends PageBase {
   constructor() {
     super();
     const o = AppUserOptions.getFeatures<any>(PLAYER_BOARD_USER_OPTIONS_FEATURE);
+    if (LocalContext.isLevel('debug'))
+      console.log(...SDK_PREFIX, 'init game to last storage value >', o.game||'');
     this._game$ = new BehaviorSubject<string>(o.game||'');
 
     const route = inject(ActivatedRoute);
     route.params.subscribe(p => {
       const sid = (<any>p)?.id || '';
-      if (this._game$.value !== sid) this._game$.next(sid);
+      if (sid && this._game$.value !== sid) {
+        if (LocalContext.isLevel('debug'))
+          console.log(...SDK_PREFIX, 'set game to url value >', sid)
+        this._game$.next(sid);
+      }
     });
 
-    this.store.isFilled$
-      .pipe(takeUntil(this._destroy$), distinctUntilChanged())
-      .subscribe((filled) => {
+    this.store.isFilled$.pipe(
+      takeUntil(this._destroy$),
+      distinctUntilChanged(),
+      withLatestFrom(this._game$, this.store.schemaOfTheDay$))
+      .subscribe(([filled, game, sotd]: [boolean, string, string]) => {
         this.state.updateStatus(getStoreStatus(filled));
-        if (filled && !this._game$.value && !!this.store.schemaOfTheDay$.value)
-          this._game$.next(this.store.schemaOfTheDay$.value);
+        if (filled && !game && !!sotd) {
+          if (LocalContext.isLevel('debug'))
+            console.log(...SDK_PREFIX, 'set game to schema-of-the-day >', sotd);
+          this._game$.next(sotd);
+        }
       });
 
     this.state.menuHandler = (item) =>
@@ -168,6 +189,8 @@ export class PlayerComponent extends PageBase {
       .subscribe(game => {
         const sdk = this.store.getSudoku(game);
         if (sdk) {
+          if (LocalContext.isLevel('debug'))
+            console.log(...SDK_PREFIX, 'apre lo schema > ', sdk._id);
           this._openSchema(sdk);
         } else {
           console.warn(SDK_PREFIX, `game not found "${game}"`);
