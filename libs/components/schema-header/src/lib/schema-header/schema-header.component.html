@@ -16,7 +16,12 @@
                 <div class="difficulty">
                   <div class="difficulty-text">{{sdk.info.difficulty||''}}</div>
                 </div>
-                <div class="difficulty-value">{{sdk.info.difficultyValue||''}}</div>
+                <div class="difficulty-value" fxLayout="row" fxLayoutAlign="start center">
+                  <span>{{sdk.info.difficultyValue||''}}</span>
+                  @if (!!sdk.info.origin) {
+                    <div class="origin-label">{{sdk.info.origin}}</div>
+                  }
+                </div>
               </div>
             } @else {
               <div fxFlex></div>

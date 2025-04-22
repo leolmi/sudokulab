@@ -21,6 +21,13 @@
   margin-bottom: 20px;
 }
 
+.origin-label {
+  color: var(--sdk-color-accent-contrast);
+  background-color: var(--sdk-color-accent);
+  padding: 0 4px;
+  margin: 0 8px;
+}
+
 .info-rounded {
   border-radius: 50%;
   padding: 6px;

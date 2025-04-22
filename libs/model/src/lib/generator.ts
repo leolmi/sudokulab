@@ -1,6 +1,7 @@
 import { SolveOptions } from './solver';
 import { EndGenerationMode, GENERATOR_DEFAULT_NUMBERS, Symmetry, ValorizationMode } from './consts';
-import { Sudoku, SudokuEx } from './sudoku';
+import { SudokuEx } from './sudoku';
+import { isBoolean as _isBoolean } from 'lodash';
 
 
 /**
@@ -19,9 +20,9 @@ export class GeneratorOptions extends SolveOptions {
     this.maxSeconds = o?.maxSeconds||0;
     this.symmetry = o?.symmetry||Symmetry.central;
     this.allowTryAlgorithm = !!o?.allowTryAlgorithm;
-    this.oneForSchema = !!o?.oneForSchema;
+    this.oneForSchema = _isBoolean(o?.oneForSchema) ? !!o?.oneForSchema : true;
     this.useAlgorithms = o?.useAlgorithms||[];
-    this.workersLength = o?.workersLength||1;
+    this.workersLength = o?.workersLength||2;
   }
 
   endMode: EndGenerationMode;

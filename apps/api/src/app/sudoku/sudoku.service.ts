@@ -4,7 +4,7 @@ import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { join } from 'path';
 import fs from 'fs';
-import { SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
+import { extendInfo, SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
 import { isArray as _isArray } from 'lodash';
 import { getAcquireOperations, translate } from './sudoku.logic';
 import { ImgDto } from '../../model/img.dto';
@@ -32,11 +32,12 @@ export class SudokuService implements OnModuleInit {
 
   async check(sudokuDto: SudokuDto): Promise<SudokuEx|undefined> {
     if (environment.debug) console.log(...SDK_PREFIX, 'check schema request', sudokuDto);
-    const sdk = new Sudoku({ values: sudokuDto.values });
+    const sdk = new Sudoku({ values: sudokuDto.values, name: sudokuDto.name });
     try {
       const solved = solve(sdk);
       const sol = getSolution(solved);
       if (sol) {
+        extendInfo(sol, sudokuDto);
         const result: any = await this.sudokuModel.updateOne({ _id: sol._id }, { $set: sol }, { upsert: true });
         if (environment.debug) console.log(...SDK_PREFIX, `check results for "${sudokuDto._id}"`, result);
         if (result?.acknowledged) return sol;
@@ -145,8 +146,6 @@ export class SudokuService implements OnModuleInit {
     notImplemented();
   }
 }
-
-
 
 
 // const handleSuccess = (handler: (doc: SudokuDoc) => any, sdk: SudokuDto, message?: string) => {

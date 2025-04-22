@@ -5,6 +5,9 @@
 
 <br>
 
+- [ ] rendere esplicito nel catalogo l'"origin" dello schema
+- [ ] notifiche push sull'aggiornamento del catalogo
+- [ ] gestione dei preferiti (schemi)
 - [ ] opzionabilità degli algoritmi utilizzati nel risolutore;
 - [ ] algoritmi: implementare popup con help per ogni algoritmo con esempio
       predefinito o applicato allo schema attuale;

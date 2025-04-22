@@ -1,5 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
-import { combine, Environment, Sudoku, SudokuEx } from '@olmi/model';
+import { combine, Environment, LocalContext, SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 
@@ -42,6 +42,8 @@ export class Interaction {
    * @param sudoku
    */
   checkSchema(sudoku: Sudoku): Observable<SudokuEx|undefined> {
+    if (LocalContext.isLevel('debug'))
+      console.log(...SDK_PREFIX, 'check schema', sudoku);
     return this.http.post<SudokuEx|undefined>(this._url(API.checkSchema), sudoku);
   }
 

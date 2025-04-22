@@ -2,6 +2,7 @@ import { BehaviorSubject, take } from 'rxjs';
 import { inject, InjectionToken } from '@angular/core';
 import { cloneDeep as _clone, extend as _extend, isArray as _isArray } from 'lodash';
 import {
+  extendInfo,
   getRandomSchema,
   isEqualCaseInsensitive,
   isExtendedSudoku,
@@ -98,11 +99,12 @@ export class SudokuStore {
         res(new SudokuEx(<Partial<SudokuEx>>sdk));
       } else if (sdk) {
         const catalog = _clone(this.catalog$.value);
-        const csdk = catalog.find(s => s.values === sdk.values);
+        const csdk = catalog.find(s => s.values === sdk!.values);
         if (csdk) {
           const sol = solve(csdk);
           const solved = getSolution(sol);
           if (solved) {
+            extendInfo(solved, csdk);
             clearSchema(solved.cells);
             _extend(csdk, solved);
             this.catalog$.next(catalog);

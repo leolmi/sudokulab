@@ -812,3 +812,13 @@ export const getRandomSchema = (sdks: Sudoku[]): Sudoku => {
   const index = _random(0, sdks.length);
   return sdks[index];
 }
+
+/**
+ * estende le info essenziali
+ * @param target
+ * @param source
+ */
+export const extendInfo = (target: Sudoku, source: Partial<Sudoku>): void => {
+  if (source.name) target.name = source.name;
+  if (source.info?.origin) target.info.origin = source.info.origin||'';
+}

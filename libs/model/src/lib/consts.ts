@@ -19,7 +19,7 @@ export const DEFAULT_PRINT_TEMPLATE = 'Couple-A4V';
 export const DEFAULT_CATALOG_URL = 'assets/catalog.json';
 
 export const GENERATOR_MIN_NUMBERS = 16;
-export const GENERATOR_DEFAULT_NUMBERS = 22;
+export const GENERATOR_DEFAULT_NUMBERS = 24;
 export const GENERATOR_MAX_NUMBERS = 40;
 export const GENERATOR_MIN_WORKERS = 1;
 export const GENERATOR_MAX_WORKERS = 10;
