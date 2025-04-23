@@ -1,4 +1,4 @@
-import { Dictionary, MenuItemColor } from '@olmi/model';
+import { Dictionary, MenuItemColor } from './types';
 
 export class ButtonsStatus {
   constructor() {

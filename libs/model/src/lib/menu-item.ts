@@ -1,6 +1,5 @@
 import { LogicOperation } from './logic';
-
-export type MenuItemColor = 'error'|'warning'|'success'|'accent'|'secondary';
+import { MenuItemColor } from './types';
 
 export class MenuItem {
   constructor(i?: Partial<MenuItem>) {

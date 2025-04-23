@@ -22,3 +22,8 @@ export type Dictionary<T> = { [key: string]: T; }
  * tipologie basiche di dato
  */
 export type ValueType = 'string'|'integer'|'number';
+
+/**
+ * colori disponibili per le voci di menu
+ */
+export type MenuItemColor = 'error'|'warning'|'success'|'accent'|'secondary';

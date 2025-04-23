@@ -42,7 +42,6 @@ import {
   uniqBy as _uniqBy
 } from 'lodash';
 import { getHash } from './generic.helper';
-import { BoardStatus } from '@olmi/board';
 
 
 /**
@@ -530,8 +529,8 @@ export const isDynamicValue = (v: string): boolean => v === STANDARD_CHARACTERS.
  * @param v
  * @param status
  */
-export const isValidCellValue = (v: string, status: BoardStatus): boolean => {
-  return isNumberCellValue(v) || (isDynamicValue(v) && status.isDynamic);
+export const isValidCellValue = (v: string, status: any): boolean => {
+  return isNumberCellValue(v) || (isDynamicValue(v) && !!status?.isDynamic);
 };
 
 /**
