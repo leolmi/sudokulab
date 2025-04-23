@@ -58,6 +58,12 @@ export const MAIN = <MenuItem[]>[
 
 export const NARROW = <MenuItem[]>[
   {
+    code: 'generator-clear',
+    operation: 'clear',
+    icon: 'border_clear',
+    text: 'Clear schema',
+  },
+  {
     code: 'generator-build',
     logic: 'execute',
     property: 'build',
