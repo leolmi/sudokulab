@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -62,7 +63,7 @@ import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BoardComponent implements OnInit, OnDestroy {
+export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('attr.focusable') focusable = '';
   @HostBinding('attr.tabIndex') tabIndex = 0;
   @ViewChild('board') board: ElementRef|undefined = undefined;
@@ -176,7 +177,9 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.currentCellCol$ = this.manager.selection$.pipe(map(s => getColRow(s?.col)));
     this.currentCellRow$ = this.manager.selection$.pipe(map(s => getColRow(s?.row)));
     this.isFocused$ = this.manager.focused$.pipe(map(f => f));
+  }
 
+  ngAfterViewInit() {
     setTimeout(() => {
       this._calcComponentHeight();
       this.onReady.emit(this.manager);
@@ -228,12 +231,12 @@ export class BoardComponent implements OnInit, OnDestroy {
     if (this.status.isDebug) console.log(...BOARD_PREFIX, 'CLICKED CELL', cell);
     this._element?.nativeElement.focus();
     this._updateSelection(cell);
+    this.manager?.checkLockedValue(cell);
   }
 
   copySchemaToClipboard() {
-    this._clipboard.copy(getCellsSchema(this.cells$.value));
-    if (this._notifier && this.status.isNotify)
-      this._notifier.notify('Schema copied to clipboard successfully', NotificationType.success);
+    this._clipboard.copy(getCellsSchema(this.cells$.value, { allowDynamic: !!this.status?.isDynamic }));
+    this._notifier.notify('Schema copied to clipboard successfully', NotificationType.success);
   }
 
   private _move(code: string, mode?: BoardNextMode) {

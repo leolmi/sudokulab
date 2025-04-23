@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject, combineLatest, map, Observable, of, takeUntil } from 'rxjs';
 import { BUTTON_STOP_CODE, ToolbarButton, ToolbarStatus } from './schema-toolbar.model';
-import { ManagerComponentBase } from '@olmi/common';
+import { ManagerComponentBase, SudokuState } from '@olmi/common';
 import { extendStatus, getButtons, setValueButtonStatus } from './schema-toolbar.helper';
 import { FlexModule } from '@angular/flex-layout';
 import { BoardCell } from '@olmi/board';
@@ -29,6 +29,7 @@ export class SchemaToolbarComponent extends ManagerComponentBase implements OnIn
   status$: BehaviorSubject<ToolbarStatus>;
   percent$: Observable<number> = of(0);
   disabled$: BehaviorSubject<boolean>;
+  isLocked$: Observable<boolean> = of(false);
 
   @Input()
   set template(t: string) {
@@ -64,10 +65,10 @@ export class SchemaToolbarComponent extends ManagerComponentBase implements OnIn
             status.active[btn.code || ''] = !!this.manager?.status$.value.isPencil;
             break;
           case 'tb-play':
-            status.hidden[btn.code || ''] = !!this.manager?.isRunning$.value;
+            status.hidden[btn.code || ''] = SudokuState.isRunning$.value;
             break;
           case BUTTON_STOP_CODE:
-            status.hidden[btn.code || ''] = !this.manager?.isRunning$.value;
+            status.hidden[btn.code || ''] = !SudokuState.isRunning$.value;
             status.disabled[btn.code || ''] = !!this.manager?.isStopping$.value;
             break;
         }
@@ -87,12 +88,13 @@ export class SchemaToolbarComponent extends ManagerComponentBase implements OnIn
         this.manager.stat$,
         this.manager.status$,
         this.manager.isStopping$,
-        this.manager.isRunning$,
+        SudokuState.isRunning$,
         this.disabled$])
         .pipe(takeUntil(this._destroy$))
         .subscribe(() => extendStatus(this.status$, this._calcButtonsStatus()));
 
       this.percent$ = this.manager.stat$.pipe(map(stat => stat.percent));
+      this.isLocked$ = this.manager.status$.pipe(map(status => status.isLock));
     }
   }
 

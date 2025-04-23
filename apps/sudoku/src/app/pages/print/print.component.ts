@@ -5,13 +5,13 @@ import { PageBase } from '../../model/page.base';
 import { PrintPageComponent } from './print-page.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { PRINT_USER_OPTIONS_FEATURE } from './print.model';
-import { Dictionary, MenuItem, PrintPage, PrintPageEx, Sudoku } from '@olmi/model';
+import { DEFAULT_PRINT_TEMPLATE, Dictionary, MenuItem, PrintPage, PrintPageEx, Sudoku } from '@olmi/model';
 import { keys as _keys, reduce as _reduce } from 'lodash';
 import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
 import { AppUserOptions, PrintDocument, SUDOKU_PRINT_DOCUMENT, SudokuStore } from '@olmi/common';
-import { BehaviorSubject, map, Observable, takeUntil } from 'rxjs';
-import { getStatus } from './print.menu';
+import { BehaviorSubject, combineLatest, map, Observable, takeUntil } from 'rxjs';
 import { TEMPLATES } from '@olmi/templates';
+import { calcStatusForMenu } from './print.menu';
 
 
 @Component({
@@ -30,7 +30,6 @@ import { TEMPLATES } from '@olmi/templates';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PrintComponent extends PageBase {
-
   printDocument = inject(SUDOKU_PRINT_DOCUMENT);
 
   schemas$: BehaviorSubject<Sudoku[]>;
@@ -40,19 +39,24 @@ export class PrintComponent extends PageBase {
   constructor() {
     super();
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
-    this.printDocument.template$.subscribe(template => {
-      this.state.updateStatus({ template });
-      AppUserOptions.updateFeature(PRINT_USER_OPTIONS_FEATURE, { template });
-    });
+
+    this.printDocument.template$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(template => AppUserOptions.updateFeature(PRINT_USER_OPTIONS_FEATURE, { template }));
 
     this.state.menuHandler = (item) => this.handleMenuItem(item);
 
-    this.pagesCount$ = this.printDocument.pages$.pipe(map(pgs => (pgs || []).length));
-    this.schemaCount$ = this.printDocument.pages$.pipe(map(pgs => _reduce(pgs || [], (t, p) => t + getSchemaCountForPage(p), 0)));
+    this.pagesCount$ = this.printDocument.pages$.pipe(
+      takeUntil(this._destroy$),
+      map((pgs: PrintPage[]) => (pgs || []).length));
+    this.schemaCount$ = this.printDocument.pages$.pipe(
+      takeUntil(this._destroy$),
+      map((pgs: PrintPage[]) => _reduce(pgs || [], (t, p) => t + getSchemaCountForPage(p), 0)));
 
-    this.printDocument.pages$
+    combineLatest([this.printDocument.pages$, this.printDocument.template$])
       .pipe(takeUntil(this._destroy$))
-      .subscribe(pages => this.state.updateStatus(getStatus(pages)))
+      .subscribe(([pages, template]) =>
+        this.state.updateStatus(calcStatusForMenu(pages, template||DEFAULT_PRINT_TEMPLATE)))
   }
 
   handleMenuItem(item: MenuItem) {

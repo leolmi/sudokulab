@@ -20,29 +20,6 @@ export class StatLine {
 }
 
 /**
- * calcola il testo con bookmarks `{xxx}`
- * @param text
- * @param scope
- */
-export const calcText = (text: string, scope: any): string => {
-  return text.replace(/\{(.*?)}/g, (m, path) => `${_get(scope, path)||''}`);
-}
-
-/**
- * calcola lo stato standard per le voci di menu
- * @param menu
- * @param bs
- */
-export const calcMenuStatus = (menu: MenuItem[], bs: any): any => {
-  return _reduce(menu, (s, o) => {
-    if (o.logic === 'switch') s[o.code||''] = !!bs[o.property||''];
-    if (o.isDynamicText) s[`caption_${o.code||''}`] = calcText(o.text||'', { value: bs[o.property||''] });
-    if (o.logic === 'execute') s[o.code||''] = !!bs[o.property||''];
-    return s;
-  }, <any>{});
-}
-
-/**
  * valori successivi per le voci standard
  * @param s
  * @param pn
@@ -77,13 +54,17 @@ export const defaultHandleMenuItem = (router: Router, state: SudokuState, item: 
       router.navigate([item.property]);
       break;
     case 'switch': {
-      const status = state.status$.value;
-      if (item.property) manager?.options(<Partial<BoardStatus>>{ [item.property]: !_get(status, <string>item.code) });
+      if (manager) {
+        const status = manager.status$.value;
+        if (item.property) manager?.options(<Partial<BoardStatus>>{ [item.property]: !_get(status, item.property) });
+      }
       break;
     }
     case 'toggle': {
-      const status: any = manager?.status$.value || {};
-      if (item.property) manager?.options(<Partial<BoardStatus>>{ [item.property]: getNextValue(status, item.property) });
+      if (manager) {
+        const status = manager.status$.value;
+        if (item.property) manager.options(<Partial<BoardStatus>>{ [item.property]: getNextValue(status, item.property) });
+      }
       break;
     }
     case 'private': {

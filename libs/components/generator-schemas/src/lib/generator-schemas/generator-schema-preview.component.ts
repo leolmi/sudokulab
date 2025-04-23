@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { BoardPreviewComponent } from '@olmi/board';
 import { FlexModule } from '@angular/flex-layout';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ManagerComponentBase } from '@olmi/common';
+import { ManagerComponentBase, SudokuState } from '@olmi/common';
 import { combineLatest, map, Observable, of } from 'rxjs';
 import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
 
@@ -17,11 +17,11 @@ import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
   ],
   template: `
     <!-- GENERATION PREVIEW -->
-    @if (manager) {
-      @if (manager.isRunning$|async) {
-        <div class="generator-schema generator-stat-preview">
-          <div class="generator-schema-content"
-               fxLayout="column" fxLayoutAlign="start center">
+    @if (globalState.isRunning$|async) {
+      <div class="generator-schema generator-stat-preview">
+        <div class="generator-schema-content"
+             fxLayout="column" fxLayoutAlign="start center">
+          @if (manager) {
             @if (manager.multiGenerationStat$|async; as stat) {
               <sudoku-board-preview [schema]="stat[index]?.currentSchema||''"></sudoku-board-preview>
               <div class="schema-details" fxFlex>{{generationDesc$|async}}</div>
@@ -33,9 +33,9 @@ import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
                 <div>{{(index+1)}}</div>
               </div>
             }
-          </div>
+          }
         </div>
-      }
+      </div>
     }
   `,
   styleUrl: './generator-schemas.component.scss',
@@ -45,6 +45,7 @@ export class GeneratorSchemaPreviewComponent extends ManagerComponentBase implem
   generationDesc$: Observable<string> = of('');
   progressMode$: Observable<'determinate'|'indeterminate'> = of('indeterminate');
   progress$: Observable<number> = of(0);
+  globalState = SudokuState;
 
   @Input()
   index: number = 0;

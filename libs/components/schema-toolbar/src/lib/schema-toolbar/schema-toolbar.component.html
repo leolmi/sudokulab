@@ -1,5 +1,6 @@
 <div class="schema-toolbar"
      [class.progress]="showProgress"
+     [class.locked]="isLocked$|async"
      fxLayout="row" fxLayoutAlign="start stretch">
   @if (showProgress && manager) {
     <mat-progress-bar

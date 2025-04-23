@@ -1,8 +1,12 @@
-import { MenuItem, SYSTEM_MENU_ITEMS } from '@olmi/model';
+import { ButtonsStatus, MenuItem, SYSTEM_MENU_ITEMS } from '@olmi/model';
+
+const CODE_GENERATE = 'generator-generate';
+const CODE_STOP = 'generator-stop';
+const CODE_SKIP = 'generator-skip';
 
 const GENERATOR_MENU = <MenuItem[]>[
   {
-    code: 'generator-generate',
+    code: CODE_GENERATE,
     property: 'generate',
     operation: 'generate',
     logic: 'execute',
@@ -11,7 +15,7 @@ const GENERATOR_MENU = <MenuItem[]>[
     text: 'Start generation',
   },
   {
-    code: 'generator-stop',
+    code: CODE_STOP,
     logic: 'execute',
     property: 'stop',
     operation: 'stop',
@@ -21,10 +25,38 @@ const GENERATOR_MENU = <MenuItem[]>[
   },
 ]
 
+const CODE_CLEAR = 'generator-clear';
+const CODE_BUILD = 'generator-build';
+const CODE_LOCK = 'is-lock';
+
+const EDIT_MENU = <MenuItem[]>[
+  {
+    code: CODE_CLEAR,
+    operation: 'clear',
+    icon: 'border_clear',
+    text: 'Clear schema',
+  },
+  {
+    code: CODE_BUILD,
+    logic: 'execute',
+    property: 'build',
+    operation: 'build',
+    icon: 'auto_fix_high',
+    text: 'Generate a schema'
+  },
+  {
+    code: CODE_LOCK,
+    property: 'isLock',
+    logic: 'switch',
+    text: `Lock value`,
+    icon: 'lock'
+  },
+]
+
 export const MAIN = <MenuItem[]>[
   ...GENERATOR_MENU,
   {
-    code: 'generator-skip',
+    code: CODE_SKIP,
     logic: 'execute',
     property: 'skip',
     operation: 'skip',
@@ -34,20 +66,7 @@ export const MAIN = <MenuItem[]>[
   {
     separator: true
   },
-  {
-    code: 'generator-clear',
-    operation: 'clear',
-    icon: 'border_clear',
-    text: 'Clear schema',
-  },
-  {
-    code: 'generator-build',
-    logic: 'execute',
-    property: 'build',
-    operation: 'build',
-    icon: 'auto_fix_high',
-    text: 'Generate a schema'
-  },
+  ...EDIT_MENU,
   {
     separator: true
   },
@@ -57,22 +76,9 @@ export const MAIN = <MenuItem[]>[
 ];
 
 export const NARROW = <MenuItem[]>[
+  ...EDIT_MENU,
   {
-    code: 'generator-clear',
-    operation: 'clear',
-    icon: 'border_clear',
-    text: 'Clear schema',
-  },
-  {
-    code: 'generator-build',
-    logic: 'execute',
-    property: 'build',
-    operation: 'build',
-    icon: 'auto_fix_high',
-    text: 'Generate a schema'
-  },
-  {
-    code: 'generator-skip',
+    code: CODE_SKIP,
     logic: 'execute',
     property: 'skip',
     operation: 'skip',
@@ -94,3 +100,24 @@ export const NARROW = <MenuItem[]>[
     ]
   }
 ];
+
+export const calcStatusForMenu = (running: boolean, stopping: boolean, multiSchema: boolean, locked: boolean): Partial<ButtonsStatus> => {
+  return {
+    hidden: {
+      [CODE_STOP]: !running,
+      [CODE_GENERATE]: running,
+      [CODE_SKIP]: !running || !multiSchema,
+    },
+    disabled: {
+      [CODE_LOCK]: running || stopping,
+      [CODE_BUILD]: running || stopping || !multiSchema,
+      [CODE_CLEAR]: running || stopping,
+      [CODE_STOP]: stopping,
+      [CODE_GENERATE]: running || stopping,
+      [CODE_SKIP]: stopping
+    },
+    active: {
+      [CODE_LOCK]: locked
+    }
+  }
+}

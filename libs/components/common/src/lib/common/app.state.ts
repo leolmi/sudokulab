@@ -4,11 +4,13 @@ import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Obse
 import { keys as _keys, values as _values } from 'lodash';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
+  ButtonsStatus,
   DEFAULT_THEME,
   Dictionary,
   Layout,
   LocalContext,
   MenuItem,
+  mergeStatus,
   SDK_PREFIX,
   setBodyClass,
   SUDOKU_USER_OPTIONS_FEATURE,
@@ -36,6 +38,8 @@ const MATCHES: Dictionary<string> = {
 
 export class SudokuState {
   static version: string = '';
+  static isRunning$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   private readonly _router = inject(Router);
   private readonly _doc = inject(DOCUMENT);
   private readonly _manifests = inject(SUDOKU_PAGES);
@@ -48,9 +52,11 @@ export class SudokuState {
   manifest$: BehaviorSubject<SudokuPageManifest|undefined>;
   menu$: BehaviorSubject<MenuItem[]>;
   title$: BehaviorSubject<string>;
-  status$: BehaviorSubject<any>;
+  status$: BehaviorSubject<ButtonsStatus>;
   layout$: BehaviorSubject<Layout>;
   theme$: BehaviorSubject<string>;
+  isDebugMode$: Observable<boolean>;
+
 
   route$: Observable<string>;
 
@@ -67,11 +73,13 @@ export class SudokuState {
     this.manifest$ = new BehaviorSubject<SudokuPageManifest|undefined>(this._manifests.find(m => m.default));
     this.menu$ = new BehaviorSubject<MenuItem[]>([]);
     this.title$ = new BehaviorSubject<string>('');
-    this.status$ = new BehaviorSubject<any>({});
+    this.status$ = new BehaviorSubject<ButtonsStatus>(new ButtonsStatus());
     this.layout$ = new BehaviorSubject<Layout>({});
 
     const o = AppUserOptions.getFeatures(SUDOKU_USER_OPTIONS_FEATURE, { theme: DEFAULT_THEME });
     this.theme$ = new BehaviorSubject<string>(o.theme);
+
+    this.isDebugMode$ = LocalContext.changed$.pipe(map(() => LocalContext.isLevel('debug')));
 
     this.route$ = this._router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
@@ -95,8 +103,10 @@ export class SudokuState {
       const other = THEME_OTHER[theme];
       setBodyClass(this._doc, THEME_CLASS[theme], THEME_CLASS[other]);
       AppUserOptions.updateFeature(SUDOKU_USER_OPTIONS_FEATURE, { theme });
-      this._changed$.next({});
     });
+
+    combineLatest([this.theme$, LocalContext.changed$])
+      .subscribe(([t, c]) => this.updateStatus(calcStatusForSystemMenu(t)));
 
     this.layout$.subscribe(l =>
       _keys(l).forEach(k =>
@@ -120,38 +130,23 @@ export class SudokuState {
         SudokuState.version = i?.version||'';
         this.info$.next(i);
       });
+
+
+    this.status$.subscribe(s => console.log('BUTTONS STATUS', s));
   }
 
-  private _updateSystemMenuItemStatus(item: MenuItem, status?: any) {
-    switch (item.code) {
-      case SYSTEM_MENU_CODE.darkTheme:
-        item.hidden = this.theme$.value === THEME_DARK;
-        break;
-      case SYSTEM_MENU_CODE.lightTheme:
-        item.hidden = this.theme$.value === THEME_LIGHT;
-        break;
-      case SYSTEM_MENU_CODE.globalDebug:
-        item.active = LocalContext.isLevel('debug');
-        break;
-    }
-  }
-
-  private _updateMenuItemStatus(item: MenuItem, status?: any) {
-    if (item.logic === 'system') {
-      this._updateSystemMenuItemStatus(item, status);
-    } else {
-      item.disabled = calcItemDisabled(item, status);
-      item.active = calcItemActive(item, status);
-      item.routeActive = calcItemRoute(item, status);
-    }
-  }
-
-  private _updateMenuStatus(menu?: MenuItem[], status?: any) {
-    status = status || this.status$.value || {};
+  private _updateMenuStatus(menu?: MenuItem[], status?: ButtonsStatus) {
+    const s = status || this.status$.value || new ButtonsStatus();
     (menu||[]).forEach(mi => {
-      this._updateMenuItemStatus(mi, status);
+      mi.hidden = !!s.hidden[mi.code||''];
+      mi.disabled = !!s.disabled[mi.code||''];
+      mi.active = !!s.active[mi.code||''];
+      mi.routeActive = !!s.routeActive[mi.code||''];
+      if (!!s.text[mi.code||'']) mi.text = s.text[mi.code||''];
+      if (!!s.icon[mi.code||'']) mi.icon = s.icon[mi.code||''];
+      if (!!s.color[mi.code||'']) mi.color = s.color[mi.code||''];
       if ((mi.subMenu || []).length > 0) {
-        this._updateMenuStatus(mi.subMenu, status);
+        this._updateMenuStatus(mi.subMenu, s);
       }
     });
   }
@@ -169,7 +164,6 @@ export class SudokuState {
         break;
       case SYSTEM_MENU_CODE.globalDebug:
         LocalContext.toggleLevel('debug');
-        this._changed$.next({});
         break;
       default:
         console.warn(...SDK_PREFIX, 'unknown system menu item', item);
@@ -177,8 +171,8 @@ export class SudokuState {
     }
   }
 
-  updateStatus(chs: any) {
-    this.status$.next({ ...this.status$.value, ...chs });
+  updateStatus(chs: Partial<ButtonsStatus>) {
+    this.status$.next(mergeStatus(this.status$.value, chs));
   }
 
   updateRoute(route: string) {
@@ -210,17 +204,14 @@ export class SudokuState {
 export const SUDOKU_STATE = new InjectionToken<SudokuState>('SUDOKU_STATE');
 
 
-const calcItemDisabled = (item: MenuItem, status: any, pn?: string) => {
-  const spn = `${(<any>item||{})[pn||'code'] || ''}`;
-  return ['execute', 'private'].includes(item?.logic || '') && (status||{})[spn] === false;
-}
-
-const calcItemActive = (item: MenuItem, status: any, pn?: string) => {
-  const spn = `${(<any>item||{})[pn||'code'] || ''}`;
-  return item?.logic === 'switch' && !!(status||{})[spn];
-}
-
-const calcItemRoute = (item: MenuItem, status: any, pn?: string) => {
-  const spn = `${(<any>item || {})[pn||'owner'] || ''}`;
-  return item?.logic === 'navigate' && (status||{})[spn] === item?.property;
+export const calcStatusForSystemMenu = (theme: string): Partial<ButtonsStatus> => {
+  return {
+    hidden: {
+      [SYSTEM_MENU_CODE.darkTheme]: theme === THEME_DARK,
+      [SYSTEM_MENU_CODE.lightTheme]: theme === THEME_LIGHT,
+    },
+    active: {
+      [SYSTEM_MENU_CODE.globalDebug]: LocalContext.isLevel('debug')
+    }
+  }
 }

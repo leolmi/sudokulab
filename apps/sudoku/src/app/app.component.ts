@@ -11,7 +11,7 @@ import { MenuItem, SUDOKU_AUTHOR_LINK } from '@olmi/model';
 import { BehaviorSubject } from 'rxjs';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './pages';
 import { LayoutModule } from '@angular/cdk/layout';
-import { SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
+import { SUDOKU_STATE, SUDOKU_STORE, SudokuState } from '@olmi/common';
 
 
 @Component({
@@ -35,6 +35,7 @@ import { SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
 export class AppComponent {
   state = inject(SUDOKU_STATE);
   store = inject(SUDOKU_STORE);
+  globalState = SudokuState;
 
   pageSubMenu$: BehaviorSubject<MenuItem[]>;
 

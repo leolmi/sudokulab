@@ -34,7 +34,7 @@ import { MatInput } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { getAlgorithms } from '@olmi/algorithms';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { ManagerComponentBase, MultiLogicManager } from '@olmi/common';
+import { ManagerComponentBase, MultiLogicManager, SudokuState } from '@olmi/common';
 
 @Component({
   selector: 'generator-options',
@@ -103,7 +103,7 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
 
   ngOnInit() {
     if (this.manager) {
-      this.disabled$ = this.manager.isRunning$.pipe(map(r => r));
+      this.disabled$ = SudokuState.isRunning$.pipe(map(r => r));
       this.isMultischema$ = combineLatest([this.manager.cells$, this.options$]).pipe(
         map(([cells, options]: [SudokuCell[], GeneratorOptions]) => isMultischema(cells, options)));
       this.hasNewOrDynamicFixed$ = combineLatest([this.manager.cells$, this.options$]).pipe(

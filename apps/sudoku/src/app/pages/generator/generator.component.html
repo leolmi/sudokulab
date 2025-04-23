@@ -1,7 +1,5 @@
-@if (manager) {
-  @if (manager.isRunning$|async) {
-    <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
-  }
+@if (globalState.isRunning$|async) {
+  <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
 }
 <div class="sudokulab-page page-fill" fxLayout="row">
   <div class="page-space" fxFlex></div>
@@ -41,7 +39,7 @@
       <schema-toolbar
         [manager]="manager"
         [template]="toolbarTemplate"
-        [disabled]="manager.isRunning$|async"
+        [disabled]="globalState.isRunning$|async"
       ></schema-toolbar>
     }
   </div>

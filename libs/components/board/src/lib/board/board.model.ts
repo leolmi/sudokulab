@@ -201,6 +201,7 @@ export class BoardStatus {
     this.isAvailable = !!s?.isAvailable;
     this.isDynamic = !!s?.isDynamic;
     this.isCoord = !!s?.isCoord;
+    this.isLock = !!s?.isLock;
     this.isNotify = !!s?.isNotify;
     this.isPasteEnabled = !!s?.isPasteEnabled;
 
@@ -215,6 +216,7 @@ export class BoardStatus {
   isAvailable: boolean;
   isDynamic: boolean;
   isCoord: boolean;
+  isLock: boolean;
   isNotify: boolean;
   isPasteEnabled: boolean;
 

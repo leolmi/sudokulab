@@ -3,6 +3,8 @@
     .sudokulab-toolbar {
       .logo {
         font-size: .8em;
+        margin-right: 10px;
+
         .sub-title {
           margin-top: 0 !important;
         }
@@ -26,6 +28,7 @@
   font-size: 1.2em;
   user-select: none;
   cursor: pointer;
+  margin-right: 40px;
 
   .sub-title {
     font-size: .45em;
@@ -41,6 +44,9 @@
   height: 40px;
 }
 
+.toolbar-state-icon {
+  margin-left: 4px;
+}
 
 .author-popup {
   >img {

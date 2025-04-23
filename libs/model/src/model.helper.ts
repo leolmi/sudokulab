@@ -1,9 +1,11 @@
 import {
   AllGroupTypes,
+  ButtonsStatus,
   Cell,
   Couple,
   DEFAULT_RANK,
   DEFAULT_TOTAL_RANK,
+  Dictionary,
   DIFFICULTY_MIN,
   DIFFICULTY_VALUES,
   GroupType,
@@ -24,7 +26,8 @@ import {
   ValuesMap
 } from './lib';
 import {
-  forOwn,
+  cloneDeep as _clone,
+  forOwn as _forOwn,
   intersection as _intersection,
   isArray as _isArray,
   isEqual as _isEqual,
@@ -39,6 +42,7 @@ import {
   uniqBy as _uniqBy
 } from 'lodash';
 import { getHash } from './generic.helper';
+import { BoardStatus } from '@olmi/board';
 
 
 /**
@@ -522,6 +526,15 @@ export const isNumberCellValue = (v: string): boolean => /^[1-9]$/g.test(v);
 export const isDynamicValue = (v: string): boolean => v === STANDARD_CHARACTERS.dynamic || v === STANDARD_CHARACTERS.dynamic2;
 
 /**
+ * valore valido per la cella
+ * @param v
+ * @param status
+ */
+export const isValidCellValue = (v: string, status: BoardStatus): boolean => {
+  return isNumberCellValue(v) || (isDynamicValue(v) && status.isDynamic);
+};
+
+/**
  * costruisce le celle in base alla stringa passata
  * @param v
  * @param o
@@ -716,7 +729,7 @@ export const decodeActiveArea = (area: string) => {
 export const checkSudokuObject = (o: any): void => {
   if (!_isObject(o)) throw new Error('undefined sudoku object');
   const sdk = new Sudoku();
-  forOwn(sdk, (v,k) => {
+  _forOwn(sdk, (v,k) => {
     if (typeof (<any>o)[k] !== typeof v) throw new Error(`undefined "${k}" property`);
   });
 }
@@ -821,4 +834,16 @@ export const getRandomSchema = (sdks: Sudoku[]): Sudoku => {
 export const extendInfo = (target: Sudoku, source: Partial<Sudoku>): void => {
   if (source.name) target.name = source.name;
   if (source.info?.origin) target.info.origin = source.info.origin||'';
+}
+
+/**
+ * integra i valori passati senza alterare gli esistenti
+ * @param os
+ * @param chs
+ */
+export const mergeStatus = (os: ButtonsStatus, chs: Partial<ButtonsStatus>): ButtonsStatus => {
+  const res = _clone(os);
+  _forOwn(res, (v: Dictionary<any>, k: string) =>
+    (<any>res)[k||''] = {...(<any>res)[k||''], ...(<any>chs)[k||''] });
+  return res;
 }

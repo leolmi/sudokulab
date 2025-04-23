@@ -18,6 +18,7 @@ import {
   getCellsSchema,
   getStat,
   Highlights,
+  isValidCellValue,
   LogicOperation,
   LogicWorkerData,
   NotificationType,
@@ -50,9 +51,9 @@ export class BoardManager {
   sequence$: BehaviorSubject<AlgorithmResult[]>;
   sudoku$: BehaviorSubject<Sudoku>;
   focused$: BehaviorSubject<boolean>;
-  isRunning$: BehaviorSubject<boolean>;
   isStopping$: BehaviorSubject<boolean>;
   selection$: BehaviorSubject<BoardCell|undefined>;
+  lockedValue$: BehaviorSubject<BoardChangeEvent|undefined>;
 
   usePersistence: boolean = false;
 
@@ -64,13 +65,13 @@ export class BoardManager {
     this.sudoku$ = new BehaviorSubject<Sudoku>(new Sudoku());
     this.cells$ = new BehaviorSubject<BoardCell[]>(buildSchemaBoard());
     this.stat$ = new BehaviorSubject<SudokuStat>(new SudokuStat());
-    this.isRunning$ = new BehaviorSubject<boolean>(false);
     this.isStopping$ = new BehaviorSubject<boolean>(false);
     this.selection$ = new BehaviorSubject<BoardCell|undefined>(<BoardCell|undefined>undefined);
     this.generationStat$ = new BehaviorSubject<GenerationStat|undefined>(undefined);
     this.multiGenerationStat$ = new BehaviorSubject<Dictionary<GenerationStat|undefined>>({});
     this.sequence$ = new BehaviorSubject<AlgorithmResult[]>([]);
     this.generatorOptions$ = new BehaviorSubject<GeneratorOptions>(new GeneratorOptions());
+    this.lockedValue$ = new BehaviorSubject<BoardChangeEvent|undefined>(undefined);
     this._highlights$ = new BehaviorSubject<Highlights | string | undefined | null>(undefined);
     this._board = board;
     this._init();
@@ -86,7 +87,7 @@ export class BoardManager {
           this.cells$.next(cells);
         }
         this.sequence$.next(getSequence(data));
-        this.isRunning$.next(!!data.isRunning);
+        SudokuState.isRunning$.next(!!data.isRunning);
         if (!data.isRunning) this.isStopping$.next(false);
         this.generationStat$.next(data.isRunning ? data.generationStat : undefined);
         update(this.multiGenerationStat$, { [data.index]: data.isRunning ? data.generationStat : undefined });
@@ -97,7 +98,10 @@ export class BoardManager {
 
     this.status$
       .pipe(takeUntil(this._destroy$))
-      .subscribe(s => this._board!.status = s);
+      .subscribe(s => {
+        this._board!.status = s;
+        if (!s.isLock && !!this.lockedValue$.value) this.lockedValue$.next(undefined);
+      });
 
     combineLatest([this.cells$, this.sudoku$]).pipe(
       takeUntil(this._destroy$),
@@ -237,10 +241,16 @@ export class BoardManager {
     update(this.status$, o);
   }
 
-  applyValue(e: BoardChangeEvent) {
+  private _handleBoardChangeEvent(e: BoardChangeEvent) {
     handleBoardValue(this.cells$, e);
     this._refreshStatus();
     this.clearHighlights();
+  }
+
+  applyValue(e: BoardChangeEvent) {
+    if (this.status.isLock && isValidCellValue(e.value, this.status))
+      this.lockedValue$.next(e);
+    this._handleBoardChangeEvent(e);
   }
 
   switchProp(nm: keyof BoardStatus) {
@@ -306,6 +316,16 @@ export class BoardManager {
   applyStep(r: AlgorithmResult) {
     if (!r || !r.cellsSnapshot) return;
     this.cells$.next(r.cellsSnapshot.map(c => new BoardCell(c)));
+  }
+
+  checkLockedValue(cell: BoardCell|undefined) {
+    const lockedValue = this.lockedValue$.value;
+    if (!!cell && this.status.isLock && !!lockedValue) {
+      const e = _clone(lockedValue);
+      if (!!cell.text) e.value = '';
+      e.cell = cell;
+      this._handleBoardChangeEvent(e);
+    }
   }
 }
 

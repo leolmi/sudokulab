@@ -382,3 +382,13 @@ button {
     }
   }
 }
+
+.icon-pulse {
+  animation: pulse-rotation 2s infinite;
+}
+
+@keyframes pulse-rotation {
+  0% {transform: rotate(0deg);}
+  50% {transform: rotate(270deg);}
+  100% {transform: rotate(90deg);}
+}

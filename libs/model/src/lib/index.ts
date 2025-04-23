@@ -1,4 +1,5 @@
 export * from './algorithm';
+export * from './buttons-status';
 export * from './consts';
 export * from './cell';
 export * from './couple';

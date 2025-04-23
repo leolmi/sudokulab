@@ -10,15 +10,15 @@ import {
   GENERATOR_OPTIONS_FEATURE,
   getBoardCells
 } from '@olmi/board';
-import { MAIN } from './generator.menu';
-import { calcMenuStatus, defaultHandleMenuItem, getStatLines, StatLine } from '../pages.helper';
+import { calcStatusForMenu, MAIN } from './generator.menu';
+import { defaultHandleMenuItem, getStatLines, StatLine } from '../pages.helper';
 import { BehaviorSubject, combineLatest, map, Observable, of, skip, takeUntil } from 'rxjs';
 import { SUDOKU_PAGE_GENERATOR_LOGIC } from './generator.logic';
 import { GeneratorOptionsComponent } from '@olmi/generator-options';
-import { GeneratorOptions, Sudoku, SudokuCell, SudokuStat } from '@olmi/model';
+import { GeneratorOptions, NotificationType, Sudoku, SudokuCell, SudokuStat } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { GeneratorSchemasComponent } from '@olmi/generator-schemas';
-import { AppUserOptions } from '@olmi/common';
+import { AppUserOptions, SudokuState } from '@olmi/common';
 import { omit as _omit } from 'lodash';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 
@@ -55,7 +55,7 @@ export class GeneratorComponent extends PageBase {
   options$: BehaviorSubject<GeneratorOptions>;
   layout$: Observable<string>;
   generationCells$: Observable<SudokuCell[]> = of([]);
-  isRunning$: Observable<boolean> = of(false);
+  globalState = SudokuState;
 
   constructor() {
     super();
@@ -92,19 +92,18 @@ export class GeneratorComponent extends PageBase {
     if ((<any>uo).schema) this.manager?.load((<any>uo).schema);
 
     if (this.manager) {
-      this.isRunning$  = this.manager.isRunning$.pipe(map(r => r));
-
       this.lines$ = this.manager.stat$.pipe(map(s => getStatLines(s, { visible: GENERATOR_VISIBLE_STAT })));
+
+      this.manager.status$
+        .pipe(takeUntil(this._destroy$))
+        .subscribe(sts =>
+          AppUserOptions.updateFeature(GENERATOR_BOARD_USER_OPTIONS_FEATURE, _omit(sts, ['schema'])));
+
       // aggiorna lo stato del menu e salva le impostazioni utente al variare delle opzioni
-      combineLatest([this.manager.status$, this.manager.isRunning$, this.manager.isStopping$, this.options$, this.manager.stat$])
+      combineLatest([this.manager.status$, SudokuState.isRunning$, this.manager.isStopping$, this.options$, this.manager.stat$])
+        .pipe(takeUntil(this._destroy$))
         .subscribe(([sts, running, stopping, o, stat]: [BoardStatus, boolean, boolean, GeneratorOptions, SudokuStat]) => {
-          this.state.updateStatus(calcMenuStatus(MAIN, { ...sts,
-            build: !running && isMultiSchema(o, stat),
-            stop: running && !stopping,
-            generate: !running && !stopping,
-            skip: running && !stopping && isMultiSchema(o, stat)
-          }));
-          AppUserOptions.updateFeature(GENERATOR_BOARD_USER_OPTIONS_FEATURE, _omit(sts, ['schema']));
+          this.state.updateStatus(calcStatusForMenu(running, stopping, isMultiSchema(o, stat), sts.isLock));
         });
 
       this.options$.subscribe(o => this.manager?.updateGeneratorOptions(o));
@@ -145,6 +144,7 @@ export class GeneratorComponent extends PageBase {
 
   pasteSchema(values: string) {
     this.manager?.load(values);
+    this.notifier.notify('Schema pasted from clipboard successfully', NotificationType.success);
   }
 
   clickOnGeneratedSchema(sdk: Sudoku) {

@@ -1,5 +1,7 @@
-import { MenuItem, PrintPage, SYSTEM_MENU_ITEMS } from '@olmi/model';
+import { ButtonsStatus, Dictionary, MenuItem, PrintPage, SYSTEM_MENU_ITEMS } from '@olmi/model';
 import { TEMPLATES } from '@olmi/templates';
+import { reduce as _reduce } from 'lodash';
+
 
 const BUTTON_PRINT_CODE = 'print-launch';
 const BUTTON_CLEAR_CODE = 'print-clear';
@@ -80,14 +82,19 @@ export const NARROW = <MenuItem[]>[
       SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   }
-
-
-
 ]
 
-export const getStatus = (pages: PrintPage[]): any => {
+
+export const calcStatusForMenu = (pages: PrintPage[], template: string): Partial<ButtonsStatus> => {
+  const tmp_active = _reduce(TEMPLATES, (d, t) =>
+    ({ ...d, [`template_${t.name}`]: (t.name===template) }), <Dictionary<boolean>>{});
   return {
-    [BUTTON_PRINT_CODE]: (pages.length > 0),
-    [BUTTON_CLEAR_CODE]: (pages.length > 0),
+    disabled: {
+      [BUTTON_PRINT_CODE]: (pages.length < 1),
+      [BUTTON_CLEAR_CODE]: (pages.length < 1),
+    },
+    active: {
+      ...tmp_active
+    }
   }
 }

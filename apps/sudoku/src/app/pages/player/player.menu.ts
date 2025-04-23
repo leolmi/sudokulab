@@ -1,18 +1,21 @@
-import { MenuItem, Sudoku, SYSTEM_MENU_ITEMS } from '@olmi/model';
+import { ButtonsStatus, MenuItem, Sudoku, SudokuStat, SYSTEM_MENU_ITEMS } from '@olmi/model';
+import { BoardStatus } from '@olmi/board';
 
-const BUTTON_SCHEMAS = 'button-code-schemas';
+const CODE_SCHEMAS = 'button-code-schemas';
 const BUTTON_KEEPER = 'button-code-keeper';
-const SOLVE_TO_TRY_RULE = 'solve-to-try';
+const CODE_SOLVE_TO_TRY_RULE = 'solve-to-try';
+const CODE_SOLVE_STEP = 'solve-step';
+const CODE_SOLVE_ALL = 'solve-all';
 
 export const SOLVES = <MenuItem[]>[
   {
-    code: 'solve-all',
+    code: CODE_SOLVE_ALL,
     text: `Solve all`,
     icon: 'play_arrow',
     operation: 'solve'
   },
   {
-    code: 'solve-step',
+    code: CODE_SOLVE_STEP,
     text: `Solve next step`,
     icon: 'skip_next',
     operation: 'solve-step'
@@ -25,7 +28,7 @@ export const SOLVES = <MenuItem[]>[
     logic: 'private'
   },
   {
-    code: SOLVE_TO_TRY_RULE,
+    code: CODE_SOLVE_TO_TRY_RULE,
     text: `Solve to try`,
     icon: 'play_circle',
     operation: 'solve-to-try',
@@ -33,21 +36,24 @@ export const SOLVES = <MenuItem[]>[
   },
 ];
 
+const CODE_VALUES_MODE = 'values-mode';
+const CODE_NEXT_MODE = 'next-mode';
+const CODE_AVAILABLE = 'is-available';
+const CODE_COORD = 'is-coord';
+
 export const OPERATIONS = <MenuItem[]>[
   {
-    code: 'values-mode',
+    code: CODE_VALUES_MODE,
     property: 'valuesMode',
     logic: 'toggle',
-    text: `Values as {value}`,
-    isDynamicText: true,
+    text: 'Values mode',
     icon: 'pin'
   },
   {
-    code: 'next-mode',
+    code: CODE_NEXT_MODE,
     property: 'nextMode',
     logic: 'toggle',
-    text: `Input mode: {value}`,
-    isDynamicText: true,
+    text: `Input mode`,
     icon: 'route'
   },
   {
@@ -68,14 +74,14 @@ export const OPERATIONS = <MenuItem[]>[
     separator: true
   },
   {
-    code: 'is-available',
+    code: CODE_AVAILABLE,
     property: 'isAvailable',
     logic: 'switch',
     text: `Available`,
     icon: 'apps'
   },
   {
-    code: 'is-coord',
+    code: CODE_COORD,
     property: 'isCoord',
     logic: 'switch',
     text: `Coordinates`,
@@ -100,7 +106,7 @@ const OPENSCHEMA = <MenuItem[]>[
     property: 'random'
   },
   {
-    code: BUTTON_SCHEMAS,
+    code: CODE_SCHEMAS,
     icon: 'grid_on',
     text: 'Available schemas',
     logic: 'private',
@@ -108,6 +114,7 @@ const OPENSCHEMA = <MenuItem[]>[
   },
 ]
 
+const CODE_SOLVE_HELP = 'solve-help';
 
 export const MAIN = <MenuItem[]>[
   {
@@ -120,7 +127,7 @@ export const MAIN = <MenuItem[]>[
         separator: true
       },
       {
-        code: 'solve-help',
+        code: CODE_SOLVE_HELP,
         text: `Show next move`,
         icon: 'support',
         operation: 'help'
@@ -159,7 +166,7 @@ export const NARROW = <MenuItem[]>[
     separator: true
   },
   {
-    code: 'solve-help',
+    code: CODE_SOLVE_HELP,
     text: `Show next move`,
     icon: 'support',
     operation: 'help'
@@ -193,14 +200,24 @@ export const NARROW = <MenuItem[]>[
   },
 ]
 
-export const calcStatusForSchemaDeps = (sdk?: Sudoku) => {
+export const calcStatusForMenu = (sdk: Sudoku|undefined, s: BoardStatus, stat: SudokuStat, filled: boolean): Partial<ButtonsStatus> => {
   return {
-    [SOLVE_TO_TRY_RULE]: !!sdk?.info.useTryAlgorithm
+    hidden: {
+      [CODE_SOLVE_TO_TRY_RULE]: !sdk?.info.useTryAlgorithm
+    },
+    disabled: {
+      [CODE_SCHEMAS]: !filled,
+      [CODE_SOLVE_STEP]: stat.isComplete,
+      [CODE_SOLVE_HELP]: stat.isComplete,
+      [CODE_SOLVE_ALL]: stat.isComplete,
+    },
+    active: {
+      [CODE_AVAILABLE]: s.isAvailable,
+      [CODE_COORD]: s.isCoord,
+    },
+    text: {
+      [CODE_VALUES_MODE]: `Values as ${s.valuesMode}`,
+      [CODE_NEXT_MODE]: `Input mode: ${s.nextMode}`,
+    }
   }
-}
-
-export const getStoreStatus = (filled: boolean) => {
- return {
-    [BUTTON_SCHEMAS]: filled
- }
 }

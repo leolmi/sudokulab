@@ -8,6 +8,12 @@
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
       <span class="sub-title">{{state.title$|async}}</span>
     </div>
+    @if (globalState.isRunning$|async) {
+      <mat-icon class="toolbar-state-icon icon-pulse" matTooltip="Generator is running">settings</mat-icon>
+    }
+    @if (state.isDebugMode$|async) {
+      <mat-icon class="toolbar-state-icon sdk-color-accent" matTooltip="Debug mode active">bug_report</mat-icon>
+    }
     <mat-menu #authorMenu="matMenu">
       @for (page of state.pages; track page.route) {
         @if (!!page.route) {
@@ -83,11 +89,7 @@
                       [ngClass]="'sdk-color-'+mitem.color"
                       (click)="state.handleMenuItem(mitem)">
                 <mat-icon>{{mitem.icon}}</mat-icon>
-                @if (mitem.isDynamicText) {
-                  <span>{{((state.status$|async)||{})['caption_'+(mitem.code||'')]}}</span>
-                } @else {
-                  <span>{{mitem.text}}</span>
-                }
+                <span>{{mitem.text}}</span>
               </button>
             }
           }

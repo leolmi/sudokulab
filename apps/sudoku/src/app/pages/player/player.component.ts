@@ -19,10 +19,10 @@ import {
 import { StepViewerComponent, StepViewerItem } from '@olmi/step-viewer';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
-import { calcStatusForSchemaDeps, getStoreStatus, OPERATIONS } from './player.menu';
+import { calcStatusForMenu } from './player.menu';
 import { PLAYER_PAGE_ROUTE } from './player.manifest';
 import { PageBase } from '../../model/page.base';
-import { calcMenuStatus, defaultHandleMenuItem, downloadSchema, getStatLines, StatLine } from '../pages.helper';
+import { defaultHandleMenuItem, downloadSchema, getStatLines, StatLine } from '../pages.helper';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './player.logic';
 import { LocalContext, MenuItem, SDK_PREFIX, Sudoku } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -109,7 +109,6 @@ export class PlayerComponent extends PageBase {
       distinctUntilChanged(),
       withLatestFrom(this._game$, this.store.schemaOfTheDay$))
       .subscribe(([filled, game, sotd]: [boolean, string, string]) => {
-        this.state.updateStatus(getStoreStatus(filled));
         if (filled && !game && !!sotd) {
           if (LocalContext.isLevel('debug'))
             console.log(...SDK_PREFIX, 'set game to schema-of-the-day >', sotd);
@@ -163,7 +162,6 @@ export class PlayerComponent extends PageBase {
   private _openSchema(sdk?: Sudoku) {
     if (!sdk) return;
     const o = AppUserOptions.getFeatures<any>(PLAYER_BOARD_USER_OPTIONS_FEATURE);
-    // const uvs = (<any>o.playing||{})[sdk.values];
     this.store
       .getSudokuEx(sdk.values)
       .then(sdkx => {
@@ -171,7 +169,6 @@ export class PlayerComponent extends PageBase {
           this.manager?.load(<Sudoku>sdkx);
           const name = sdkx.values;
           const route = `/${PLAYER_PAGE_ROUTE}/${name}`;
-          this.state.updateStatus({ route });
           this.state.updateRoute(route);
           AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, { game: name });
           checkPlayerUrl(this._location, this._router, route);
@@ -216,17 +213,14 @@ export class PlayerComponent extends PageBase {
       this.isComplete$ = this.manager.stat$.pipe(map(s => s.hasErrors || s.percent >= 100));
       // calcola le statistiche dello schema
       this.stat$ = this.manager.stat$.pipe(map(s => getStatLines(s, { visible: PLAYER_VISIBLE_STAT })));
-      // aggiorna lo stato del menu e salva le impostazioni utente al variare delle opzioni
-      this.manager.status$.subscribe(s => {
-        this.state.updateStatus(calcMenuStatus(OPERATIONS, s));
-        AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, s);
-      });
+      // salva le impostazioni utente al variare delle opzioni
+      this.manager.status$.subscribe(s => AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, s));
       // aggiorna lo stato per quelle voci che dipendono dallo schema corrente
-      this.manager.sudoku$.subscribe(sdk =>
-        this.state.updateStatus(calcStatusForSchemaDeps(sdk)));
+      combineLatest([this.manager.sudoku$, this.manager.status$, this.manager.stat$, this.store.isFilled$])
+        .subscribe(([sdk, s, stat, filled]) =>
+          this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled)));
     }
   }
-
 
   private _checkValues(values: string) {
     this.store.checkSchema(new Sudoku({ values }))

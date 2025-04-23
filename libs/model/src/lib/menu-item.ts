@@ -1,5 +1,7 @@
 import { LogicOperation } from './logic';
 
+export type MenuItemColor = 'error'|'warning'|'success'|'accent'|'secondary';
+
 export class MenuItem {
   constructor(i?: Partial<MenuItem>) {
     Object.assign(<any>this, i || {});
@@ -12,11 +14,10 @@ export class MenuItem {
   code?: string;
   icon?: string;
   text?: string;
-  isDynamicText?: boolean;
   logic?: 'toggle'|'switch'|'navigate'|'execute'|'private'|'system';
   property?: string;
   owner?: string;
-  color?: 'error'|'warning'|'success'|'accent'|'secondary';
+  color?: MenuItemColor;
   operation?: LogicOperation;
   subMenu?: MenuItem[];
 }

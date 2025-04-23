@@ -9,6 +9,11 @@
   &.progress {
     margin-top: 20px;
   }
+  &.locked {
+    .schemas-toolbar-button {
+      --sdk-color-border: var(--sdk-color-accent);
+    }
+  }
 }
 
 .toolbar-progress {
