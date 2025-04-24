@@ -118,7 +118,7 @@ export class SudokuState {
         const menu = (!!layout?.narrow) ? manifest?.narrowMenu : manifest?.menu;
         if (manifest) {
           this.page$.next(manifest.route);
-          this.title$.next(`${manifest.title} ${info.version}`);
+          this.title$.next(`${manifest.title} ${info.version||''}`);
         }
         this._updateMenuStatus(menu, status);
         this.menu$.next(menu||[]);
@@ -130,9 +130,6 @@ export class SudokuState {
         SudokuState.version = i?.version||'';
         this.info$.next(i);
       });
-
-
-    this.status$.subscribe(s => console.log('BUTTONS STATUS', s));
   }
 
   private _updateMenuStatus(menu?: MenuItem[], status?: ButtonsStatus) {
