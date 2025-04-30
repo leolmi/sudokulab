@@ -156,6 +156,11 @@ export class PlayerComponent extends PageBase {
         downloadSchema(sdk);
         break;
       }
+      case 'check': {
+        const sdk = this.store.getSudoku(this.game);
+        if (sdk) this.store.checkSchema(sdk);
+        break;
+      }
     }
   }
 
