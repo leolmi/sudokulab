@@ -39,10 +39,11 @@ import {
   random as _random,
   reduce as _reduce,
   repeat as _repeat,
+  set as _set,
   uniqBy as _uniqBy
 } from 'lodash';
 import { getHash } from './generic.helper';
-
+import { algorithmsVersion } from '../../../package.json'
 
 /**
  * id cella = "col:row"
@@ -833,6 +834,7 @@ export const getRandomSchema = (sdks: Sudoku[]): Sudoku => {
 export const extendInfo = (target: Sudoku, source: Partial<Sudoku>): void => {
   if (source.name) target.name = source.name;
   if (source.info?.origin) target.info.origin = source.info.origin||'';
+  _set(target, 'info.version', algorithmsVersion);
 }
 
 /**

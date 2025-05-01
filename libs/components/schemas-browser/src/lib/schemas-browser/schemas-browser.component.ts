@@ -1,7 +1,7 @@
-import { Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { scrollToElement, Sudoku } from '@olmi/model';
-import { BehaviorSubject, combineLatest, filter, map, Observable, take } from 'rxjs';
+import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { checkNumber, Sudoku } from '@olmi/model';
+import { BehaviorSubject, combineLatest, map, Observable, take } from 'rxjs';
 import { findIndex } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
 import { FlexModule } from '@angular/flex-layout';
@@ -9,8 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DestroyComponentBase, SUDOKU_STATE } from '@olmi/common';
 import { ItemTooltipPipe, UserPlayingPipe } from './pipes';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'schemas-browser',
@@ -22,14 +21,13 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     MatTooltipModule,
     ItemTooltipPipe,
     UserPlayingPipe,
-    MatProgressSpinner
+    ScrollingModule,
   ],
   templateUrl: './schemas-browser.component.html',
   styleUrl: './schemas-browser.component.scss',
   standalone: true
 })
 export class SchemasBrowserComponent extends DestroyComponentBase {
-  private readonly _DOC = inject(DOCUMENT);
   private readonly _skipScrollTo$: BehaviorSubject<boolean>;
 
   readonly state = inject(SUDOKU_STATE)
@@ -37,11 +35,8 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
   activeSchema$: BehaviorSubject<string>;
   hideTooltip$: Observable<boolean>;
   diameter$: Observable<number>;
-  container$: BehaviorSubject<ElementRef|undefined>;
 
-  @ViewChild('container') set container(c: ElementRef) {
-    this.container$.next(c);
-  }
+  @ViewChild('container') container!: CdkVirtualScrollViewport;
 
   @Input()
   set activeSchema(s: string|null|undefined) {
@@ -66,16 +61,10 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
     this._skipScrollTo$ = new BehaviorSubject<boolean>(false);
     this.activeSchema$ = new BehaviorSubject<string>('');
     this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
-    this.container$ = new BehaviorSubject<ElementRef|undefined>(undefined);
 
     this.hideTooltip$ = this.state.layout$.pipe(map(l => !this.allowCompact || !l.compact));
     this.diameter$ = this.state.layout$.pipe(map(l => (l.compact && this.allowCompact) ? 30 : 100));
-
-    combineLatest([this.container$, this.activeSchema$])
-      .pipe(filter(([c, as]) => !!c && !!as))
-      .subscribe(() =>
-        setTimeout(() =>
-          this._scrollToActive(), 150));
+    this.activeSchema$.subscribe(() => setTimeout(() => this._scrollToActive(), 150));
   }
 
   private _scrollToActive() {
@@ -84,7 +73,7 @@ export class SchemasBrowserComponent extends DestroyComponentBase {
       .subscribe(([schemas, active, skip]: [Sudoku[], string, boolean]) => {
         if (!skip) {
           const activeIndex = findIndex(schemas, s => s.values === active);
-          if (activeIndex > -1) scrollToElement(this._DOC, `s${activeIndex}`);
+          if (activeIndex > -1 && this.container) this.container.scrollToIndex(checkNumber(activeIndex-4, 0, activeIndex) , 'smooth');
         } else {
           this._skipScrollTo$.next(false);
         }

@@ -4,6 +4,7 @@ export class SudokulabInfo {
   }
   session?: string;
   version?: string;
+  algorithmsVersion?: string;
   title?: string;
   author?: string;
 }

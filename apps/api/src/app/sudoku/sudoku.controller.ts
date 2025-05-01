@@ -74,10 +74,10 @@ export class SudokuController {
   }
 
   /**
-   * ricalcola tutti gli schemi in catalogo
+   * verifica la versione di tutti gli schemi in catalogo
    */
-  @Post('refresh')
-  async refreshAll(): Promise<any> {
-    return this.sudokuService.refreshAll();
+  @Post('check-all')
+  async checkAll(): Promise<any> {
+    return this.sudokuService.checkAll();
   }
 }

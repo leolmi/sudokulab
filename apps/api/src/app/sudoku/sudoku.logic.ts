@@ -1,5 +1,13 @@
 import { SudokuDto } from '../../model/sudoku.dto';
-import { getFixedCount, getStandardSchemaName, isSchemaString, isSudokuObject, Sudoku, SudokuInfo } from '@olmi/model';
+import {
+  getFixedCount,
+  getStandardSchemaName,
+  isSchemaString,
+  isSudokuObject,
+  Sudoku,
+  SudokuEx,
+  SudokuInfo
+} from '@olmi/model';
 import { cloneDeep as _clone, isString as _isString, keys as _keys } from 'lodash';
 import { getSolution, solve } from '@olmi/logic';
 
@@ -51,13 +59,13 @@ export const translate = (ss: any[]): Sudoku[] => {
   }
 }
 
-const _solve = (sdk: Sudoku): Sudoku => {
+const _solve = (sdk: Sudoku): SudokuEx => {
   const work = solve(sdk);
   return getSolution(work);
 }
 
-export const getSudoku = async (s: any): Promise<Sudoku|undefined> => {
-  return new Promise<Sudoku|undefined>((res, rej) => {
+export const getSudoku = async (s: any): Promise<SudokuEx|undefined> => {
+  return new Promise<SudokuEx|undefined>((res, rej) => {
     if (_isString(s)) {
       if (!isSchemaString(s)) return Promise.reject(`incompatible string "${s}"`);
       const sdk = _solve(new Sudoku({ values: `${s}` }));

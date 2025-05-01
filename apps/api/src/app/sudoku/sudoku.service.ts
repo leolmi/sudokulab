@@ -5,15 +5,14 @@ import { SudokuDoc } from '../../model/sudoku.interface';
 import { join } from 'path';
 import fs from 'fs';
 import { extendInfo, SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
-import { isArray as _isArray } from 'lodash';
-import { getAcquireOperations, translate } from './sudoku.logic';
+import { isArray as _isArray, padStart as _padStart } from 'lodash';
+import { getAcquireOperations, getSudoku, translate } from './sudoku.logic';
 import { ImgDto } from '../../model/img.dto';
 import { OcrOptions } from '../../model/ocr.options';
 import { OcrResult } from '../../model/ocr.result';
 import { notImplemented } from '../../model/consts';
 import { environment } from '../../environments/environment';
-import { getSolution, solve } from '@olmi/logic';
-
+import { algorithmsVersion } from '../../../../../package.json'
 
 export interface AcquireResult {
   data?: any;
@@ -32,20 +31,7 @@ export class SudokuService implements OnModuleInit {
 
   async check(sudokuDto: SudokuDto): Promise<SudokuEx|undefined> {
     if (environment.debug) console.log(...SDK_PREFIX, 'check schema request', sudokuDto);
-    const sdk = new Sudoku({ values: sudokuDto.values, name: sudokuDto.name });
-    try {
-      const solved = solve(sdk);
-      const sol = getSolution(solved);
-      if (sol) {
-        extendInfo(sol, sudokuDto);
-        const result: any = await this.sudokuModel.updateOne({ _id: sol._id }, { $set: sol }, { upsert: true });
-        if (environment.debug) console.log(...SDK_PREFIX, `check results for "${sudokuDto._id}"`, result);
-        if (result?.acknowledged) return sol;
-      }
-    } catch (err) {
-      console.error(`error while checking sudoku "${sudokuDto.values}"`, err);
-    }
-    return undefined;
+    return await this._check(sudokuDto);
   }
 
   onModuleInit(): any {
@@ -67,6 +53,7 @@ export class SudokuService implements OnModuleInit {
     //       }
     //     });
     // });
+    this.checkAll();
   }
 
   async ocr(img: ImgDto, o?: OcrOptions): Promise<OcrResult> {
@@ -138,13 +125,47 @@ export class SudokuService implements OnModuleInit {
   }
 
   /**
-   * ricalcola tutti gli schemi in catalogo
+   * ricalcola tutti gli schemi non aggiornati in catalogo
    */
-  async refreshAll() {
-    // TODO...
-
-    notImplemented();
+  async checkAll() {
+    const t = performance.now();
+    const sdks = await this.sudokuModel.find().exec();
+    const tot = sdks.length;
+    // const sdk = sdks[0];
+    console.log(...SDK_PREFIX, `checking ${tot} schemas start...`);
+    let index = 0;
+    let updated = 0;
+    for (const sdk of sdks) {
+      index++;
+      // se la versione di calcolo è anteriore lo ricalcola
+      if (!checkAlgorithmsVersion(sdk.info.version)) {
+        if (environment.debug) console.log(`upgrading (${index}/${tot}) schema "${sdk.values}" (${sdk.info.version})...`);
+        const res = await this._check(sdk);
+        if (res && environment.debug) console.log(`\t> upgraded to version ${res.info.version}`);
+        updated++;
+      }
+    }
+    const elapsed = performance.now() - t;
+    console.log(...SDK_PREFIX, `checking all schemas done in ${elapsed.toFixed(0)}mls, ${updated} schemas updated.`);
   }
+
+  private async _check(info: Partial<Sudoku>): Promise<SudokuEx|undefined> {
+    const sdk = new Sudoku({ values: info.values, name: info.name });
+    try {
+      const sol = await getSudoku(sdk);
+      if (sol) {
+        extendInfo(sol, info);
+        const result: any = await this.sudokuModel.updateOne({ _id: sol._id }, { $set: sol }, { upsert: true });
+        if (environment.debug) console.log(...SDK_PREFIX, `check results for "${info._id}"`, result);
+        if (result?.acknowledged) return sol;
+      }
+    } catch (err) {
+      console.error(`error while checking sudoku "${info.values}"`, err);
+    }
+    return undefined;
+  }
+
+
 }
 
 
@@ -157,3 +178,18 @@ export class SudokuService implements OnModuleInit {
 //   console.error(...SDK_PREFIX_W, err, args||'');
 //   handler(err);
 // };
+
+/**
+ * restituisce un numerico confrontabile dalla versione
+ * "x.yyy"  =>  x0yyy
+ * "xx.y"   => xx000y
+ * @param v
+ */
+const getAlgorithmsVersionNumber = (v?: string): number => {
+  if (!/^\d{1,4}\.\d{1,4}$/g.test(`${v||''}`)) return 0;
+  const ns = v.split('.').map(vs => _padStart(vs, 4, '0')).join('');
+  return parseInt(ns, 10);
+}
+
+const checkAlgorithmsVersion = (v: string|undefined): boolean =>
+  getAlgorithmsVersionNumber(v) >= getAlgorithmsVersionNumber(algorithmsVersion);

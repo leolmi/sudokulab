@@ -17,7 +17,6 @@ export class LogicWorkerBase {
     this.sudoku = a?.sudoku;
     this.debug = !!a?.debug;
     this.params = a?.params;
-    this.version = a?.version||'';
   }
 
   id: string;
@@ -25,7 +24,6 @@ export class LogicWorkerBase {
   sudoku?: Sudoku;
   params?: any;
   debug: boolean;
-  version: string;
 }
 
 /**

@@ -188,7 +188,6 @@ export class BoardManager {
       if (operation === 'stop') this.isStopping$.next(true);
       if (this.board.logic) {
         this.board.logic.execute({
-          version: SudokuState.version||'',
           sudoku: new SudokuEx({ cells: this.cells$.value }),
           operation,
           options: {

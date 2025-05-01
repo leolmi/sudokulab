@@ -38,6 +38,7 @@ const MATCHES: Dictionary<string> = {
 
 export class SudokuState {
   static version: string = '';
+  static algorithmsVersion: string = '';
   static isRunning$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private readonly _router = inject(Router);
@@ -128,6 +129,7 @@ export class SudokuState {
       .pipe(filter(i => !!i), take(1))
       .subscribe((i: SudokulabInfo) => {
         SudokuState.version = i?.version||'';
+        SudokuState.algorithmsVersion = i?.algorithmsVersion||'';
         this.info$.next(i);
       });
   }

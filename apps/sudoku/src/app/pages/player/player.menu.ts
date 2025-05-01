@@ -70,13 +70,13 @@ export const OPERATIONS = <MenuItem[]>[
     property: 'download',
     logic: 'private'
   },
-  {
-    code: 'check-schema',
-    text: `Check schema`,
-    icon: 'cloud_sync',
-    property: 'check',
-    logic: 'private'
-  },
+  // {
+  //   code: 'check-schema',
+  //   text: `Check schema`,
+  //   icon: 'cloud_sync',
+  //   property: 'check',
+  //   logic: 'private'
+  // },
   {
     separator: true
   },

@@ -1,33 +1,26 @@
-@defer {
-  <div class="schemas-browser"
-       #container
-       [class.allow-compact]="allowCompact">
-    @for (sdk of schemas$|async; track sdk.values) {
-      <div class="schema-item sdk-color-hover board-active-contrast"
-           fxLayout="row" fxLayoutAlign="start center"
-           [attr.id]="'s'+$index"
-           [class.active]="sdk.values===(activeSchema$|async)"
-           [matTooltip]="sdk|itemTooltip"
-           [matTooltipDisabled]="hideTooltip$|async"
-           (click)="internalClickOnSchema(sdk)">
-        <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
-        <div class="schema-info" fxLayout="column" fxFlex>
-          <div class="title" fxFlex>{{sdk.name}} {{sdk.info.origin||''}}</div>
-          <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
-        </div>
-        @if (sdk | userPlaying) {
-          <mat-icon class="play-info">edit</mat-icon>
-        }
-        @if (sdk.info.useTryAlgorithm) {
-          <div class="t-info notranslate" translate="no">T{{sdk.info.tryAlgorithmCount}}</div>
-        }
-        <div class="alg-info notranslate" translate="no">A{{sdk.info.algorithmCount}}</div>
-      </div>
+<cdk-virtual-scroll-viewport #container
+                             class="schemas-browser"
+                             [class.allow-compact]="allowCompact"
+                             itemSize="54" fxFlex>
+  <div *cdkVirtualFor="let sdk of (schemas$|async); let index = index"
+       class="schema-item sdk-color-hover board-active-contrast"
+       fxLayout="row" fxLayoutAlign="start center"
+       [attr.id]="'s'+index"
+       [class.active]="sdk.values===(activeSchema$|async)"
+       [matTooltip]="sdk|itemTooltip"
+       [matTooltipDisabled]="hideTooltip$|async"
+       (click)="internalClickOnSchema(sdk)">
+    <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
+    <div class="schema-info" fxLayout="column" fxFlex>
+      <div class="title" fxFlex>{{sdk.name}} {{sdk.info.origin||''}}</div>
+      <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
+    </div>
+    @if (sdk | userPlaying) {
+      <mat-icon class="play-info">edit</mat-icon>
     }
+    @if (sdk.info.useTryAlgorithm) {
+      <div class="t-info notranslate" translate="no">T{{sdk.info.tryAlgorithmCount}}</div>
+    }
+    <div class="alg-info notranslate" translate="no">A{{sdk.info.algorithmCount}}</div>
   </div>
-} @placeholder (minimum 500ms) {
-  <div class="schemas-browser schemas-placeholder"
-       fxLayout="row" fxLayoutAlign="center center">
-    <mat-spinner mode="indeterminate" [diameter]="diameter$|async"></mat-spinner>
-  </div>
-}
+</cdk-virtual-scroll-viewport>

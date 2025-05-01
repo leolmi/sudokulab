@@ -47,14 +47,10 @@ print-page {
 
 .schemas-browser-tool {
   .schemas-container {
-    overflow: auto;
     width: 350px;
 
     .schemas-browser {
-      position: absolute;
       width: 100%;
-      top: 0;
-      left: 0;
     }
   }
 }
