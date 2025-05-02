@@ -34,4 +34,6 @@ Here you can produce documents with the patterns you find most interesting and s
 
 <br><br>
 
+Try it on [sudokulab.herokuapp.com](https://sudokulab.herokuapp.com)
+
 > If you would like additional information contact me on [leo.olmi@gmaill.com](mailto:leo.olmi@gmaill.com)
