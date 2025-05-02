@@ -47,6 +47,7 @@ body {
   background-color: var(--sdk-color-background);
   color: var(--sdk-color-foreground);
 
+  --sdk-android-bottom-bar-space: 50px;
   --mat-sys-primary: var(--sdk-color-accent);
   --mat-sys-primary-container: var(--sdk-color-accent);
   --mat-badge-background-color: var(--sdk-color-accent);
@@ -113,6 +114,11 @@ body {
     .compact-visible {
       display: block !important;
     }
+
+    .mat-mdc-dialog-actions {
+      padding-bottom: var(--sdk-android-bottom-bar-space);
+    }
+
   }
 }
 
@@ -123,6 +129,10 @@ body {
 
 .display-none {
   display: none;
+}
+
+.overflow-auto {
+  overflow: auto;
 }
 
 .opacity-6 {

@@ -6,7 +6,7 @@
   <div class="page-content" [fxLayout]="layout$|async">
 
 
-  <div class="generator-options narrow-hidden" fxLayout="column" fxFlex>
+  <div class="generator-options narrow-hidden overflow-auto" fxLayout="column" fxFlex>
     <div class="stat-monitor" fxLayout="column">
       @for (l of lines$|async; track l.description) {
         <div class="stat-line"
