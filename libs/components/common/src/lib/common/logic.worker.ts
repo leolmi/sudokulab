@@ -1,8 +1,16 @@
-import { LogicOperation, LogicWorkerData, SolveMode, SolveOptions, SolveWork, Sudoku, SudokuEx } from '@olmi/model';
+import {
+  checkStatus,
+  LogicOperation,
+  LogicWorkerData,
+  SolveMode,
+  SolveOptions,
+  SolveWork,
+  Sudoku,
+  SudokuEx
+} from '@olmi/model';
 import { get as _get } from 'lodash';
 import { distinctUntilChanged, filter } from 'rxjs';
 import {
-  checkStatus,
   clearSchema,
   generateSchema,
   GeneratorContext,
@@ -34,7 +42,7 @@ const execute = (args: LogicWorkerData) => {
     case 'solve-step':
     case 'solve-to':
     case 'solve-to-try':
-    case 'help':
+    case 'help': {
       const options = getSolveOptions(args);
       const res = solve(args.sudoku, options);
       onResult(res, (sdk, error) => {
@@ -43,10 +51,12 @@ const execute = (args: LogicWorkerData) => {
         args.allowHidden = options.allowHidden;
       });
       break;
-    case 'stop':
+    }
+    case 'stop': {
       // do nothing so it cleared the timeout and aborted the previous request
       if (generationContext.session.time) generationContext.session.stopped = true;
       break;
+    }
     case 'skip':
       if (generationContext.session.time) generationContext.session.skipSchema = true;
       break;
@@ -56,10 +66,11 @@ const execute = (args: LogicWorkerData) => {
     case 'generate':
       startGeneration(generationContext, args);
       break;
-    case 'build':
+    case 'build': {
       const sdk = generateSchema(generationContext, args);
       if (sdk) args.sudoku = sdk;
       break;
+    }
     case 'check':
     default:
       checkStatus((<SudokuEx>args.sudoku)?.cells, {

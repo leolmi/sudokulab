@@ -133,6 +133,7 @@ export class SudokuService implements OnModuleInit {
     const tot = sdks.length;
     // const sdk = sdks[0];
     console.log(...SDK_PREFIX, `checking ${tot} schemas start...`);
+    if (environment.debug) console.log(`schema version: ${algorithmsVersion}`)
     let index = 0;
     let updated = 0;
     for (const sdk of sdks) {
@@ -143,6 +144,8 @@ export class SudokuService implements OnModuleInit {
         const res = await this._check(sdk);
         if (res && environment.debug) console.log(`\t> upgraded to version ${res.info.version}`);
         updated++;
+      } else {
+        if (environment.debug) console.log(`schema (${index}/${tot}) "${sdk._id}" with right version: ${sdk.info.version}`);
       }
     }
     const elapsed = performance.now() - t;

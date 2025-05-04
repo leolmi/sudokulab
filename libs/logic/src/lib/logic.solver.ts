@@ -1,6 +1,7 @@
 import {
   AlgorithmType,
   buildSudokuCells,
+  checkStatus,
   hasErrors,
   isComplete,
   SDK_PREFIX,
@@ -15,7 +16,6 @@ import { findFirstAppliedAlgorithm, getAlgorithm } from '@olmi/algorithms';
 import {
   checkMaxCyclesComplete,
   checkOneStepComplete,
-  checkStatus,
   checkToStepComplete,
   checkToStepItem,
   checkToTryComplete,
@@ -99,7 +99,7 @@ const initSolver = (cells: SudokuCell[], o?: Partial<SolveOptions>): SolveWork =
 const endSolver = (work: SolveWork) => {
   work.end = Date.now();
   checkToStepItem(work);
-  if (!!work.options?.debug) console.log(...SDK_PREFIX, `solver ends in ${(work.end-work.start).toFixed(0)}mls`, work);
+  if (work.options?.debug) console.log(...SDK_PREFIX, `solver ends in ${(work.end-work.start).toFixed(0)}mls`, work);
 }
 
 /**
@@ -113,7 +113,7 @@ export const solve = (arg?: SudokuCell[]|Sudoku, o?: Partial<SolveOptions>): Sol
     (<SudokuEx>arg)?.cells||buildSudokuCells((<Sudoku>arg)?.values||'')||[];
   // init results
   const work = initSolver(cells||[], o);
-  if (!!o?.debug) console.log(...SDK_PREFIX, 'solver start', work);
+  if (o?.debug) console.log(...SDK_PREFIX, 'solver start', work);
   while (isSolvable(work)) {
     solveParallelStep(work);
   }

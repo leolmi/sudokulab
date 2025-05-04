@@ -7,7 +7,7 @@ import {
   DEFAULT_TOTAL_RANK,
   Dictionary,
   DIFFICULTY_MIN,
-  DIFFICULTY_VALUES,
+  DIFFICULTY_LIMIT_VALUES,
   GroupType,
   GroupTypeMap,
   SDK_PREFIX,
@@ -43,6 +43,7 @@ import {
   uniqBy as _uniqBy
 } from 'lodash';
 import { getHash } from './generic.helper';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { algorithmsVersion } from '../../../package.json'
 
 /**
@@ -815,7 +816,7 @@ export const refreshSchemaValues = (sdk?: SudokuEx): void => {
  * @param diff
  * @param def
  */
-export const getDiffValue = (diff?: string, def = DIFFICULTY_MIN): number => DIFFICULTY_VALUES[`${diff||def}`.toUpperCase()]||0;
+export const getDiffValue = (diff?: string, def = DIFFICULTY_MIN): number => DIFFICULTY_LIMIT_VALUES[`${diff||def}`.toUpperCase()]||0;
 
 /**
  * restituisce l'identità di uno schema scelto randomicamente dall'elenco

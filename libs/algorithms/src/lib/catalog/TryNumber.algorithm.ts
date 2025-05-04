@@ -3,6 +3,7 @@ import {
   AlgorithmOptions,
   AlgorithmResult,
   AlgorithmType,
+  checkStatus,
   onCell,
   SudokuCell,
   TRY_NUMBER_ALGORITHM
@@ -14,7 +15,6 @@ import {
   registerAlgorithm,
 } from '../algorithms.common';
 import { cloneDeep as _clone, minBy as _minBy } from 'lodash';
-import { checkStatus } from '@olmi/logic';
 
 /**
  * ALGORITMO
@@ -38,7 +38,7 @@ import { checkStatus } from '@olmi/logic';
 export class TryNumberAlgorithm extends Algorithm {
   id = TRY_NUMBER_ALGORITHM;
   priority = 100;
-  factor = '+240+(4*NU*NEP)';
+  factor = '+400+(4*NU*NEP)';
   name = 'Try number in cell';
   icon = 'generating_tokens';
   type = AlgorithmType.solver;

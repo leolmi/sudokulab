@@ -110,18 +110,18 @@ export enum ValorizationMode {
 export const DIFFICULTY_UNRATED = 'UNRATED';
 export const DIFFICULTY_MAX = 'EXTREME';
 export const DIFFICULTY_MIN = 'EASY';
-export const DIFFICULTY_VALUES: any = {
-  EASY: 600,
-  MEDIUM: 800,
-  HARD: 1000,
+export const DIFFICULTY_LIMIT_VALUES: any = {
+  EASY: 300,
+  MEDIUM: 700,
+  HARD: 1100,
   VERYHARD: 1600,
   EXTREME: 1000000000
 }
 export const DIFFICULTY_RANGES = [
-  {value: DIFFICULTY_VALUES.EASY, label: 'EASY'},
-  {value: DIFFICULTY_VALUES.MEDIUM, label: 'MEDIUM'},
-  {value: DIFFICULTY_VALUES.HARD, label: 'HARD'},
-  {value: DIFFICULTY_VALUES.VERYHARD, label: 'VERYHARD'}
+  {value: DIFFICULTY_LIMIT_VALUES.EASY, label: 'EASY'},
+  {value: DIFFICULTY_LIMIT_VALUES.MEDIUM, label: 'MEDIUM'},
+  {value: DIFFICULTY_LIMIT_VALUES.HARD, label: 'HARD'},
+  {value: DIFFICULTY_LIMIT_VALUES.VERYHARD, label: 'VERYHARD'}
 ]
 
 

@@ -1,6 +1,6 @@
-import { ApplySudokuRulesOptions, checkStatus, GeneratorContext, getSolution, solve } from '@olmi/logic';
 import {
-  cellId,
+  ApplySudokuRulesOptions,
+  cellId, checkStatus,
   DIFFICULTY_MAX,
   EndGenerationMode,
   GeneratorOptions,
@@ -17,6 +17,9 @@ import {
   TRY_NUMBER_ALGORITHM
 } from '@olmi/model';
 import { cloneDeep as _clone, isArray as _isArray, isObject as _isObject, keys as _keys, random as _random } from 'lodash';
+import { GeneratorContext } from './logic.model';
+import { solve } from './logic.solver';
+import { getSolution } from './logic.helper';
 
 /**
  * vero se il numero di celle dinamiche e fisse è maggiore o uguale

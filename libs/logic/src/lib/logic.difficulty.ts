@@ -27,7 +27,7 @@ export const getTryAlgorithmCount = (seq?: AlgorithmResult[]): number => {
  */
 const _calcIncrement = (v: number, N: number, stat: SudokuStat, f: string): number => {
   // conta i numeri che completano lo schema
-  const nums = ((stat.rank * stat.rank) || 81) - stat.fixedCount; stat.missingCount
+  const nums = ((stat.rank * stat.rank) || 81) - stat.fixedCount;
   // scope dell'espressione
   const scope = {
     N,                    // numero di valori considerati (posizione del ciclo)
@@ -36,7 +36,7 @@ const _calcIncrement = (v: number, N: number, stat: SudokuStat, f: string): numb
     NEP: (nums-N)/nums,   // percentuale di numeri mancanti al riempimento
     NP: N/nums            // percentuale di numeri inseriti
   };
-  const exp = `return ${v} ${f};`;
+  const exp = `return ${v}${f};`;
   try {
     const c = new Function(_keys(scope).join(','), exp);
     const res = c.apply(c, _values(scope));
@@ -48,15 +48,39 @@ const _calcIncrement = (v: number, N: number, stat: SudokuStat, f: string): numb
   }
 }
 
+/**
+ * identificativo che tiene conto dell'algoritmo e delle celle su cui è stato
+ * determinato (non quelle su cui ha effetto)
+ * @param a
+ */
+const _getAlgApplicationId = (a: AlgorithmResult): string => {
+  const gids = (a.highlights.groups||[]).map(g => g.id).join('-');
+  const cids = _keys(a.highlights.secondaryCell).join('-');
+  return `${a.algorithm}@${gids}@${cids}`
+}
+
+/**
+ * calcola la difficoltà sugli N step di risoluzione
+ * @param seq
+ * @param cells
+ */
 const _calcDifficultyValue = (seq?: AlgorithmResult[], cells?: SudokuCell[]): number => {
   const stat = getStat(cells||[]);
   let diff = 0;
   let N = 0;
+  const algCache: any = {};
   (seq||[]).forEach(a => {
     const alg = getAlgorithm(a.algorithm);
-    if (!!alg) {
+    if (alg) {
       if (alg.type === AlgorithmType.solver) N++;
-      diff = _calcIncrement(diff, N, stat, alg.factor);
+      const appId = _getAlgApplicationId(a);
+      // l'applicazione di un algoritmo già trovata ha un incremento minimo
+      if (algCache[appId]) {
+        diff++;
+      } else {
+        algCache[appId] = true;
+        diff = _calcIncrement(diff, N, stat, alg.factor);
+      }
     }
   });
   return Math.floor(diff);

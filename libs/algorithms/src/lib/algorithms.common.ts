@@ -3,13 +3,13 @@ import {
   AlgorithmResult,
   AlgorithmResultLine,
   buildHighlights,
+  checkStatus,
   Condition,
   getStat,
   Highlights,
   SudokuCell,
   SudokuGroup
 } from '@olmi/model';
-import { checkStatus } from '@olmi/logic';
 import { cloneDeep as _clone, isString as _isString, reduce as _reduce, remove as _remove } from 'lodash';
 
 export const ALGORITHMS: Algorithm[] = [];
@@ -28,7 +28,7 @@ export const applyAlgorithm = (alg: Algorithm,
   handler(res);
   res.highlights = buildHighlights(res.highlights);
   if (res.applied) {
-    if (!!alg.options.checkAvailableOnStep) checkStatus(cells);
+    if (alg.options.checkAvailableOnStep) checkStatus(cells);
     res.stat = getStat(cells);
     res.cellsSnapshot = _clone(cells);
   }

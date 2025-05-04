@@ -1,3 +1,5 @@
+import { ApplySudokuRulesOptions } from './options';
+
 export interface SudokuError {
   // constructor(e?: Partial<SudokuError>) {
   //   Object.assign(<any>this, e || {});
@@ -11,3 +13,7 @@ export interface SudokuError {
 }
 
 export type ErrorsContainer = {[code: string]: SudokuError};
+
+export interface CheckErrorsOptions extends ApplySudokuRulesOptions {
+
+}

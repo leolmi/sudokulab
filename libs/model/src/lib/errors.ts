@@ -1,4 +1,4 @@
-import { SudokuError } from '@olmi/model';
+import { SudokuError } from './sudoku-error';
 
 export interface ErrorCellArgs {
   cid?: string;
@@ -24,6 +24,3 @@ export class ErrorNoValueForCell implements SudokuError {
   code: string;
   message: string;
 }
-
-
-

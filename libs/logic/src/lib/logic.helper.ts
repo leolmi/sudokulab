@@ -1,14 +1,12 @@
 import {
-  addError,
-  DEFAULT_RANK,
-  forEachGroup,
-  GenerationStat, getCellsSchema,
+  applySudokuRules,
+  checkStatus,
+  GenerationStat,
+  getCellsSchema,
   getCellUserValue,
   getFixedCount,
   getRank,
   isComplete,
-  isDynamicValue,
-  isNumberCellValue,
   isSolvableCells,
   onCell,
   SolveOptions,
@@ -19,103 +17,19 @@ import {
   SudokuEx,
   SudokuInfoEx,
   UserValue,
-  ValueOptions
+  ValueOptions,
 } from '@olmi/model';
-import {
-  keys as _keys,
-  lowerCase as _lowerCase,
-  reduce as _reduce,
-  remove as _remove,
-  uniq as _uniq,
-  values as _values
-} from 'lodash';
-import { ApplySudokuRulesOptions, CheckAvailableOptions, CheckErrorsOptions, GeneratorContext } from './logic.model';
-import { ErrorNoValueForCell, ErrorWrongCellValue } from './logic.errors';
+import { keys as _keys, lowerCase as _lowerCase, uniq as _uniq } from 'lodash';
 import { calcDifficulty } from './logic.difficulty';
-
-/**
- * Restituisce l'array dei valori (stringa) possibili secondo il rank dello schema passato
- * @param rank
- */
-export const getAvailable = (rank = DEFAULT_RANK): string[] =>
-  Array(rank).fill(0).map((x, i) => `${(i+1)}`);
-
-/**
- * restituisce la mappa dei valori presenti contandoli
- * ````
- * { vN: { cid1:true, ..., cidK: true }, ... }
- * ````
- * @param cells
- */
-export const getCellsValuesMap = (cells: SudokuCell[]) => {
-  return _reduce(cells, (m, c) => isNumberCellValue(c.text) ? ({
-    ...m,
-    [c.text]: {
-      ...(m[c.text]||{}),
-      [c.id]: true
-    }
-  }) : m, <any>{});
-}
-
-/**
- * resetta la collezione dei valori possibili
- * @param cells
- */
-export const resetAvailable = (cells: SudokuCell[]) => {
-  cells.forEach(c => c.available = (c.isFixed) ? [] : getAvailable());
-}
-
-/**
- * verifica gli errori presenti nelle celle
- * @param cells
- * @param options
- */
-export const checkSudokuErrors = (cells: SudokuCell[], options?: CheckErrorsOptions) => {
-  // resetta gli errori e ricerca errori per cella
-  cells.forEach(c => {
-    delete c.error;
-    // ERROR: cella senza valori possibili
-    if (!c.isFixed && (!c.text || isDynamicValue(c.text)) && c.available.length<1)
-      c.error = addError(c.error, new ErrorNoValueForCell({ cid:c.id }));
-  });
-
-  // errori sui gruppi
-  forEachGroup(cells, (gcells) => {
-    const vm = getCellsValuesMap(gcells);
-    _values(vm).forEach((v: any) => {
-      const cids = _keys(v);
-      if (cids.length > 1) cids.forEach(cid => {
-        // celle con stesso valore nel gruppo
-        onCell(cells, cid, (c) => {
-          if (options?.schemaMode || (!c.isFixed && !c.isDynamic)) {
-            c.error = addError(c.error, new ErrorWrongCellValue({ cid:c.id }))
-          }
-        });
-      })
-    })
-  });
-}
-
-/**
- * verifica i valori possibili per le celle non ancora valorizzate
- * @param cells
- * @param options
- */
-export const checkStatus = (cells?: SudokuCell[], options?: CheckAvailableOptions) => {
-  if (!cells) return;
-  // verifica i valori possibili
-  applySudokuRules(cells, options);
-  // verifica gli errori nello schema
-  checkSudokuErrors(cells, options);
-}
+import { GeneratorContext } from './logic.model';
 
 export const clearCell = (c: SudokuCell, uv?: UserValue) => {
-  c.text = uv?.text||'';
-  c.userValues = uv?.userValues||[];
+  c.text = uv?.text || '';
+  c.userValues = uv?.userValues || [];
   c.isDynamic = false;
   c.isFixed = false;
   delete c.error;
-}
+};
 
 export const isValidToStep = (o: SolveOptions): boolean => o.mode === 'to-step' && o.toStep > 0;
 
@@ -135,23 +49,7 @@ export const clearSchema = (cells?: SudokuCell[], o?: ValueOptions) => {
   checkStatus(cells, { resetBefore: true });
 }
 
-/**
- * applica le regole base del sudoku:
- * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
- * @param cells
- * @param options
- */
-export const applySudokuRules = (cells: SudokuCell[], options?: ApplySudokuRulesOptions) => {
-  if (options?.resetBefore) resetAvailable(cells);
-  // per ogni cella del gruppo
-  forEachGroup(cells, (gcells) => {
-    const vm = getCellsValuesMap(gcells);
-    // elimina dai valori possibili quelli già presenti nel gruppo stesso
-    gcells.forEach(c => isNumberCellValue(c.text) ?
-      c.available = [] :
-      _remove(c.available, av => !!vm[av]));
-  });
-}
+
 
 /**
  * completo se il conteggio supera l'impostazione di massimo numero di cicli

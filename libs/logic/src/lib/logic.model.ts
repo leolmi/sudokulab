@@ -1,30 +1,15 @@
-import {GeneratorOptions, getStat, SudokuCell, SudokuEx, SUDOKULAB_TITLE, SudokuStat, ValueOptions} from '@olmi/model';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {
+  GeneratorOptions,
+  getStat,
+  SudokuCell,
+  SudokuEx,
+  SUDOKULAB_TITLE,
+  SudokuStat,
+} from '@olmi/model';
+import { BehaviorSubject, Subject } from 'rxjs';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { version } from '../../../../package.json';
 
-export interface ApplySudokuRulesOptions extends ValueOptions {
-  /**
-   * resetta lo stato degli available prima di procedere (default=false)
-   */
-  resetBefore?: boolean;
-}
-
-/**
- * opzioni per la verifica dello schema
- */
-export interface CheckAvailableOptions extends ApplySudokuRulesOptions {
-  /**
-   * considera fissi tutti i valori presenti (default=false)
-   */
-  valueAsFixed?: boolean;
-}
-
-/**
- *
- */
-export interface CheckErrorsOptions extends ApplySudokuRulesOptions {
-
-}
 
 /**
  * sessione di generazione: contiene tutte le info per la generazione
