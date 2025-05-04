@@ -1,4 +1,4 @@
-import { ButtonsStatus, MenuItem, Sudoku, SudokuStat, SYSTEM_MENU_ITEMS } from '@olmi/model';
+import { ButtonsStatus, MenuItem, Sudoku, SudokuStat, SYSTEM_MENU_CODE, SYSTEM_MENU_ITEMS } from '@olmi/model';
 import { BoardStatus } from '@olmi/board';
 
 const CODE_SCHEMAS = 'button-code-schemas';
@@ -94,7 +94,8 @@ export const OPERATIONS = <MenuItem[]>[
     text: `Coordinates`,
     icon: 'grid_4x4'
   },
-  SYSTEM_MENU_ITEMS.globalDebug
+  SYSTEM_MENU_ITEMS.globalDebug,
+  SYSTEM_MENU_ITEMS.androidBottomBarBugFix,
 ]
 
 const OPENSCHEMA = <MenuItem[]>[
@@ -210,7 +211,7 @@ export const NARROW = <MenuItem[]>[
 export const calcStatusForMenu = (sdk: Sudoku|undefined, s: BoardStatus, stat: SudokuStat, filled: boolean): Partial<ButtonsStatus> => {
   return {
     hidden: {
-      [CODE_SOLVE_TO_TRY_RULE]: !sdk?.info.useTryAlgorithm
+      [CODE_SOLVE_TO_TRY_RULE]: !sdk?.info.useTryAlgorithm,
     },
     disabled: {
       [CODE_SCHEMAS]: !filled,

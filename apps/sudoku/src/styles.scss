@@ -61,6 +61,19 @@ body {
     color-scheme: dark;
   }
 
+
+  .debug-visible {
+    display: none !important;
+  }
+  &.debug-mode {
+    .debug-hidden {
+      display: none !important;
+    }
+    .debug-visible {
+      display: block !important;
+    }
+  }
+
   .landscape-visible {
     display: none !important;
   }
@@ -115,10 +128,11 @@ body {
       display: block !important;
     }
 
-    .mat-mdc-dialog-actions {
-      padding-bottom: var(--sdk-android-bottom-bar-space);
+    &.android-bottom-bar-bug-fix {
+      .mat-mdc-dialog-actions {
+        padding-bottom: var(--sdk-android-bottom-bar-space);
+      }
     }
-
   }
 }
 

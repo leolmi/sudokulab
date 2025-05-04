@@ -1,6 +1,14 @@
 import { inject, InjectionToken } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable, take } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  Observable,
+  take,
+} from 'rxjs';
 import { keys as _keys, values as _values } from 'lodash';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
@@ -20,7 +28,7 @@ import {
   THEME_DARK,
   THEME_LIGHT,
   THEME_OTHER,
-  toggleClass
+  toggleClass,
 } from '@olmi/model';
 import { SUDOKU_PAGES, SudokuPageManifest } from './sudoku-page.manifest';
 import { AppUserOptions } from './user-options';
@@ -57,7 +65,8 @@ export class SudokuState {
   layout$: BehaviorSubject<Layout>;
   theme$: BehaviorSubject<string>;
   isDebugMode$: Observable<boolean>;
-
+  // debug options
+  androidBottomBarBugFix$: BehaviorSubject<boolean>;
 
   route$: Observable<string>;
 
@@ -77,8 +86,12 @@ export class SudokuState {
     this.status$ = new BehaviorSubject<ButtonsStatus>(new ButtonsStatus());
     this.layout$ = new BehaviorSubject<Layout>({});
 
-    const o = AppUserOptions.getFeatures(SUDOKU_USER_OPTIONS_FEATURE, { theme: DEFAULT_THEME });
+    const o = AppUserOptions.getFeatures(SUDOKU_USER_OPTIONS_FEATURE, {
+      theme: DEFAULT_THEME,
+      androidBottomBarBugFix: false
+    });
     this.theme$ = new BehaviorSubject<string>(o.theme);
+    this.androidBottomBarBugFix$ = new BehaviorSubject<boolean>(!!o.androidBottomBarBugFix);
 
     this.isDebugMode$ = LocalContext.changed$.pipe(map(() => LocalContext.isLevel('debug')));
 
@@ -106,12 +119,20 @@ export class SudokuState {
       AppUserOptions.updateFeature(SUDOKU_USER_OPTIONS_FEATURE, { theme });
     });
 
-    combineLatest([this.theme$, LocalContext.changed$])
-      .subscribe(([t, c]) => this.updateStatus(calcStatusForSystemMenu(t)));
+    this.androidBottomBarBugFix$.subscribe(abbf => {
+      toggleClass(this._doc.body, 'android-bottom-bar-bug-fix', abbf);
+      AppUserOptions.updateFeature(SUDOKU_USER_OPTIONS_FEATURE, { androidBottomBarBugFix: abbf });
+    });
+
+    combineLatest([this.theme$, this.androidBottomBarBugFix$, LocalContext.changed$])
+      .subscribe(() => this.updateStatus(this._calcStatusForSystemMenu()));
 
     this.layout$.subscribe(l =>
       _keys(l).forEach(k =>
         toggleClass(this._doc.body, `layout-${k}`, (<any>l)[k])));
+
+    this.isDebugMode$.subscribe(d =>
+      toggleClass(this._doc.body, 'debug-mode', d));
 
     combineLatest([this.manifest$, this.info$, this.layout$, this.status$, this._changed$]).pipe(
       filter(([m,i,l,s,c]) => !!m && !!i))
@@ -150,6 +171,20 @@ export class SudokuState {
     });
   }
 
+  private _calcStatusForSystemMenu(): Partial<ButtonsStatus> {
+    return {
+      hidden: {
+        [SYSTEM_MENU_CODE.darkTheme]: this.theme$.value === THEME_DARK,
+        [SYSTEM_MENU_CODE.lightTheme]: this.theme$.value === THEME_LIGHT,
+        [SYSTEM_MENU_CODE.androidBottomBarBugFix]: !LocalContext.isLevel('debug'),
+      },
+      active: {
+        [SYSTEM_MENU_CODE.globalDebug]: LocalContext.isLevel('debug'),
+        [SYSTEM_MENU_CODE.androidBottomBarBugFix]: this.androidBottomBarBugFix$.value
+      }
+    }
+  }
+
   private _handleSystemMenu(item: MenuItem) {
     switch (item.code) {
       case SYSTEM_MENU_CODE.restoreSettings:
@@ -163,6 +198,9 @@ export class SudokuState {
         break;
       case SYSTEM_MENU_CODE.globalDebug:
         LocalContext.toggleLevel('debug');
+        break;
+      case SYSTEM_MENU_CODE.androidBottomBarBugFix:
+        this.androidBottomBarBugFix$.next(!this.androidBottomBarBugFix$.value);
         break;
       default:
         console.warn(...SDK_PREFIX, 'unknown system menu item', item);
@@ -201,16 +239,3 @@ export class SudokuState {
 }
 
 export const SUDOKU_STATE = new InjectionToken<SudokuState>('SUDOKU_STATE');
-
-
-export const calcStatusForSystemMenu = (theme: string): Partial<ButtonsStatus> => {
-  return {
-    hidden: {
-      [SYSTEM_MENU_CODE.darkTheme]: theme === THEME_DARK,
-      [SYSTEM_MENU_CODE.lightTheme]: theme === THEME_LIGHT,
-    },
-    active: {
-      [SYSTEM_MENU_CODE.globalDebug]: LocalContext.isLevel('debug')
-    }
-  }
-}

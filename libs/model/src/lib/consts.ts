@@ -1,4 +1,5 @@
 export const SUDOKU_AUTHOR_LINK = 'https://github.com/leolmi/sudokulab';
+export const SUDOKU_AUTHOR_MAIL = 'leo.olmi@gmail.com';
 export const DEFAULT_AVAILABLES = ['1','2','3','4','5','6','7','8','9'];
 export const SDK_PREFIX = ['%cSudokuLab', 'color:#111;background-color:yellowgreen;padding:2px 6px;'];
 export const SUDOKU_DEBUG_LEVELS_KEY = 'SUDOKULAB-DEBUG-LEVELS';
@@ -129,6 +130,7 @@ export const SYSTEM_MENU_CODE: any = {
   darkTheme: 'system-dark-theme',
   lightTheme: 'system-light-theme',
   globalDebug: 'system-debug-mode',
+  androidBottomBarBugFix: 'system-android-bbbf'
 }
 
 export const SYSTEM_MENU_ITEMS: any = {
@@ -154,6 +156,12 @@ export const SYSTEM_MENU_ITEMS: any = {
     code: SYSTEM_MENU_CODE.globalDebug,
     icon: 'bug_report',
     text: 'Debug mode',
+    logic: 'system',
+  },
+  androidBottomBarBugFix: {
+    code: SYSTEM_MENU_CODE.androidBottomBarBugFix,
+    icon: 'call_to_action',
+    text: `Android Bottom Bar Fix`,
     logic: 'system',
   }
 }

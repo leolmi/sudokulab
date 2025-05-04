@@ -126,7 +126,6 @@ export const toggleBodyClass2 = (doc: Document, cl_true: string, cl_false: strin
   }
 }
 
-
 export const setBodyClass = (doc: Document, clin: string, clout: string) => {
   doc.body.classList.replace(clout, clin);
 }
