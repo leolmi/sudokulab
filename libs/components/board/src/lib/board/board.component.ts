@@ -200,7 +200,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:paste', ['$event'])
   pastEvent(event: ClipboardEvent) {
-    if (!this.status.isPasteEnabled) return;
+    if (!this.status.isPasteEnabled || !this.manager?.focused$.value) return;
     const values = event.clipboardData?.getData('text')||'';
     if (isSchemaString(values)) this.pasteSchemaRequest.emit(values);
   }

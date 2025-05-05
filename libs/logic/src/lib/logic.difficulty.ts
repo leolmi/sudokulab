@@ -8,7 +8,6 @@ import {
   DIFFICULTY_RANGES,
   DIFFICULTY_UNRATED,
   getStat,
-  LocalContext,
   SudokuCell,
   SudokuStat,
   TRY_NUMBER_ALGORITHM
@@ -70,17 +69,14 @@ const _getAlgApplicationId = (a: AlgorithmResult, alg: Algorithm): string => {
  */
 const _calcDifficultyValue = (seq?: AlgorithmResult[], cells?: SudokuCell[]): number => {
   const stat = getStat(cells||[]);
-  const debug = LocalContext.isLevel('debug-diff');
   let diff = 0;
   let N = 0;
   const algCache: any = {};
-  const log_steps: any[] = [];
   (seq||[]).forEach((a, index) => {
     const alg = getAlgorithm(a.algorithm);
     if (alg) {
       if (alg.type === AlgorithmType.solver) N++;
       const appId = _getAlgApplicationId(a, alg);
-      const pre_diff = diff;
       // l'applicazione di un algoritmo già trovata ha un incremento minimo
       if (algCache[appId]) {
         diff++;
@@ -88,13 +84,8 @@ const _calcDifficultyValue = (seq?: AlgorithmResult[], cells?: SudokuCell[]): nu
         algCache[appId] = true;
         diff = _calcIncrement(diff, N, stat, alg.factor);
       }
-      if (debug) log_steps.push(`.${(index+1)} ${alg.name}  ${pre_diff} > ${diff}   appId=${appId}`);
     }
   });
-  if (debug) {
-    console.log('DIFF CALC STEPS:', log_steps);
-    console.log(`RESULT DIFF=${diff}, CACHE:`, algCache);
-  }
   return Math.floor(diff);
 }
 

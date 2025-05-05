@@ -13,7 +13,8 @@ import {
   getCellsSchema,
   getFirstJsonFile,
   getSudokuByFile,
-  isJsonType, isSchemaString,
+  isSchemaString,
+  SDK_PREFIX,
   stopEvent,
   ValueOptions
 } from '@olmi/model';
@@ -154,6 +155,7 @@ export class SchemaKeeperDialogComponent {
 
   load() {
     const schema = `${this.text$.value}`.trim().toLowerCase();
+    console.log(...SDK_PREFIX, 'try to load schema', schema);
     this._dialogRef.close(schema);
   }
 
