@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  skipSchemaCheck: false,
   debug: !!process.env.SUDOKULAB_DEBUG,
   managementKey: process.env.SUDOKULAB_MANAGEMENT_KEY||'sdklabkey',
   google: {
