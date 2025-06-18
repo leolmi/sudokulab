@@ -1,15 +1,29 @@
 import { inject, InjectionToken } from '@angular/core';
-import { combine, Environment, LocalContext, SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
+import {
+  combine,
+  Environment,
+  LocalContext,
+  OcrScanArgs,
+  OcrScanMap,
+  OcrScanResult,
+  SDK_PREFIX,
+  Sudoku,
+  SudokuEx
+} from '@olmi/model';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+
 
 const API: any = {
   info: 'info',
   getCatalog: 'sudoku/list',
   checkSchema: 'sudoku/check',
   updateCatalog: 'sudoku/upload',
-  ocrImage: 'sudoku/ocr',
-  refreshCatalog: 'sudoku/refresh'
+  refreshCatalog: 'sudoku/refresh',
+
+  ocrScan: 'ocr/scan',
+  ocrMap: 'ocr/map',
+  testOcr: 'ocr/test'
 }
 
 export class Interaction {
@@ -53,6 +67,29 @@ export class Interaction {
    */
   updateCatalog(path = 'documents/catalog.json'): Observable<any> {
     return this.http.post(this._url(API.updateCatalog), { path });
+  }
+
+  /**
+   * effettua il test per l'ocr
+   */
+  testOcr(): Observable<OcrScanResult> {
+    return this.http.post<OcrScanResult>(this._url(API.testOcr), {});
+  }
+
+  /**
+   * aggiorna l'associazione mappa-carattere per lo scanner
+   * @param map
+   */
+  ocrMap(map: OcrScanMap): Observable<any> {
+    return this.http.post(this._url(API.ocrMap), map);
+  }
+
+  /**
+   * effettua lo scan dell'immagine
+   * @param data
+   */
+  ocrScan(data: OcrScanArgs): Observable<OcrScanResult> {
+    return this.http.post<OcrScanResult>(this._url(API.ocrScan), data);
   }
 }
 

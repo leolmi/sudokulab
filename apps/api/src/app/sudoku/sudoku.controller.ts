@@ -4,8 +4,6 @@ import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { Sudoku, SudokuEx } from '@olmi/model';
 import { PathDto } from '../../model/path.dto';
-import { ImgDto } from '../../model/img.dto';
-import { OcrResult } from '../../model/ocr.result';
 import { badRequest } from '../../model/consts';
 
 
@@ -61,16 +59,6 @@ export class SudokuController {
     const result = await this.sudokuService.acquire(args.path);
     if (result.error) badRequest(result.error);
     return result.data;
-  }
-
-  /**
-   * ricava i numeri dello schema rappresentato in figura
-   * @param img
-   */
-  @Post('ocr')
-  async ocr(@Body() img: ImgDto): Promise<OcrResult> {
-    if (!img.data) badRequest('undefined image data');
-    return await this.sudokuService.ocr(img);
   }
 
   /**

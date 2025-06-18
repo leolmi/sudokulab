@@ -1,6 +1,11 @@
 <h2 mat-dialog-title class="user-select-none">Keep Schema</h2>
-<mat-dialog-content class="schema-keeper-content">
+<mat-dialog-content class="schema-keeper-content" [class.loading]="loading$|async">
   <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
+  @if (loading$|async) {
+    <div class="loader" fxLayout="row" fxLayoutAlign="center center">
+      <mat-spinner [diameter]="100" mode="indeterminate"></mat-spinner>
+    </div>
+  }
   @switch (keeperMode$|async) {
     @case (KeeperMode.chooser) {
       <div class="keeper-page page-chooser drop-enabled"
@@ -24,7 +29,7 @@
         </div>
       </div>
       <div class="keeper-chooser-label"
-           [class.hidden]="dragging$|async">Choose keeper mode or drag a json file here</div>
+           [class.hidden]="dragging$|async">Choose keeper mode or drag a json or image file here</div>
     }
     @case (KeeperMode.schema) {
       <div class="keeper-page page-keeper">
@@ -52,9 +57,20 @@
       </div>
     }
     @case (KeeperMode.image) {
-      <div class="keeper-page page-keeper">
-        IMAGE... (todo)
-      </div>
+      <div class="keeper-page page-keeper">loading image...</div>
+    }
+    @case (KeeperMode.imageCrop) {
+      <ocr-image-crop
+        class="keeper-page"
+        [image]="image$|async"
+        (cropQuad)="updateCrop($event)"
+      ></ocr-image-crop>
+    }
+    @case (KeeperMode.doubts) {
+      <ocr-doubts
+        [ocrMaps]="inDoubts$|async"
+        (doubts)="outDoubts$.next($event)"
+      ></ocr-doubts>
     }
   }
 </mat-dialog-content>

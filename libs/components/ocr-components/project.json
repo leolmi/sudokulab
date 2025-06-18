@@ -1,7 +1,7 @@
 {
-  "name": "image-manager",
+  "name": "ocr-components",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/components/image-manager/src",
+  "sourceRoot": "libs/components/ocr-components/src",
   "prefix": "lib",
   "projectType": "library",
   "tags": [],

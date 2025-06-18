@@ -10,6 +10,8 @@ import {
   DIFFICULTY_LIMIT_VALUES,
   GroupType,
   GroupTypeMap,
+  Pos,
+  Quad,
   SDK_PREFIX,
   STANDARD_CHARACTERS,
   Sudoku,
@@ -40,11 +42,12 @@ import {
   reduce as _reduce,
   repeat as _repeat,
   set as _set,
+  sortBy,
   uniqBy as _uniqBy
 } from 'lodash';
 import { getHash } from './generic.helper';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { algorithmsVersion } from '../../../package.json'
+import { algorithmsVersion } from '../../../package.json';
 
 /**
  * id cella = "col:row"
@@ -751,7 +754,6 @@ export const getSudokuByFile = (file: any, handler: (sdk: Sudoku) => void): void
   reader.readAsText(file);
 }
 
-
 export const isSchemaString = (text: string) => {
   const values = `${text||''}`.trim();
   return values.length === DEFAULT_TOTAL_RANK && /[1-9?]/g.test(values);
@@ -848,4 +850,25 @@ export const mergeStatus = (os: ButtonsStatus, chs: Partial<ButtonsStatus>): But
   _forOwn(res, (v: Dictionary<any>, k: string) =>
     (<any>res)[k||''] = {...(<any>res)[k||''], ...(<any>chs)[k||''] });
   return res;
+}
+
+export const getQuad = (points?: Pos[]): Quad => {
+  const q = new Quad();
+  if ((points || []).length !== 4) return q;
+  const tops = sortBy(points || [], 'y');
+  if (tops[0].x < tops[1].x) {
+    q.tl = { ...tops[0] };
+    q.tr = { ...tops[1] };
+  } else {
+    q.tl = { ...tops[1] };
+    q.tr = { ...tops[0] };
+  }
+  if (tops[2].x < tops[3].x) {
+    q.bl = { ...tops[2] };
+    q.br = { ...tops[3] };
+  } else {
+    q.bl = { ...tops[3] };
+    q.br = { ...tops[2] };
+  }
+  return q;
 }

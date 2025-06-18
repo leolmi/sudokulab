@@ -1,0 +1,59 @@
+<div class="sudokulab-page page-fill" fxLayout="row">
+  <div class="page-space" fxFlex></div>
+  <div class="page-content" fxLayout="column">
+    <!-- HEADER -->
+    <div class="header" fxLayout="row" fxLayoutAlign="start center">
+      @if (gridSize$|async; as size) {
+        <div class="title" fxFlex>Char map {{size}}x{{size}}</div>
+      }
+      <input class="char-input"
+             [maxLength]="1" type="text"
+             [value]="char$|async"
+             (change)="applyChar($event)">
+    </div>
+
+    <!-- OPTIONS -->
+    <div class="options">
+      <mat-slider
+        [max]="40"
+        [min]="4"
+        [step]="1"
+        [discrete]="true"
+        [showTickMarks]="true"
+        aria-labelledby="fixed numbers count">
+        <input matSliderThumb
+               [ngModel]="gridSize$|async"
+               (valueChange)="updateSize($event)">
+      </mat-slider>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid">
+      <svg class="svg-grid" viewBox="0 0 100 100">
+        <g>
+          @for (cell of cells$|async; track $index) {
+            <rect class="svg-grid-cell"
+                  (mouseenter)="over(cell)"
+                  [class.active]="cell.active"
+                  [attr.width]="cell.size"
+                  [attr.height]="cell.size"
+                  [attr.x]="cell.x"
+                  [attr.y]="cell.y"
+                  (click)="toggle(cell)"
+            ></rect>
+          }
+        </g>
+      </svg>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar" fxLayout="row" fxLayoutAlign="start center">
+      <button mat-button (click)="testOcr()">Test OCR</button>
+      <div fxFlex></div>
+      @if (activeCell$|async; as ac) {
+        <div class="position">{{ac.posX}},{{ac.posY}}</div>
+      }
+    </div>
+  </div>
+  <div class="page-space" fxFlex></div>
+</div>

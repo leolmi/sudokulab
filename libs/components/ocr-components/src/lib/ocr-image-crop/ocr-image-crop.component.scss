@@ -1,0 +1,13 @@
+.crop-area-polygon {
+  fill: transparent;
+  stroke: orangered;
+  stroke-width: .5;
+  stroke-dasharray: 2, 1;
+}
+
+.crop-point {
+  fill: orangered;
+  stroke: #982a00;
+  stroke-width: .5;
+  cursor: pointer;
+}

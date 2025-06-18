@@ -7,6 +7,8 @@ import { DatabaseModule } from '../../database/database.module';
 @Module({
   imports: [DatabaseModule],
   controllers: [SudokuController],
-  providers: [SudokuService, ...sudokuProviders],
+  providers: [
+    SudokuService,
+    ...sudokuProviders],
 })
 export class SudokuModule {}

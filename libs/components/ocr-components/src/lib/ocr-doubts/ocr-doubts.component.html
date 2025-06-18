@@ -1,0 +1,10 @@
+@for (ocm of ocrMaps$|async; track $index) {
+  <div class="ocr-map" fxLayout="row" fxLayoutAlign="start center">
+    <img class="ocr-map-image" [src]="ocm.src">
+    <div fxFlex></div>
+    <input class="ocr-map-text"
+           [maxLength]="1" type="text"
+           [value]="ocm.text"
+           (change)="applyChar($event, ocm)">
+  </div>
+}

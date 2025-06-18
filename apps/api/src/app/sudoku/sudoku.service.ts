@@ -56,15 +56,7 @@ export class SudokuService implements OnModuleInit {
     this.checkAll();
   }
 
-  async ocr(img: ImgDto, o?: OcrOptions): Promise<OcrResult> {
 
-    notImplemented();
-
-    // TODO...
-    //   return await ocr(img, o);
-
-    return Promise.resolve(new OcrResult());
-  }
 
   async manage(data: any): Promise<any> {  //ManageDto
 
@@ -128,6 +120,10 @@ export class SudokuService implements OnModuleInit {
    * ricalcola tutti gli schemi non aggiornati in catalogo
    */
   async checkAll() {
+    if (environment.skipSchemaCheck) {
+      console.log('schema check skipped.');
+      return;
+    }
     const t = performance.now();
     const sdks = await this.sudokuModel.find().exec();
     const tot = sdks.length;

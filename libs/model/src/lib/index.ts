@@ -13,6 +13,7 @@ export * from './layout';
 export * from './logic';
 export * from './menu-item';
 export * from './notifier';
+export * from './ocr-scan';
 export * from './options';
 export * from './pos';
 export * from './print-page';

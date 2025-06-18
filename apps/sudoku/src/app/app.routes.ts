@@ -1,5 +1,13 @@
 import { Route } from '@angular/router';
-import { generatorRoutes, infosRoutes, playerRoutes, printRoutes, managementRoutes, defaultRoutes } from './pages';
+import {
+  generatorRoutes,
+  infosRoutes,
+  playerRoutes,
+  printRoutes,
+  managementRoutes,
+  defaultRoutes,
+  mapsRoutes
+} from './pages';
 
 
 export const appRoutes: Route[] = [
@@ -8,5 +16,6 @@ export const appRoutes: Route[] = [
   ...infosRoutes,
   ...printRoutes,
   ...managementRoutes,
+  // ...mapsRoutes,
   ...defaultRoutes
 ];

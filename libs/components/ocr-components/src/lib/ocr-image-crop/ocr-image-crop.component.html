@@ -1,0 +1,26 @@
+@if (image) {
+  <svg class="svg-image"
+       xmlns="http://www.w3.org/2000/svg"
+       #desktop
+       width="100%" viewBox="0 0 100 100"
+       (mousemove)="dragCropPoint($event)"
+       (touchmove)="touchCropPoint($event)">
+    <image #imageRaw width="100%" [attr.href]="image" />
+    <g>
+      <polygon [attr.points]="poligonPoints$|async" class="crop-area-polygon" />
+      @for (cp of points$|async; track $index) {
+        <circle class="crop-point"
+                [class.dragging]="(dragging$|async)===cp.id"
+                r="2"
+                (mousedown)="dragThis(cp)"
+                (mouseup)="dragThis()"
+                (touchstart)="dragThis(cp)"
+                (touchend)="dragThis()"
+                [attr.cx]="cp.x"
+                [attr.cy]="cp.y"></circle>
+      }
+    </g>
+  </svg>
+} @else {
+  <div>no image data</div>
+}

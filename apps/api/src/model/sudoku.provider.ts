@@ -1,6 +1,5 @@
 import { Connection } from 'mongoose';
 import { SudokuSchema } from './sudoku.schema';
-
 const SUDOKU_SCHEMA_NAME = 'Sudoku2';
 
 export const sudokuProviders = [

@@ -1,0 +1,13 @@
+<h2 mat-dialog-title class="user-select-none">Characters</h2>
+<mat-dialog-content class="schema-keeper-content">
+  <ocr-doubts
+    [ocrMaps]="data.doubts"
+    (isValid)="valid$.next($event)"
+    (doubts)="ocrMaps$.next($event)"
+  ></ocr-doubts>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <div fxFlex></div>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [disabled]="!(valid$|async)" (click)="apply()">Apply</button>
+</mat-dialog-actions>

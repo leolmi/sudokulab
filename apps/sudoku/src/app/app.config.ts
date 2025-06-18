@@ -6,6 +6,7 @@ import {
   GeneratorPageManifest,
   InfosPageManifest,
   ManagementPageManifest,
+  MapsPageManifest,
   PlayerPageManifest,
   PrintPageManifest,
   SUDOKU_PAGE_GENERATOR_LOGIC,
@@ -45,6 +46,7 @@ export const appConfig: ApplicationConfig = {
     { provide: SUDOKU_PAGES, useClass: InfosPageManifest, multi: true },
     { provide: SUDOKU_PAGES, useClass: PrintPageManifest, multi: true },
     { provide: SUDOKU_PAGES, useClass: ManagementPageManifest, multi: true },
+    // { provide: SUDOKU_PAGES, useClass: MapsPageManifest, multi: true },
     { provide: SUDOKU_STATE, useClass: SudokuState },
     { provide: SUDOKU_PAGE_PLAYER_LOGIC, useClass: LogicManager },
     { provide: SUDOKU_PAGE_GENERATOR_LOGIC, useClass: MultiLogicManager }

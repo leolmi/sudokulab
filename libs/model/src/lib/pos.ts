@@ -9,3 +9,17 @@ export class Pos {
   x: number;
   y: number;
 }
+
+
+export class Quad {
+  constructor(r?: Partial<Quad>) {
+    this.tl = new Pos(r?.tl);
+    this.tr = new Pos(r?.tr);
+    this.bl = new Pos(r?.bl);
+    this.br = new Pos(r?.br);
+  }
+  tl: Pos;
+  tr: Pos;
+  bl: Pos;
+  br: Pos;
+}

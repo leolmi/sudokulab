@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep as _clone, isFunction as _isFunction, isNumber as _isNumber, isString as _isString } from 'lodash';
-import { ValueType } from './lib';
+import { SDK_PREFIX, ValueType } from './lib';
 
 export function guid(): string {
   return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, c => {
@@ -158,6 +158,14 @@ export const getFirstJsonFile = (files: any) => {
   return Array.from(files||[]).find((i: any) => isJsonType(i?.type));
 }
 
+export const AVAILABLE_IMAGE_TYPE = ['image/png','image/jpeg','image/jpg','image/jpe','image/bmp'];
+
+export const isImageType = (type: string): boolean => AVAILABLE_IMAGE_TYPE.indexOf(type)>-1;
+
+export const getFirstImageFile = (files: any) => {
+  return Array.from(files||[]).find((i: any) => isImageType(i?.type));
+}
+
 export const stopEvent = (e: any) => {
   if (_isFunction(e?.preventDefault)) e.preventDefault();
   if (_isFunction(e?.stopPropagation)) e.stopPropagation();
@@ -177,4 +185,18 @@ export const scrollToElement = (doc: Document, id: string, position: ScrollLogic
       inline: 'nearest'
     });
   }
+}
+
+export const getImageByFile = (file: any, handler: (img?: string) => void): void => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      handler(<string>reader.result);
+    } catch (err) {
+      console.error(...SDK_PREFIX, 'error parsing image file', err);
+      handler();
+    }
+  };
+  reader.onerror = (err) => console.error(...SDK_PREFIX, 'error reading image file', err);
+  reader.readAsDataURL(file);
 }
