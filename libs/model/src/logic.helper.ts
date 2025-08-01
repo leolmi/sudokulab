@@ -37,6 +37,21 @@ export const resetAvailable = (cells: SudokuCell[]) => {
 }
 
 /**
+ * verifica i valori possibili e gli user values rispetto ai valori fissi presenti
+ * @param c
+ * @param vm
+ */
+const checkCellValues = (c: SudokuCell, vm: any) => {
+  if (isNumberCellValue(c.text)) {
+    c.available = [];
+    c.userValues = [];
+  } else {
+    _remove(c.available, av => !!vm[av]);
+    _remove(c.userValues, uv => !!vm[uv]);
+  }
+}
+
+/**
  * applica le regole base del sudoku:
  * - ogni gruppo (riga|colonna|quadrato) deve contenere tutti i numeri da 1-rank senza ripetizioni
  * @param cells
@@ -48,9 +63,7 @@ export const applySudokuRules = (cells: SudokuCell[], options?: ApplySudokuRules
   forEachGroup(cells, (gcells) => {
     const vm = getCellsValuesMap(gcells);
     // elimina dai valori possibili quelli già presenti nel gruppo stesso
-    gcells.forEach(c => isNumberCellValue(c.text) ?
-      c.available = [] :
-      _remove(c.available, av => !!vm[av]));
+    gcells.forEach(c => checkCellValues(c, vm));
   });
 }
 
