@@ -3,8 +3,10 @@ import {
   AlgorithmResult,
   AlgorithmResultLine,
   buildHighlights,
+  CellTypeBy,
   checkStatus,
   Condition,
+  decodeCellId,
   findGroup,
   getByVisibles,
   getCell,
@@ -70,6 +72,8 @@ export const getSingleResultLine = (c: SudokuCell|string, description: string, w
   withValue
 })];
 
+export const getOrtogonalType = (type: GroupType) => (type === GroupType.row) ? GroupType.column : GroupType.row;
+
 export interface CouplesInfos {
   /**
    * gruppo che contiene la coppia
@@ -112,8 +116,20 @@ export const onCouples = (res: AlgorithmResult,
   })
 }
 
+export const oneIsOrtogonal = (ids1: string[], ids2: string[], gtype: GroupType): boolean => {
+  const otype = getOrtogonalType(gtype);
+  const cval = CellTypeBy[otype];
+  return !!ids1.find(id1 => {
+    const cell1 = decodeCellId(id1);
+    return !!ids2.find(id2 => {
+      const cell2 = decodeCellId(id2);
+      return !!cval && (<any>cell2)[cval] === (<any>cell1)[cval];
+    })
+  })
+}
+
 export const isTheSameValueTypeOnGroups = (i1: CouplesInfos, i2: CouplesInfos): boolean =>
-  !isTheSameGroup(i1.group, i2.group) && i1.group.type === i2.group.type && i1.value === i2.value;
+  !isTheSameGroup(i1.group, i2.group) && i1.group.type === i2.group.type && i1.value === i2.value && oneIsOrtogonal(i1.ids, i2.ids, i1.group.type);
 
 /**
  * valuta ogni incrocio tra le celle coppie di i1 e i2 e se trova valori uguali diversi da quello di coppia
@@ -133,15 +149,17 @@ export const onOthers = (res: AlgorithmResult,
     const c1 = getCell(cells, cid1);
     i2.ids.find(cid2 => {
       const c2 = getCell(cells, cid2);
-      const int = _intersection(c1?.available||[], c2?.available||[]);
-      _remove(int, v => v === i1.value);
-      if (int.length>0) {
-        const value = int[0];
-        getByVisibles(cells,  [cid1, cid2]).forEach(oc => {
-          // se la cella non appartiene a nessuno dei due gruppi e contiene
-          // il possibile valore comune alla coppia
-          if (oc.available.includes(value) && !isOnGroup(oc, i1.group) && !isOnGroup(oc, i2.group)) handler(oc, value);
-        });
+      if ((c1?.available || []).length === 2 && (c2?.available || []).length === 2) {
+        const int = _intersection(c1?.available || [], c2?.available || []);
+        _remove(int, v => v === i1.value);
+        if (int.length > 0) {
+          const value = int[0];
+          getByVisibles(cells, [cid1, cid2]).forEach(oc => {
+            // se la cella non appartiene a nessuno dei due gruppi e contiene
+            // il possibile valore comune alla coppia
+            if (oc.available.includes(value) && !isOnGroup(oc, i1.group) && !isOnGroup(oc, i2.group)) handler(oc, value);
+          });
+        }
       }
       return res.applied;
     });
