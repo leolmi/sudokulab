@@ -31,6 +31,7 @@ import {
   isCopyKeys,
   isDeleteKey,
   isDirectionKey,
+  isNextStepKey,
   isSkippedKey,
   moveOnDirection,
   parseCells
@@ -249,11 +250,13 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private _handleKeyboardEvents(e: KeyboardEvent) {
     if (this.status.isDebug) console.log(...BOARD_PREFIX, 'BOARD KEY EVENT', e.key, '\nORIGINAL', e);
-    if (isDirectionKey(e.code)) {
+    if (isDirectionKey(e)) {
       this._move(e.code, this.status.nextMode);
     } else {
       // COPIA LO SCHEMA IN CLIPBOARD
       if (isCopyKeys(e)) return this.copySchemaToClipboard();
+      // NEXT STEP
+      if (isNextStepKey(e)) return this.manager?.execOperation('solve-step');
       // SKIPPED KEYS
       if (isSkippedKey(e.code)) return;
       const cell = this.manager?.selection$.value;
