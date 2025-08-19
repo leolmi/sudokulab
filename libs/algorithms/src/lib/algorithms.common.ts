@@ -3,14 +3,27 @@ import {
   AlgorithmResult,
   AlgorithmResultLine,
   buildHighlights,
-  checkStatus,
   Condition,
+  findGroup,
+  getByVisibles,
+  getCell,
   getStat,
+  GroupType,
   Highlights,
+  isOnGroup,
+  isTheSameGroup,
+  onValuesMap,
   SudokuCell,
   SudokuGroup
 } from '@olmi/model';
-import { cloneDeep as _clone, isString as _isString, reduce as _reduce, remove as _remove } from 'lodash';
+import { checkStatus } from '@olmi/logic';
+import {
+  cloneDeep as _clone,
+  intersection as _intersection,
+  isString as _isString,
+  reduce as _reduce,
+  remove as _remove
+} from 'lodash';
 
 export const ALGORITHMS: Algorithm[] = [];
 export const ALGORITHMS_MAP: {[id: string]: Algorithm} = {};
@@ -28,7 +41,7 @@ export const applyAlgorithm = (alg: Algorithm,
   handler(res);
   res.highlights = buildHighlights(res.highlights);
   if (res.applied) {
-    if (alg.options.checkAvailableOnStep) checkStatus(cells);
+    if (!!alg.options.checkAvailableOnStep) checkStatus(cells);
     res.stat = getStat(cells);
     res.cellsSnapshot = _clone(cells);
   }
@@ -56,3 +69,81 @@ export const getSingleResultLine = (c: SudokuCell|string, description: string, w
   description,
   withValue
 })];
+
+export interface CouplesInfos {
+  /**
+   * gruppo che contiene la coppia
+   */
+  group: SudokuGroup;
+  /**
+   * celle del gruppo che contiene la coppia
+   */
+  gcells: SudokuCell[];
+  /**
+   * identificativi delle celle della coppia
+   */
+  ids: string[];
+  /**
+   * valore comune della coppia
+   */
+  value: string;
+}
+
+/**
+ * esegue l'handler sulle coppie di valori possibili nei gruppi colonne e righe
+ * @param res
+ * @param cells
+ * @param handler
+ * @param validator
+ */
+export const onCouples = (res: AlgorithmResult,
+                          cells: SudokuCell[],
+                          handler: (i: CouplesInfos) => boolean,
+                          validator?: (i: CouplesInfos) => boolean) => {
+  findGroup(cells, (gcells, group) => {
+    if (group.type === GroupType.column || group.type === GroupType.row) {
+      return onValuesMap(gcells, (value, ids) => {
+        const info = <CouplesInfos>{ group, gcells, ids, value  };
+        // se nel gruppo solo due celle possono contenere il valore `value`...
+        return (ids.length === 2 && (!validator || validator(info))) ? handler(info) : res.applied;
+      });
+    }
+    return res.applied;
+  })
+}
+
+export const isTheSameValueTypeOnGroups = (i1: CouplesInfos, i2: CouplesInfos): boolean =>
+  !isTheSameGroup(i1.group, i2.group) && i1.group.type === i2.group.type && i1.value === i2.value;
+
+/**
+ * valuta ogni incrocio tra le celle coppie di i1 e i2 e se trova valori uguali diversi da quello di coppia
+ * esegue l'hander su ogni cella esterna ai gruppi che può vederle entrambe
+ * @param res
+ * @param cells
+ * @param i1
+ * @param i2
+ * @param handler
+ */
+export const onOthers = (res: AlgorithmResult,
+                         cells: SudokuCell[],
+                         i1: CouplesInfos,
+                         i2: CouplesInfos,
+                         handler: (oc: SudokuCell, v: string) => void) => {
+  i1.ids.forEach(cid1 => {
+    const c1 = getCell(cells, cid1);
+    i2.ids.find(cid2 => {
+      const c2 = getCell(cells, cid2);
+      const int = _intersection(c1?.available||[], c2?.available||[]);
+      _remove(int, v => v === i1.value);
+      if (int.length>0) {
+        const value = int[0];
+        getByVisibles(cells,  [cid1, cid2]).forEach(oc => {
+          // se la cella non appartiene a nessuno dei due gruppi e contiene
+          // il possibile valore comune alla coppia
+          if (oc.available.includes(value) && !isOnGroup(oc, i1.group) && !isOnGroup(oc, i2.group)) handler(oc, value);
+        });
+      }
+      return res.applied;
+    });
+  });
+}
