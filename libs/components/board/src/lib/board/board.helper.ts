@@ -70,9 +70,7 @@ export const parseCells = (cls?: SudokuCell[]|undefined|null, check = false, uv?
   return eff_cls;
 }
 
-export const isDirectionKey = (code: string): boolean => {
-  return _keys(AVAILABLE_DIRECTIONS).indexOf(code)>-1;
-}
+export const isDirectionKey = (e: KeyboardEvent): boolean => !e.ctrlKey && _keys(AVAILABLE_DIRECTIONS).indexOf(e.code)>-1;
 
 export const isSkippedKey = (code: string): boolean => SKIPPED_KEYS[code];
 
@@ -81,6 +79,8 @@ export const isDeleteKey = (code: string): boolean => code===DELETE_KEY;
 export const isCopyKeys = (e: KeyboardEvent): boolean => (e.key==='c' && e.ctrlKey) || e.key === 'Copy';
 
 export const isPasteKeys = (e: KeyboardEvent): boolean => (e.key==='v' && e.ctrlKey) || e.key === 'Paste';
+
+export const isNextStepKey = (e: KeyboardEvent): boolean => e.ctrlKey && e.code === 'ArrowRight';
 
 export const moveOnDirection = (direction: string, current?: Cell|undefined|null, mode?: BoardNextMode): Cell => {
   const rank = DEFAULT_RANK;
