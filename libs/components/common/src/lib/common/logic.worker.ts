@@ -81,13 +81,24 @@ const execute = (args: LogicWorkerData) => {
   }
 }
 
+const getUseTryAlgorithmByMode = (args?: LogicWorkerData): boolean => {
+  switch (args?.operation) {
+    case 'help':
+    case 'solve-step':
+      return false;
+    default:
+      return true;
+  }
+}
+
 const getSolveOptions = (args?: LogicWorkerData): SolveOptions => {
   const mode = operationToMode(args?.operation);
   return <SolveOptions>{
     mode,
     debug: !!args?.debug,
     allowHidden: args?.operation === 'help',
-    toStep: _get(args?.params, 'step')
+    toStep: _get(args?.params, 'step'),
+    useTryAlgorithm: getUseTryAlgorithmByMode(args)
   };
 }
 
