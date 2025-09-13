@@ -60,7 +60,7 @@ export const translate = (ss: any[]): Sudoku[] => {
 }
 
 const _solve = (sdk: Sudoku): SudokuEx => {
-  const work = solve(sdk);
+  const work = solve(sdk, { useTryAlgorithm: true });
   return getSolution(work);
 }
 

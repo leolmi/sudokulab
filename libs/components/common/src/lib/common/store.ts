@@ -1,4 +1,4 @@
-import { BehaviorSubject, take } from 'rxjs';
+import { BehaviorSubject, catchError, of, take } from 'rxjs';
 import { inject, InjectionToken } from '@angular/core';
 import { cloneDeep as _clone, extend as _extend, isArray as _isArray } from 'lodash';
 import {
@@ -7,6 +7,7 @@ import {
   isEqualCaseInsensitive,
   isExtendedSudoku,
   LogicExecutor,
+  NotificationType,
   SDK_PREFIX,
   Sudoku,
   SudokuEx
@@ -14,9 +15,11 @@ import {
 import { Interaction, SUDOKU_API } from './interaction';
 import { saveAs } from 'file-saver';
 import { clearSchema, getSolution, solve } from '@olmi/logic';
+import { Notifier, SUDOKU_NOTIFIER } from './notifier';
 
 export class SudokuStore {
   private readonly _interaction: Interaction;
+  private readonly _notifier: Notifier;
   generated$: BehaviorSubject<SudokuEx[]>;
   catalog$: BehaviorSubject<Sudoku[]>;
   schemaOfTheDay$: BehaviorSubject<string>;
@@ -27,6 +30,7 @@ export class SudokuStore {
 
   constructor() {
     this._interaction = inject(SUDOKU_API);
+    this._notifier = inject(SUDOKU_NOTIFIER);
     this.isFilled$ = new BehaviorSubject<boolean>(false);
     this.isFilling$ = new BehaviorSubject<boolean>(false);
     this.isDownload$ = new BehaviorSubject<boolean>(!!this._interaction.env.management);
@@ -67,7 +71,13 @@ export class SudokuStore {
   checkSchema(sdk: Sudoku): Promise<SudokuEx|undefined> {
     return new Promise<SudokuEx | undefined>((res) => {
       try {
-        this._interaction.checkSchema(sdk)
+        this._interaction
+          .checkSchema(sdk)
+          .pipe(catchError((err) => {
+            this._notifier.notify(`error while check schema`, NotificationType.error);
+            console.error(...SDK_PREFIX, `error while check schema\n\t${sdk.values}`, err);
+            return of(undefined);
+          }))
           .subscribe((r: SudokuEx|undefined) => {
             if (r) {
               this._updateCatalogItem(r._id, (ctg, s) => {

@@ -133,11 +133,13 @@ export class PlayerComponent extends PageBase {
       }
       case 'solve-to': {
         const schema = this.store.getSudoku(this.game);
-        this.openDialog<string>(SolveToDialogComponent, (step) => this.manager?.goToStep(step), { data: { schema } })
+        this.openDialog<string>(SolveToDialogComponent, (step) =>
+          this.manager?.goToStep(step), { data: { schema } })
         break;
       }
       case 'keeper': {
-        this.openDialog<string>(SchemaKeeperDialogComponent, (values) => this._checkValues(values));
+        this.openDialog<string>(SchemaKeeperDialogComponent, (values) =>
+          this._checkValues(values));
         break;
       }
       case 'clear-highlights': {

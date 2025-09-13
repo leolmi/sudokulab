@@ -1,6 +1,6 @@
 import { SUDOKU_DEBUG_LEVELS_KEY } from './lib';
-import { remove as _remove} from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { remove as _remove } from 'lodash';
+import { BehaviorSubject, map } from 'rxjs';
 
 const sanitizeLevel = (l: string): string => `${l||''}`.trim().toLowerCase();
 
@@ -45,6 +45,8 @@ export class LocalContext {
     const levels = getLevels();
     return !!(ls || []).find(l => levels.includes(sanitizeLevel(l)));
   }
+
+  static isDebugMode$ = LocalContext.changed$.pipe(map(() => LocalContext.isLevel('debug')));
 }
 
 

@@ -168,6 +168,9 @@ const getStatError = (s: SolveStat, work: SolveWork): string|undefined => {
   return undefined;
 }
 
+export const hasErrors = (work: SolveWork) =>
+  !!work.solutions.find(s => s.status === 'error');
+
 export const getWorkStat = (work: SolveWork): SolveStat => {
   const stat = new SolveStat();
   stat.isOutOfRange = work.solutions.filter(s => s.status === 'out-of-range').length > 0;

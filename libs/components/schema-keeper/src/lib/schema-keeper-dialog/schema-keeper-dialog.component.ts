@@ -16,18 +16,23 @@ import {
   getImageByFile,
   getSudokuByFile,
   isSchemaString,
+  LocalContext,
+  NotificationType,
   OcrScanDoubt,
   OcrScanMap,
   OcrScanResult,
-  Pos, Quad,
+  Quad,
   SDK_PREFIX,
+  SolveOptions,
   stopEvent,
+  Sudoku,
   ValueOptions
 } from '@olmi/model';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { OcrDoubtsComponent, OcrImageCropComponent, OcrMapWrapper } from '@olmi/ocr-components';
-import { SUDOKU_API } from '@olmi/common';
+import { SUDOKU_API, SUDOKU_NOTIFIER } from '@olmi/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { getSolutionByStat, getWorkStat, solve } from '@olmi/logic';
 
 enum KeeperMode {
   chooser = 'chooser',
@@ -70,6 +75,8 @@ interface ChooserButton {
 export class SchemaKeeperDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<SchemaKeeperDialogComponent>);
   private readonly _interaction = inject(SUDOKU_API);
+  private readonly _notifier = inject(SUDOKU_NOTIFIER);
+  protected readonly localContext = LocalContext;
   @ViewChild('textInput') textInput: ElementRef|undefined;
   @ViewChild('fileResource') fileResource: ElementRef|undefined;
   keeperMode$: BehaviorSubject<KeeperMode>;
@@ -252,6 +259,10 @@ export class SchemaKeeperDialogComponent {
     }
   }
 
+  get schema() {
+    return `${this.text$.value||''}`.trim().toLowerCase();
+  }
+
   load() {
     switch (this.keeperMode$.value) {
       case KeeperMode.imageCrop:
@@ -261,10 +272,27 @@ export class SchemaKeeperDialogComponent {
         this._manageDoubts();
         break;
       default:
-        const schema = `${this.text$.value}`.trim().toLowerCase();
-        console.log(...SDK_PREFIX, 'try to load schema', schema);
-        this._dialogRef.close(schema);
+        console.log(...SDK_PREFIX, 'try to load schema', this.schema);
+        this._dialogRef.close(this.schema);
         break;
+    }
+  }
+
+  testSolve() {
+    const values = this.schema;
+    const sdk = new Sudoku({ values })
+    const options = new SolveOptions({
+      useTryAlgorithm: true,
+      debug: true
+    });
+    const res = solve(sdk, options);
+    const stat = getWorkStat(res);
+    const sol = getSolutionByStat(stat);
+    console.log('RESULTS', res, '\n\tSTAT', stat, '\n\tSOLUTION', sol);
+    if (sol) {
+      this._notifier.notify('solution found', NotificationType.success);
+    } else {
+      this._notifier.notify('No solution found', NotificationType.error);
     }
   }
 

@@ -10,6 +10,7 @@ import {
   findGroup,
   getByVisibles,
   getCell,
+  getCellGroups,
   getStat,
   GroupType,
   Highlights,
@@ -24,7 +25,8 @@ import {
   intersection as _intersection,
   isString as _isString,
   reduce as _reduce,
-  remove as _remove
+  remove as _remove,
+  uniq as _uniq
 } from 'lodash';
 
 export const ALGORITHMS: Algorithm[] = [];
@@ -80,7 +82,7 @@ export interface CouplesInfos {
    */
   group: SudokuGroup;
   /**
-   * celle del gruppo che contiene la coppia
+   * tutte (9) celle del gruppo che contiene la coppia
    */
   gcells: SudokuCell[];
   /**
@@ -95,6 +97,8 @@ export interface CouplesInfos {
 
 /**
  * esegue l'handler sulle coppie di valori possibili nei gruppi colonne e righe
+ * (in ogni cella della coppia restituita possono essere inseriti solo 2 valori e
+ * entrambe le celle possono contenere il valore CouplesInfos.value)
  * @param res
  * @param cells
  * @param handler
@@ -116,6 +120,32 @@ export const onCouples = (res: AlgorithmResult,
   })
 }
 
+/**
+ * restituisce gli altri valori (diversi da value) che la coppia
+ * di celle può contenere
+ * @param cells
+ * @param value
+ */
+export const getOthers = (cells: SudokuCell[], value: string) => {
+  const values = [...cells[0].available, ...cells[1].available];
+  _remove(values, v => v === value);
+  return _uniq(values);
+}
+
+/**
+ * esegue il gestore su ogni gruppo che contiene la cella escluso quello indicato (se presente)
+ * @param cells
+ * @param cid
+ * @param xgid
+ * @param handler
+ */
+export const onCellGroups = (cells: SudokuCell[], cid: string, xgid: string|undefined, handler: (g: SudokuGroup) => boolean) => {
+  const cell = getCell(cells, cid);
+  getCellGroups(cell)
+    .filter(g => g.id !== (xgid||''))
+    .find(g => handler(g));
+}
+
 export const oneIsOrtogonal = (ids1: string[], ids2: string[], gtype: GroupType): boolean => {
   const otype = getOrtogonalType(gtype);
   const cval = CellTypeBy[otype];
@@ -130,6 +160,14 @@ export const oneIsOrtogonal = (ids1: string[], ids2: string[], gtype: GroupType)
 
 export const isTheSameValueTypeOnGroups = (i1: CouplesInfos, i2: CouplesInfos): boolean =>
   !isTheSameGroup(i1.group, i2.group) && i1.group.type === i2.group.type && i1.value === i2.value && oneIsOrtogonal(i1.ids, i2.ids, i1.group.type);
+
+/**
+ * vero se la cella contiene N valori possibili
+ * @param c
+ * @param N (default = 2)
+ */
+export const hasNAvailable = (c: SudokuCell|undefined, N = 2): boolean =>
+  !c?.text && (c?.available||[]).length === N;
 
 /**
  * valuta ogni incrocio tra le celle coppie di i1 e i2 e se trova valori uguali diversi da quello di coppia
@@ -149,16 +187,19 @@ export const onOthers = (res: AlgorithmResult,
     const c1 = getCell(cells, cid1);
     i2.ids.find(cid2 => {
       const c2 = getCell(cells, cid2);
-      if ((c1?.available || []).length === 2 && (c2?.available || []).length === 2) {
+      if (hasNAvailable(c1) && hasNAvailable(c2)) {
         const int = _intersection(c1?.available || [], c2?.available || []);
         _remove(int, v => v === i1.value);
         if (int.length > 0) {
           const value = int[0];
-          getByVisibles(cells, [cid1, cid2]).forEach(oc => {
-            // se la cella non appartiene a nessuno dei due gruppi e contiene
-            // il possibile valore comune alla coppia
-            if (oc.available.includes(value) && !isOnGroup(oc, i1.group) && !isOnGroup(oc, i2.group)) handler(oc, value);
-          });
+          // const cids = [...i1.ids, ...i2.ids];
+          getByVisibles(cells, [cid1, cid2])
+            // .filter(oc => !cids.includes(oc.id))
+            .forEach(oc => {
+              // se la cella non appartiene a nessuno dei due gruppi e contiene
+              // il possibile valore comune alla coppia
+              if (oc.available.includes(value) && !isOnGroup(oc, i1.group) && !isOnGroup(oc, i2.group)) handler(oc, value);
+            });
         }
       }
       return res.applied;

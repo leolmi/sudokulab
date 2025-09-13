@@ -115,6 +115,13 @@ export const getCoord = (c: string|Cell|undefined): string => {
 }
 
 /**
+ * restituisce l'elenco delle coordinate delle celle
+ * @param cids
+ */
+export const getCoords = (cids: string[]): string =>
+  cids.map(cid => getCoord(cid)).join(',')
+
+/**
  * decifra le coordinate della cella
  * @param id
  */

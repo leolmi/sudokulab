@@ -6,11 +6,16 @@ export class ApplyAlgorithmOptions {
     Object.assign(<any>this, o||{});
 
     this.useTryAlgorithm = !!o?.useTryAlgorithm;
+    this.skipAlgorithm = o?.skipAlgorithm||[];
   }
   /**
    * abilita l'utilizzo del metodo brutal-force
    */
   useTryAlgorithm?: boolean;
+  /**
+   * skippa gli algoritmi in elenco
+   */
+  skipAlgorithm?: string[];
 }
 
 export type SolveMode = 'all'|'one-step'|'to-try'|'to-step';
@@ -67,6 +72,7 @@ export class SolveSolution {
   cells: SudokuCell[];
   sequence: AlgorithmResult[];
   status: SolveStatus;
+  message?: string;
 }
 
 /**

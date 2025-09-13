@@ -81,6 +81,9 @@
   <div fxFlex></div>
   <button mat-button mat-dialog-close>Cancel</button>
   @if ((keeperMode$|async)!==KeeperMode.chooser) {
+    @if (localContext.isDebugMode$|async) {
+      <button mat-button [disabled]="!(valid$|async)" (click)="testSolve()">Test solve</button>
+    }
     <button mat-button [disabled]="!(valid$|async)" (click)="load()">Load</button>
   }
 </mat-dialog-actions>
