@@ -36,10 +36,10 @@ export class OcrImageMapComponent {
   }
 
   async apply() {
-    const maps = this.ocrMaps$.value;
-    for (const m of maps) {
-      await firstValueFrom(this._interaction.ocrMap(<OcrScanMap>m));
-    }
+    // const maps = this.ocrMaps$.value;
+    // for (const m of maps) {
+    //   await firstValueFrom(this._interaction.ocrMap(<OcrScanMap>m));
+    // }
     this._dialogRef.close();
   }
 }

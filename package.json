@@ -35,6 +35,7 @@
     "jimp": "^1.6.0",
     "lodash": "^4.17.21",
     "mongoose": "^8.13.2",
+    "opencv-wasm": "^4.3.0-10",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"

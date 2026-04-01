@@ -32,7 +32,6 @@ class GridCell {
     MatSlider,
     MatSliderThumb,
     ReactiveFormsModule,
-    MatButton
   ],
   selector: 'sudoku-maps',
   templateUrl: './maps.component.html',
@@ -157,18 +156,18 @@ export class MapsComponent extends PageBase {
     this.notifier.notify('Char map copied successfully', NotificationType.success);
   }
 
-  testOcr() {
-    this.interaction.testOcr().subscribe(res => {
-      if ((res.doubts||[]).length>0) {
-        this._dialog.open(OcrImageMapComponent, {
-          data: res,
-          width: '500px',
-          minHeight: '400px'
-        });
-      }
-      console.log('TEST OCR RESULT:', res.values);
-    })
-  }
+  // testOcr() {
+  //   this.interaction.testOcr().subscribe(res => {
+  //     if ((res.doubts||[]).length>0) {
+  //       this._dialog.open(OcrImageMapComponent, {
+  //         data: res,
+  //         width: '500px',
+  //         minHeight: '400px'
+  //       });
+  //     }
+  //     console.log('TEST OCR RESULT:', res.values);
+  //   })
+  // }
 
   over(cell: GridCell) {
     this.activeCell$.next({ ...cell });

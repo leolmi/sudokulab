@@ -5,6 +5,10 @@ dist
 tmp
 out-tsc
 
+# tesseract language data (keep .gz in assets, ignore uncompressed)
+*.traineddata
+!apps/api/src/assets/tessdata/*.gz
+
 # dependencies
 node_modules
 
@@ -33,6 +37,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+temp
 
 # System Files
 .DS_Store
@@ -42,3 +47,15 @@ Thumbs.db
 .nx/workspace-data
 
 .angular
+
+# Claude
+.claude/worktrees
+
+# Environment files — NEVER commit
+.env
+.env.*
+!.env.example
+
+# Secret files — NEVER commit
+.secret
+.secret.*

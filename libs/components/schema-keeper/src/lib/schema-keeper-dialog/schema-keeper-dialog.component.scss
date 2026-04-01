@@ -96,6 +96,16 @@
     }
   }
 
+  .page-image-preview {
+    .image-preview {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border: 1px solid var(--sdk-color-border);
+      border-radius: 4px;
+    }
+  }
+
   &.loading {
     .keeper-page,
     .keeper-chooser-label {

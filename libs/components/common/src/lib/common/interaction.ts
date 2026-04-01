@@ -69,20 +69,20 @@ export class Interaction {
     return this.http.post(this._url(API.updateCatalog), { path });
   }
 
-  /**
-   * effettua il test per l'ocr
-   */
-  testOcr(): Observable<OcrScanResult> {
-    return this.http.post<OcrScanResult>(this._url(API.testOcr), {});
-  }
+  // /**
+  //  * effettua il test per l'ocr
+  //  */
+  // testOcr(): Observable<OcrScanResult> {
+  //   return this.http.post<OcrScanResult>(this._url(API.testOcr), {});
+  // }
 
-  /**
-   * aggiorna l'associazione mappa-carattere per lo scanner
-   * @param map
-   */
-  ocrMap(map: OcrScanMap): Observable<any> {
-    return this.http.post(this._url(API.ocrMap), map);
-  }
+  // /**
+  //  * aggiorna l'associazione mappa-carattere per lo scanner
+  //  * @param map
+  //  */
+  // ocrMap(map: OcrScanMap): Observable<any> {
+  //   return this.http.post(this._url(API.ocrMap), map);
+  // }
 
   /**
    * effettua lo scan dell'immagine

@@ -1,6 +1,7 @@
 <h2 mat-dialog-title class="user-select-none">Keep Schema</h2>
 <mat-dialog-content class="schema-keeper-content" [class.loading]="loading$|async">
   <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
+  <input class="hidden file-resource" type="file" accept="image/*" #imageResource (change)="onImageChange($event)">
   @if (loading$|async) {
     <div class="loader" fxLayout="row" fxLayoutAlign="center center">
       <mat-spinner [diameter]="100" mode="indeterminate"></mat-spinner>
@@ -56,21 +57,12 @@
         </mat-form-field>
       </div>
     }
-    @case (KeeperMode.image) {
-      <div class="keeper-page page-keeper">loading image...</div>
-    }
-    @case (KeeperMode.imageCrop) {
-      <ocr-image-crop
-        class="keeper-page"
-        [image]="image$|async"
-        (cropQuad)="updateCrop($event)"
-      ></ocr-image-crop>
-    }
-    @case (KeeperMode.doubts) {
-      <ocr-doubts
-        [ocrMaps]="inDoubts$|async"
-        (doubts)="outDoubts$.next($event)"
-      ></ocr-doubts>
+    @case (KeeperMode.imagePreview) {
+      <div class="keeper-page page-image-preview" fxLayout="column" fxLayoutAlign="center center">
+        @if (image$|async; as img) {
+          <img class="image-preview" [src]="img" alt="Sudoku image">
+        }
+      </div>
     }
   }
 </mat-dialog-content>
