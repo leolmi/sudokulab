@@ -19,7 +19,8 @@ console.log(`
 `)
 
 
-if (environment.debug) console.log('APP ENVIRONMENTS', environment);
+if (environment.debug) Logger.log('APP ENVIRONMENTS', environment);
+Logger.log(`APP MODE: ${environment.production ? 'PRODUCTION' : 'DEVELOPMENT'}`);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: !process.env.DISABLED_CORS });

@@ -10,7 +10,10 @@ import { preProcessImage, scanCells, splitImage } from './ocr.helper';
 export class OcrService {
 
   async ocr(img: ImgDto, options?: OcrOptions): Promise<OcrResult> {
-    const context = new OcrContext({ options, debug: true });
+    const context = new OcrContext({
+      options,
+      debug: !!process.env.SUDOKULAB_DEBUG,
+    });
     const data = img.data.replace(/^data:image\/.*;base64,/g, '');
     context.raw = Buffer.from(data, 'base64');
 

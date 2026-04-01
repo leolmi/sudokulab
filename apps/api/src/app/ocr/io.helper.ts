@@ -9,6 +9,8 @@ export const saveImage = async (
   folder: string,
   filename: string
 ) => {
+  // su heroku non è possibile salvare in locale
+  if (process.env.DYNO) return;
   const dir = path.join(TEMP_DIR, folder);
   fs.mkdirSync(dir, { recursive: true });
   const filePath = path.join(dir, filename);
