@@ -210,14 +210,23 @@ export class BoardStatus {
     this.valuesMode = s?.valuesMode||DEFAULT_VALUES_MODE;
   }
 
+  // attiva il debug
   isDebug: boolean;
+  // attiva i valori secondari
   isPencil: boolean;
+  // disabilita l'interazione utente
   isDisabled: boolean;
+  // attiva i valori disponibili
   isAvailable: boolean;
+  // attiva i valori dinamici
   isDynamic: boolean;
+  // attiva la visualizzazione delle coordinate
   isCoord: boolean;
+  // permette di inserire ripetutamente l'ultimo valore valido inserito
   isLock: boolean;
+  // attiva la notifica dei cambiamenti
   isNotify: boolean;
+  // attiva il supporto per la combinazione di tasti CRTL-V
   isPasteEnabled: boolean;
 
   nextMode: BoardNextMode;

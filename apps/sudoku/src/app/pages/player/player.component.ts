@@ -29,7 +29,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SchemasDialogComponent } from '@olmi/schemas-browser';
 import { SchemaHeaderComponent } from '@olmi/schema-header';
-import { SchemaKeeperDialogComponent } from '@olmi/schema-keeper';
+import { SchemaKeeperDialogComponent, SchemaKeeperErrorAction, SchemaKeeperErrorDialogComponent } from '@olmi/schema-keeper';
 import { AppUserOptions } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
@@ -231,7 +231,31 @@ export class PlayerComponent extends PageBase {
 
   private _checkValues(values: string) {
     this.store.checkSchema(new Sudoku({ values }))
-      .then(sdkx => this._game$.next(sdkx?.values||''));
+      .then(sdkx => this._game$.next(sdkx?.values||''))
+      .catch(err => this._handleSchemaError(values, err));
+  }
+
+  private _handleSchemaError(values: string, error: any) {
+    this._dialog
+      .open(SchemaKeeperErrorDialogComponent, { data: { values, error } })
+      .afterClosed()
+      .subscribe((action: SchemaKeeperErrorAction | undefined) => {
+        switch (action) {
+          case 'edit':
+            // riapre il keeper con i valori problematici pre-caricati in modalità schema
+            this.openDialog<string>(SchemaKeeperDialogComponent,
+              (v) => this._checkValues(v),
+              { data: { values } });
+            break;
+          case 'download':
+            this._clipboard.copy(values);
+            this.notifier.notify('Stringa schema copiata negli appunti');
+            break;
+          case 'close':
+          default:
+            break;
+        }
+      });
   }
 
   ready(manager: BoardManager) {

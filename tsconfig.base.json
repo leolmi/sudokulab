@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@olmi/algorithm-info": ["libs/components/algorithm-info/src/index.ts"],
       "@olmi/algorithms": ["libs/algorithms/src/index.ts"],
       "@olmi/board": ["libs/components/board/src/index.ts"],
       "@olmi/common": ["libs/components/common/src/index.ts"],

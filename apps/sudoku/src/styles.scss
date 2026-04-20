@@ -407,6 +407,22 @@ button {
   }
 }
 
+// Dialog descrittivo degli algoritmi: responsive full-screen sotto i 720px.
+.algorithm-info-dialog-panel {
+  .mat-mdc-dialog-surface {
+    overflow: hidden;
+  }
+  @media (max-width: 720px) {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    .mat-mdc-dialog-surface {
+      border-radius: 0 !important;
+    }
+  }
+}
+
 .icon-pulse {
   animation: pulse-rotation 2s infinite;
 }

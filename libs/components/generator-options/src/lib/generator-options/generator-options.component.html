@@ -151,20 +151,19 @@
       </div>
     }
     <!-- ALGORITHMS -->
-    <div class="options-line algorithms-line">
-      <mat-label class="algorithms-label" [class.disabled]="disabled$|async">Use this algorithms</mat-label>
-      @for (alg of algorithms; track alg.name) {
-        @if (alg.id !== TRY_NUMBER_ALGORITHM || opt.allowTryAlgorithm) {
-          <mat-checkbox
-            class="algorithm-tag"
-            [disabled]="disabled$|async"
-            [checked]="((algMap$|async)||{})[alg.id]"
-            (change)="updateAlgMap(alg, $event.checked)"
-          >
-            {{alg.name}}
-          </mat-checkbox>
-        }
-      }
+    <div class="options-line algorithms-summary-line"
+         [class.disabled]="disabled$|async"
+         fxLayout="row"
+         fxLayoutAlign="start center"
+         fxLayoutGap="8px"
+         (click)="openAlgorithmsDialog()"
+         [attr.role]="'button'"
+         [attr.tabindex]="(disabled$|async) ? -1 : 0">
+      <mat-label class="algorithms-label">Use this algorithms</mat-label>
+      <div class="algorithms-summary" fxFlex [title]="algorithmsSummary$|async">
+        {{ algorithmsSummary$ | async }}
+      </div>
+      <mat-icon class="algorithms-edit-icon">tune</mat-icon>
     </div>
     <!-- NUMBER OF WORKERS -->
     <mat-label class="inner-label" [class.disabled]="disabled$|async">

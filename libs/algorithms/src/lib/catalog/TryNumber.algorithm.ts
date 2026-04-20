@@ -4,6 +4,8 @@ import {
   AlgorithmResult,
   AlgorithmType,
   checkStatus,
+  getByVisibles,
+  isEmptyCell,
   onCell,
   SudokuCell,
   TRY_NUMBER_ALGORITHM
@@ -14,7 +16,7 @@ import {
   getSingleResultLine,
   registerAlgorithm,
 } from '../algorithms.common';
-import { cloneDeep as _clone, minBy as _minBy } from 'lodash';
+import { cloneDeep as _clone } from 'lodash';
 
 /**
  * ALGORITMO
@@ -48,15 +50,36 @@ export class TryNumberAlgorithm extends Algorithm {
 
   apply = (cells: SudokuCell[]): AlgorithmResult =>
     applyAlgorithm(this, cells, (res) => {
-      // ricerca la prima cella con minor numero di valori possibili fra quelle non valorizzate
-      const cell = _minBy(cells, (c) => c.text ? 1000 : c.available.length || 1000);
-      if ((cell?.available || []).length < 1) return;
-      res.cases = (cell!.available||[]).map((v) => cloneCellsWithValue(cells, cell, v));
+      // seleziona la cella con euristica MRV + Degree:
+      // - minimo numero di candidati (MRV)
+      // - a parità, massimo numero di celle vuote visibili (Degree)
+      // ignora celle vuote con 0 candidati (schema in errore, non fork)
+      let best: SudokuCell | undefined;
+      let bestAvail = Infinity;
+      let bestDegree = -1;
+      for (const c of cells) {
+        if (!isEmptyCell(c)) continue;
+        const n = c.available.length;
+        if (n < 2) continue;
+        if (n < bestAvail) {
+          best = c;
+          bestAvail = n;
+          bestDegree = getByVisibles(cells, [c.id]).length;
+        } else if (n === bestAvail) {
+          const d = getByVisibles(cells, [c.id]).length;
+          if (d > bestDegree) {
+            best = c;
+            bestDegree = d;
+          }
+        }
+      }
+      if (!best) return;
+      res.cases = best.available.map((v) => cloneCellsWithValue(cells, best, v));
       res.applied = true;
-      res.cells = [cell!.id];
-      res.highlights = getHighlights(cell!);
-      res.descLines = getSingleResultLine(cell!,
-        `The schema has been split on cell ${(cell!.coord||'unknown')} using the values [${(cell!.available||[]).join(',')}]`, true);
+      res.cells = [best.id];
+      res.highlights = getHighlights(best);
+      res.descLines = getSingleResultLine(best,
+        `The schema has been split on cell ${best.coord||'unknown'} using the values [${best.available.join(',')}]`, true);
     });
 }
 

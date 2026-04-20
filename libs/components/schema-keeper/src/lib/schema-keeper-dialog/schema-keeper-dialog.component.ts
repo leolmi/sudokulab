@@ -1,7 +1,7 @@
-import { Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, inject, Optional, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexModule } from '@angular/flex-layout';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, catchError, combineLatest, map, Observable, of } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
@@ -89,11 +89,12 @@ export class SchemaKeeperDialogComponent {
   textLength$: Observable<number>;
   valid$: Observable<boolean>;
 
-  constructor() {
-    this.keeperMode$ = new BehaviorSubject<KeeperMode>(KeeperMode.chooser);
+  constructor(@Optional() @Inject(MAT_DIALOG_DATA) data?: { values?: string }) {
+    const presetValues = (data?.values || '').trim();
+    this.keeperMode$ = new BehaviorSubject<KeeperMode>(presetValues ? KeeperMode.schema : KeeperMode.chooser);
     this.loading$ = new BehaviorSubject<boolean>(false);
     this.dragging$ = new BehaviorSubject<boolean>(false);
-    this.text$ = new BehaviorSubject<string>('');
+    this.text$ = new BehaviorSubject<string>(presetValues);
     this.image$ = new BehaviorSubject<string>('');
 
     this.textLength$ = this.text$.pipe(map(t => `${t||''}`.length));

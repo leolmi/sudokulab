@@ -12,6 +12,9 @@ import {
 import { cloneDeep as _clone, isBoolean as _isBoolean, isString, last as _last } from 'lodash';
 import {
   AlgorithmResult,
+  applySudokuRules,
+  ApplySudokuRulesOptions,
+  checkStatus,
   Dictionary,
   GenerationStat,
   GeneratorOptions,
@@ -27,7 +30,7 @@ import {
   SudokuInfoEx,
   SudokuStat,
   update,
-  ValueOptions
+  ValueOptions,
 } from '@olmi/model';
 import { AppUserOptions, Notifier, SudokuState } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
@@ -171,6 +174,13 @@ export class BoardManager {
    */
   private _internalLogicExecute(operation?: LogicOperation, params?: any) {
     switch (operation) {
+      case 'apply-rules':
+        this._updateCells((cells) => {
+          applySudokuRules(cells, <ApplySudokuRulesOptions>params);
+          console.log('apply-rules', cells);
+          return true;
+        });
+        break;
       case 'clear':
         this._updateCells(cells => {
           cells.forEach(c => clearCell(c));
@@ -300,7 +310,7 @@ export class BoardManager {
 
   clear() {
     this.execOperation('clear');
-    this._highlights$.next('');
+    this.clearHighlights();
   }
 
   goToStep(stepS: string) {

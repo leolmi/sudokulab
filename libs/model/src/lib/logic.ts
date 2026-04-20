@@ -5,7 +5,7 @@ import { guid } from '../generic.helper';
 import { GenerationStat } from './generator';
 import { EventEmitter } from '@angular/core';
 
-export type LogicOperation = 'check'|'solve'|'stop'|'solve-step'|'solve-to'|'solve-to-try'|'clear'|'help'|'generate'|'skip'|'generation-result'|'generation-ping'|'assign'|'toggle'|'build';
+export type LogicOperation = 'apply-rules'|'check'|'solve'|'stop'|'solve-step'|'solve-to'|'solve-to-try'|'clear'|'help'|'generate'|'skip'|'generation-result'|'generation-ping'|'assign'|'toggle'|'build';
 
 
 export class LogicWorkerBase {

@@ -17,7 +17,9 @@ import {
   LogicManager,
   MultiLogicManager,
   Notifier,
+  serverBusyInterceptor,
   SUDOKU_API,
+  SUDOKU_ENVIRONMENT,
   SUDOKU_NOTIFIER,
   SUDOKU_PAGES,
   SUDOKU_PRINT_DOCUMENT,
@@ -27,7 +29,7 @@ import {
   SudokuStore
 } from '@olmi/common';
 import { printDocumentFactory } from './pages/print/print-document.factory';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { environment } from '../environment/environment';
 
 
@@ -36,7 +38,8 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes),
     provideAnimations(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([serverBusyInterceptor])),
+    { provide: SUDOKU_ENVIRONMENT, useValue: environment },
     { provide: SUDOKU_API, useFactory: () => new Interaction(environment) },
     { provide: SUDOKU_STORE, useClass: SudokuStore },
     { provide: SUDOKU_NOTIFIER, useClass: Notifier },

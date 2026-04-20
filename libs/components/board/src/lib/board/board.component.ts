@@ -114,6 +114,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     const hl = _isString(h) ?
       Coding.decodeHighlightsString(h) :
       <Highlights>h || new Highlights();
+    console.log(...BOARD_PREFIX, 'highlights on board', hl);
     this.highlights$.next(hl);
   }
 

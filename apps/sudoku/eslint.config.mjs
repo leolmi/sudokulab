@@ -28,7 +28,10 @@ export default [
   },
   {
     files: ['**/*.html'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // `!(obs$|async)` unisce "null / pending / false" in un unico ramo:
+      // scelta convenzionale del progetto, non è un errore.
+      '@angular-eslint/template/no-negated-async': 'off',
+    },
   },
 ];

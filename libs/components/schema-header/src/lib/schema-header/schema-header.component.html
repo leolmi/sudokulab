@@ -41,12 +41,17 @@
                 <mat-icon>info</mat-icon>
               </button>
               <mat-menu #menuDiff="matMenu">
-                @for (item of dfmap; track item.name) {
-                  <button mat-menu-item class="menu-item-alg">
+                @for (item of dfmap; track item.id) {
+                  <button mat-menu-item
+                          class="menu-item-alg"
+                          (click)="openAlgorithmInfo(item.id)"
+                          [matTooltip]="'Apri la descrizione di ' + item.name"
+                          matTooltipPosition="left">
                     <div fxLayout="row" fxLayoutAlign="start center">
                       <mat-icon>{{item.icon}}</mat-icon>
                       <div class="alg-value"> x {{item.value}}</div>
                       <span fxFlex>{{item.name}}</span>
+                      <mat-icon class="alg-info-open">open_in_new</mat-icon>
                     </div>
                   </button>
                 }

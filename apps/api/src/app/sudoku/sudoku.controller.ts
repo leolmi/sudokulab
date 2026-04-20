@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { SudokuService } from './sudoku.service';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
@@ -44,7 +44,7 @@ export class SudokuController {
    * @param sudokuDto
    */
   @Post('check')
-  async check(@Body() sudokuDto: SudokuDto): Promise<SudokuEx|undefined> {
+  async check(@Body() sudokuDto: SudokuDto): Promise<SudokuEx> {
     if (!sudokuDto.values) badRequest('undefined schema data');
     return this.sudokuService.check(sudokuDto);
   }
@@ -62,10 +62,30 @@ export class SudokuController {
   }
 
   /**
-   * verifica la versione di tutti gli schemi in catalogo
+   * verifica la versione di tutti gli schemi in catalogo.
+   * Query param `force=true` ignora la cache e riesegue comunque.
    */
   @Post('check-all')
-  async checkAll(): Promise<any> {
-    return this.sudokuService.checkAll();
+  async checkAll(@Query('force') force?: string): Promise<any> {
+    return this.sudokuService.checkAll({ force: force === 'true' });
+  }
+
+  /**
+   * invalida la cache dell'ultimo checkAll completato, forzando un nuovo
+   * check al prossimo avvio o alla prossima chiamata non forzata
+   */
+  @Post('invalidate-check')
+  async invalidateCheck(): Promise<any> {
+    await this.sudokuService.invalidateCheckState();
+    return { ok: true };
+  }
+
+  /**
+   * certifica l'univocità di tutti gli schemi del catalogo tramite un solver
+   * brute-force indipendente dal catalogo algoritmi (DFS + regole base)
+   */
+  @Post('verify-uniqueness')
+  async verifyUniqueness(): Promise<any> {
+    return this.sudokuService.verifyUniqueness();
   }
 }

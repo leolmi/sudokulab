@@ -2,6 +2,7 @@ import {
   AlgorithmType,
   buildSudokuCells,
   checkStatus,
+  getCellsSchema,
   hasErrors,
   isComplete,
   SDK_PREFIX,
@@ -41,10 +42,24 @@ const solveStep = (work: SolveWork, step: SolveSolution, index = 0) => {
     // se è un algoritmo risolutivo considera terminato lo step
     if (alg?.type === AlgorithmType.solver) {
       if (res.cases.length > 0) {
+        const branches = res.cases.length;
+        const splitCell = res.cells?.[0] || '?';
+        const splitValues = res.cases.map(cs => {
+          const c = cs.find(cc => cc.id === splitCell);
+          return c?.text || '?';
+        });
+        // board e candidati residui al momento dello split
+        const board = getCellsSchema(step.cells, { allowDynamic: true, allowUserValue: true });
+        const candidates = step.cells
+          .filter(c => !c.text && c.available.length > 0)
+          .map(c => `${c.id}=[${c.available.join('')}]`)
+          .join(' ');
+        console.log(...SDK_PREFIX, `[pre-split] way=${index} board=${board}`);
+        console.log(...SDK_PREFIX, `[pre-split] way=${index} candidates: ${candidates}`);
         step.cells = <SudokuCell[]>(res.cases||[]).shift();
         // aggiunge gli altri casi come percorsi alternativi al principale
         res.cases.forEach(cells => work.solutions.push(new SolveSolution({ cells, sequence: _clone(step.sequence) })));
-        // console.log('solutions counter = ', work.solutions.length);
+        console.log(...SDK_PREFIX, `[split] ${res.algorithm} on cell ${splitCell} into ${branches} branches (values=[${splitValues.join(',')}]) way=${index} total solutions=${work.solutions.length}`);
       }
       if (isComplete(step.cells)) {
         step.status = 'success';
@@ -53,6 +68,7 @@ const solveStep = (work: SolveWork, step: SolveSolution, index = 0) => {
       // se non è un algoritmo risolutivo procede ancora una volta
       if (isSolvable(work, true)) solveStep(work, step, index);
     }
+    if (work.options.debug) console.log(...SDK_PREFIX, `[step] counter=${work.counter} way=${index} algo=${res.algorithm} solutions=${work.solutions.length}`);
   } else {
     // console.log('no step result found');
     // se nessun algoritmo da risultati completa
@@ -100,6 +116,27 @@ const endSolver = (work: SolveWork) => {
   work.end = Date.now();
   checkToStepItem(work);
   if (work.options?.debug) console.log(...SDK_PREFIX, `solver ends in ${(work.end-work.start).toFixed(0)}mls`, work);
+  // diagnostica: segnala se due soluzioni success hanno lo stesso board (bug di duplicazione)
+  const successes = work.solutions.filter(s => s.status === 'success');
+  if (successes.length > 1) {
+    const snapshot = (s: SolveSolution) => getCellsSchema(s.cells, { allowUserValue: true, allowDynamic: true });
+    const byValues: Record<string, number[]> = {};
+    successes.forEach((s, i) => {
+      const key = snapshot(s);
+      (byValues[key] = byValues[key] || []).push(i);
+    });
+    const dupes = Object.entries(byValues).filter(([, idxs]) => idxs.length > 1);
+    if (dupes.length > 0) {
+      console.warn(...SDK_PREFIX, `[solve] DUPLICATE solutions detected: ${successes.length} success branches, ${dupes.length} distinct board(s) duplicated`);
+      dupes.forEach(([key, idxs]) => {
+        console.warn(...SDK_PREFIX, `  duplicated board "${key}" appears in success branches [${idxs.join(',')}]`);
+        idxs.forEach(i => {
+          const algos = successes[i].sequence.map(r => r.algorithm).join(' > ');
+          console.warn(...SDK_PREFIX, `  branch[${i}] steps: ${algos}`);
+        });
+      });
+    }
+  }
 }
 
 /**

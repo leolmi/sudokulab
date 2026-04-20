@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { AlgorithmsSelectorDialogComponent } from '../algorithms-selector-dialog/algorithms-selector-dialog.component';
 import {
   Algorithm,
   EndGenerationMode,
@@ -15,7 +17,7 @@ import {
   ValueType
 } from '@olmi/model';
 import { BehaviorSubject, combineLatest, map, Observable, of } from 'rxjs';
-import { get as _get, remove as _remove, set as _set } from 'lodash';
+import { get as _get, set as _set } from 'lodash';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
@@ -24,7 +26,7 @@ import {
   AVAILABLE_STOP_MODES,
   AVAILABLE_SYMMETRIES,
   AVAILABLE_VALUES_MODES,
-  getAlgorithmsMap,
+  getUsableAlgorithms,
   hasNewOrDynamicFixed,
   isMultischema
 } from './generator-options.helper';
@@ -42,6 +44,7 @@ import { ManagerComponentBase, MultiLogicManager, SudokuState } from '@olmi/comm
     CommonModule,
     FlexLayoutModule,
     FormsModule,
+    MatDialogModule,
     MatOption,
     MatInput,
     MatFormField,
@@ -71,13 +74,15 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
   readonly algorithms: Algorithm[];
 
   options$: BehaviorSubject<GeneratorOptions>;
-  algMap$: BehaviorSubject<any>;
+  algorithmsSummary$: Observable<string>;
 
   disabled$: Observable<boolean> = of(true);
   isMultischema$: Observable<boolean> = of(false);
   hasNewOrDynamicFixed$: Observable<boolean> = of(false);
   fixedCount$: Observable<number> = of(0);
   workersLengthChanged$: Observable<boolean>;
+
+  private readonly _dialog = inject(MatDialog);
 
   @Input()
   set options(o: GeneratorOptions | null | undefined) {
@@ -92,13 +97,38 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
 
     this.options$ = new BehaviorSubject<GeneratorOptions>(new GeneratorOptions());
     this.algorithms = getAlgorithms();
-    this.algMap$ = new BehaviorSubject<any>({});
 
-    this.options$.subscribe(o =>
-      this.algMap$.next(getAlgorithmsMap(this.algorithms, o.useAlgorithms)));
+    this.algorithmsSummary$ = this.options$.pipe(map(o => this._buildSummary(o)));
 
     this.workersLengthChanged$ = this.options$.pipe(map(o =>
       (o.workersLength||GENERATOR_MIN_WORKERS) !== MultiLogicManager.count));
+  }
+
+  private _buildSummary(opt: GeneratorOptions): string {
+    const usable = getUsableAlgorithms(this.algorithms, opt.allowTryAlgorithm);
+    const usableIds = new Set(usable.map(a => a.id));
+    const selected = (opt.useAlgorithms || []).filter(id => usableIds.has(id));
+    if (selected.length === 0 || selected.length === usable.length) {
+      return 'All algorithms';
+    }
+    return selected
+      .map(id => this.algorithms.find(a => a.id === id)?.name || id)
+      .join(', ');
+  }
+
+  openAlgorithmsDialog() {
+    if (SudokuState.isRunning$.value) return;
+    const opt = this.options$.value;
+    const usable = getUsableAlgorithms(this.algorithms, opt.allowTryAlgorithm);
+    this._dialog
+      .open(AlgorithmsSelectorDialogComponent, {
+        data: { algorithms: usable, selected: opt.useAlgorithms || [] },
+        autoFocus: false,
+      })
+      .afterClosed()
+      .subscribe((result: string[] | undefined) => {
+        if (Array.isArray(result)) this.updateOptions('useAlgorithms', result);
+      });
   }
 
   ngOnInit() {
@@ -120,13 +150,4 @@ export class GeneratorOptionsComponent extends ManagerComponentBase implements O
     this.onOptionsChanged.emit(o);
   }
 
-  updateAlgMap(alg: Algorithm, checked: boolean) {
-    const as = [...this.options$.value.useAlgorithms || []];
-    if (checked) {
-      if (!as.includes(alg.id)) as.push(alg.id)
-    } else {
-      if (as.includes(alg.id)) _remove(as, s => s === alg.id);
-    }
-    this.updateOptions('useAlgorithms', as);
-  }
 }

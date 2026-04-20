@@ -23,8 +23,8 @@ export const XYWINGS_ALGORITHM = 'XYWings';
  */
 export class XYWingsAlgorithm extends Algorithm {
   id = XYWINGS_ALGORITHM;
-  priority = 8;
-  factor = '+190';
+  priority = 11;
+  factor = '+180+(NEP*60)';
   name = 'XY-Wings';
   icon = 'widgets';
   type = AlgorithmType.support;

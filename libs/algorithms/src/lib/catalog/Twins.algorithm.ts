@@ -26,9 +26,9 @@ export const TWINS_ALGORITHM = 'Twins';
 export class TwinsAlgorithm extends Algorithm {
   id = TWINS_ALGORITHM;
   priority = 2;
-  // il twins è più difficile da vedere e usare se sono molti i numeri mancanti
-  factor = '+20+(NEP*10)';
-  name = 'Twins in group';
+  // il naked pair è più difficile da vedere e usare se sono molti i numeri mancanti
+  factor = '+25+(NEP*15)';
+  name = 'Naked Pair (Twins)';
   icon = 'bookmarks';
   type = AlgorithmType.support;
   title = 'quando una coppia di celle all\'interno di un gruppo può contenere la stessa coppia di valori questi possono essere esclusi da tutte le altre celle del gruppo e dagli altri gruppi che le contengono';

@@ -844,6 +844,8 @@ export const getRandomSchema = (sdks: Sudoku[]): Sudoku => {
 export const extendInfo = (target: Sudoku, source: Partial<Sudoku>): void => {
   if (source.name) target.name = source.name;
   if (source.info?.origin) target.info.origin = source.info.origin||'';
+  // preserva la simmetria: non è ricostruibile da `values` e andrebbe persa al ricalcolo
+  if (source.info?.symmetry) target.info.symmetry = source.info.symmetry;
   _set(target, 'info.version', algorithmsVersion);
 }
 

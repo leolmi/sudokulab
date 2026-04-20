@@ -6,9 +6,10 @@ import {
   getStat,
   SudokuCell,
   Symmetry,
+  TRY_NUMBER_ALGORITHM,
   ValorizationMode
 } from '@olmi/model';
-import { keys as _keys, reduce as _reduce } from 'lodash';
+import { keys as _keys } from 'lodash';
 
 export const AVAILABLE_SYMMETRIES = _keys(Symmetry).map(ss => ({
   description: ss,
@@ -70,7 +71,11 @@ export const hasNewOrDynamicFixed = (cells: SudokuCell[], options: GeneratorOpti
 }
 
 
-export const getAlgorithmsMap = (algorithms: Algorithm[], used: string[]): any => {
-  return _reduce(algorithms, (m, a) =>
-    ({ ...m, [a.id]: (used || []).includes(a.id) }), <any>{});
+/**
+ * Restituisce gli algoritmi selezionabili dall'utente: esclude `TryNumber`
+ * se `allowTryAlgorithm` è false (perché in quel caso l'algoritmo non può
+ * essere usato dal generatore comunque).
+ */
+export const getUsableAlgorithms = (algorithms: Algorithm[], allowTryAlgorithm: boolean): Algorithm[] => {
+  return algorithms.filter(a => a.id !== TRY_NUMBER_ALGORITHM || allowTryAlgorithm);
 }

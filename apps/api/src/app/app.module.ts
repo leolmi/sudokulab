@@ -6,10 +6,12 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { SudokuModule } from './sudoku/sudoku.module';
 import { AppLoggerMiddleware } from './app.logger';
 import { OcrModule } from './ocr/ocr.module';
+import { StatusModule } from './status/status.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({ rootPath: join(__dirname, 'public/browser') }),
+    StatusModule,
     SudokuModule,
     OcrModule
   ],

@@ -27,8 +27,9 @@ export const ALIGNMENT_ON_GROUP_ALGORITHM = 'AlignmentOnGroup';
  */
 export class AlignmentOnGroupAlgorithm extends Algorithm {
   id = ALIGNMENT_ON_GROUP_ALGORITHM;
-  priority = 3;
-  factor = '+15';
+  priority = 4;
+  // include pointing pair (box→row/col) e claiming (row/col→box)
+  factor = '+20+(NEP*12)';
   name = 'Alignment on group';
   icon = 'padding';
   type = AlgorithmType.support;

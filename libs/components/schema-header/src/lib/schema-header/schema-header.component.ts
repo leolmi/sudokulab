@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Dictionary, isEmpty, LocalContext, SDK_PREFIX, Sudoku } from '@olmi/model';
 import { BehaviorSubject, map, Observable } from 'rxjs';
@@ -7,11 +7,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { isArray as _isArray, isNumber as _isNumber, keys as _keys } from 'lodash';
 import { getAlgorithm } from '@olmi/algorithms';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olmi/algorithm-info';
 
 interface MapItem {
+  id: string;
   name: string;
   value: number;
   icon: string;
@@ -38,6 +41,8 @@ export class SchemaHeaderComponent {
   difficultyMap$: Observable<MapItem[]>;
   isEmpty$: Observable<boolean>;
 
+  private readonly _dialog = inject(MatDialog);
+
   @Input()
   set schema(s: Sudoku|undefined|null) {
     this.schema$.next(s||undefined);
@@ -52,12 +57,20 @@ export class SchemaHeaderComponent {
       return _keys(diff_map).map(k => {
         const alg = getAlgorithm(k);
         return <MapItem>{
+          id: k,
           icon: alg?.icon||'',
           name: alg?.name||'',
           value: getDiffCount(diff_map, k)
         }
       });
     }));
+  }
+
+  openAlgorithmInfo(id: string) {
+    // this._dialog.open(AlgorithmInfoDialogComponent, {
+    //   ...ALGORITHM_INFO_DIALOG_CONFIG,
+    //   data: { algorithmId: id },
+    // });
   }
 }
 

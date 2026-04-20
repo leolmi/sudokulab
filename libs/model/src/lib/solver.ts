@@ -1,5 +1,6 @@
 import { SudokuCell } from './sudoku-cell';
 import { AlgorithmResult } from './algorithm';
+import { getCellsSchema } from '../model.helper';
 
 export class ApplyAlgorithmOptions {
   constructor(o?: Partial<ApplyAlgorithmOptions>) {
@@ -73,6 +74,13 @@ export class SolveSolution {
   sequence: AlgorithmResult[];
   status: SolveStatus;
   message?: string;
+
+  /**
+   * stringa di tutti i valori della soluzione (fissi + dinamici + user-value, lunghezza 81)
+   */
+  get values(): string {
+    return getCellsSchema(this.cells, { allowDynamic: true, allowUserValue: true });
+  }
 }
 
 /**

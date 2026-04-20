@@ -24,6 +24,7 @@ export const ONE_CELL_FOR_VALUE_ALGORITHM = 'OneCellForValue';
 export class OneCellForValueAlgorithm extends Algorithm {
   id = ONE_CELL_FOR_VALUE_ALGORITHM;
   priority = 0;
+  // tecnica base: peso minimo e costante
   factor = '+10';
   name = 'One cell for value';
   icon = 'crop_free';

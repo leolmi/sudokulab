@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
-  skipSchemaCheck: false,
+  // check del catalogo all'avvio attivo di default; disattivabile con SUDOKULAB_SKIP_SCHEMA_CHECK=1
+  skipSchemaCheck: process.env.SUDOKULAB_SKIP_SCHEMA_CHECK === '1',
   debug: !!process.env.SUDOKULAB_DEBUG,
   managementKey: process.env.SUDOKULAB_MANAGEMENT_KEY||'sdklabkey',
   google: {

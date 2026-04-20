@@ -96,9 +96,9 @@ export interface CouplesInfos {
 }
 
 /**
- * esegue l'handler sulle coppie di valori possibili nei gruppi colonne e righe
- * (in ogni cella della coppia restituita possono essere inseriti solo 2 valori e
- * entrambe le celle possono contenere il valore CouplesInfos.value)
+ * esegue l'handler sulle coppie di valori possibili in TUTTI i gruppi
+ * (riga/colonna/box): due celle dello stesso gruppo che sono le uniche
+ * a poter ospitare un certo valore.
  * @param res
  * @param cells
  * @param handler
@@ -109,14 +109,11 @@ export const onCouples = (res: AlgorithmResult,
                           handler: (i: CouplesInfos) => boolean,
                           validator?: (i: CouplesInfos) => boolean) => {
   findGroup(cells, (gcells, group) => {
-    if (group.type === GroupType.column || group.type === GroupType.row) {
-      return onValuesMap(gcells, (value, ids) => {
-        const info = <CouplesInfos>{ group, gcells, ids, value  };
-        // se nel gruppo solo due celle possono contenere il valore `value`...
-        return (ids.length === 2 && (!validator || validator(info))) ? handler(info) : res.applied;
-      });
-    }
-    return res.applied;
+    return onValuesMap(gcells, (value, ids) => {
+      const info = <CouplesInfos>{ group, gcells, ids, value  };
+      // se nel gruppo solo due celle possono contenere il valore `value`...
+      return (ids.length === 2 && (!validator || validator(info))) ? handler(info) : res.applied;
+    });
   })
 }
 

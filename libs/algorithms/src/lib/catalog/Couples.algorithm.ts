@@ -32,8 +32,8 @@ export const COUPLES_ALGORITHM = 'Couples';
  */
 export class CouplesAlgorithm extends Algorithm {
   id = COUPLES_ALGORITHM;
-  priority = 4;
-  factor = '+150';
+  priority = 10;
+  factor = '+80+(NEP*40)';
   name = 'Couples over groups';
   icon = 'move_down';
   type = AlgorithmType.support;
@@ -63,7 +63,7 @@ export class CouplesAlgorithm extends Algorithm {
               if (!isTheSameCell(cell_YZ, cell_XY) && cell_YZ.available.length === 2 && YY.length === 1) {
                 // valore sinistro (X)
                 const X = _xor(cell_XY.available, YY)[0];
-                // valore destro (Y)
+                // valore destro (Z)
                 const Z = _xor(cell_YZ.available, YY)[0];
                 // ricerca del complementare sinistro
                 if (findComplementaryCell(cells, res, cell_XY, cell_YZ, g_XYZ, Z, X)) return true;
