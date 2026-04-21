@@ -12,7 +12,7 @@ export const NAKED_TRIPLE_ALGORITHM = 'NakedTriple';
  */
 export class NakedTripleAlgorithm extends Algorithm {
   id = NAKED_TRIPLE_ALGORITHM;
-  priority = 5;
+  priority = 4;
   factor = '+50+(NEP*30)';
   name = 'Naked Triple';
   icon = 'grid_3x3';

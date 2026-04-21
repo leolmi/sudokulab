@@ -11,7 +11,7 @@ export const HIDDEN_QUAD_ALGORITHM = 'HiddenQuad';
  */
 export class HiddenQuadAlgorithm extends Algorithm {
   id = HIDDEN_QUAD_ALGORITHM;
-  priority = 8;
+  priority = 7;
   factor = '+130+(NEP*65)';
   name = 'Hidden Quad';
   icon = 'bookmark_border';

@@ -67,10 +67,10 @@ export class SchemaHeaderComponent {
   }
 
   openAlgorithmInfo(id: string) {
-    // this._dialog.open(AlgorithmInfoDialogComponent, {
-    //   ...ALGORITHM_INFO_DIALOG_CONFIG,
-    //   data: { algorithmId: id },
-    // });
+    this._dialog.open(AlgorithmInfoDialogComponent, {
+      ...ALGORITHM_INFO_DIALOG_CONFIG,
+      data: { algorithmId: id },
+    });
   }
 }
 

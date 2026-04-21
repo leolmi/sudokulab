@@ -32,7 +32,7 @@ export const COUPLES_ALGORITHM = 'Couples';
  */
 export class CouplesAlgorithm extends Algorithm {
   id = COUPLES_ALGORITHM;
-  priority = 10;
+  priority = 9;
   factor = '+80+(NEP*40)';
   name = 'Couples over groups';
   icon = 'move_down';

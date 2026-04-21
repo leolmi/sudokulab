@@ -12,7 +12,7 @@ export const HIDDEN_TRIPLE_ALGORITHM = 'HiddenTriple';
  */
 export class HiddenTripleAlgorithm extends Algorithm {
   id = HIDDEN_TRIPLE_ALGORITHM;
-  priority = 6;
+  priority = 5;
   factor = '+80+(NEP*45)';
   name = 'Hidden Triple';
   icon = 'bookmark_border';

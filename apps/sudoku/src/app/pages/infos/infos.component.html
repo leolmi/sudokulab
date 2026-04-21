@@ -83,7 +83,19 @@
       <p>Quindi gli algoritmi:</p>
       <ul>
         @for (alg of algorithms; track alg.id) {
-          <li><mat-icon>{{alg.icon}}</mat-icon>&nbsp;&nbsp;<b>{{alg.name}}</b>: <i>({{TYPEDESC[alg.type]}}) {{alg.title}}</i>.<br>{{alg.description}};</li>
+          <li>
+            <mat-icon>{{alg.icon}}</mat-icon>&nbsp;&nbsp;<b>{{alg.name}}</b>
+            @if (hasInfoPage(alg.id)) {
+              <button mat-icon-button
+                      class="alg-info-btn"
+                      matTooltip="Apri la pagina di dettaglio"
+                      (click)="openAlgorithmInfo(alg.id)"
+                      aria-label="Apri la pagina di dettaglio dell'algoritmo">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            }
+            : <i>({{TYPEDESC[alg.type]}}) {{alg.title}}</i>.<br>{{alg.description}};
+          </li>
         }
       </ul>
       <p>Il risolutore quindi applica gli algoritmi visti in maniera sequenziale fino a raggiungere la soluzione ed ogni
@@ -98,7 +110,7 @@
       <br><br>
       <h1 id="help-generator">Il generatore di schemi</h1>
       <div class="image-container">
-        <img class="help-image" src="assets/images/sudokulab-generator.png" aria-label="sudokulab generator">
+        <img class="help-image" src="assets/images/sudokulab-generator.png" aria-label="sudokulab generator" alt="sudokulab generator">
       </div>
       <p>La generazione degli schemi prevede che l'utente possa definire una propria geometria delle celle fisse indicando
         dei valori esatti o dei marker [ ? ] che saranno poi valorizzati dai cicli di risoluzione.</p>
@@ -135,7 +147,7 @@
       <br><br>
       <h1 id="help-print">La stampa degli schemi</h1>
       <div class="image-container">
-        <img class="help-image" src="assets/images/sudokulab-print.png" aria-label="sudokulab print">
+        <img class="help-image" src="assets/images/sudokulab-print.png" aria-label="sudokulab print" alt="sudokulab print">
       </div>
       <p>In questa pagina è possibile stampare pagine con la rappresentazione degli schemi presenti nel catalogo. Definito
         il modello con cui saranno rappresentati nella pagina, si possono aggiungere le pagine e, selezionando il quadrante
@@ -151,17 +163,17 @@
       <br><br>
       <h1 id="help-import">Import schemi</h1>
       <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sudokulab-keeper.png" aria-label="sudokulab import">
+        <img class="help-image small-image" src="assets/images/sudokulab-keeper.png" aria-label="sudokulab import" alt="sudokulab import">
       </div>
       <p>Il tool permette di caricare schemi precedentemente scaricati in formato json. È quindi possibile scambiarsi
         schemi utilizzando l'export.</p>
       <p>Con l'opzione <i bold>String of numbers</i> è possibile invece inserire la stringa che compone lo schema.</p>
       <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sudokulab-keeper-values.png" aria-label="sudokulab import">
+        <img class="help-image small-image" src="assets/images/sudokulab-keeper-values.png" aria-label="sudokulab import" alt="sudokulab import">
       </div>
       <p>Per fare un esempio, consideriamo lo schema seguente:</p>
       <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sample_01.png" aria-label="sudokulab import sample">
+        <img class="help-image small-image" src="assets/images/sample_01.png" aria-label="sudokulab import sample" alt="sudokulab import sample">
       </div>
       <p>La corrispondente stringa che lo rappresenta è formata dai numeri presenti più gli zeri per le celle vuote, letto
         come si leggerebbe un testo qualsiasi ossia da sinistra verso destra e dall'alto verso il basso:</p>
@@ -170,18 +182,18 @@
         carattere <span code>x</span></p>
       <p>Utilizzando il pulsante <i bold>Schema</i> è possibile inserire i valori direttamente in uno schema apposito:</p>
       <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sudokulab-keeper-schema.png" aria-label="sudokulab check schema dialog">
+        <img class="help-image small-image" src="assets/images/sudokulab-keeper-schema.png" aria-label="sudokulab check schema dialog" alt="sudokulab check schema dialog">
       </div>
       <p>Come si è notato è possibile trascinare anche file di tipo immagine, e in tal caso si accederà al tool di gestione
         dell'immagine che permette all'utente di ritagliare e/o ruotare lo schema ed avviare la fase di decodifica</p>
       <div class="image-container">
-        <img class="help-image small-image" src="assets/images/handle-image.png" aria-label="sudokulab check schema dialog">
+        <img class="help-image small-image" src="assets/images/handle-image.png" aria-label="sudokulab handle image" alt="sudokulab handle image">
       </div>
       <p>Dopo tale operazione, se la decodifica ha successo lo schema letto viene aperto nel precedente tool "Check Schema"
         per correggere o integrare informazioni non correttamente interpretate.</p>
       <p>L'acquisizione dell'immagine, se il device lo supporta, è startabile anche dal pulsante apposito <mat-icon>camera</mat-icon>:</p>
       <div class="image-container">
-        <img class="help-image small-image" src="assets/images/take-picture.png" aria-label="sudokulab camera dialog">
+        <img class="help-image small-image" src="assets/images/take-picture.png" aria-label="sudokulab camera dialog" alt="sudokulab camera dialog">
       </div>
 
 

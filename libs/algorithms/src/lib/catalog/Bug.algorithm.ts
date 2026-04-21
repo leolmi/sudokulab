@@ -26,7 +26,7 @@ export const BUG_ALGORITHM = 'Bug';
  */
 export class BugAlgorithm extends Algorithm {
   id = BUG_ALGORITHM;
-  priority = 20;
+  priority = 16;
   // tecnica endgame: si applica solo con schema quasi completo
   factor = '+80+(NP*40)';
   name = 'Bug';

@@ -12,7 +12,7 @@ Versione corrente del catalogo: **`algorithmsVersion = 3.0`** (vedi `package.jso
 
 ```ts
 abstract class Algorithm {
-  id: string;                 // identificatore univoco (es. "HiddenPair")
+  id: string;                 // identificatore univoco (es. "XWings")
   name: string;               // nome visualizzato
   priority: number;           // ordine di applicazione (0 = prima)
   icon: string;               // icona Material
@@ -71,83 +71,78 @@ File: [OneValueForCell.algorithm.ts](../libs/algorithms/src/lib/catalog/OneValue
 ### 3. Naked Pair (Twins) — `priority 2`
 File: [Twins.algorithm.ts](../libs/algorithms/src/lib/catalog/Twins.algorithm.ts)
 - **id**: `Twins` · **type**: `support` · **factor**: `+25+(NEP*15)`
-- Due celle dello stesso gruppo condividono esattamente 2 candidati → escludi quei valori dalle altre celle del gruppo.
+- Due celle dello stesso gruppo condividono esattamente 2 candidati → escludi quei valori dalle altre celle del gruppo. Il finder copre anche il caso "hidden pair" (due valori confinati in due celle): per questo non esiste un algoritmo `HiddenPair` separato — la logica è già inclusa qui.
 
-### 4. Hidden Pair — `priority 3` *(nuovo)*
-File: [HiddenPair.algorithm.ts](../libs/algorithms/src/lib/catalog/HiddenPair.algorithm.ts)
-- **id**: `HiddenPair` · **type**: `support` · **factor**: `+45+(NEP*25)`
-- Due valori confinati in 2 sole celle di un gruppo → rimuovi tutti gli altri candidati da quelle celle.
-
-### 5. Alignment On Group — `priority 4`
+### 4. Alignment On Group — `priority 3`
 File: [AlignmentOnGroup.algorithm.ts](../libs/algorithms/src/lib/catalog/AlignmentOnGroup.algorithm.ts)
 - **id**: `AlignmentOnGroup` · **type**: `support` · **factor**: `+20+(NEP*12)`
 - Pointing pair (box → riga/colonna) e claiming (riga/colonna → box).
 
-### 6. Naked Triple — `priority 5` *(nuovo)*
+### 5. Naked Triple — `priority 4` *(nuovo)*
 File: [NakedTriple.algorithm.ts](../libs/algorithms/src/lib/catalog/NakedTriple.algorithm.ts)
 - **id**: `NakedTriple` · **type**: `support` · **factor**: `+50+(NEP*30)`
 - Tre celle la cui **unione** dei candidati vale esattamente 3 valori.
 
-### 7. Hidden Triple — `priority 6` *(nuovo)*
+### 6. Hidden Triple — `priority 5` *(nuovo)*
 File: [HiddenTriple.algorithm.ts](../libs/algorithms/src/lib/catalog/HiddenTriple.algorithm.ts)
 - **id**: `HiddenTriple` · **type**: `support` · **factor**: `+80+(NEP*45)`
 - Tre valori confinati in 3 sole celle di un gruppo.
 
-### 8. Naked Quad — `priority 7` *(nuovo)*
+### 7. Naked Quad — `priority 6` *(nuovo)*
 File: [NakedQuad.algorithm.ts](../libs/algorithms/src/lib/catalog/NakedQuad.algorithm.ts)
 - **id**: `NakedQuad` · **type**: `support` · **factor**: `+100+(NEP*60)`
 
-### 9. Hidden Quad — `priority 8` *(nuovo)*
+### 8. Hidden Quad — `priority 7` *(nuovo)*
 File: [HiddenQuad.algorithm.ts](../libs/algorithms/src/lib/catalog/HiddenQuad.algorithm.ts)
 - **id**: `HiddenQuad` · **type**: `support` · **factor**: `+130+(NEP*65)`
 
-### 10. X-Wings — `priority 9`
+### 9. X-Wings — `priority 8`
 File: [XWings.algorithm.ts](../libs/algorithms/src/lib/catalog/XWings.algorithm.ts)
 - **id**: `XWings` · **type**: `support` · **factor**: `+140+(NEP*50)`
 - Un valore V ha esattamente 2 posizioni su 2 righe, confinate nelle stesse 2 colonne (o viceversa) → V escluso dalle altre celle di quelle colonne.
 
-### 11. Couples — `priority 10`
+### 10. Couples — `priority 9`
 File: [Couples.algorithm.ts](../libs/algorithms/src/lib/catalog/Couples.algorithm.ts)
 - **id**: `Couples` · **type**: `support` · **factor**: `+80+(NEP*40)`
 - Coppie di valori che producono allineamenti incrociati.
 
-### 12. XY-Wings — `priority 11`
+### 11. XY-Wings — `priority 10`
 File: [XYWings.algorithm.ts](../libs/algorithms/src/lib/catalog/XYWings.algorithm.ts)
 - **id**: `XYWings` · **type**: `support` · **factor**: `+180+(NEP*60)`
 - Pivot `[A,B]` + wings `[A,X]`, `[B,X]` → escludi X dalle celle che vedono entrambe le wings. Include anche il caso precedentemente chiamato "Y-Wings" (rimosso perché sottoinsieme).
 
-### 13. Swordfish — `priority 12` *(implementato)*
+### 12. Swordfish — `priority 11` *(implementato)*
 File: [Swordfish.algorithm.ts](../libs/algorithms/src/lib/catalog/Swordfish.algorithm.ts)
 - **id**: `Swordfish` · **type**: `support` · **factor**: `+240+(NEP*100)`
 - Generalizzazione di X-Wings a 3 righe/colonne.
 
-### 14. Unique Rectangle — `priority 13` *(nuovo)*
+### 13. Unique Rectangle — `priority 12` *(nuovo)*
 File: [UniqueRectangle.algorithm.ts](../libs/algorithms/src/lib/catalog/UniqueRectangle.algorithm.ts)
 - **id**: `UniqueRectangle` · **type**: `support` · **factor**: `+160+(NEP*40)`
 - Tipo 1 e tipo 2: sfrutta il vincolo di soluzione unica (deadly pattern).
 
-### 15. Simple Colouring — `priority 14` *(nuovo)*
+### 14. Simple Colouring — `priority 13` *(nuovo)*
 File: [SimpleColouring.algorithm.ts](../libs/algorithms/src/lib/catalog/SimpleColouring.algorithm.ts)
 - **id**: `SimpleColouring` · **type**: `support` · **factor**: `+280+(NEP*100)`
 - Catene di coppie coniugate per un singolo valore + eliminazioni Color Trap / Color Wrap.
 
-### 16. Jellyfish — `priority 15` *(nuovo)*
+### 15. Jellyfish — `priority 14` *(nuovo)*
 File: [Jellyfish.algorithm.ts](../libs/algorithms/src/lib/catalog/Jellyfish.algorithm.ts)
 - **id**: `Jellyfish` · **type**: `support` · **factor**: `+360+(NEP*160)`
 - Fish di taglia 4 (4 righe/colonne).
 
-### 17. Turbot Fish — `priority 16` *(ex Chains)*
+### 16. Turbot Fish — `priority 15` *(ex Chains)*
 File: [TurbotFish.algorithm.ts](../libs/algorithms/src/lib/catalog/TurbotFish.algorithm.ts)
 - **id**: `TurbotFish` · **type**: `support` · **factor**: `+200+(NEP*80)`
 - Struttura a 3 gruppi con raccordo. Include casi Skyscraper, Two-String Kite, Empty Rectangle.
 - Rinominato da `Chains` in v3.0 (il vecchio id non è più riconosciuto).
 
-### 18. BUG — `priority 20`
+### 17. BUG — `priority 16`
 File: [Bug.algorithm.ts](../libs/algorithms/src/lib/catalog/Bug.algorithm.ts)
 - **id**: `Bug` · **type**: `support` · **factor**: `+80+(NP*40)`
 - Tecnica endgame (BUG+1). Peso dinamico via `NP` (schema pieno).
 
-### 19. Try Number — `priority 100`
+### 18. Try Number — `priority 100`
 File: [TryNumber.algorithm.ts](../libs/algorithms/src/lib/catalog/TryNumber.algorithm.ts)
 - **id**: `TryNumber` · **type**: `solver` · **factor**: `+400+(4*NU*NEP)`
 - Brute force con euristica **MRV + Degree** (v3.0): a parità di candidati, preferisce la cella che vede più celle vuote.
@@ -171,7 +166,7 @@ Oltre a [algorithms.common.ts](../libs/algorithms/src/lib/algorithms.common.ts) 
 
 - [algorithms.subset.helper.ts](../libs/algorithms/src/lib/algorithms.subset.helper.ts):
   - `applyNakedSubset(alg, cells, res, N)` → core di Naked Pair/Triple/Quad.
-  - `applyHiddenSubset(alg, cells, res, N)` → core di Hidden Pair/Triple/Quad.
+  - `applyHiddenSubset(alg, cells, res, N)` → core di Hidden Triple (N=3) / Hidden Quad (N=4). Il caso N=2 non ha un algoritmo dedicato perché `Twins` cattura già lo stesso pattern a priority più bassa.
   - `applyFish(alg, cells, res, N, baseType)` → core di Swordfish (N=3) e Jellyfish (N=4); applicabile anche a X-Wings (N=2) volendo consolidarlo.
 
 Utility di supporto:

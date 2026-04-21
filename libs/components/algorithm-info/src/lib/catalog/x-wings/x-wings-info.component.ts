@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { Highlights } from '@olmi/model';
-import { SudokuBoardPreviewComponent } from '../../sudoku-board-preview/sudoku-board-preview.component';
+import {
+  SudokuBoardPreviewComponent,
+  SudokuBoardPreviewSample,
+} from '../../sudoku-board-preview/sudoku-board-preview.component';
 
 /**
  * Pagina di descrizione dell'algoritmo X-Wings.
@@ -43,37 +45,37 @@ import { SudokuBoardPreviewComponent } from '../../sudoku-board-preview/sudoku-b
       </div>
 
       <div class="example" fxLayout="column" fxLayoutGap="12px">
-        <h3>Esempio — X-Wing per il valore 4</h3>
+        <h3>Esempio — X-Wing per il valore 1</h3>
         <p class="caption">
-          Sulle righe <strong>B</strong> e <strong>F</strong> il candidato 4 (in
-          verde) è confinato alle sole colonne <strong>1</strong> e
-          <strong>6</strong>. Le celle ai quattro vertici del rettangolo sono
-          evidenziate.
+          Stato dello schema al passo in cui il solver applica l'algoritmo. Il
+          candidato <strong>1</strong> è confinato a due sole celle in
+          <strong>colonna 3</strong> (D3, I3) e a due sole celle in
+          <strong>colonna 4</strong> (D4, I4). Le quattro celle, evidenziate in
+          primario, sono allineate sulle stesse due righe (D e I) e formano il
+          rettangolo dell'X-Wing. La cella in secondario (<strong>D5</strong>) è
+          quella su cui il solver, per effetto dell'algoritmo, rimuove il
+          candidato 1.
         </p>
         <div fxLayout="row" fxLayoutAlign="center center">
-          <sudoku-board-preview
-            [values]="example_values_1"
-            [highlights]="example_highlights_1"
-            [size]="400"
-          >
+          <sudoku-board-preview [sample]="example_1" [size]="400">
           </sudoku-board-preview>
         </div>
         <p class="caption">
-          Dato il pattern, il valore 4 può essere <strong>eliminato</strong> da
-          ogni altra cella delle colonne <strong>1</strong> e
-          <strong>6</strong>: 4 in quelle colonne può solo finire in uno dei
-          quattro vertici del rettangolo.
+          Dato il pattern, il valore 1 può essere <strong>eliminato</strong> da
+          ogni altra cella delle righe <strong>D</strong> e <strong>I</strong>:
+          in quelle righe l'1 può finire solo in uno dei quattro vertici del
+          rettangolo.
         </p>
       </div>
 
       <div>
         <h3>Perché funziona</h3>
         <p>
-          Le righe B e F devono ciascuna contenere un 4. Se entrambe lo hanno
-          solo nelle colonne 1 e 6, una delle due righe prende il 4 in colonna 1
-          e l'altra in colonna 6 (sono le uniche due combinazioni possibili). In
-          ogni caso le colonne 1 e 6 contengono già i loro 4 nei vertici, quindi
-          non possono contenerne altri.
+          Le colonne 3 e 4 devono ciascuna contenere un 1. Se entrambe lo hanno
+          solo nelle righe D e I, una delle due colonne prende l'1 in riga D e
+          l'altra in riga I (sono le uniche due combinazioni possibili). In ogni
+          caso le righe D e I contengono già i loro 1 nei vertici, quindi non
+          possono contenerne altri.
         </p>
       </div>
     </section>
@@ -119,12 +121,27 @@ import { SudokuBoardPreviewComponent } from '../../sudoku-board-preview/sudoku-b
   ],
 })
 export class XWingsInfoComponent {
-  // Schema scelto per mostrare chiaramente un X-Wing sul valore 4.
-  // 4 su r2 è confinato a c1/c6, e su r6 è confinato a c1/c6.
-  readonly example_values_1 =
-    '80030000001200000600009870000430001800000790000000060500890004000100000390000007';
+  readonly example_1: SudokuBoardPreviewSample = {
+    // Clue iniziale del puzzle (schema "9x9_25num_MEDIUM_(614457223)" preso da
+    // documents/catalog.json): definisce le celle fisse, immutabili.
+    schema:
+      '503020000900308000002000045090004000048000720000200010870000100000705002000090507',
 
-  // Evidenzia i quattro vertici del rettangolo: B1, B6 (riga B = 2a),
-  // F1, F6 (riga F = 6a). Formato id cella in SudokuLab: letter+number.
-  readonly example_highlights_1 = `cell B1, B6, F1, F6`;
+    // Stato della board immediatamente prima del passo in cui il solver applica
+    // X-Wings. Include i valori dinamici piazzati dagli algoritmi precedenti: da
+    // questo snapshot il preview ricalcola i candidati, così il pattern (1
+    // confinato a D3/I3 in colonna 3 e a D4/I4 in colonna 4) è direttamente
+    // leggibile sulla griglia.
+    values:
+      '503427000904358270782900345290004050048500720050200010875602100039705002420090507',
+
+    // Evidenziazioni didattiche (convenzione invertita rispetto al solver):
+    // - cell  (primario)   = i quattro vertici del rettangolo X-Wing, cioè il
+    //                        pattern che si vuole far notare all'utente.
+    // - cell2 (secondario) = tutte le celle impattate dall'applicazione, cioè
+    //                        quelle da cui il candidato 1 viene rimosso. Non
+    //                        solo la prima riportata dal solver in descLines.
+    highlights: `cell D3, I3, D4, I4
+  cell2 D5, I6`,
+  };
 }

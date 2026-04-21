@@ -29,7 +29,7 @@ export const XWINGS_ALGORITHM = 'XWings';
  */
 export class XWingsAlgorithm extends Algorithm {
   id = XWINGS_ALGORITHM;
-  priority = 9;
+  priority = 8;
   factor = '+140+(NEP*50)';
   name = 'X-Wings';
   icon = 'grid_view';

@@ -1,27 +1,33 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  Input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, Input, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardComponent, BoardManager, BoardStatus } from '@olmi/board';
-import {
-  ApplySudokuRulesOptions,
-  buildSudokuCells,
-  decodeHighlightsString,
-  Highlights,
-  SudokuCell,
-} from '@olmi/model';
+import { decodeHighlightsString } from '@olmi/model';
+
+/**
+ * Descrizione di un esempio mostrabile dalla board-preview.
+ *
+ * Incapsula le tre informazioni che definiscono lo stato della griglia:
+ * il clue iniziale (`schema`), lo stato corrente con i dinamici (`values`)
+ * e le evidenziazioni (`highlights`). Solo `schema` è obbligatorio; se
+ * presenti, `values` e `highlights` vengono applicati in ordine dopo lo
+ * schema.
+ */
+export interface SudokuBoardPreviewSample {
+  /** Clue iniziale del puzzle (81 char). Definisce le celle fisse. */
+  schema: string;
+  /** Stato corrente (81 char, fissi + dinamici). Assente = mostra solo lo schema. */
+  values?: string;
+  /** Stringa highlights nel formato accettato da `decodeHighlightsString`. */
+  highlights?: string;
+}
 
 /**
  * Board read-only usata come "tool" dalle pagine di descrizione degli algoritmi.
  *
- * Riceve in ingresso la stringa dei valori e (opzionalmente) highlights già
- * costruiti. Disabilita l'interazione (no click, no selezione, no tastiera).
- * Non impone il layout: chi la usa può metterla in grid, card, flex, ecc.
+ * Riceve in ingresso un `SudokuBoardPreviewSample` che raccoglie schema, values
+ * e highlights dell'esempio da visualizzare. Disabilita l'interazione (no click,
+ * no selezione, no tastiera). Non impone il layout: chi la usa può metterla in
+ * grid, card, flex, ecc.
  */
 @Component({
   selector: 'sudoku-board-preview',
@@ -48,22 +54,15 @@ import {
   ],
 })
 export class SudokuBoardPreviewComponent {
-  private readonly _manager = signal<BoardManager | null>(null);
-  private readonly _values = signal<string>('');
-  private readonly _highlights = signal<string | null>(null);
-
-  @Input() set values(v: string | null | undefined) {
-    this._values.set(v || '');
-  }
-
-  @Input() set highlights(hl: string | null) {
-    this._highlights.set(hl);
-  }
+  readonly sample = input<SudokuBoardPreviewSample | null>(null);
 
   /** Lato in px del quadrato della board (default 360). */
   @Input() size = 360;
 
-  readonly previewStatus: Partial<BoardStatus> = {
+  private readonly _manager = signal<BoardManager | null>(null);
+
+  // Costanti: la preview è sempre read-only, no edit / pencil / paste.
+  private readonly previewStatus: Partial<BoardStatus> = {
     isDisabled: false,
     isLock: false,
     isPencil: false,
@@ -73,28 +72,25 @@ export class SudokuBoardPreviewComponent {
   };
 
   onBoard(manager: BoardManager) {
+    // `previewStatus` è costante: impostato una sola volta all'arrivo del
+    // manager, non serve un effect dedicato.
+    manager.options(this.previewStatus);
     this._manager.set(manager);
   }
 
   constructor() {
+    // Unico effect: quando il manager è pronto e arriva un sample, lo applica
+    // in ordine deterministico (load → values → apply-rules → highlights).
+    // Gli highlights sono l'ultima operazione così non vengono sovrascritti da
+    // un successivo apply-rules.
     effect(() => {
       const manager = this._manager();
-      const values = this._values();
-      if (manager && values) {
-        manager.load(values);
-        manager.execOperation('apply-rules', { resetBefore: true });
-      }
-    });
-
-    effect(() => {
-      const manager = this._manager();
-      const highlights = this._highlights();
-      if (manager && highlights) manager.setHighlights(decodeHighlightsString(highlights));
-    });
-
-    effect(() => {
-      const manager = this._manager();
-      if (manager) manager.options(this.previewStatus);
+      const s = this.sample();
+      if (!manager || !s?.schema) return;
+      manager.load(s.schema);
+      if (s.values) manager.values(s.values);
+      manager.execOperation('apply-rules', { resetBefore: true });
+      if (s.highlights) manager.setHighlights(decodeHighlightsString(s.highlights));
     });
   }
 }

@@ -28,7 +28,7 @@ export const UNIQUE_RECTANGLE_ALGORITHM = 'UniqueRectangle';
  */
 export class UniqueRectangleAlgorithm extends Algorithm {
   id = UNIQUE_RECTANGLE_ALGORITHM;
-  priority = 13;
+  priority = 12;
   factor = '+160+(NEP*40)';
   name = 'Unique Rectangle';
   icon = 'crop_square';

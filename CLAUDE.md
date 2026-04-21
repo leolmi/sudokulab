@@ -22,7 +22,7 @@ Prova online: [sudokulab.herokuapp.com](https://sudokulab.herokuapp.com)
 | Lib | Path | Contenuto |
 |-----|------|-----------|
 | `@olmi/model` | [libs/model](libs/model) | Tipi di dominio (Sudoku, SudokuCell, Algorithm, GeneratorOptions, Difficulty, PrintTemplate, Highlights…) e helper puri |
-| `@olmi/algorithms` | [libs/algorithms](libs/algorithms) | Catalogo di 19 algoritmi di risoluzione (v3.0) + registro e utilities di applicazione |
+| `@olmi/algorithms` | [libs/algorithms](libs/algorithms) | Catalogo di 18 algoritmi di risoluzione (v3.0) + registro e utilities di applicazione |
 | `@olmi/logic` | [libs/logic](libs/logic) | Solver, generator e calcolo della difficoltà; orchestrazione degli algoritmi |
 | `@olmi/components` | [libs/components](libs/components) | Componenti Angular riusabili (board, toolbar, step-viewer, OCR, generator-options…) |
 | `@olmi/templates` | [libs/templates](libs/templates) | Template di stampa (layout pagine A4 con puzzle multipli) |
@@ -94,7 +94,7 @@ Node richiesto: `20.18.1` (vedi `package.json > engines`).
 
 ## Documenti correlati
 
-- [documents/alghoritms.md](documents/alghoritms.md) — catalogo completo dei 19 algoritmi v3.0 (id, priorità, fattore, descrizione, tipo).
+- [documents/alghoritms.md](documents/alghoritms.md) — catalogo completo dei 18 algoritmi v3.0 (id, priorità, fattore, descrizione, tipo).
 - [documents/generator.md](documents/generator.md) — funzionamento del generatore (opzioni, simmetrie, workers, calcolo difficoltà).
 - [documents/printer.md](documents/printer.md) — tool di stampa (template, pagine A4, flusso di composizione).
 - [documents/player.md](documents/player.md) — player (interazione, step-viewer, hint, OCR import).

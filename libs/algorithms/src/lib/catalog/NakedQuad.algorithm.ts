@@ -12,7 +12,7 @@ export const NAKED_QUAD_ALGORITHM = 'NakedQuad';
  */
 export class NakedQuadAlgorithm extends Algorithm {
   id = NAKED_QUAD_ALGORITHM;
-  priority = 7;
+  priority = 6;
   factor = '+100+(NEP*60)';
   name = 'Naked Quad';
   icon = 'grid_4x4';

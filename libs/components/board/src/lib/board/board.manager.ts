@@ -19,8 +19,8 @@ import {
   GenerationStat,
   GeneratorOptions,
   getCellsSchema,
-  getStat,
-  Highlights,
+  getStat, handleUpdate,
+  Highlights, isNumberCellValue,
   isValidCellValue,
   LogicOperation,
   LogicWorkerData,
@@ -42,26 +42,27 @@ import { clearCell } from '@olmi/logic';
 export class BoardManager {
   private readonly _board: BoardComponent;
   private readonly _destroy$: Subject<void>;
-  private readonly _highlights$: BehaviorSubject<Highlights|string|undefined|null>;
+  private readonly _highlights$: BehaviorSubject<
+    Highlights | string | undefined | null
+  >;
   private _debounce = 200;
 
   readonly generatorOptions$: BehaviorSubject<GeneratorOptions>;
   status$: BehaviorSubject<BoardStatus>;
   stat$: BehaviorSubject<SudokuStat>;
-  generationStat$: BehaviorSubject<GenerationStat|undefined>;
-  multiGenerationStat$: BehaviorSubject<Dictionary<GenerationStat|undefined>>;
+  generationStat$: BehaviorSubject<GenerationStat | undefined>;
+  multiGenerationStat$: BehaviorSubject<Dictionary<GenerationStat | undefined>>;
   cells$: BehaviorSubject<BoardCell[]>;
   sequence$: BehaviorSubject<AlgorithmResult[]>;
   sudoku$: BehaviorSubject<Sudoku>;
   focused$: BehaviorSubject<boolean>;
   isStopping$: BehaviorSubject<boolean>;
-  selection$: BehaviorSubject<BoardCell|undefined>;
-  lockedValue$: BehaviorSubject<BoardChangeEvent|undefined>;
+  selection$: BehaviorSubject<BoardCell | undefined>;
+  lockedValue$: BehaviorSubject<BoardChangeEvent | undefined>;
 
   usePersistence: boolean = false;
 
-  constructor(private board: BoardComponent,
-              private notifier?: Notifier) {
+  constructor(private board: BoardComponent, private notifier?: Notifier) {
     this._destroy$ = new Subject<void>();
     this.focused$ = new BehaviorSubject<boolean>(false);
     this.status$ = new BehaviorSubject<BoardStatus>(new BoardStatus());
@@ -69,13 +70,25 @@ export class BoardManager {
     this.cells$ = new BehaviorSubject<BoardCell[]>(buildSchemaBoard());
     this.stat$ = new BehaviorSubject<SudokuStat>(new SudokuStat());
     this.isStopping$ = new BehaviorSubject<boolean>(false);
-    this.selection$ = new BehaviorSubject<BoardCell|undefined>(<BoardCell|undefined>undefined);
-    this.generationStat$ = new BehaviorSubject<GenerationStat|undefined>(undefined);
-    this.multiGenerationStat$ = new BehaviorSubject<Dictionary<GenerationStat|undefined>>({});
+    this.selection$ = new BehaviorSubject<BoardCell | undefined>(
+      <BoardCell | undefined>undefined
+    );
+    this.generationStat$ = new BehaviorSubject<GenerationStat | undefined>(
+      undefined
+    );
+    this.multiGenerationStat$ = new BehaviorSubject<
+      Dictionary<GenerationStat | undefined>
+    >({});
     this.sequence$ = new BehaviorSubject<AlgorithmResult[]>([]);
-    this.generatorOptions$ = new BehaviorSubject<GeneratorOptions>(new GeneratorOptions());
-    this.lockedValue$ = new BehaviorSubject<BoardChangeEvent|undefined>(undefined);
-    this._highlights$ = new BehaviorSubject<Highlights | string | undefined | null>(undefined);
+    this.generatorOptions$ = new BehaviorSubject<GeneratorOptions>(
+      new GeneratorOptions()
+    );
+    this.lockedValue$ = new BehaviorSubject<BoardChangeEvent | undefined>(
+      undefined
+    );
+    this._highlights$ = new BehaviorSubject<
+      Highlights | string | undefined | null
+    >(undefined);
     this._board = board;
     this._init();
   }
@@ -84,31 +97,36 @@ export class BoardManager {
     if (!this._board) return;
     if (this.board.logic) {
       // valuta il ritorno del logic-worker
-      this.board.logic.completed.subscribe(data => {
+      this.board.logic.completed.subscribe((data) => {
         if (data.sudoku && !data.allowHidden) {
-          const cells= getBoardCells(data.sudoku)
+          const cells = getBoardCells(data.sudoku);
           this.cells$.next(cells);
         }
         this.sequence$.next(getSequence(data));
         SudokuState.isRunning$.next(!!data.isRunning);
         if (!data.isRunning) this.isStopping$.next(false);
-        this.generationStat$.next(data.isRunning ? data.generationStat : undefined);
-        update(this.multiGenerationStat$, { [data.index]: data.isRunning ? data.generationStat : undefined });
+        this.generationStat$.next(
+          data.isRunning ? data.generationStat : undefined
+        );
+        update(this.multiGenerationStat$, {
+          [data.index]: data.isRunning ? data.generationStat : undefined,
+        });
         this._checkHighlights(data);
         this._checkNotifies(data);
       });
     }
 
-    this.status$
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(s => {
-        this._board!.status = s;
-        if (!s.isLock && !!this.lockedValue$.value) this.lockedValue$.next(undefined);
-      });
+    this.status$.pipe(takeUntil(this._destroy$)).subscribe((s) => {
+      this._board!.status = s;
+      if (!s.isLock && !!this.lockedValue$.value)
+        this.lockedValue$.next(undefined);
+    });
 
-    combineLatest([this.cells$, this.sudoku$]).pipe(
-      takeUntil(this._destroy$),
-      filter(([cells, sdk]) => (cells||[]).length>0))
+    combineLatest([this.cells$, this.sudoku$])
+      .pipe(
+        takeUntil(this._destroy$),
+        filter(([cells, sdk]) => (cells || []).length > 0)
+      )
       .subscribe(([cells, sdk]: [BoardCell[], Sudoku]) => {
         this._board!.cells = cells;
         const stat = getStat(cells);
@@ -119,11 +137,11 @@ export class BoardManager {
 
     this._highlights$
       .pipe(takeUntil(this._destroy$), debounceTime(this._debounce))
-      .subscribe(h => this._board.highlights = h);
+      .subscribe((h) => (this._board.highlights = h));
 
     this._board.boardChangeRequest
       .pipe(takeUntil(this._destroy$))
-      .subscribe(e => this.applyValue(e));
+      .subscribe((e) => this.applyValue(e));
   }
 
   private _checkHighlights(data: LogicWorkerData) {
@@ -138,7 +156,8 @@ export class BoardManager {
         const infoex = <SudokuInfoEx>data.sudoku?.info;
         if ((infoex?.solution || []).length > 0) {
           const item = _last(infoex!.solution);
-          if (item?.value) this._highlights$.next(new Highlights(item.highlights));
+          if (item?.value)
+            this._highlights$.next(new Highlights(item.highlights));
         }
       }
     }
@@ -151,7 +170,10 @@ export class BoardManager {
         if (data.error) {
           this.notifier.notify(data.error, NotificationType.error);
         } else if (data.sudoku) {
-          this.notifier.notify('Schema solved successfully', NotificationType.success);
+          this.notifier.notify(
+            'Schema solved successfully',
+            NotificationType.success
+          );
         }
         break;
       default:
@@ -182,8 +204,8 @@ export class BoardManager {
         });
         break;
       case 'clear':
-        this._updateCells(cells => {
-          cells.forEach(c => clearCell(c));
+        this._updateCells((cells) => {
+          cells.forEach((c) => clearCell(c));
           return true;
         });
         break;
@@ -193,7 +215,10 @@ export class BoardManager {
   execOperation(operation?: LogicOperation, params?: any, setFocus = false) {
     const status = this.status$.value;
     if (operation) {
-      if (operation === 'assign') return this.applyValue(getApplyBoardEvent(status, this.selection$.value, params));
+      if (operation === 'assign')
+        return this.applyValue(
+          getApplyBoardEvent(status, this.selection$.value, params)
+        );
       if (operation === 'toggle') return this.toggleOption(`${params}`);
       if (operation === 'stop') this.isStopping$.next(true);
       if (this.board.logic) {
@@ -203,9 +228,9 @@ export class BoardManager {
           options: {
             ...this.generatorOptions$.value,
             allowDynamic: !!status.isDynamic,
-            schemaMode: (status.editMode === 'schema')
+            schemaMode: status.editMode === 'schema',
           },
-          params
+          params,
         });
       } else {
         this._internalLogicExecute(operation, params);
@@ -230,14 +255,29 @@ export class BoardManager {
     this.execOperation('check');
   }
 
-  load(s: string|Sudoku) {
+  load(s: string | Sudoku) {
     const sdk = isString(s) ? new Sudoku({ values: s }) : <Sudoku>s;
     this.cells$.next([]);
     this.sudoku$.next(sdk);
-    const values = this.usePersistence ? AppUserOptions.getUserValues(sdk._id) : undefined;
+    const values = this.usePersistence
+      ? AppUserOptions.getUserValues(sdk._id)
+      : undefined;
     this.cells$.next(getBoardCells(sdk, false, values));
     this._refreshStatus();
     this.clearHighlights();
+  }
+
+  values(s: string|null) {
+    if (!s || s.length !== 81) return;
+    handleUpdate(this.cells$, (cells) => {
+      cells.forEach((c, i) => {
+        if (!c.isFixed) {
+          const cv = s.charAt(i);
+          c.text = isNumberCellValue(cv) ? cv : '';
+        }
+      });
+      return true;
+    });
   }
 
   options(o: Partial<BoardStatus>, fixed?: Partial<BoardStatus>) {
@@ -264,7 +304,7 @@ export class BoardManager {
 
   switchProp(nm: keyof BoardStatus) {
     if (!_isBoolean(this.status[nm])) return;
-    this.options(<Partial<BoardStatus>>{[nm]: !this.status[nm]});
+    this.options(<Partial<BoardStatus>>{ [nm]: !this.status[nm] });
     this.resetFocus();
   }
 
@@ -277,9 +317,9 @@ export class BoardManager {
     if (nextMode === 'none') {
       nextMode = 'next-in-row';
     } else if (nextMode === 'next-in-row') {
-      nextMode = 'next-in-square'
+      nextMode = 'next-in-square';
     } else {
-      nextMode = 'none'
+      nextMode = 'none';
     }
     this.options(<Partial<BoardStatus>>{ nextMode });
     this.resetFocus();
@@ -290,12 +330,16 @@ export class BoardManager {
   }
 
   switchMode() {
-    this.options({ editMode: this.status.editMode==='play'?'schema':'play' });
+    this.options({
+      editMode: this.status.editMode === 'play' ? 'schema' : 'play',
+    });
     this.resetFocus();
   }
 
   switchValues() {
-    this.options({ valuesMode: this.status.valuesMode==='numbers'?'dots':'numbers' });
+    this.options({
+      valuesMode: this.status.valuesMode === 'numbers' ? 'dots' : 'numbers',
+    });
     this.resetFocus();
   }
 
@@ -303,7 +347,7 @@ export class BoardManager {
     this._highlights$.next('');
   }
 
-  setHighlights(h?: Highlights|string|undefined|null, debounce = 500) {
+  setHighlights(h?: Highlights | string | undefined | null, debounce = 500) {
     this._debounce = debounce;
     this._highlights$.next(h);
   }
@@ -324,10 +368,10 @@ export class BoardManager {
 
   applyStep(r: AlgorithmResult) {
     if (!r || !r.cellsSnapshot) return;
-    this.cells$.next(r.cellsSnapshot.map(c => new BoardCell(c)));
+    this.cells$.next(r.cellsSnapshot.map((c) => new BoardCell(c)));
   }
 
-  checkLockedValue(cell: BoardCell|undefined) {
+  checkLockedValue(cell: BoardCell | undefined) {
     const lockedValue = this.lockedValue$.value;
     if (!!cell && this.status.isLock && !!lockedValue) {
       const e = _clone(lockedValue);
