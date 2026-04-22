@@ -35,7 +35,21 @@
           </div>
         }
         @if (item.groupTitle) {
-          <div class="step-viewer-item-title">{{item.groupTitle}}</div>
+          <div class="step-viewer-item-title"
+               fxLayout="row"
+               fxLayoutAlign="start center"
+               fxFlex>
+            <span>{{item.groupTitle}}</span>
+            @if (item.algorithmId) {
+              <button mat-icon-button
+                      class="alg-info-button"
+                      [matTooltip]="'Apri la descrizione di ' + item.groupTitle"
+                      matTooltipPosition="right"
+                      (click)="openAlgorithmInfo(item.algorithmId, $event)">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            }
+          </div>
         } @else {
           <div class="step-viewer-item-index"
                fxLayout="row"

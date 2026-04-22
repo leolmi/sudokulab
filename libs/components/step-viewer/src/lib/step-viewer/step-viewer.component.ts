@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BehaviorSubject } from 'rxjs';
@@ -6,13 +6,19 @@ import { StepViewerItem } from './step-viewer.model';
 import { AlgorithmResult } from '@olmi/model';
 import { getItems } from './step-viewer.logic';
 import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
+import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olmi/algorithm-info';
 
 @Component({
   selector: 'step-viewer',
   imports: [
     CommonModule,
     FlexLayoutModule,
-    MatIcon
+    MatIcon,
+    MatIconButton,
+    MatTooltipModule
   ],
   templateUrl: './step-viewer.component.html',
   styleUrl: './step-viewer.component.scss',
@@ -20,6 +26,8 @@ import { MatIcon } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StepViewerComponent {
+  private readonly _dialog = inject(MatDialog);
+
   items$: BehaviorSubject<StepViewerItem[]>;
   selected$: BehaviorSubject<string>;
   clicked$: BehaviorSubject<any>;
@@ -64,5 +72,14 @@ export class StepViewerComponent {
     this.appliedIndex$.next(index);
     const item = this.items$.value[index];
     if (item?.result) this.onApplyItem.emit(item.result);
+  }
+
+  openAlgorithmInfo(algorithmId: string, ev?: Event) {
+    ev?.stopPropagation();
+    if (!algorithmId) return;
+    this._dialog.open(AlgorithmInfoDialogComponent, {
+      ...ALGORITHM_INFO_DIALOG_CONFIG,
+      data: { algorithmId },
+    });
   }
 }

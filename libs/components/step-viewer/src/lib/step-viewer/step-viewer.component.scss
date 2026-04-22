@@ -24,6 +24,25 @@
         font-weight: bold;
         font-size: 1.1em;
         margin-top: 8px;
+
+        .alg-info-button.mat-mdc-icon-button {
+          width: 28px;
+          height: 28px;
+          padding: 0;
+          margin-left: 6px;
+          opacity: .6;
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+          }
+
+          &:hover {
+            opacity: 1;
+          }
+        }
       }
 
       .step-viewer-item-index {

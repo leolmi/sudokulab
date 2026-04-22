@@ -7,6 +7,7 @@ export class StepViewerItem {
     this.cell = i?.cell||'';
     this.hasValue = !!i?.hasValue;
     this.allowHidden = !!i?.allowHidden;
+    this.algorithmId = i?.algorithmId||'';
   }
 
   id: string;
@@ -18,4 +19,5 @@ export class StepViewerItem {
   cell: string;
   hasValue: boolean;
   allowHidden: boolean;
+  algorithmId: string;
 }

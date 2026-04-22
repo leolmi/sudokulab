@@ -4,13 +4,14 @@ import { keys as _keys, reduce as _reduce } from 'lodash';
 import { getAlgorithm } from '@olmi/algorithms';
 
 export const getItems = (seq: AlgorithmResult[]): StepViewerItem[] => {
-  let group: string = '';
+  let group = '';
   return _reduce(seq, (items, result, index) => {
     const alg = getAlgorithm(result.algorithm);
     if (group !== alg?.name) {
       items.push(new StepViewerItem({
         id: `title_${index}`,
         groupTitle: alg?.name,
+        algorithmId: result.algorithm,
       }));
     }
     group = alg?.name||'';
