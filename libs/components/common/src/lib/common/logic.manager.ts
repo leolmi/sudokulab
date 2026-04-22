@@ -7,8 +7,10 @@ import {
   LogicWorkerArgs,
   LogicWorkerData
 } from '@olmi/model';
-import { AppUserOptions, SUDOKU_STORE, SudokuStore } from '@olmi/common';
-import { GENERATOR_OPTIONS_FEATURE } from '@olmi/board';
+import { SUDOKU_STORE, SudokuStore } from './store';
+import { AppUserOptions } from './user-options';
+import { GENERATOR_OPTIONS_FEATURE } from './constants';
+
 
 
 class LogicManagerBase {

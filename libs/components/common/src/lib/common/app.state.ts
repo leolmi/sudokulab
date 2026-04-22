@@ -45,8 +45,8 @@ const MATCHES: Dictionary<string> = {
 }
 
 export class SudokuState {
-  static version: string = '';
-  static algorithmsVersion: string = '';
+  static version = '';
+  static algorithmsVersion = '';
   static isRunning$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private readonly _router = inject(Router);
@@ -137,7 +137,7 @@ export class SudokuState {
     combineLatest([this.manifest$, this.info$, this.layout$, this.status$, this._changed$]).pipe(
       filter(([m,i,l,s,c]) => !!m && !!i))
       .subscribe(([manifest, info, layout, status, c]) => {
-        const menu = (!!layout?.narrow) ? manifest?.narrowMenu : manifest?.menu;
+        const menu = (layout?.narrow) ? manifest?.narrowMenu : manifest?.menu;
         if (manifest) {
           this.page$.next(manifest.route);
           this.title$.next(`${manifest.title} ${info.version||''}`);
@@ -162,9 +162,9 @@ export class SudokuState {
       mi.disabled = !!s.disabled[mi.code||''];
       mi.active = !!s.active[mi.code||''];
       mi.routeActive = !!s.routeActive[mi.code||''];
-      if (!!s.text[mi.code||'']) mi.text = s.text[mi.code||''];
-      if (!!s.icon[mi.code||'']) mi.icon = s.icon[mi.code||''];
-      if (!!s.color[mi.code||'']) mi.color = s.color[mi.code||''];
+      if (s.text[mi.code||'']) mi.text = s.text[mi.code||''];
+      if (s.icon[mi.code||'']) mi.icon = s.icon[mi.code||''];
+      if (s.color[mi.code||'']) mi.color = s.color[mi.code||''];
       if ((mi.subMenu || []).length > 0) {
         this._updateMenuStatus(mi.subMenu, s);
       }

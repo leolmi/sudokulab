@@ -6,7 +6,7 @@ import {
   SUDOKU_APP_USER_OPTIONS_KEY,
   UserValues
 } from '@olmi/model';
-import { PLAYER_BOARD_USER_VALUES_PREFIX_KEY } from '@olmi/board';
+import { PLAYER_BOARD_USER_VALUES_PREFIX_KEY } from './constants';
 
 export class AppUserOptions {
 

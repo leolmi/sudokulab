@@ -34,4 +34,11 @@ export default [
       '@angular-eslint/template/no-negated-async': 'off',
     },
   },
+  {
+    files: ['**/*.ts'],
+    rules: {
+      '@angular-eslint/component-selector': 'off',
+      '@angular-eslint/component-class-suffix': 'off',
+    },
+  },
 ];

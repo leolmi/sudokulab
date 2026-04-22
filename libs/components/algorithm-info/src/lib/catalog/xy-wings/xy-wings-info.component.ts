@@ -164,6 +164,13 @@ export class XYWingsInfoComponent {
     values:
       '000092130004810602210760050060951300400300061100246005080130006000000819001000503',
 
+    // Override didattico: con le sole regole base D9 esce {4,7,8}; il
+    // pattern XY-Wing richiede D9={4,7} (l'8 è eliminabile solo con
+    // tecniche intermedie). Forziamo lo stato coerente col testo.
+    available: {
+      D9: '4 7',
+    },
+
     // Evidenziazioni didattiche:
     // - cell  (primario)   = le tre celle del pattern: F7 (pivot),
     //                        C7 e D9 (le due wings).

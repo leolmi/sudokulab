@@ -1,26 +1,17 @@
 import { BehaviorSubject, combineLatest, debounceTime, filter, Subject, takeUntil } from 'rxjs';
-import {
-  BoardCell,
-  BoardChangeEvent,
-  BoardComponent,
-  BoardStatus,
-  buildSchemaBoard,
-  getBoardCells,
-  getSequence,
-  handleBoardValue
-} from '@olmi/board';
 import { cloneDeep as _clone, isBoolean as _isBoolean, isString, last as _last } from 'lodash';
 import {
   AlgorithmResult,
   applySudokuRules,
   ApplySudokuRulesOptions,
-  checkStatus,
   Dictionary,
   GenerationStat,
   GeneratorOptions,
   getCellsSchema,
-  getStat, handleUpdate,
-  Highlights, isNumberCellValue,
+  getStat,
+  handleUpdate,
+  Highlights,
+  isNumberCellValue,
   isValidCellValue,
   LogicOperation,
   LogicWorkerData,
@@ -30,10 +21,14 @@ import {
   SudokuInfoEx,
   SudokuStat,
   update,
-  ValueOptions,
+  ValueOptions
 } from '@olmi/model';
 import { AppUserOptions, Notifier, SudokuState } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
+import { BoardComponent } from './board.component';
+import { BoardCell, BoardChangeEvent, BoardStatus } from './board.model';
+import { buildSchemaBoard, getBoardCells, getSequence } from './board.helper';
+import { handleBoardValue } from './board-component.helper';
 
 /**
  * gestore dello schema
@@ -60,7 +55,7 @@ export class BoardManager {
   selection$: BehaviorSubject<BoardCell | undefined>;
   lockedValue$: BehaviorSubject<BoardChangeEvent | undefined>;
 
-  usePersistence: boolean = false;
+  usePersistence = false;
 
   constructor(private board: BoardComponent, private notifier?: Notifier) {
     this._destroy$ = new Subject<void>();
@@ -184,11 +179,6 @@ export class BoardManager {
     }
   }
 
-  private _updateCells(handler: (cells: BoardCell[]) => boolean) {
-    const cells = _clone(this.cells$.value);
-    if (handler(cells)) this.cells$.next(cells);
-  }
-
   /**
    * operazioni attivabili anche senza worker
    * @param operation
@@ -197,14 +187,14 @@ export class BoardManager {
   private _internalLogicExecute(operation?: LogicOperation, params?: any) {
     switch (operation) {
       case 'apply-rules':
-        this._updateCells((cells) => {
+        handleUpdate(this.cells$, (cells) => {
           applySudokuRules(cells, <ApplySudokuRulesOptions>params);
           console.log('apply-rules', cells);
           return true;
         });
         break;
       case 'clear':
-        this._updateCells((cells) => {
+        handleUpdate(this.cells$, (cells) => {
           cells.forEach((c) => clearCell(c));
           return true;
         });
@@ -275,6 +265,29 @@ export class BoardManager {
           const cv = s.charAt(i);
           c.text = isNumberCellValue(cv) ? cv : '';
         }
+      });
+      return true;
+    });
+  }
+
+  /**
+   * Forza gli `available` delle celle indicate sovrascrivendo quanto
+   * calcolato da `apply-rules`. Serve soprattutto agli esempi didattici
+   * (algorithm-info) quando lo snapshot di fase non è autoconsistente.
+   *
+   * @param map dizionario `coord cella` → stringa candidati concatenati
+   *            (es. `{ D9: '69', D3: '16' }`). Ogni carattere non '1'..'9'
+   *            viene ignorato; celle assenti dalla mappa restano invariate.
+   */
+  forceAvailable(map: Dictionary<string>) {
+    if (!map) return;
+    handleUpdate(this.cells$, (cells) => {
+      cells.forEach((c) => {
+        const forced = map[c.coord];
+        if (forced == null) return;
+        c.available = forced
+          .split('')
+          .filter((ch) => isNumberCellValue(ch));
       });
       return true;
     });
@@ -375,7 +388,7 @@ export class BoardManager {
     const lockedValue = this.lockedValue$.value;
     if (!!cell && this.status.isLock && !!lockedValue) {
       const e = _clone(lockedValue);
-      if (!!cell.text) e.value = '';
+      if (cell.text) e.value = '';
       e.cell = cell;
       this._handleBoardChangeEvent(e);
     }

@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DestroyComponentBase } from './destroy.component.base';
 import { BehaviorSubject } from 'rxjs';
-import { BoardManager } from '@olmi/board';
 
 @Component({
   selector: 'manager-base-component',
@@ -10,20 +9,20 @@ import { BoardManager } from '@olmi/board';
   imports: [CommonModule],
   standalone: true
 })
-export class ManagerComponentBase extends DestroyComponentBase {
-  manager$: BehaviorSubject<BoardManager|undefined>;
+export class ManagerComponentBase<TManager = unknown> extends DestroyComponentBase {
+  manager$: BehaviorSubject<TManager|undefined>;
 
   @Input()
-  set manager(m: BoardManager|undefined|null) {
+  set manager(m: TManager|undefined|null) {
     this.manager$.next(m||undefined);
   }
-  get manager(): BoardManager|undefined {
+  get manager(): TManager|undefined {
     return this.manager$.value;
   }
 
   constructor() {
     super();
 
-    this.manager$ = new BehaviorSubject<BoardManager | undefined>(undefined);
+    this.manager$ = new BehaviorSubject<TManager | undefined>(undefined);
   }
 }

@@ -7,7 +7,7 @@ import { BUTTON_STOP_CODE, ToolbarButton, ToolbarStatus } from './schema-toolbar
 import { ManagerComponentBase, SudokuState } from '@olmi/common';
 import { extendStatus, getButtons, setValueButtonStatus } from './schema-toolbar.helper';
 import { FlexModule } from '@angular/flex-layout';
-import { BoardCell } from '@olmi/board';
+import { BoardCell, BoardManager } from '@olmi/board';
 import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
@@ -24,7 +24,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SchemaToolbarComponent extends ManagerComponentBase implements OnInit {
+export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> implements OnInit {
   buttons$: BehaviorSubject<ToolbarButton[]>;
   status$: BehaviorSubject<ToolbarStatus>;
   percent$: Observable<number> = of(0);

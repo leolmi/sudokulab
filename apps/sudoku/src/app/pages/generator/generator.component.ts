@@ -7,7 +7,6 @@ import {
   BoardManager,
   BoardStatus,
   GENERATOR_BOARD_USER_OPTIONS_FEATURE,
-  GENERATOR_OPTIONS_FEATURE,
   getBoardCells
 } from '@olmi/board';
 import { calcStatusForMenu, MAIN } from './generator.menu';
@@ -18,7 +17,11 @@ import { GeneratorOptionsComponent } from '@olmi/generator-options';
 import { GeneratorOptions, NotificationType, Sudoku, SudokuCell, SudokuStat } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { GeneratorSchemasComponent } from '@olmi/generator-schemas';
-import { AppUserOptions, SudokuState } from '@olmi/common';
+import {
+  AppUserOptions,
+  GENERATOR_OPTIONS_FEATURE,
+  SudokuState,
+} from '@olmi/common';
 import { omit as _omit } from 'lodash';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 

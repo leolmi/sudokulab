@@ -183,6 +183,14 @@ export class BugInfoComponent {
     values:
       '005314782428657193137829465070438000804160300300790840586273914719546238243981000',
 
+    // Override didattico: E8 dalle regole base esce con {2,5,7} perché il 5
+    // è eliminabile solo considerando che in quel box può stare unicamente
+    // sull'allineamento della riga D. Qui lo forziamo a {2,7} per mostrare
+    // uno stato coerente con l'ipotesi BUG (tutte bi-value tranne D9).
+    available: {
+      E8: '2 7',
+    },
+
     // Evidenziazioni didattiche:
     // - cell  (primario)   = D9, la cella "trivalente" da cui si rimuove 1.
     // - cell2 (secondario) = D3 e F9, le due celle "testimone" del

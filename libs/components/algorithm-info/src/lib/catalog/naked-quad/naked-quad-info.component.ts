@@ -154,6 +154,13 @@ export class NakedQuadInfoComponent {
     values:
       '000008103000390507300701009080903000002870000900025000800030050700009308563480000',
 
+    // Override didattico: con le sole regole base A8 esce {2,4,6}; la
+    // quaterna {2,4,6,8} funziona comunque, ma per coerenza col testo
+    // — che dichiara A8={4,6} — forziamo la riduzione.
+    available: {
+      A8: '4 6',
+    },
+
     // Evidenziazioni didattiche:
     // - cell  (primario)   = le quattro celle che formano la quaterna
     //                        (A8, B8, C8, H8).

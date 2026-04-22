@@ -177,6 +177,13 @@ export class TryNumberInfoComponent {
     values:
       '748036012000008034003400800305802460800000351460305280004089003180703000930050008',
 
+    // Override didattico: con le sole regole base H5 esce {2,4,6};
+    // l'euristica MRV sceglie H5={4,6} perché il 2 viene eliminato da
+    // tecniche intermedie. Forziamo lo stato coerente col testo.
+    available: {
+      H5: '4 6',
+    },
+
     // Evidenziazioni didattiche:
     // - cell (primario) = H5, la cella su cui il solver "tenta" la dirama.
     highlights: `cell H5`,

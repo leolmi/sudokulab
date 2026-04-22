@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, Input, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardComponent, BoardManager, BoardStatus } from '@olmi/board';
-import { decodeHighlightsString } from '@olmi/model';
+import { decodeHighlightsString, Dictionary } from '@olmi/model';
 
 /**
  * Descrizione di un esempio mostrabile dalla board-preview.
@@ -17,6 +17,13 @@ export interface SudokuBoardPreviewSample {
   schema: string;
   /** Stato corrente (81 char, fissi + dinamici). Assente = mostra solo lo schema. */
   values?: string;
+  /**
+   * Override degli `available` per cella: dizionario `coord` → stringa dei
+   * candidati concatenati (es. `{ D9: '69', D3: '16' }`). Applicato dopo
+   * `apply-rules`; serve quando lo snapshot di fase non è autoconsistente
+   * e l'algoritmo vuole mostrare candidati specifici su alcune celle.
+   */
+  available?: Dictionary<string>;
   /** Stringa highlights nel formato accettato da `decodeHighlightsString`. */
   highlights?: string;
 }
@@ -80,9 +87,10 @@ export class SudokuBoardPreviewComponent {
 
   constructor() {
     // Unico effect: quando il manager è pronto e arriva un sample, lo applica
-    // in ordine deterministico (load → values → apply-rules → highlights).
-    // Gli highlights sono l'ultima operazione così non vengono sovrascritti da
-    // un successivo apply-rules.
+    // in ordine deterministico (load → values → apply-rules → available →
+    // highlights). Gli `available` sono forzati dopo `apply-rules` così da
+    // sovrascrivere quanto calcolato dalle regole; gli highlights sono in
+    // coda per non essere spazzati via da un successivo apply-rules.
     effect(() => {
       const manager = this._manager();
       const s = this.sample();
@@ -90,6 +98,7 @@ export class SudokuBoardPreviewComponent {
       manager.load(s.schema);
       if (s.values) manager.values(s.values);
       manager.execOperation('apply-rules', { resetBefore: true });
+      if (s.available) manager.forceAvailable(s.available);
       if (s.highlights) manager.setHighlights(decodeHighlightsString(s.highlights));
     });
   }

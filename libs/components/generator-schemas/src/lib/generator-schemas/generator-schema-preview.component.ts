@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoardPreviewComponent } from '@olmi/board';
+import { BoardManager, BoardPreviewComponent } from '@olmi/board';
 import { FlexModule } from '@angular/flex-layout';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ManagerComponentBase, SudokuState } from '@olmi/common';
@@ -41,7 +41,7 @@ import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
   styleUrl: './generator-schemas.component.scss',
   standalone: true
 })
-export class GeneratorSchemaPreviewComponent extends ManagerComponentBase implements OnInit {
+export class GeneratorSchemaPreviewComponent extends ManagerComponentBase<BoardManager> implements OnInit {
   generationDesc$: Observable<string> = of('');
   progressMode$: Observable<'determinate'|'indeterminate'> = of('indeterminate');
   progress$: Observable<number> = of(0);

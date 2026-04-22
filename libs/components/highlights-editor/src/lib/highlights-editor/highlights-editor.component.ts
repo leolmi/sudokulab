@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ManagerComponentBase } from '@olmi/common';
+import { BoardManager } from '@olmi/board';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,7 +26,7 @@ import { MatInputModule } from '@angular/material/input';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HighlightsEditorComponent extends ManagerComponentBase {
+export class HighlightsEditorComponent extends ManagerComponentBase<BoardManager> {
   text$: BehaviorSubject<string>;
   active$: BehaviorSubject<boolean>;
 

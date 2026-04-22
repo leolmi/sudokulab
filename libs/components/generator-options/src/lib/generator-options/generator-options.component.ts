@@ -37,6 +37,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { getAlgorithms } from '@olmi/algorithms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { ManagerComponentBase, MultiLogicManager, SudokuState } from '@olmi/common';
+import { BoardManager } from '@olmi/board';
 
 @Component({
   selector: 'generator-options',
@@ -60,7 +61,7 @@ import { ManagerComponentBase, MultiLogicManager, SudokuState } from '@olmi/comm
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GeneratorOptionsComponent extends ManagerComponentBase implements OnInit {
+export class GeneratorOptionsComponent extends ManagerComponentBase<BoardManager> implements OnInit {
   readonly AVAILABLE_DIFFICULTIES = AVAILABLE_DIFFICULTIES;
   readonly AVAILABLE_SYMMETRIES = AVAILABLE_SYMMETRIES;
   readonly AVAILABLE_STOP_MODES = AVAILABLE_STOP_MODES;
