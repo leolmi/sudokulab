@@ -150,6 +150,7 @@
   }
   .svg-board-line {
     stroke: var(--board-color-background-contrast);
+    opacity: .5;
   }
   .svg-board-cell-text {
     fill: var(--board-color-background-contrast);

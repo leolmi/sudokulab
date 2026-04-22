@@ -65,9 +65,16 @@ import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
+  // counter per generare id univoci dei clipPath (più board convivono in stampa,
+  // catalogo, ecc.); gli id nei <defs> SVG sono globali al documento.
+  private static _idSeq = 0;
+
   @HostBinding('attr.focusable') focusable = '';
   @HostBinding('attr.tabIndex') tabIndex = 0;
   @ViewChild('board') board: ElementRef|undefined = undefined;
+
+  /** id del clipPath usato per arrotondare il contorno dello schema. */
+  readonly boardClipId = `sdk-board-clip-${++BoardComponent._idSeq}`;
 
   private _notifier = inject(SUDOKU_NOTIFIER);
   private _clipboard = inject(Clipboard);
@@ -114,7 +121,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     const hl = _isString(h) ?
       Coding.decodeHighlightsString(h) :
       <Highlights>h || new Highlights();
-    console.log(...BOARD_PREFIX, 'highlights on board', hl);
+    // console.log(...BOARD_PREFIX, 'highlights on board', hl);
     this.highlights$.next(hl);
   }
 

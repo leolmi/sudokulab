@@ -32,11 +32,20 @@
       @if (manager) {
         <schema-header class="narrow-visible" [schema]="manager.sudoku$|async"></schema-header>
       }
-      <sudoku-board
-        [logic]="logic"
-        (onReady)="ready($event)"
-        (pasteSchemaRequest)="pasteSchema($event)"
-      ></sudoku-board>
+      <div class="board-fx-wrap"
+           [class.fx-playing]="fxPlaying$|async"
+           [class.fx-coord]="isCoord$|async">
+        <sudoku-board
+          [logic]="logic"
+          (onReady)="ready($event)"
+          (pasteSchemaRequest)="pasteSchema($event)"
+        ></sudoku-board>
+        <div class="fx-cascade" aria-hidden="true">
+          @for (cell of fxCells; track cell.i) {
+            <div class="fx-cell" [style.animation-delay.ms]="cell.delay"></div>
+          }
+        </div>
+      </div>
       @if (manager) {
         <schema-toolbar
           [showProgress]="true"

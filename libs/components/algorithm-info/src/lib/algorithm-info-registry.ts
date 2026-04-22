@@ -5,12 +5,14 @@ import {
   COUPLES_ALGORITHM,
   HIDDEN_QUAD_ALGORITHM,
   HIDDEN_TRIPLE_ALGORITHM,
+  JELLYFISH_ALGORITHM,
   NAKED_QUAD_ALGORITHM,
   NAKED_TRIPLE_ALGORITHM,
   ONE_CELL_FOR_VALUE_ALGORITHM,
   ONE_VALUE_FOR_CELL_ALGORITHM,
   SIMPLE_COLOURING_ALGORITHM,
   SWORDFISH_ALGORITHM,
+  TURBOTFISH_ALGORITHM,
   TWINS_ALGORITHM,
   UNIQUE_RECTANGLE_ALGORITHM,
   XWINGS_ALGORITHM,
@@ -65,12 +67,18 @@ export const ALGORITHM_INFO_PAGES: Record<string, () => Promise<Type<unknown>>> 
   [SWORDFISH_ALGORITHM]: () =>
     import('./catalog/swordfish/swordfish-info.component')
       .then(m => m.SwordfishInfoComponent),
+  [JELLYFISH_ALGORITHM]: () =>
+    import('./catalog/jellyfish/jellyfish-info.component')
+      .then(m => m.JellyfishInfoComponent),
   [UNIQUE_RECTANGLE_ALGORITHM]: () =>
     import('./catalog/unique-rectangle/unique-rectangle-info.component')
       .then(m => m.UniqueRectangleInfoComponent),
   [SIMPLE_COLOURING_ALGORITHM]: () =>
     import('./catalog/simple-colouring/simple-colouring-info.component')
       .then(m => m.SimpleColouringInfoComponent),
+  [TURBOTFISH_ALGORITHM]: () =>
+    import('./catalog/turbot-fish/turbot-fish-info.component')
+      .then(m => m.TurbotFishInfoComponent),
   [BUG_ALGORITHM]: () =>
     import('./catalog/bug/bug-info.component')
       .then(m => m.BugInfoComponent),

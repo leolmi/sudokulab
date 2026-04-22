@@ -13,6 +13,7 @@ import {
   map,
   Observable,
   of,
+  pairwise,
   takeUntil,
   withLatestFrom
 } from 'rxjs';
@@ -24,7 +25,8 @@ import { PLAYER_PAGE_ROUTE } from './player.manifest';
 import { PageBase } from '../../model/page.base';
 import { defaultHandleMenuItem, downloadSchema, getStatLines, StatLine } from '../pages.helper';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './player.logic';
-import { LocalContext, MenuItem, SDK_PREFIX, Sudoku } from '@olmi/model';
+import { checkStatus, hasErrors, LocalContext, MenuItem, NotificationType, SDK_PREFIX, Sudoku } from '@olmi/model';
+import { cloneDeep as _clone } from 'lodash';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SchemasDialogComponent } from '@olmi/schemas-browser';
@@ -81,7 +83,17 @@ export class PlayerComponent extends PageBase {
   stat$: Observable<StatLine[]> = of([]);
   isComplete$: Observable<boolean> = of(false);
   isEmpty$: Observable<boolean> = of(true);
+  isCoord$: Observable<boolean> = of(false);
   layout$: Observable<string>;
+
+  /** 81 celle dell'overlay cascata — delay già pronto in ms per `[style.animation-delay]`. */
+  readonly fxCells = Array.from({ length: 81 }, (_, i) => {
+    const r = Math.floor(i / 9);
+    const c = i % 9;
+    return { r, c, i, delay: (r + c) * 30 };
+  });
+  /** true durante il play dell'effetto "schema completato". Toggled via RAF per restart pulito. */
+  readonly fxPlaying$ = new BehaviorSubject<boolean>(false);
 
   private get game() {
     return this._game$.value;
@@ -214,6 +226,8 @@ export class PlayerComponent extends PageBase {
       });
 
     if (this.manager) {
+      // coord mode: l'overlay FX deve allinearsi al riquadro 0..90 (non al full svg)
+      this.isCoord$ = this.manager.status$.pipe(map(s => !!s.isCoord), distinctUntilChanged());
       // intercetta lo schema vuoto
       this.isEmpty$ = this.manager.stat$.pipe(map(s => s.isEmpty));
       // intercetta lo schema completo
@@ -226,7 +240,39 @@ export class PlayerComponent extends PageBase {
       combineLatest([this.manager.sudoku$, this.manager.status$, this.manager.stat$, this.store.isFilled$])
         .subscribe(([sdk, s, stat, filled]) =>
           this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled)));
+
+      // FX "schema completato": solo sulla transizione incompleto→completo, senza errori.
+      // - filter(!isEmpty) scarta lo stato iniziale del BehaviorSubject, così il
+      //   pairwise non scatta su uno schema caricato già completo (rimane orfano
+      //   di "prev incompleto").
+      // - `stat.hasErrors` non è affidabile qui: `handleBoardValue` aggiorna
+      //   cells$ in modo SINCRONO senza passare dal check errori (che è a carico
+      //   del logic-worker, asincrono), quindi la prima emissione di stat$ dopo
+      //   l'ultima cifra può avere `hasErrors=false` anche se il valore è errato.
+      //   Riverifichiamo esplicitamente con `checkStatus` prima di partire.
+      this.manager.stat$.pipe(
+        takeUntil(this._destroy$),
+        filter(s => !s.isEmpty),
+        pairwise(),
+        filter(([prev, curr]) => !prev.isComplete && curr.isComplete),
+      ).subscribe(() => {
+        const cells = _clone(this.manager!.cells$.value);
+        checkStatus(cells);
+        if (!hasErrors(cells)) this._playCompletionFx();
+      });
     }
+  }
+
+  private _playCompletionFx() {
+    // restart pulito: togli la classe play, poi riaggiungi al frame successivo.
+    this.fxPlaying$.next(false);
+    requestAnimationFrame(() => {
+      this.fxPlaying$.next(true);
+      // toast di conferma (MatSnackBar già usato in app)
+      this.notifier.notify('Schema completato!', NotificationType.success, { duration: 2600 });
+      // cascata ~1.1s + bordo ~1.1s: spegni il flag a fine animazione
+      setTimeout(() => this.fxPlaying$.next(false), 1400);
+    });
   }
 
   private _checkValues(values: string) {

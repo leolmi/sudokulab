@@ -8,24 +8,32 @@
        [class.coord]="status.isCoord"
        [style.height.px]="height$|async"
        [attr.viewBox]="status.isCoord?'-5 -5 96 96':'-0.5 -0.5 91 91'">
-    <g>
-      <!-- CONTORNO (light) -->
+    <defs>
+      <!-- Clip arrotondato: tutto ciò che è dentro la board viene tagliato sugli
+           angoli smussati; il contorno esterno è disegnato fuori dal clip. -->
+      <clipPath [attr.id]="boardClipId">
+        <rect x="0" y="0" width="90" height="90" rx="1.5" ry="1.5" />
+      </clipPath>
+    </defs>
+    <!-- COORDINATE: fuori dal clip perché si trovano oltre il riquadro 0..90 -->
+    @if (status.isCoord) {
+      @for (crd of GEOMETRY.coords; track crd.text) {
+        <text class="svg-board-coord-text"
+              text-anchor="middle"
+              dominant-baseline="hanging"
+              [attr.x]="crd.x"
+              [attr.y]="crd.y"
+              [class.highlight]="crd.col===(currentCellCol$|async) || crd.row===(currentCellRow$|async)"
+        >{{crd.text}}</text>
+      }
+    }
+
+    <g [attr.clip-path]="'url(#' + boardClipId + ')'">
+      <!-- SFONDO (riempimento) — lo stroke arriva dal bordo esterno, qui solo fill -->
       <rect x="0" y="0" width="90" height="90"
             class="svg-board-line svg-board-background"
             stroke-width="0"
       ></rect>
-      @if (status.isCoord) {
-        @for (crd of GEOMETRY.coords; track crd.text) {
-          <!-- COORDS -->
-          <text class="svg-board-coord-text"
-                text-anchor="middle"
-                dominant-baseline="hanging"
-                [attr.x]="crd.x"
-                [attr.y]="crd.y"
-                [class.highlight]="crd.col===(currentCellCol$|async) || crd.row===(currentCellRow$|async)"
-          >{{crd.text}}</text>
-        }
-      }
 
       @for (cell of (cells$|async); track cell.id) {
         <g [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
@@ -63,7 +71,7 @@
                     text-anchor="start"
                     [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
                     [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)"
-              >{{(status.valuesMode=='dots')?'∎':vl}}</text>
+              >{{(status.valuesMode==='dots')?'∎':vl}}</text>
             }
           }
         </g>
@@ -99,5 +107,14 @@
         ></rect>
       }
     </g>
+
+    <!-- BORDO ESTERNO: disegnato fuori dal clip per restare netto ed avere
+         lo stesso peso delle linee che dividono i settori (GEOMETRY.line.big). -->
+    <rect x="0" y="0" width="90" height="90"
+          rx="1.5" ry="1.5"
+          class="svg-board-line svg-board-outline"
+          fill="none"
+          [attr.stroke-width]="GEOMETRY.line.big"
+    ></rect>
   </svg>
 }

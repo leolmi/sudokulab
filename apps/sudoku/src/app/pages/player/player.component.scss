@@ -38,3 +38,89 @@
 .footer-container {
   padding: 20px 50px;
 }
+
+// =========================================================
+// FX "schema completato"
+// - cascata verde cella per cella (overlay 9x9 sopra la board)
+// - pulse del bordo della board
+// Toast via MatSnackBar (notifier.notify con type-success).
+// =========================================================
+.board-fx-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+
+  // Percentuali calcolate sulla viewBox `-0.5 -0.5 91 91` (coord OFF): il
+  // riquadro 0..90 occupa quasi tutto l'SVG (0.5/91 ≈ 0.55% per lato) →
+  // inset praticamente nullo.
+  --fx-inset-top: 0;
+  --fx-inset-right: 0;
+  --fx-inset-bottom: 0;
+  --fx-inset-left: 0;
+  // Coord ON: viewBox `-5 -5 96 96`. Il riquadro 0..90 è shiftato a destra
+  // e in basso → inset asimmetrico (le coordinate stanno solo su due lati).
+  &.fx-coord {
+    --fx-inset-top: 5.208%;    // 5/96
+    --fx-inset-left: 5.208%;   // 5/96
+    --fx-inset-right: 1.042%;  // 1/96
+    --fx-inset-bottom: 1.042%; // 1/96
+  }
+
+  // Overlay 9x9 allineato al riquadro visibile della board. Fa solo da
+  // superficie per l'animazione — pointer-events:none per non interferire.
+  .fx-cascade {
+    position: absolute;
+    top: var(--fx-inset-top);
+    right: var(--fx-inset-right);
+    bottom: var(--fx-inset-bottom);
+    left: var(--fx-inset-left);
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    pointer-events: none;
+    opacity: 0;
+  }
+  .fx-cell {
+    background: var(--sdk-color-accent);
+    opacity: 0;
+    // `animation-delay` viene iniettato via `[style.animation-delay.ms]` dal
+    // componente: (riga + colonna) * 30ms per la propagazione anti-diagonale.
+  }
+
+  // play
+  &.fx-playing {
+    .fx-cascade {
+      opacity: 1;
+    }
+    .fx-cell {
+      animation: fx-cell-flash 600ms ease-out both;
+    }
+    // Effetto #4: animiamo direttamente il rect SVG del contorno della board
+    // (stesso elemento che disegna il bordo), così il pulse coincide al pixel
+    // con il bordo reale — niente offset tra un pseudo-element CSS e l'SVG.
+    ::ng-deep .svg-board-outline {
+      animation: fx-outline-pulse 1100ms ease-out both;
+    }
+  }
+}
+
+@keyframes fx-cell-flash {
+  0%   { opacity: 0; }
+  40%  { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+// Pulse del contorno SVG: stroke e stroke-width animati sull'`<rect>` del bordo.
+// Il filter drop-shadow aggiunge un alone morbido in tinta accent intorno al rect.
+@keyframes fx-outline-pulse {
+  0%   { filter: none; }
+  20%  {
+    stroke: var(--sdk-color-accent);
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--sdk-color-accent) 55%, transparent));
+  }
+  70%  {
+    stroke: var(--sdk-color-accent);
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--sdk-color-accent) 55%, transparent));
+  }
+  100% { filter: none; }
+}

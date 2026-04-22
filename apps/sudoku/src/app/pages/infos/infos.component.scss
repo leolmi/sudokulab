@@ -110,6 +110,18 @@
   max-height: 300px !important;
 }
 
+.alg-title {
+  display: inline-flex !important;
+  margin-top: 20px;
+
+  .alg-name {
+    margin: 0 10px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--sdk-color-accent);
+  }
+}
+
 .alg-info-btn {
   width: 24px;
   height: 24px;

@@ -84,16 +84,19 @@
       <ul>
         @for (alg of algorithms; track alg.id) {
           <li>
-            <mat-icon>{{alg.icon}}</mat-icon>&nbsp;&nbsp;<b>{{alg.name}}</b>
-            @if (hasInfoPage(alg.id)) {
-              <button mat-icon-button
-                      class="alg-info-btn"
-                      matTooltip="Apri la pagina di dettaglio"
-                      (click)="openAlgorithmInfo(alg.id)"
-                      aria-label="Apri la pagina di dettaglio dell'algoritmo">
-                <mat-icon>open_in_new</mat-icon>
-              </button>
-            }
+            <div class="alg-title" fxLayout="row" fxLayoutAlign="center start">
+              <mat-icon>{{alg.icon}}</mat-icon>
+              <div class="alg-name">{{alg.name}}</div>
+              @if (hasInfoPage(alg.id)) {
+                <button mat-icon-button
+                        class="alg-info-btn"
+                        matTooltip="Apri la pagina di dettaglio"
+                        (click)="openAlgorithmInfo(alg.id)"
+                        aria-label="Apri la pagina di dettaglio dell'algoritmo">
+                  <mat-icon>open_in_new</mat-icon>
+                </button>
+              }
+            </div>
             : <i>({{TYPEDESC[alg.type]}}) {{alg.title}}</i>.<br>{{alg.description}};
           </li>
         }
