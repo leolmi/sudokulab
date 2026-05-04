@@ -60,7 +60,40 @@
     @case (KeeperMode.imagePreview) {
       <div class="keeper-page page-image-preview" fxLayout="column" fxLayoutAlign="center center">
         @if (image$|async; as img) {
-          <img class="image-preview" [src]="img" alt="Sudoku image">
+          <div class="image-preview-wrapper">
+            <img class="image-preview"
+                 [src]="img"
+                 [style.transform]="'rotate(' + (rotationTotal$|async) + 'deg)'"
+                 alt="Sudoku image">
+          </div>
+          <div class="rotation-controls" fxLayout="row" fxLayoutAlign="center center">
+            <button mat-icon-button
+                    matTooltip="Rotate 90° counter-clockwise"
+                    (click)="rotateOrthogonal(-90)">
+              <mat-icon>rotate_left</mat-icon>
+            </button>
+            <mat-slider class="rotation-slider"
+                        [min]="-ROTATION_RANGE"
+                        [max]="ROTATION_RANGE"
+                        [step]="1"
+                        [discrete]="true"
+                        [showTickMarks]="false">
+              <input matSliderThumb
+                     [value]="rotation$|async"
+                     (valueChange)="setRotation($event)">
+            </mat-slider>
+            <button mat-icon-button
+                    matTooltip="Rotate 90° clockwise"
+                    (click)="rotateOrthogonal(90)">
+              <mat-icon>rotate_right</mat-icon>
+            </button>
+            <button mat-icon-button
+                    matTooltip="Reset rotation"
+                    [disabled]="(rotationTotal$|async) === 0"
+                    (click)="resetRotation()">
+              <mat-icon>restart_alt</mat-icon>
+            </button>
+          </div>
         }
       </div>
     }

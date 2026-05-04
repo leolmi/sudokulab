@@ -27,7 +27,11 @@ import {
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { SUDOKU_API, SUDOKU_NOTIFIER } from '@olmi/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatTooltip } from '@angular/material/tooltip';
 import { getSolutionByStat, getWorkStat, solve } from '@olmi/logic';
+
+const ROTATION_RANGE = 45;
 
 enum KeeperMode {
   chooser = 'chooser',
@@ -58,6 +62,9 @@ interface ChooserButton {
     BoardComponent,
     SchemaToolbarComponent,
     MatProgressSpinner,
+    MatSlider,
+    MatSliderThumb,
+    MatTooltip,
   ],
   templateUrl: './schema-keeper-dialog.component.html',
   styleUrl: './schema-keeper-dialog.component.scss',
@@ -76,6 +83,10 @@ export class SchemaKeeperDialogComponent {
   image$: BehaviorSubject<string>;
   dragging$: BehaviorSubject<boolean>;
   loading$: BehaviorSubject<boolean>;
+  rotation$: BehaviorSubject<number>;
+  rotationOrthogonal$: BehaviorSubject<number>;
+  rotationTotal$: Observable<number>;
+  readonly ROTATION_RANGE = ROTATION_RANGE;
 
   manager: BoardManager | undefined;
   toolbarTemplate = 'nums,clear,delete';
@@ -96,6 +107,10 @@ export class SchemaKeeperDialogComponent {
     this.dragging$ = new BehaviorSubject<boolean>(false);
     this.text$ = new BehaviorSubject<string>(presetValues);
     this.image$ = new BehaviorSubject<string>('');
+    this.rotation$ = new BehaviorSubject<number>(0);
+    this.rotationOrthogonal$ = new BehaviorSubject<number>(0);
+    this.rotationTotal$ = combineLatest([this.rotation$, this.rotationOrthogonal$])
+      .pipe(map(([r, o]) => r + o));
 
     this.textLength$ = this.text$.pipe(map(t => `${t||''}`.length));
     this.valid$ = combineLatest([this.keeperMode$, this.text$, this.image$]).pipe(map(
@@ -114,6 +129,12 @@ export class SchemaKeeperDialogComponent {
     this.image$.next('');
     this.loading$.next(false);
     this.dragging$.next(false);
+    this._resetRotation();
+  }
+
+  private _resetRotation() {
+    this.rotation$.next(0);
+    this.rotationOrthogonal$.next(0);
   }
 
   private _onChangeMode() {
@@ -147,6 +168,7 @@ export class SchemaKeeperDialogComponent {
     if (file) {
       getImageByFile(file, (img) => {
         if (img) {
+          this._resetRotation();
           this.image$.next(img);
         } else {
           this.setMode();
@@ -156,6 +178,47 @@ export class SchemaKeeperDialogComponent {
       // Utente ha annullato la selezione
       this.setMode();
     }
+  }
+
+  setRotation(value: number) {
+    this.rotation$.next(value);
+  }
+
+  rotateOrthogonal(delta: number) {
+    const next = (this.rotationOrthogonal$.value + delta) % 360;
+    this.rotationOrthogonal$.next(next);
+  }
+
+  resetRotation() {
+    this._resetRotation();
+  }
+
+  private _rotateImage(dataUrl: string, angle: number): Promise<string> {
+    const normalized = ((angle % 360) + 360) % 360;
+    if (normalized === 0) return Promise.resolve(dataUrl);
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const rad = (normalized * Math.PI) / 180;
+        const sin = Math.abs(Math.sin(rad));
+        const cos = Math.abs(Math.cos(rad));
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(w * cos + h * sin);
+        canvas.height = Math.round(w * sin + h * cos);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(dataUrl);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rad);
+        ctx.drawImage(img, -w / 2, -h / 2);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
   }
 
   private _importFromFiles(files: any) {
@@ -196,16 +259,19 @@ export class SchemaKeeperDialogComponent {
 
   private _manageScan() {
     this.loading$.next(true);
-    this._interaction
-      .ocrScan({ data: this.image$.value })
-      .pipe(catchError(err => {
-        console.error('error while scan image', err);
-        return of(undefined);
-      }))
-      .subscribe(res => {
-        this.loading$.next(false);
-        this._manageScanResult(res);
-      })
+    const angle = this.rotation$.value + this.rotationOrthogonal$.value;
+    this._rotateImage(this.image$.value, angle).then(data => {
+      this._interaction
+        .ocrScan({ data })
+        .pipe(catchError(err => {
+          console.error('error while scan image', err);
+          return of(undefined);
+        }))
+        .subscribe(res => {
+          this.loading$.next(false);
+          this._manageScanResult(res);
+        })
+    });
   }
 
   allowDrop(e: any) {
