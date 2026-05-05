@@ -35,9 +35,16 @@ export class SolveOptions extends ApplyAlgorithmOptions {
     this.debug = !!o?.debug;
     this.allowHidden = !!o?.allowHidden;
     this.toStep = o?.toStep||-1;
+    this.oracleSolution = o?.oracleSolution;
   }
 
   mode: SolveMode;
+  /**
+   * soluzione unica già nota (stringa di 81 caratteri '1'..'9'); se presente,
+   * gli algoritmi di tipo `solver` (es. TryNumber) usano l'oracolo per
+   * scegliere il ramo corretto invece di splittare in branch paralleli
+   */
+  oracleSolution?: string;
   /**
    * numero massimo di cicli di risoluzione
    */

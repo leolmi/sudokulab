@@ -15,6 +15,8 @@ export class SudokuInfo extends Difficulty {
     this.unique = !!i?.unique;
     this.version = i?.version||'';
     this.origin = i?.origin||'';
+    this.canonicalId = i?.canonicalId;
+    this.canonicalToken = i?.canonicalToken;
   }
 
   /**
@@ -41,6 +43,16 @@ export class SudokuInfo extends Difficulty {
    * origine dello schema
    */
   origin: string;
+  /**
+   * id canonico dell'orbita di equivalenza (D4 + relabeling cifre);
+   * schemi equivalenti condividono lo stesso valore. Vedi `canonize`.
+   */
+  canonicalId?: string;
+  /**
+   * token di trasformazione `t:relabel` — applicato a `canonicalId`
+   * ricostruisce `values`. Vedi `applyToken`.
+   */
+  canonicalToken?: string;
 }
 
 

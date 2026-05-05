@@ -19,7 +19,8 @@ Tipo [`GeneratorOptions`](../libs/model/src/lib/generator.ts) (estende `SolveOpt
 |---------|------|---------|-------------|
 | `fixedCount` | number | `GENERATOR_DEFAULT_NUMBERS` | Numero di celle **fisse** desiderate nello schema finale (tipicamente 17–40) |
 | `symmetry` | `Symmetry` | `central` | Simmetria delle celle fisse: `central`, `axial`, `diagonal`, `none` |
-| `maxSchemas` | number | `1` | Numero massimo di schemi da generare in sessione |
+| `maxOrbits` | number | `1` | Numero di **orbite** (famiglie di equivalenza) da generare in sessione. Ogni orbita emette `1 + (variantsCount-1)` schemi. |
+| `variantsCount` | number | `1` | Numero di varianti equivalenti da emettere per ogni orbita (vedi sezione *Varianti*) |
 | `maxSeconds` | number | `0` (∞) | Timeout per la generazione |
 | `endMode` | `EndGenerationMode` | `afterN` | Condizione di arresto della sessione |
 | `valuesMode` | `ValorizationMode` | `auto` | Modalità di valorizzazione delle celle dinamiche (`auto`, `sequential`, `random`) |
@@ -46,7 +47,7 @@ Orchestrato da [`LogicManager`](../libs/components/common/src/lib/logic.manager.
    - Con `oneForSchema = true` la soluzione dev'essere unica (altrimenti si aggiunge una cella fissa e si riprova).
    - La sequenza degli algoritmi usati determina la difficoltà: se fuori `[difficultyLimitMin, difficultyLimitMax]` lo schema viene scartato o ritentato.
 5. **Gate finale**: se `fixedCount` è raggiunto e la difficoltà è in range, lo schema è emesso in `GenerationStat.generatedSchema` e accumulato nel catalogo della sessione.
-6. **Loop**: il worker ripete fino a `maxSchemas` o `maxSeconds` / condizione `endMode`.
+6. **Loop**: il worker ripete fino a `maxOrbits` (in modalità `afterN`) o `maxSeconds` (in modalità `afterTime`) o `STOP` manuale.
 
 Stato della sessione: `GenerationSession` ([logic.model.ts](../libs/logic/src/lib/logic.model.ts)) — contiene opzioni, celle correnti, cache, contatori.
 

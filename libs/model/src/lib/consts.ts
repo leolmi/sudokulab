@@ -24,6 +24,8 @@ export const GENERATOR_DEFAULT_NUMBERS = 24;
 export const GENERATOR_MAX_NUMBERS = 40;
 export const GENERATOR_MIN_WORKERS = 1;
 export const GENERATOR_MAX_WORKERS = 10;
+export const GENERATOR_MIN_VARIANTS = 1;
+export const GENERATOR_MAX_VARIANTS = 50;
 
 
 export const TRY_NUMBER_ALGORITHM = 'TryNumber';

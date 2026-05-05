@@ -79,11 +79,31 @@ export class LogicManager extends LogicManagerBase implements LogicExecutor {
 }
 
 /**
- * gestisce N worker paralleli per la logica
+ * gestisce N worker paralleli per la logica.
+ *
+ * Coordinazione globale per la generazione: i worker sono indipendenti e
+ * partono dallo stesso input, quindi senza coordinazione tendono a duplicare
+ * il lavoro. Il manager fa da gatekeeper sul flusso `generation-result`
+ * usando il `canonicalId` di ogni schema:
+ *
+ *  - per ogni orbita (canonicalId) accetta al massimo `variantsCount` emissioni
+ *  - dopo `maxOrbits` orbite distinte droppa nuove orbite e invia `stop`
+ *
+ * Le emissioni filtrate non vengono propagate allo store. Il segnale `stop`
+ * viene inviato a tutti i worker quando il budget complessivo è esaurito,
+ * per evitare che continuino a calcolare schemi che andrebbero scartati.
  */
 export class MultiLogicManager extends LogicManagerBase implements LogicExecutor {
   static count = 1;
   private _workers: Worker[] = [];
+  // canonicalId → set di `values` distinti già accettati per quella orbita.
+  // Usiamo un Set, non un counter, perché tutti i worker partono dallo stesso
+  // input: la prima emissione di ognuno è lo stesso schema. Contandole tutte
+  // saturerebbe il budget con duplicati.
+  private _seenValuesByOrbit: Map<string, Set<string>> = new Map();
+  private _maxOrbits = 1;
+  private _variantsCount = 1;
+  private _stopSent = false;
 
   constructor() {
     super();
@@ -96,12 +116,92 @@ export class MultiLogicManager extends LogicManagerBase implements LogicExecutor
     }
   }
 
+  protected override _handleMessage(m: MessageEvent, index?: number) {
+    const data = new LogicWorkerData(m.data);
+    if (data.operation === 'generation-result' && this._shouldFilter(data)) {
+      return;
+    }
+    super._handleMessage(m, index);
+  }
+
+  /**
+   * Decide se questa emissione va scartata in base ai vincoli globali.
+   * Se l'emissione completa il budget, invia `stop` ai worker.
+   *
+   * Logica:
+   *  - duplicato esatto (stesso `values` già accettato): drop silenzioso
+   *  - orbita nuova oltre `maxOrbits`: drop + stop
+   *  - orbita nota ma budget `variantsCount` esaurito: drop
+   *  - altrimenti: accetta e registra
+   */
+  private _shouldFilter(data: LogicWorkerData): boolean {
+    const sdk = data.generationStat?.generatedSchema;
+    const cid = sdk?.info?.canonicalId;
+    // schemi senza canonicalId: passa (legacy / sicurezza)
+    if (!cid || !sdk) return false;
+
+    const values = sdk.values;
+    let seen = this._seenValuesByOrbit.get(cid);
+
+    // duplicato esatto (più worker hanno generato lo stesso schema): drop
+    if (seen?.has(values)) return true;
+
+    const isNewOrbit = !seen;
+
+    // orbita nuova oltre il limite globale: drop + stop
+    if (isNewOrbit && this._seenValuesByOrbit.size >= this._maxOrbits) {
+      this._sendStop();
+      return true;
+    }
+
+    // budget per-orbita esaurito (`variantsCount` schemi distinti già accettati)
+    if (seen && seen.size >= this._variantsCount) return true;
+
+    // accetto e registro
+    if (!seen) {
+      seen = new Set<string>();
+      this._seenValuesByOrbit.set(cid, seen);
+    }
+    seen.add(values);
+
+    // se tutte le orbite raggiunte hanno saturato il budget, segnala stop
+    if (this._seenValuesByOrbit.size >= this._maxOrbits) {
+      let allFull = true;
+      for (const s of this._seenValuesByOrbit.values()) {
+        if (s.size < this._variantsCount) { allFull = false; break; }
+      }
+      if (allFull) this._sendStop();
+    }
+
+    return false;
+  }
+
+  private _sendStop() {
+    if (this._stopSent) return;
+    this._stopSent = true;
+    const stopArgs = new LogicWorkerArgs({ operation: 'stop' });
+    this._workers.forEach(w => w.postMessage(stopArgs));
+  }
+
+  /**
+   * Resetta lo stato di coordinazione all'inizio di ogni nuova generazione.
+   */
+  private _resetCoordination(args: LogicWorkerArgs) {
+    const opts = args.options as Partial<GeneratorOptions> | undefined;
+    this._seenValuesByOrbit.clear();
+    this._maxOrbits = opts?.maxOrbits || 1;
+    this._variantsCount = opts?.variantsCount || 1;
+    this._stopSent = false;
+  }
+
   /**
    * esegue la disposizione sul worker logico
    * @param args
    */
   execute(args: Partial<LogicWorkerArgs>): string {
-    return this._execute(args, (eff) =>
-      this._workers.forEach(w => w.postMessage(eff)));
+    return this._execute(args, (eff) => {
+      if (eff.operation === 'generate') this._resetCoordination(eff);
+      this._workers.forEach(w => w.postMessage(eff));
+    });
   }
 }

@@ -2,6 +2,8 @@ import {
   AlgorithmType,
   buildSudokuCells,
   checkStatus,
+  decodeCellId,
+  getCellIndex,
   getCellsSchema,
   hasErrors,
   isComplete,
@@ -42,24 +44,44 @@ const solveStep = (work: SolveWork, step: SolveSolution, index = 0) => {
     // se è un algoritmo risolutivo considera terminato lo step
     if (alg?.type === AlgorithmType.solver) {
       if (res.cases.length > 0) {
-        const branches = res.cases.length;
         const splitCell = res.cells?.[0] || '?';
+        // Oracolo: se nota la soluzione unica, collassa i casi al solo
+        // ramo corretto evitando di generare branch paralleli sprecati.
+        let oracleResolved = false;
+        if (work.options.oracleSolution && res.cells?.length) {
+          const cell = decodeCellId(splitCell);
+          if (cell) {
+            const oracleVal = work.options.oracleSolution.charAt(getCellIndex(cell));
+            const correct = res.cases.find(cs => cs.find(cc => cc.id === splitCell)?.text === oracleVal);
+            if (correct) {
+              res.cases = [correct];
+              oracleResolved = true;
+            }
+          }
+        }
+        const branches = res.cases.length;
         const splitValues = res.cases.map(cs => {
           const c = cs.find(cc => cc.id === splitCell);
           return c?.text || '?';
         });
-        // board e candidati residui al momento dello split
-        const board = getCellsSchema(step.cells, { allowDynamic: true, allowUserValue: true });
-        const candidates = step.cells
-          .filter(c => !c.text && c.available.length > 0)
-          .map(c => `${c.id}=[${c.available.join('')}]`)
-          .join(' ');
-        console.log(...SDK_PREFIX, `[pre-split] way=${index} board=${board}`);
-        console.log(...SDK_PREFIX, `[pre-split] way=${index} candidates: ${candidates}`);
+        if (!oracleResolved) {
+          // board e candidati residui al momento dello split
+          const board = getCellsSchema(step.cells, { allowDynamic: true, allowUserValue: true });
+          const candidates = step.cells
+            .filter(c => !c.text && c.available.length > 0)
+            .map(c => `${c.id}=[${c.available.join('')}]`)
+            .join(' ');
+          console.log(...SDK_PREFIX, `[pre-split] way=${index} board=${board}`);
+          console.log(...SDK_PREFIX, `[pre-split] way=${index} candidates: ${candidates}`);
+        }
         step.cells = <SudokuCell[]>(res.cases||[]).shift();
         // aggiunge gli altri casi come percorsi alternativi al principale
         res.cases.forEach(cells => work.solutions.push(new SolveSolution({ cells, sequence: _clone(step.sequence) })));
-        console.log(...SDK_PREFIX, `[split] ${res.algorithm} on cell ${splitCell} into ${branches} branches (values=[${splitValues.join(',')}]) way=${index} total solutions=${work.solutions.length}`);
+        if (oracleResolved) {
+          console.log(...SDK_PREFIX, `[oracle] ${res.algorithm} on cell ${splitCell} resolved to value ${splitValues[0]} way=${index}`);
+        } else {
+          console.log(...SDK_PREFIX, `[split] ${res.algorithm} on cell ${splitCell} into ${branches} branches (values=[${splitValues.join(',')}]) way=${index} total solutions=${work.solutions.length}`);
+        }
       }
       if (isComplete(step.cells)) {
         step.status = 'success';

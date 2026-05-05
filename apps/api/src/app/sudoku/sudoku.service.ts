@@ -4,10 +4,10 @@ import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
 import { join } from 'path';
 import fs from 'fs';
-import { extendInfo, SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
+import { canonize, extendInfo, SDK_PREFIX, Sudoku, SudokuEx } from '@olmi/model';
 import { isArray as _isArray, padStart as _padStart } from 'lodash';
 import { getAcquireOperations, getCatalogVerdict, getSudoku, translate } from './sudoku.logic';
-import { countSolutions } from './sudoku.brute-force';
+import { countSolutions } from '@olmi/logic';
 import { ImgDto } from '../../model/img.dto';
 import { OcrOptions } from '../../model/ocr.options';
 import { OcrResult } from '../../model/ocr.result';
@@ -33,6 +33,59 @@ export interface CheckOutcome {
   };
 }
 
+type BackfillableInfo = {
+  canonicalId?: string;
+  canonicalToken?: string;
+  difficultyMap?: any;
+  algorithmCount?: number;
+  useTryAlgorithm?: boolean;
+  tryAlgorithmCount?: number;
+};
+
+/**
+ * Riempie i campi `canonicalId` e `canonicalToken` nell'`info` se mancanti,
+ * a partire da `values`. Mutazione in-place.
+ *
+ * @returns true se ha modificato l'oggetto (caller deve persistere), false se
+ * i campi erano già valorizzati o `values` è vuoto.
+ */
+const checkCanonicalId = (values: string, info: BackfillableInfo): boolean => {
+  if (!values || info?.canonicalId) return false;
+  const { canonical, token } = canonize(values);
+  info.canonicalId = canonical;
+  info.canonicalToken = `${token.t}:${token.relabel}`;
+  return true;
+};
+
+/**
+ * Riempie i campi derivati da `difficultyMap` (`algorithmCount`,
+ * `useTryAlgorithm`, `tryAlgorithmCount`) se mancanti. Sono campi
+ * deterministicamente ricavabili dalla mappa, quindi possiamo backfillare
+ * il catalogo esistente senza re-eseguire il solve.
+ *
+ * @returns true se ha modificato almeno un campo.
+ */
+const checkDerivedInfo = (info: BackfillableInfo): boolean => {
+  if (!info) return false;
+  const map = info.difficultyMap || {};
+  const tryUses = (map['TryNumber'] || []).length;
+  const algCount = Object.keys(map).length;
+  let changed = false;
+  if (info.algorithmCount === undefined || info.algorithmCount === null) {
+    info.algorithmCount = algCount;
+    changed = true;
+  }
+  if (info.tryAlgorithmCount === undefined || info.tryAlgorithmCount === null) {
+    info.tryAlgorithmCount = tryUses;
+    changed = true;
+  }
+  if (info.useTryAlgorithm === undefined || info.useTryAlgorithm === null) {
+    info.useTryAlgorithm = tryUses > 0;
+    changed = true;
+  }
+  return changed;
+};
+
 
 @Injectable()
 export class SudokuService implements OnModuleInit {
@@ -45,6 +98,27 @@ export class SudokuService implements OnModuleInit {
 
   async getSchemas(): Promise<SudokuDoc[]> {
     return await this.sudokuModel.find().exec();
+  }
+
+  /**
+   * Restituisce tutti gli schemi del catalogo che condividono il `canonicalId`
+   * indicato (orbita di equivalenza sotto D4 + relabeling cifre).
+   */
+  async getOrbit(canonicalId: string): Promise<SudokuDoc[]> {
+    if (!canonicalId) return [];
+    return await this.sudokuModel.find({ 'info.canonicalId': canonicalId }).exec();
+  }
+
+  /**
+   * Dato uno schema (`values`, 81 caratteri), calcola il suo `canonicalId` e
+   * ritorna l'orbita corrispondente. Utile lato client quando si conosce solo
+   * la stringa-schema e si vuole scoprire le varianti equivalenti già a catalogo.
+   */
+  async getOrbitByValues(values: string): Promise<{ canonicalId: string; members: SudokuDoc[] }> {
+    if (!values) return { canonicalId: '', members: [] };
+    const { canonical } = canonize(values);
+    const members = await this.getOrbit(canonical);
+    return { canonicalId: canonical, members };
   }
 
   async check(sudokuDto: SudokuDto): Promise<SudokuEx> {
@@ -226,12 +300,14 @@ export class SudokuService implements OnModuleInit {
     let skipped = 0;
     let failed = 0;
     let deleted = 0;
+    let canonicalBackfilled = 0;
     const step = Math.max(1, Math.floor(tot / 10));
     let nextMilestone = step;
     for (const sdk of sdks) {
       index++;
       this.appState.setProgress((index / tot) * 100);
-      // se la versione di calcolo è anteriore lo ricalcola
+      // se la versione di calcolo è anteriore lo ricalcola (recheck completo
+      // popola anche canonicalId via _check)
       if (!checkAlgorithmsVersion(sdk.info.version)) {
         if (environment.debug) console.log(`upgrading (${index}/${tot}) schema "${sdk.values}" (${sdk.info.version})...`);
         const res = await this._check(sdk);
@@ -255,17 +331,32 @@ export class SudokuService implements OnModuleInit {
           }
         }
       } else {
-        if (environment.debug) console.log(`schema (${index}/${tot}) "${sdk._id}" with right version: ${sdk.info.version}`);
-        skipped++;
+        // entrambe le funzioni vanno chiamate sempre (no short-circuit con ||)
+        const canonicalChanged = checkCanonicalId(sdk.values, sdk.info);
+        const derivedChanged = checkDerivedInfo(sdk.info);
+        if (canonicalChanged || derivedChanged) {
+          try {
+            // Mongoose non rileva mutazioni in-place su Mixed/sub-doc senza
+            // markModified esplicito; per sicurezza marchiamo `info`
+            sdk.markModified('info');
+            await sdk.save();
+            canonicalBackfilled++;
+          } catch (err: any) {
+            console.error(...SDK_PREFIX, `[check] errore backfill su "${sdk._id}"`, err?.message || err);
+          }
+        } else {
+          if (environment.debug) console.log(`schema (${index}/${tot}) "${sdk._id}" with right version: ${sdk.info.version}`);
+          skipped++;
+        }
       }
       if (index >= nextMilestone && index < tot) {
         const pct = Math.floor((index / tot) * 100);
-        console.log(...SDK_PREFIX, `progress ${pct}% (${index}/${tot}) — updated: ${updated}, skipped: ${skipped}, failed: ${failed}, deleted: ${deleted}`);
+        console.log(...SDK_PREFIX, `progress ${pct}% (${index}/${tot}) — updated: ${updated}, skipped: ${skipped}, failed: ${failed}, deleted: ${deleted}, canonicalBackfilled: ${canonicalBackfilled}`);
         nextMilestone += step;
       }
     }
     const elapsed = performance.now() - t;
-    console.log(...SDK_PREFIX, `checking all schemas done in ${elapsed.toFixed(0)}mls, ${updated} updated, ${skipped} skipped, ${failed} failed, ${deleted} deleted on ${tot}.`);
+    console.log(...SDK_PREFIX, `checking all schemas done in ${elapsed.toFixed(0)}mls, ${updated} updated, ${skipped} skipped, ${failed} failed, ${deleted} deleted, ${canonicalBackfilled} canonical-backfilled on ${tot}.`);
     await this._persistCheckState({ tot, updated, skipped, failed, deleted, elapsedMs: Math.round(elapsed) });
   }
 
@@ -360,6 +451,7 @@ export class SudokuService implements OnModuleInit {
         return { error: { code: 'disagreement', message, solutionCount: 1 } };
       }
       extendInfo(sol, info);
+      checkCanonicalId(sol.values, sol.info);
       const result: any = await this.sudokuModel.updateOne({ _id: sol._id }, { $set: sol }, { upsert: true });
       if (environment.debug) console.log(...SDK_PREFIX, `check results for "${info._id}"`, result);
       if (result?.acknowledged) return { sol };

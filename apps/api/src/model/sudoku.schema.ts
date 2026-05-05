@@ -40,6 +40,21 @@ class Info extends Document {
   @Prop({ type: Object })
   difficultyMap: any;
   /**
+   * numero di algoritmi distinti utilizzati (cardinalità di `difficultyMap`)
+   */
+  @Prop()
+  algorithmCount: number;
+  /**
+   * vero se la risoluzione richiede l'algoritmo `TryNumber` (brute-force)
+   */
+  @Prop()
+  useTryAlgorithm: boolean;
+  /**
+   * numero di applicazioni dell'algoritmo `TryNumber` nella sequenza
+   */
+  @Prop()
+  tryAlgorithmCount: number;
+  /**
    * versione dello schema sudoku
    */
   @Prop()
@@ -49,6 +64,19 @@ class Info extends Document {
    */
   @Prop()
   origin: string;
+  /**
+   * id canonico dell'orbita di equivalenza (D4 + relabeling cifre):
+   * schemi equivalenti sotto rotazione/flip/permutazione cifre condividono
+   * lo stesso valore (vedi `canonize` in `@olmi/model`)
+   */
+  @Prop({ index: true })
+  canonicalId: string;
+  /**
+   * token di trasformazione `t:relabel` che, applicato al canonicalId,
+   * ricostruisce `values` (vedi `applyToken` in `@olmi/model`)
+   */
+  @Prop()
+  canonicalToken: string;
 }
 
 @Schema()

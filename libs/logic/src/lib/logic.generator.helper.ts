@@ -1,5 +1,9 @@
 import {
   ApplySudokuRulesOptions,
+  applyToken,
+  buildSudokuCells,
+  CanonizeToken,
+  canonize,
   cellId, checkStatus,
   DIFFICULTY_MAX,
   EndGenerationMode,
@@ -13,6 +17,7 @@ import {
   setDynamic,
   SudokuCell,
   SudokuEx,
+  SudokuInfoEx,
   Symmetry,
   TRY_NUMBER_ALGORITHM
 } from '@olmi/model';
@@ -20,6 +25,7 @@ import { cloneDeep as _clone, isArray as _isArray, isObject as _isObject, keys a
 import { GeneratorContext } from './logic.model';
 import { solve } from './logic.solver';
 import { getSolution } from './logic.helper';
+import { findUniqueSolution } from './brute-force';
 
 /**
  * vero se il numero di celle dinamiche e fisse è maggiore o uguale
@@ -83,7 +89,9 @@ export const isSessionComplete = (ctx: GeneratorContext): boolean => {
   if (ctx.session.stopped || !ctx.session.time) return true;
   switch (ctx.session.options.endMode) {
     case EndGenerationMode.afterN:
-      return _keys(ctx.schemas).length >= ctx.session.options.maxSchemas;
+      // conta le orbite emesse, non le singole varianti: ogni orbita produce
+      // `variantsCount` schemi ma viene contata una sola volta
+      return ctx.session.orbitsEmitted >= ctx.session.options.maxOrbits;
     case EndGenerationMode.afterTime:
       return (Date.now() - ctx.session.time) >= (ctx.session.options.maxSeconds * 1000)
     case EndGenerationMode.manual:
@@ -253,14 +261,174 @@ export const isRightSolution = (ctx: GeneratorContext, sdk: SudokuEx|undefined):
 
 /**
  * calcola la soluzione dello schema
+ * Pre-gate: brute-force tenta di trovare la soluzione **unica** (cap=2).
+ * - Se non è univoca lo schema viene scartato subito.
+ * - Se è univoca la soluzione viene passata al solver come `oracleSolution`:
+ *   in questo modo gli algoritmi solver-type (TryNumber) possono evitare
+ *   lo split in branch paralleli scegliendo direttamente il valore corretto.
  * @param ctx
  * @param handler
  */
 export const calcSolution = (ctx: GeneratorContext, handler: (sdk: SudokuEx) => any): void => {
+  const values = ctx.session.currentSchema?.values || '';
+  const oracleSolution = findUniqueSolution(values);
+  if (!oracleSolution) return;
   const work = solve(ctx.session.currentSchema, {
     ...ctx.session.options,
     mode: 'all',
+    oracleSolution,
   });
   const sol = getSolution(work);
   if (isRightSolution(ctx, sol)) handler(sol!);
+}
+
+/**
+ * marchia lo schema con `canonicalId` e `canonicalToken` calcolati da `canonize`.
+ * Mutazione in-place su `sol.info`.
+ */
+const _markCanonical = (sol: SudokuEx): { canonical: string; token: CanonizeToken } => {
+  const result = canonize(sol.values);
+  sol.info.canonicalId = result.canonical;
+  sol.info.canonicalToken = `${result.token.t}:${result.token.relabel}`;
+  return result;
+};
+
+/**
+ * Hamming distance tra due stringhe-schema della stessa lunghezza
+ * (numero di posizioni con caratteri differenti).
+ */
+const _hamming = (a: string, b: string): number => {
+  let d = 0;
+  const len = Math.min(a.length, b.length);
+  for (let i = 0; i < len; i++) if (a.charAt(i) !== b.charAt(i)) d++;
+  return d;
+};
+
+/**
+ * Genera una permutazione casuale di '1'..'9' che è un **derangement**:
+ * nessuna cifra resta nella propria posizione (perm.charAt(i-1) !== i).
+ * Usata per costruire token di trasformazione che cambiano *tutte* le cifre.
+ */
+const _randomDerangement9 = (): string => {
+  while (true) {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    let isDer = true;
+    for (let i = 0; i < 9; i++) if (arr[i] === i + 1) { isDer = false; break; }
+    if (isDer) return arr.join('');
+  }
+};
+
+/**
+ * Costruisce un nuovo `SudokuEx` per la variante identificata da `token`,
+ * a partire dal canonicalId. Esegue un solve completo (con oracolo) per
+ * popolare `info` con difficoltà/algoritmi corretti.
+ *
+ * Ritorna `undefined` se il solve fallisce (non dovrebbe mai succedere se
+ * canonical/token sono consistenti).
+ */
+const _buildVariant = (
+  canonical: string,
+  token: CanonizeToken,
+  originalInfo: SudokuInfoEx
+): SudokuEx | undefined => {
+  const values = applyToken(canonical, token);
+  const oracleSolution = findUniqueSolution(values);
+  if (!oracleSolution) return undefined;
+  const cells = buildSudokuCells(values);
+  checkStatus(cells, { resetBefore: true });
+  const work = solve(cells, { mode: 'all', oracleSolution });
+  const sol = getSolution(work);
+  if (!sol) return undefined;
+  // preserva i campi di "identità" presi dall'originale
+  sol.info.origin = originalInfo.origin;
+  sol.info.symmetry = originalInfo.symmetry;
+  sol.info.version = originalInfo.version;
+  sol.info.canonicalId = canonical;
+  sol.info.canonicalToken = `${token.t}:${token.relabel}`;
+  return sol;
+};
+
+/**
+ * Marchia lo schema originale ed emette `variantsCount-1` varianti aggiuntive
+ * scelte con farthest-first sulla Hamming distance, usando token (D4 + derangement)
+ * per garantire che ogni variante differisca dall'originale per **layout E cifre**.
+ *
+ * L'emissione si ferma in anticipo se la sessione si completa
+ * (`isSessionComplete`).
+ *
+ * @param ctx
+ * @param sol schema unico appena risolto (sarà mutato per inserire canonical*)
+ * @param emit funzione di emissione (tipicamente `ctx.addSchema`)
+ */
+export const emitWithVariants = (
+  ctx: GeneratorContext,
+  sol: SudokuEx,
+  emit: (sdk: SudokuEx) => void
+): void => {
+  // 1. marca + emette l'originale
+  const { canonical, token: origToken } = _markCanonical(sol);
+  emit(sol);
+
+  const target = Math.max(1, ctx.session.options.variantsCount || 1);
+
+  if (target > 1) {
+    // 2. genera fino a target-1 varianti aggiuntive con farthest-first.
+    // NB: durante il loop il check `isSessionComplete` continua a rispettare
+    // stop manuale e timeout, ma NON il counter `orbitsEmitted` (che viene
+    // incrementato solo a fine orbita: vedi nota in fondo).
+    const emittedValues: string[] = [sol.values];
+    const usedTokenKeys = new Set<string>();
+    usedTokenKeys.add(`${origToken.t}:${origToken.relabel}`);
+
+    const candidatesPerRound = 64;
+    const maxRounds = target * 5;  // safety bound
+
+    for (let round = 0; round < maxRounds && emittedValues.length < target; round++) {
+      if (isSessionComplete(ctx)) break;
+
+      let best: { values: string; token: CanonizeToken } | undefined;
+      let bestMinDist = -1;
+
+      for (let i = 0; i < candidatesPerRound; i++) {
+        const t = Math.floor(Math.random() * 8);
+        const relabel = _randomDerangement9();
+        const tokenKey = `${t}:${relabel}`;
+        if (usedTokenKeys.has(tokenKey)) continue;
+
+        const candidateValues = applyToken(canonical, { t, relabel });
+        if (emittedValues.indexOf(candidateValues) >= 0) continue;
+
+        let minDist = 81;
+        for (const ev of emittedValues) {
+          const d = _hamming(candidateValues, ev);
+          if (d < minDist) minDist = d;
+        }
+
+        if (minDist > bestMinDist) {
+          best = { values: candidateValues, token: { t, relabel } };
+          bestMinDist = minDist;
+        }
+      }
+
+      if (!best) continue;
+
+      const variant = _buildVariant(canonical, best.token, sol.info);
+      if (variant) {
+        emit(variant);
+        emittedValues.push(best.values);
+        usedTokenKeys.add(`${best.token.t}:${best.token.relabel}`);
+      }
+    }
+  }
+
+  // 3. orbita completata (originale + varianti): incrementa il contatore.
+  // Questo va DOPO il loop: incrementare prima causerebbe il break immediato
+  // del loop stesso quando `maxOrbits=1`, perché `isSessionComplete` (afterN)
+  // confronta `orbitsEmitted >= maxOrbits` e l'orbita corrente non sarebbe
+  // ancora "finita" semanticamente.
+  ctx.session.orbitsEmitted++;
 }

@@ -6,8 +6,10 @@ import {
   Algorithm,
   EndGenerationMode,
   GENERATOR_MAX_NUMBERS,
+  GENERATOR_MAX_VARIANTS,
   GENERATOR_MAX_WORKERS,
   GENERATOR_MIN_NUMBERS,
+  GENERATOR_MIN_VARIANTS,
   GENERATOR_MIN_WORKERS,
   GeneratorOptions,
   getFixedCount,
@@ -70,6 +72,8 @@ export class GeneratorOptionsComponent extends ManagerComponentBase<BoardManager
   readonly GENERATOR_MIN_NUMBERS = GENERATOR_MIN_NUMBERS;
   readonly GENERATOR_MAX_WORKERS = GENERATOR_MAX_WORKERS;
   readonly GENERATOR_MIN_WORKERS = GENERATOR_MIN_WORKERS;
+  readonly GENERATOR_MAX_VARIANTS = GENERATOR_MAX_VARIANTS;
+  readonly GENERATOR_MIN_VARIANTS = GENERATOR_MIN_VARIANTS;
   readonly TRY_NUMBER_ALGORITHM = TRY_NUMBER_ALGORITHM;
   readonly EndGenerationMode = EndGenerationMode;
   readonly algorithms: Algorithm[];

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { SudokuService } from './sudoku.service';
 import { SudokuDto } from '../../model/sudoku.dto';
 import { SudokuDoc } from '../../model/sudoku.interface';
@@ -11,6 +11,8 @@ import { badRequest } from '../../model/consts';
  * GESTIONE DEGLI SCHEMI
  *
  *  - get    /sudoku/list
+ *  - get    /sudoku/orbit/:canonicalId
+ *  - get    /sudoku/orbit-of?values=...
  *  - post   /sudoku/convert    { path }
  *  - post   /sudoku/check      Sudoku
  *  - post   /sudoku/upload     { path }
@@ -27,6 +29,26 @@ export class SudokuController {
   @Get('list')
   async getSchemas(): Promise<SudokuDoc[]> {
     return this.sudokuService.getSchemas();
+  }
+
+  /**
+   * restituisce tutti gli schemi del catalogo che appartengono alla stessa
+   * orbita di equivalenza (stesso `canonicalId`)
+   */
+  @Get('orbit/:canonicalId')
+  async getOrbit(@Param('canonicalId') canonicalId: string): Promise<SudokuDoc[]> {
+    if (!canonicalId) badRequest('undefined canonicalId');
+    return this.sudokuService.getOrbit(canonicalId);
+  }
+
+  /**
+   * dato uno schema in `values` (81 caratteri), calcola il suo `canonicalId` e
+   * ritorna l'orbita di equivalenza già presente a catalogo
+   */
+  @Get('orbit-of')
+  async getOrbitOf(@Query('values') values: string): Promise<{ canonicalId: string; members: SudokuDoc[] }> {
+    if (!values) badRequest('undefined values');
+    return this.sudokuService.getOrbitByValues(values);
   }
 
   /**

@@ -15,6 +15,7 @@ import {
   addDynamicCell,
   calcSolution,
   clearDynamics,
+  emitWithVariants,
   generateNewSchema,
   isSchemaComplete,
   isSchemaFilled,
@@ -148,9 +149,9 @@ const _startGeneration = async (ctx: GeneratorContext) => {
         // 3. effettua un ping per gestire il progresso
         await ctx.ping();
 
-        // 4. risoluzione schema
+        // 4. risoluzione schema (+ varianti se variantsCount > 1)
         calcSolution(ctx, sdk => {
-          ctx.addSchema(sdk);
+          emitWithVariants(ctx, sdk, variant => ctx.addSchema(variant));
           // se impostato aggiorna lo schema dopo 1 generazione
           if (isMultiSchema(ctx) && ctx.session.options.oneForSchema) ctx.session.skipSchema = true;
         });

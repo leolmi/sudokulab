@@ -92,12 +92,12 @@
           <div class="space"></div>
           <!-- NUMBER OF STOP SCHEMA -->
           <mat-form-field appearance="fill" fxFlex>
-            <mat-label>builded schemas</mat-label>
+            <mat-label>builded base schemas</mat-label>
             <input matInput
                    type="number"
                    [disabled]="disabled$|async"
-                   [value]="(opt.maxSchemas||1)+''"
-                   (input)="updateOptions('maxSchemas', $event, 'number', 'target.value')">
+                   [value]="(opt.maxOrbits||1)+''"
+                   (input)="updateOptions('maxOrbits', $event, 'number', 'target.value')">
           </mat-form-field>
         }
         @case (EndGenerationMode.afterTime) {
@@ -113,6 +113,19 @@
           </mat-form-field>
         }
       }
+    </div>
+    <!-- VARIANTS PER BASE SCHEMA -->
+    <div class="options-line" fxLayout="row" fxLayoutAlign="start center">
+      <mat-form-field appearance="fill" fxFlex>
+        <mat-label>Variants per base schema</mat-label>
+        <input matInput
+               type="number"
+               [min]="GENERATOR_MIN_VARIANTS"
+               [max]="GENERATOR_MAX_VARIANTS"
+               [disabled]="disabled$|async"
+               [value]="(opt.variantsCount||1)+''"
+               (change)="updateOptions('variantsCount', $event, 'number', 'target.value')">
+      </mat-form-field>
     </div>
     <!-- VALUES & CYCLES -->
     @if (hasNewOrDynamicFixed$|async) {

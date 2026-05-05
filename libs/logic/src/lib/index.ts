@@ -1,3 +1,4 @@
+export * from './brute-force';
 export * from './logic.generator';
 export * from './logic.catalog';
 export * from './logic.difficulty';

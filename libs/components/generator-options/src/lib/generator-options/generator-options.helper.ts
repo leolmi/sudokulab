@@ -29,7 +29,7 @@ export const AVAILABLE_STOP_MODES = [{
   description: 'manual'
 }, {
   code: EndGenerationMode.afterN,
-  description: 'after N schemas'
+  description: 'after N base schemas'
 }, {
   code: EndGenerationMode.afterTime,
   description: 'after N seconds'

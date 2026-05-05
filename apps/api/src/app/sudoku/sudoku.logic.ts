@@ -1,5 +1,6 @@
 import { SudokuDto } from '../../model/sudoku.dto';
 import {
+  canonize,
   getFixedCount,
   getStandardSchemaName,
   isSchemaString,
@@ -10,9 +11,8 @@ import {
   SudokuInfo
 } from '@olmi/model';
 import { cloneDeep as _clone, isString as _isString, keys as _keys } from 'lodash';
-import { getSolution, getWorkStat, solve } from '@olmi/logic';
+import { countSolutions, getSolution, getWorkStat, solve } from '@olmi/logic';
 import { environment } from '../../environments/environment';
-import { countSolutions } from './sudoku.brute-force';
 
 export const validate = (sdk: SudokuDto): string => {
   if ((sdk?._id||'') === '') return `wrong identity`;
@@ -154,6 +154,12 @@ export const getAcquireOperations = async (ss: any[]): Promise<any[]> => {
     if (!sdk) {
       console.error(...SDK_PREFIX, `[acquire] schema "${values}" univoco al brute-force ma non risolto dal motore catalogato (disagreement) — non persistito`);
       continue;
+    }
+    // popola i campi canonical: bulkWrite salta i middleware Mongoose, va fatto qui
+    if (sdk.values && !sdk.info.canonicalId) {
+      const { canonical, token } = canonize(sdk.values);
+      sdk.info.canonicalId = canonical;
+      sdk.info.canonicalToken = `${token.t}:${token.relabel}`;
     }
     operations.push(<any>{
       updateOne: {

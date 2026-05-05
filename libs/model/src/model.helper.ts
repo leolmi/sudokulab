@@ -881,3 +881,35 @@ export const getQuad = (points?: Pos[]): Quad => {
   }
   return q;
 }
+
+
+/**
+ * restituisce un id compatto dello schema sostituendo le sequenze di zeri
+ * con la lettera dell'alfabeto corrispondente alla loro lunghezza
+ * (1 zero = A, 2 zeri = B, ..., 26 zeri = Z). Sequenze più lunghe di 26
+ * zeri vengono spezzate in più lettere (es. 27 zeri = "ZA", 52 = "ZZ").
+ * @param schema stringa-schema (valori 1-9 e 0 per le celle vuote)
+ */
+export const getIdFromSchema = (schema: string): string => {
+  return (schema || '').replace(/0+/g, (m) => {
+    let res = '';
+    let n = m.length;
+    while (n > 26) {
+      res += 'Z';
+      n -= 26;
+    }
+    return res + String.fromCharCode(64 + n);
+  });
+}
+
+/**
+ * funzione inversa di `getSchemaId`: ricostruisce la stringa-schema
+ * sostituendo ogni lettera A-Z con il numero corrispondente di zeri
+ * (A = 1 zero, B = 2 zeri, ..., Z = 26 zeri). Lettere consecutive
+ * sommano i loro zeri (es. "ZA" = 27 zeri).
+ * @param id id compatto dello schema
+ */
+export const getSchemaFromId = (id: string): string => {
+  return (id || '').replace(/[A-Z]/g, (m) =>
+    _repeat(STANDARD_CHARACTERS.empty, m.charCodeAt(0) - 64));
+}

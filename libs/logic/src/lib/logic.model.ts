@@ -26,6 +26,7 @@ export class GenerationSession {
     this.time = s?.time||0;
     this.stopped = false;
     this.skipSchema = false;
+    this.orbitsEmitted = 0;
   }
 
   /**
@@ -64,6 +65,12 @@ export class GenerationSession {
    * se vero ricalcola lo schema
    */
   skipSchema: boolean;
+  /**
+   * numero di orbite (famiglie di equivalenza) emesse fino ad ora.
+   * Incrementato una sola volta per chiamata a `emitWithVariants` (non per le
+   * singole varianti). Usato dal check `EndGenerationMode.afterN`.
+   */
+  orbitsEmitted: number;
   /**
    * schema corrente
    */
