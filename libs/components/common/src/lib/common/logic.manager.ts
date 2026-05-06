@@ -1,6 +1,7 @@
 import { EventEmitter, inject } from '@angular/core';
 import {
   checkNumber,
+  EndGenerationMode,
   GeneratorOptions,
   LocalContext,
   LogicExecutor,
@@ -103,6 +104,7 @@ export class MultiLogicManager extends LogicManagerBase implements LogicExecutor
   private _seenValuesByOrbit: Map<string, Set<string>> = new Map();
   private _maxOrbits = 1;
   private _variantsCount = 1;
+  private _endMode: EndGenerationMode = EndGenerationMode.afterN;
   private _stopSent = false;
 
   constructor() {
@@ -146,16 +148,22 @@ export class MultiLogicManager extends LogicManagerBase implements LogicExecutor
     // duplicato esatto (più worker hanno generato lo stesso schema): drop
     if (seen?.has(values)) return true;
 
+    // i contatori orbite/varianti sono un budget hard solo per `afterN`.
+    // In `manual` e `afterTime` lo stop è governato dal worker stesso
+    // (input utente / timer): qui ci limitiamo a deduplicare i duplicati
+    // esatti tra worker paralleli, senza emettere `stop`.
+    const enforceBudget = this._endMode === EndGenerationMode.afterN;
+
     const isNewOrbit = !seen;
 
     // orbita nuova oltre il limite globale: drop + stop
-    if (isNewOrbit && this._seenValuesByOrbit.size >= this._maxOrbits) {
+    if (enforceBudget && isNewOrbit && this._seenValuesByOrbit.size >= this._maxOrbits) {
       this._sendStop();
       return true;
     }
 
     // budget per-orbita esaurito (`variantsCount` schemi distinti già accettati)
-    if (seen && seen.size >= this._variantsCount) return true;
+    if (enforceBudget && seen && seen.size >= this._variantsCount) return true;
 
     // accetto e registro
     if (!seen) {
@@ -165,7 +173,7 @@ export class MultiLogicManager extends LogicManagerBase implements LogicExecutor
     seen.add(values);
 
     // se tutte le orbite raggiunte hanno saturato il budget, segnala stop
-    if (this._seenValuesByOrbit.size >= this._maxOrbits) {
+    if (enforceBudget && this._seenValuesByOrbit.size >= this._maxOrbits) {
       let allFull = true;
       for (const s of this._seenValuesByOrbit.values()) {
         if (s.size < this._variantsCount) { allFull = false; break; }
@@ -191,6 +199,7 @@ export class MultiLogicManager extends LogicManagerBase implements LogicExecutor
     this._seenValuesByOrbit.clear();
     this._maxOrbits = opts?.maxOrbits || 1;
     this._variantsCount = opts?.variantsCount || 1;
+    this._endMode = opts?.endMode || EndGenerationMode.afterN;
     this._stopSent = false;
   }
 
