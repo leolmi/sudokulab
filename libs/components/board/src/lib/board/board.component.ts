@@ -133,10 +133,9 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   private _hostTouchStart: ((e: TouchEvent) => void) | null = null;
 
   // === DEBUG REPORT (radial-picker) ==========================================
-  // Strumentazione attivabile: raccoglie tutti gli eventi rilevanti durante la
-  // vita del picker (pointer, capture, touch, contextmenu, scroll, ecc.) e
-  // alla chiusura copia un report testuale in clipboard.
-  private static readonly PICKER_DEBUG = true;
+  // Strumentazione attivabile via status.isDebug: raccoglie tutti gli eventi
+  // rilevanti durante la vita del picker (pointer, capture, touch, contextmenu,
+  // scroll, ecc.) e alla chiusura copia un report testuale in clipboard.
   private _pickerLog: string[] = [];
   private _pickerLogT0 = 0;
   private _pickerLogActive = false;
@@ -547,7 +546,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private _logPicker(tag: string, payload?: any) {
-    if (!BoardComponent.PICKER_DEBUG || !this._pickerLogActive) return;
+    if (!this._pickerLogActive) return;
     const t = (performance.now() - this._pickerLogT0).toFixed(1);
     let line = `[+${t.padStart(7)}ms] ${tag}`;
     if (payload !== undefined) {
@@ -592,7 +591,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private _pickerLogStart(cell: BoardCell, e: PointerEvent, target: Element) {
-    if (!BoardComponent.PICKER_DEBUG) return;
+    if (!this.status.isDebug) return;
     this._pickerLog = [];
     this._pickerLogT0 = performance.now();
     this._pickerLogActive = true;
@@ -658,7 +657,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private _pickerLogEnd(reason: string) {
-    if (!BoardComponent.PICKER_DEBUG || !this._pickerLogActive) return;
+    if (!this._pickerLogActive) return;
     this._logPicker('=== END ===', { reason });
     this._detachPickerListeners();
     this._pickerLogActive = false;

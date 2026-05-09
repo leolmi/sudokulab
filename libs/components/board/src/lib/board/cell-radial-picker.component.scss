@@ -89,6 +89,15 @@
   pointer-events: none;
 }
 
+// su dispositivi touch (mobile/tablet) la preview centrale deve essere ben
+// leggibile sotto al dito; su desktop con mouse resta tenue come segnaposto.
+@media (pointer: coarse) {
+  .picker-preview-label {
+    opacity: 1;
+    font-weight: 600;
+  }
+}
+
 ::ng-deep .theme-dark {
   .cell-radial-picker {
     --picker-segment-fill: rgba(70, 70, 70, 0.92);
