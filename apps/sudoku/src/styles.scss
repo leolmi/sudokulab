@@ -379,6 +379,14 @@ button {
   }
 }
 
+mat-form-field {
+  &.hide-line-ripple {
+    .mdc-line-ripple {
+      display: none !important;
+    }
+  }
+}
+
 // NOTIFIES
 
 // mdc-snackbar mat-mdc-snack-bar-container ng-tns-c808971067-1 ng-trigger ng-trigger-state type-success ng-star-inserted
