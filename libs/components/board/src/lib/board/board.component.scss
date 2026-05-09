@@ -41,6 +41,13 @@
 .svg-board-cell {
   transition: fill .5s ease-in-out;
   fill: transparent;
+  // su Android il browser interpreta il movimento dopo un long-press come pan
+  // e invalida il pointer capture (pointercancel) chiudendo il radial-picker;
+  // touch-action:none e -webkit-touch-callout:none impediscono questo comportamento.
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 
   &.svg-selection-cell {
     stroke-width: 1;
