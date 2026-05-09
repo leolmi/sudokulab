@@ -5,12 +5,16 @@
   outline: none !important;
   position: relative;
   display: block;
+  // touch-action propagato su tutta la catena: alcuni Chrome Android
+  // risolvono il valore effettivo sul contenitore, non sul singolo child SVG
+  touch-action: none;
 }
 
 .svg-interactive-board {
   width: 100%;
   outline: none !important;
   font-family: Arial, monospace;
+  touch-action: none;
 
   &.disabled {
     opacity: .4;

@@ -130,6 +130,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private _pickerState: PickerState | null = null;
   private _pickerTimer: ReturnType<typeof setTimeout> | null = null;
+  private _hostTouchStart: ((e: TouchEvent) => void) | null = null;
 
   // === DEBUG REPORT (radial-picker) ==========================================
   // Strumentazione attivabile: raccoglie tutti gli eventi rilevanti durante la
@@ -248,9 +249,29 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
       this._calcComponentHeight();
       this.onReady.emit(this.manager);
     });
+    // listener touchstart non-passive sull'host: necessario per chiamare
+    // preventDefault e inibire il long-press di sistema su Android Chrome,
+    // che altrimenti emette pointercancel al primo movimento dopo il long-press.
+    // Angular HostListener non permette {passive:false}, quindi va registrato
+    // manualmente.
+    const host: HTMLElement = this._element.nativeElement;
+    this._hostTouchStart = (e: TouchEvent) => {
+      const t = e.target as Element | null;
+      if (!t) return;
+      // intercetta solo touchstart che originano sulle celle interattive
+      if (!(t instanceof Element) || !t.classList?.contains('svg-board-cell')) return;
+      // un solo dito (multitouch lasciato libero per pinch/zoom)
+      if (e.touches.length !== 1) return;
+      try { e.preventDefault(); } catch { /* noop */ }
+    };
+    host.addEventListener('touchstart', this._hostTouchStart, { passive: false });
   }
 
   ngOnDestroy() {
+    if (this._hostTouchStart) {
+      try { this._element.nativeElement.removeEventListener('touchstart', this._hostTouchStart); } catch { /* noop */ }
+      this._hostTouchStart = null;
+    }
     this.manager?.dispose();
   }
 
@@ -306,6 +327,11 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.status.editMode === 'play' && cell.isFixed) return;
     const target = event.target as Element;
     if (!target || typeof (target as any).setPointerCapture !== 'function') return;
+    // su Android Chrome questo inibisce il long-press di sistema (selezione/drag)
+    // che altrimenti cancella il pointer al primo movimento dopo il long-press.
+    if (event.pointerType === 'touch') {
+      try { event.preventDefault(); } catch { /* noop */ }
+    }
     this._pickerLogStart(cell, event, target);
     let captureOk = false;
     try {
