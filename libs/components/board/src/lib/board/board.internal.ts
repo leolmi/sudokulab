@@ -18,6 +18,7 @@ export const getBoardClasses = (status: BoardStatus): any => {
     [`edit-mode-${status.editMode}`]: true,
     [`values-mode-${status.valuesMode}`]: true,
     pencil: isRealPencil(status),
+    locked: !!status.isLock,
   }
 }
 

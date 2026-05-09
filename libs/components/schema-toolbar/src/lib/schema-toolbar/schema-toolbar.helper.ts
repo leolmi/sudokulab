@@ -1,8 +1,11 @@
-import { StandardToolbarButtons, ToolbarButton, ToolbarStatus } from '@olmi/schema-toolbar';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { extend as _extend, reduce as _reduce } from 'lodash';
-import { SudokuCell } from '@olmi/model';
-import { BoardCell, BoardManager } from '@olmi/board';
+import { BoardManager } from '@olmi/board';
+import {
+  StandardToolbarButtons,
+  ToolbarButton,
+  ToolbarStatus,
+} from './schema-toolbar.model';
 
 export const getButtons = (template: string): ToolbarButton[] => {
   const types = `${template}`.split(',').map(t => `${t||''}`.toLowerCase().trim()).filter(t => !!t);
@@ -18,6 +21,12 @@ export const extendStatus = (cs$: BehaviorSubject<ToolbarStatus>, ps: Partial<To
   _extend(ns.disabled, cs.disabled, ps.disabled);
   _extend(ns.active, cs.active, ps.active);
   cs$.next(ns);
+}
+
+export const isValueLocked = (manager: BoardManager | undefined, value: string): boolean => {
+  if (!manager) return false;
+  const locked = manager.lockedValue$.value;
+  return !!manager.status$.value.isLock && !!locked && locked.value === value;
 }
 
 export const setValueButtonStatus = (status: ToolbarStatus, code?: string, manager?: BoardManager): void => {

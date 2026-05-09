@@ -1,6 +1,5 @@
 <div class="schema-toolbar"
      [class.progress]="showProgress"
-     [class.locked]="isLocked$|async"
      fxLayout="row" fxLayoutAlign="start stretch">
   @if (showProgress && manager) {
     <mat-progress-bar
@@ -19,6 +18,13 @@
                [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
                [ngClass]="'sdk-colors-'+btn.color"
                (click)="clickOnButton(btn)"
+               (mousedown)="onPressStart(btn, $event)"
+               (mouseup)="onPressEnd()"
+               (mouseleave)="onPressEnd()"
+               (touchstart)="onPressStart(btn, $event)"
+               (touchend)="onPressEnd($event)"
+               (touchcancel)="onPressEnd($event)"
+               (contextmenu)="$event.preventDefault()"
                fxFlex>
             <mat-icon>{{btn.icon}}</mat-icon>
           </div>
@@ -29,6 +35,13 @@
                [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
                [ngClass]="'sdk-colors-'+btn.color"
                (click)="clickOnButton(btn)"
+               (mousedown)="onPressStart(btn, $event)"
+               (mouseup)="onPressEnd()"
+               (mouseleave)="onPressEnd()"
+               (touchstart)="onPressStart(btn, $event)"
+               (touchend)="onPressEnd($event)"
+               (touchcancel)="onPressEnd($event)"
+               (contextmenu)="$event.preventDefault()"
                fxFlex>
             <span>{{ btn.text }}</span>
           </div>

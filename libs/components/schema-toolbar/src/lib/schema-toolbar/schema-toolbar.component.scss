@@ -9,11 +9,6 @@
   &.progress {
     margin-top: 20px;
   }
-  &.locked {
-    .schemas-toolbar-button {
-      --sdk-color-border: var(--sdk-color-accent);
-    }
-  }
 }
 
 .toolbar-progress {
@@ -32,10 +27,12 @@
   border-width: 1px;
   border-style: solid;
   user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 
   &.disabled {
     opacity: .4;
-    pointer-events: none;
     cursor: default;
   }
 }

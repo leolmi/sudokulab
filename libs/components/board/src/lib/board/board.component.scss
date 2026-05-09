@@ -49,6 +49,15 @@
   }
 }
 
+.svg-interactive-board.locked {
+  .svg-board-cell {
+    cursor: copy;
+  }
+  &.edit-mode-play .svg-board-cell.fixed {
+    cursor: default;
+  }
+}
+
 
 .svg-board-cell-text {
   font-size: 6px;

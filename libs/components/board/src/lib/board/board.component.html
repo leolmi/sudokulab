@@ -42,6 +42,7 @@
                 [attr.stroke-width]="GEOMETRY.line.thin"
                 [class.error]="cell.error"
                 [class.dynamic]="cell.isDynamic"
+                [class.fixed]="cell.isFixed"
                 [class.current]="cell.id === (currentCellId$|async)"
                 (click)="select(cell)"
                 [attr.width]="GEOMETRY.cell.width"
