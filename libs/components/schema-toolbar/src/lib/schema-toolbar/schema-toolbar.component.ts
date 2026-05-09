@@ -96,6 +96,15 @@ export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> i
       // global disabled
       if (this.disabled$.value && code !== BUTTON_STOP_CODE) status.disabled[code] = true;
     });
+    // empty e dynamic condividono uno slot: il lock su uno dei due deve avere
+    // priorità sullo swap automatico calcolato da setValueButtonStatus
+    if (isValueLocked(this.manager, '?')) {
+      status.hidden[TB_VALUE_DYNAMIC] = false;
+      status.hidden[TB_VALUE_EMPTY] = true;
+    } else if (isValueLocked(this.manager, '')) {
+      status.hidden[TB_VALUE_EMPTY] = false;
+      status.hidden[TB_VALUE_DYNAMIC] = true;
+    }
     return status;
   }
 

@@ -12,7 +12,6 @@ import {
   handleUpdate,
   Highlights,
   isNumberCellValue,
-  isValidCellValue,
   LogicOperation,
   LogicWorkerData,
   NotificationType,
@@ -310,8 +309,9 @@ export class BoardManager {
   }
 
   applyValue(e: BoardChangeEvent) {
-    if (this.status.isLock && isValidCellValue(e.value, this.status))
-      this.lockedValue$.next(e);
+    // con isLock attivo il lock "segue" l'ultima azione esplicita: qualunque valore
+    // applicato (numerico, dynamic '?', empty '') sposta il lockedValue
+    if (this.status.isLock) this.lockedValue$.next(e);
     this._handleBoardChangeEvent(e);
   }
 

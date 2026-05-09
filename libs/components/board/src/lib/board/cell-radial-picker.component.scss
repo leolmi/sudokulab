@@ -1,0 +1,101 @@
+:host {
+  display: contents;
+}
+
+.cell-radial-picker {
+  position: fixed;
+  pointer-events: none;
+  user-select: none;
+  z-index: 100;
+  overflow: visible;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+
+  --picker-segment-fill: rgba(50, 50, 50, 0.92);
+  --picker-segment-fill-hover: rgba(63, 81, 181, 0.95);
+  --picker-segment-empty-fill: rgba(110, 50, 50, 0.92);
+  --picker-segment-empty-fill-hover: rgba(200, 60, 60, 0.95);
+  --picker-segment-dynamic-fill: rgba(80, 100, 50, 0.92);
+  --picker-segment-dynamic-fill-hover: rgba(150, 180, 70, 0.95);
+  --picker-segment-stroke: rgba(255, 255, 255, 0.18);
+  --picker-label-fill: white;
+  --picker-dead-fill: rgba(20, 20, 20, 0.85);
+  --picker-dead-fill-hover: rgba(50, 50, 50, 0.85);
+  --picker-shadow-fill: rgba(0, 0, 0, 0.05);
+}
+
+.picker-shadow circle {
+  fill: var(--picker-shadow-fill);
+  stroke: none;
+}
+
+.picker-segment {
+  fill: var(--picker-segment-fill);
+  stroke: var(--picker-segment-stroke);
+  stroke-width: 0.4;
+  transition: fill 80ms ease-out;
+
+  &.empty {
+    fill: var(--picker-segment-empty-fill);
+  }
+  &.dynamic {
+    fill: var(--picker-segment-dynamic-fill);
+  }
+  &.hovered {
+    fill: var(--picker-segment-fill-hover);
+    &.empty {
+      fill: var(--picker-segment-empty-fill-hover);
+    }
+    &.dynamic {
+      fill: var(--picker-segment-dynamic-fill-hover);
+    }
+  }
+}
+
+.picker-dead-zone {
+  fill: var(--picker-dead-fill);
+  stroke: var(--picker-segment-stroke);
+  stroke-width: 0.4;
+  transition: fill 80ms ease-out;
+
+  &.hovered {
+    fill: var(--picker-dead-fill-hover);
+  }
+}
+
+.picker-segment-label {
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+  font-weight: bold;
+  fill: var(--picker-label-fill);
+  pointer-events: none;
+  transition: font-size 80ms ease-out;
+
+  &.empty {
+    font-size: 10px;
+  }
+
+  &.hovered {
+    font-size: 11px;
+  }
+}
+
+.picker-preview-label {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 100;
+  fill: white;
+  stroke: none;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+::ng-deep .theme-dark {
+  .cell-radial-picker {
+    --picker-segment-fill: rgba(70, 70, 70, 0.92);
+    --picker-segment-fill-hover: rgba(154, 205, 50, 0.95);
+    --picker-segment-empty-fill: rgba(120, 60, 50, 0.92);
+    --picker-segment-empty-fill-hover: rgba(220, 90, 60, 0.95);
+    --picker-segment-dynamic-fill: rgba(90, 110, 60, 0.92);
+    --picker-segment-dynamic-fill-hover: rgba(180, 200, 80, 0.95);
+  }
+}

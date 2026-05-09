@@ -1,0 +1,40 @@
+<svg class="cell-radial-picker"
+     [attr.viewBox]="'0 0 ' + viewSize + ' ' + viewSize"
+     [style.left.px]="centerX - radius"
+     [style.top.px]="centerY - radius"
+     [style.width.px]="radius * 2"
+     [style.height.px]="radius * 2">
+  <g class="picker-shadow">
+    <circle [attr.cx]="viewCenter"
+            [attr.cy]="viewCenter"
+            [attr.r]="outerRadius + 1"></circle>
+  </g>
+  @for (seg of segments; track seg.index) {
+    <path class="picker-segment"
+          [class.hovered]="seg.index === hoveredIndex"
+          [class.empty]="seg.value === ''"
+          [class.dynamic]="seg.value === '?'"
+          [attr.d]="seg.path"></path>
+  }
+  <circle class="picker-dead-zone"
+          [class.hovered]="hoveredIndex < 0"
+          [attr.cx]="viewCenter"
+          [attr.cy]="viewCenter"
+          [attr.r]="innerRadius"></circle>
+  @for (seg of segments; track seg.index) {
+    <text class="picker-segment-label"
+          [class.hovered]="seg.index === hoveredIndex"
+          [class.empty]="seg.value === ''"
+          [attr.x]="seg.labelX"
+          [attr.y]="seg.labelY"
+          text-anchor="middle"
+          dominant-baseline="central">{{ seg.label }}</text>
+  }
+  @if (previewLabel) {
+    <text class="picker-preview-label"
+          [attr.x]="viewCenter"
+          [attr.y]="viewCenter"
+          text-anchor="middle"
+          dominant-baseline="central">{{ previewLabel }}</text>
+  }
+</svg>

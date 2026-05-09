@@ -7,7 +7,7 @@
        [class.focused]="isFocused$|async"
        [class.coord]="status.isCoord"
        [style.height.px]="height$|async"
-       [attr.viewBox]="status.isCoord?'-5 -5 96 96':'-0.5 -0.5 91 91'">
+       viewBox="-5 -5 100 100">
     <defs>
       <!-- Clip arrotondato: tutto ciò che è dentro la board viene tagliato sugli
            angoli smussati; il contorno esterno è disegnato fuori dal clip. -->
@@ -44,14 +44,29 @@
                 [class.dynamic]="cell.isDynamic"
                 [class.fixed]="cell.isFixed"
                 [class.current]="cell.id === (currentCellId$|async)"
-                (click)="select(cell)"
+                (pointerdown)="onCellPointerDown(cell, $event)"
+                (pointermove)="onPointerMove($event)"
+                (pointerup)="onPointerUp($event)"
+                (pointercancel)="onPointerCancel($event)"
+                (contextmenu)="$event.preventDefault()"
                 [attr.width]="GEOMETRY.cell.width"
                 [attr.height]="GEOMETRY.cell.height"
                 [attr.x]="cell.x"
                 [attr.y]="cell.y"
           ></rect>
 
-          @if (cell.text) {
+          @if ((previewCellId$|async) === cell.id) {
+            <!-- PRE-COMMIT PREVIEW (durante drag nel radial-picker) -->
+            @if ((previewValue$|async); as pv) {
+              <text class="svg-board-cell-text preview"
+                    text-anchor="middle"
+                    dominant-baseline="central"
+                    [class.dynamic]="pv === '?'"
+                    [attr.x]="cell.textX"
+                    [attr.y]="cell.textY"
+              >{{pv}}</text>
+            }
+          } @else if (cell.text) {
             <!-- CELL TEXT -->
             <text class="svg-board-cell-text"
                   text-anchor="middle"
@@ -118,4 +133,13 @@
           [attr.stroke-width]="GEOMETRY.line.big"
     ></rect>
   </svg>
+  @if (pickerOpen$|async) {
+    <cell-radial-picker
+      [values]="pickerValues$|async"
+      [hoveredIndex]="(pickerHoveredIndex$|async) ?? -1"
+      [centerX]="(pickerCenter$|async)?.x ?? 0"
+      [centerY]="(pickerCenter$|async)?.y ?? 0"
+      [radius]="(pickerRadius$|async) ?? 100"
+    ></cell-radial-picker>
+  }
 }

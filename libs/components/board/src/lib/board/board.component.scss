@@ -3,6 +3,8 @@
 :host {
   width: 100%;
   outline: none !important;
+  position: relative;
+  display: block;
 }
 
 .svg-interactive-board {
@@ -75,6 +77,10 @@
   &.svg-pulse {
     font-weight: bold;
     animation: svg-pulse 2s infinite;
+  }
+  &.preview {
+    opacity: .55;
+    font-style: italic;
   }
 }
 
