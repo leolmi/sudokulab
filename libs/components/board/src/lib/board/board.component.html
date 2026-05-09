@@ -1,145 +1,151 @@
+<svg class="svg-interactive-board"
+     #board
+     [ngClass]="classNames()"
+     [class.disabled]="status.isDisabled"
+     [class.focused]="isFocused()"
+     [class.coord]="status.isCoord"
+     [style.height.px]="height"
+     viewBox="-5 -5 100 100">
+  <defs>
+    <!-- Clip arrotondato: tutto ciò che è dentro la board viene tagliato sugli
+         angoli smussati; il contorno esterno è disegnato fuori dal clip. -->
+    <clipPath [attr.id]="boardClipId">
+      <rect x="0" y="0" width="90" height="90" rx="1.5" ry="1.5" />
+    </clipPath>
+  </defs>
+  <!-- COORDINATE: fuori dal clip perché si trovano oltre il riquadro 0..90 -->
+  @if (status.isCoord) {
+    @let curCol = currentCellCol();
+    @let curRow = currentCellRow();
+    @for (crd of GEOMETRY.coords; track crd.text) {
+      <text class="svg-board-coord-text"
+            text-anchor="middle"
+            dominant-baseline="hanging"
+            [attr.x]="crd.x"
+            [attr.y]="crd.y"
+            [class.highlight]="crd.col===curCol || crd.row===curRow"
+      >{{crd.text}}</text>
+    }
+  }
 
-@if (status$|async; as status) {
-  <svg class="svg-interactive-board"
-       #board
-       [ngClass]="class$|async"
-       [class.disabled]="status.isDisabled"
-       [class.focused]="isFocused$|async"
-       [class.coord]="status.isCoord"
-       [style.height.px]="height$|async"
-       viewBox="-5 -5 100 100">
-    <defs>
-      <!-- Clip arrotondato: tutto ciò che è dentro la board viene tagliato sugli
-           angoli smussati; il contorno esterno è disegnato fuori dal clip. -->
-      <clipPath [attr.id]="boardClipId">
-        <rect x="0" y="0" width="90" height="90" rx="1.5" ry="1.5" />
-      </clipPath>
-    </defs>
-    <!-- COORDINATE: fuori dal clip perché si trovano oltre il riquadro 0..90 -->
-    @if (status.isCoord) {
-      @for (crd of GEOMETRY.coords; track crd.text) {
-        <text class="svg-board-coord-text"
-              text-anchor="middle"
-              dominant-baseline="hanging"
-              [attr.x]="crd.x"
-              [attr.y]="crd.y"
-              [class.highlight]="crd.col===(currentCellCol$|async) || crd.row===(currentCellRow$|async)"
-        >{{crd.text}}</text>
+  <g [attr.clip-path]="'url(#' + boardClipId + ')'">
+    <!-- SFONDO (riempimento) — lo stroke arriva dal bordo esterno, qui solo fill -->
+    <rect x="0" y="0" width="90" height="90"
+          class="svg-board-line svg-board-background"
+          stroke-width="0"
+    ></rect>
+
+    @let curCellId = currentCellId();
+    @let hl = highlights;
+    @let prevCellId = previewCellId();
+    @let prevValue = previewValue();
+    @for (cell of cells; track cell.id) {
+      <g [class.highlight]="(hl?.cell||{})[cell.id]"
+         [class.highlight-secondary]="(hl?.secondaryCell||{})[cell.id]">
+        <rect class="svg-board-cell"
+              [attr.stroke-width]="GEOMETRY.line.thin"
+              [class.error]="cell.error"
+              [class.dynamic]="cell.isDynamic"
+              [class.fixed]="cell.isFixed"
+              [class.current]="cell.id === curCellId"
+              (pointerdown)="onCellPointerDown(cell, $event)"
+              (pointermove)="onPointerMove($event)"
+              (pointerup)="onPointerUp($event)"
+              (pointercancel)="onPointerCancel($event)"
+              (contextmenu)="$event.preventDefault()"
+              [attr.width]="GEOMETRY.cell.width"
+              [attr.height]="GEOMETRY.cell.height"
+              [attr.x]="cell.x"
+              [attr.y]="cell.y"
+        ></rect>
+
+        @if (prevCellId === cell.id) {
+          <!-- PRE-COMMIT PREVIEW (durante drag nel radial-picker) -->
+          @if (prevValue) {
+            <text class="svg-board-cell-text preview"
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                  [class.dynamic]="prevValue === '?'"
+                  [attr.x]="cell.textX"
+                  [attr.y]="cell.textY"
+            >{{prevValue}}</text>
+          }
+        } @else if (cell.text) {
+          <!-- CELL TEXT -->
+          <text class="svg-board-cell-text"
+                text-anchor="middle"
+                dominant-baseline="central"
+                [class.fixed]="cell.isFixed"
+                [class.dynamic]="cell.isDynamic"
+                [class.error]="cell.error"
+                [class.svg-pulse]="(hl?.cellValue||{})[cell.id]"
+                [attr.x]="cell.textX"
+                [attr.y]="cell.textY"
+          >{{cell.text}}</text>
+        } @else {
+          <!-- AVAILABLE VALUES -->
+          @for (vl of cell.getValues(status); track $index) {
+            <text class="svg-board-cell-values-text"
+                  [class.user-values]="cell.userValues.length>0"
+                  [class.highlight-cell]="(hl?.cell||{})[cell.id]"
+                  text-anchor="start"
+                  [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
+                  [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)"
+            >{{(status.valuesMode==='dots')?'∎':vl}}</text>
+          }
+        }
+      </g>
+    }
+
+    <!-- LINNE SPESSE -->
+    @for (ln of GEOMETRY.lines.big; track ln.id) {
+      <line [attr.x1]="ln.x1" [attr.y1]="ln.y1" [attr.x2]="ln.x2" [attr.y2]="ln.y2"
+            class="svg-board-line"
+            [attr.stroke-width]="GEOMETRY.line.big"
+      ></line>
+    }
+
+    <!-- SELEZIONE -->
+    @let mgr = manager();
+    @if (mgr) {
+      @let sel = mgr.selection();
+      @if (sel) {
+        <rect class="svg-board-cell svg-selection-cell"
+              [attr.width]="GEOMETRY.cell.width"
+              [attr.height]="GEOMETRY.cell.height"
+              [attr.x]="sel.x"
+              [attr.y]="sel.y"
+        ></rect>
       }
     }
 
-    <g [attr.clip-path]="'url(#' + boardClipId + ')'">
-      <!-- SFONDO (riempimento) — lo stroke arriva dal bordo esterno, qui solo fill -->
-      <rect x="0" y="0" width="90" height="90"
-            class="svg-board-line svg-board-background"
-            stroke-width="0"
+    <!-- GRUPPI EVIDENZIATI -->
+    @for (group of hlgroups(); track group) {
+      <rect class="svg-board-highlight-group"
+            [attr.x]="group.x"
+            [attr.y]="group.y"
+            [attr.width]="group.width"
+            [attr.height]="group.height"
       ></rect>
+    }
+  </g>
 
-      @for (cell of (cells$|async); track cell.id) {
-        <g [class.highlight]="((highlights$|async)?.cell||{})[cell.id]"
-           [class.highlight-secondary]="((highlights$|async)?.secondaryCell||{})[cell.id]">
-          <rect class="svg-board-cell"
-                [attr.stroke-width]="GEOMETRY.line.thin"
-                [class.error]="cell.error"
-                [class.dynamic]="cell.isDynamic"
-                [class.fixed]="cell.isFixed"
-                [class.current]="cell.id === (currentCellId$|async)"
-                (pointerdown)="onCellPointerDown(cell, $event)"
-                (pointermove)="onPointerMove($event)"
-                (pointerup)="onPointerUp($event)"
-                (pointercancel)="onPointerCancel($event)"
-                (contextmenu)="$event.preventDefault()"
-                [attr.width]="GEOMETRY.cell.width"
-                [attr.height]="GEOMETRY.cell.height"
-                [attr.x]="cell.x"
-                [attr.y]="cell.y"
-          ></rect>
-
-          @if ((previewCellId$|async) === cell.id) {
-            <!-- PRE-COMMIT PREVIEW (durante drag nel radial-picker) -->
-            @if ((previewValue$|async); as pv) {
-              <text class="svg-board-cell-text preview"
-                    text-anchor="middle"
-                    dominant-baseline="central"
-                    [class.dynamic]="pv === '?'"
-                    [attr.x]="cell.textX"
-                    [attr.y]="cell.textY"
-              >{{pv}}</text>
-            }
-          } @else if (cell.text) {
-            <!-- CELL TEXT -->
-            <text class="svg-board-cell-text"
-                  text-anchor="middle"
-                  dominant-baseline="central"
-                  [class.fixed]="cell.isFixed"
-                  [class.dynamic]="cell.isDynamic"
-                  [class.error]="cell.error"
-                  [class.svg-pulse]="((highlights$|async)?.cellValue||{})[cell.id]"
-                  [attr.x]="cell.textX"
-                  [attr.y]="cell.textY"
-            >{{cell.text}}</text>
-          } @else {
-            <!-- AVAILABLE VALUES -->
-            @for (vl of cell.getValues(status); track $index) {
-              <text class="svg-board-cell-values-text"
-                    [class.user-values]="cell.userValues.length>0"
-                    [class.highlight-cell]="((highlights$|async)?.cell||{})[cell.id]"
-                    text-anchor="start"
-                    [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
-                    [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)"
-              >{{(status.valuesMode==='dots')?'∎':vl}}</text>
-            }
-          }
-        </g>
-      }
-
-      <!-- LINNE SPESSE -->
-      @for (ln of GEOMETRY.lines.big; track ln.id) {
-        <line [attr.x1]="ln.x1" [attr.y1]="ln.y1" [attr.x2]="ln.x2" [attr.y2]="ln.y2"
-              class="svg-board-line"
-              [attr.stroke-width]="GEOMETRY.line.big"
-        ></line>
-      }
-
-      <!-- SELEZIONE -->
-      @if (manager) {
-        @if (manager.selection$|async; as sel) {
-          <rect class="svg-board-cell svg-selection-cell"
-                [attr.width]="GEOMETRY.cell.width"
-                [attr.height]="GEOMETRY.cell.height"
-                [attr.x]="sel?.x"
-                [attr.y]="sel?.y"
-          ></rect>
-        }
-      }
-
-      <!-- GRUPPI EVIDENZIATI -->
-      @for (group of hlgroups$|async; track group) {
-        <rect class="svg-board-highlight-group"
-              [attr.x]="group.x"
-              [attr.y]="group.y"
-              [attr.width]="group.width"
-              [attr.height]="group.height"
-        ></rect>
-      }
-    </g>
-
-    <!-- BORDO ESTERNO: disegnato fuori dal clip per restare netto ed avere
-         lo stesso peso delle linee che dividono i settori (GEOMETRY.line.big). -->
-    <rect x="0" y="0" width="90" height="90"
-          rx="1.5" ry="1.5"
-          class="svg-board-line svg-board-outline"
-          fill="none"
-          [attr.stroke-width]="GEOMETRY.line.big"
-    ></rect>
-  </svg>
-  @if (pickerOpen$|async) {
-    <cell-radial-picker
-      [values]="pickerValues$|async"
-      [hoveredIndex]="(pickerHoveredIndex$|async) ?? -1"
-      [centerX]="(pickerCenter$|async)?.x ?? 0"
-      [centerY]="(pickerCenter$|async)?.y ?? 0"
-      [radius]="(pickerRadius$|async) ?? 100"
-    ></cell-radial-picker>
-  }
+  <!-- BORDO ESTERNO: disegnato fuori dal clip per restare netto ed avere
+       lo stesso peso delle linee che dividono i settori (GEOMETRY.line.big). -->
+  <rect x="0" y="0" width="90" height="90"
+        rx="1.5" ry="1.5"
+        class="svg-board-line svg-board-outline"
+        fill="none"
+        [attr.stroke-width]="GEOMETRY.line.big"
+  ></rect>
+</svg>
+@if (pickerOpen()) {
+  @let pCenter = pickerCenter();
+  <cell-radial-picker
+    [values]="pickerValues()"
+    [hoveredIndex]="pickerHoveredIndex()"
+    [centerX]="pCenter.x"
+    [centerY]="pCenter.y"
+    [radius]="pickerRadius()"
+  ></cell-radial-picker>
 }

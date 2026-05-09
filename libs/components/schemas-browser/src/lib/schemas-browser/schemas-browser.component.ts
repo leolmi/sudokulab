@@ -1,19 +1,26 @@
-import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { checkNumber, Sudoku } from '@olmi/model';
-import { BehaviorSubject, combineLatest, map, Observable, take } from 'rxjs';
 import { findIndex } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { DestroyComponentBase, SUDOKU_STATE } from '@olmi/common';
+import { SUDOKU_STATE } from '@olmi/common';
 import { ItemTooltipPipe, UserPlayingPipe } from './pipes';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'schemas-browser',
   imports: [
-    CommonModule,
     BoardPreviewComponent,
     MatIconModule,
     MatTooltipModule,
@@ -23,65 +30,55 @@ import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrollin
   ],
   templateUrl: './schemas-browser.component.html',
   styleUrl: './schemas-browser.component.scss',
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SchemasBrowserComponent extends DestroyComponentBase {
-  private readonly _skipScrollTo$: BehaviorSubject<boolean>;
+export class SchemasBrowserComponent {
+  private readonly _state = inject(SUDOKU_STATE);
+  private readonly _skipScrollTo = signal<boolean>(false);
 
-  readonly state = inject(SUDOKU_STATE)
-  schemas$: BehaviorSubject<Sudoku[]>;
-  activeSchema$: BehaviorSubject<string>;
-  hideTooltip$: Observable<boolean>;
-  diameter$: Observable<number>;
+  readonly schemas = input<Sudoku[] | null | undefined>([]);
+  readonly activeSchema = input<string | null | undefined>('');
+  readonly allowCompact = input<boolean>(false);
 
-  @ViewChild('container') container!: CdkVirtualScrollViewport;
+  readonly clickOnSchema = output<Sudoku>();
 
-  @Input()
-  set activeSchema(s: string|null|undefined) {
-    if (this.activeSchema$.value !== s) {
-      this.activeSchema$.next(s||'');
-    }
-  }
+  readonly container = viewChild<CdkVirtualScrollViewport>('container');
 
-  @Input()
-  set schemas(s: Sudoku[]|null|undefined) {
-    this.schemas$.next(s||[]);
-  }
-
-  @Input()
-  allowCompact = false;
-
-  @Output()
-  clickOnSchema: EventEmitter<Sudoku> = new EventEmitter<Sudoku>();
+  readonly hideTooltip = computed<boolean>(() => !this.allowCompact() || !this._state.layout().compact);
+  readonly diameter = computed<number>(() =>
+    (this._state.layout().compact && this.allowCompact()) ? 30 : 100);
 
   constructor() {
-    super();
-    this._skipScrollTo$ = new BehaviorSubject<boolean>(false);
-    this.activeSchema$ = new BehaviorSubject<string>('');
-    this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
-
-    this.hideTooltip$ = this.state.layout$.pipe(map(l => !this.allowCompact || !l.compact));
-    this.diameter$ = this.state.layout$.pipe(map(l => (l.compact && this.allowCompact) ? 30 : 100));
-    this.activeSchema$.subscribe(() => setTimeout(() => this._scrollToActive(), 150));
+    // scroll allo schema attivo quando cambia (dopo un piccolo delay per
+    // permettere al virtual scroll di completare il render)
+    effect(() => {
+      const active = this.activeSchema();
+      const schemas = this.schemas();
+      const skip = this._skipScrollTo();
+      // dipendenza tracciata: la chiamata di queste signal serve da trigger
+      void active; void schemas;
+      setTimeout(() => this._scrollToActive(), 150);
+    });
   }
 
   private _scrollToActive() {
-    combineLatest([this.schemas$, this.activeSchema$, this._skipScrollTo$])
-      .pipe(take(1))
-      .subscribe(([schemas, active, skip]: [Sudoku[], string, boolean]) => {
-        if (!skip) {
-          const activeIndex = findIndex(schemas, s => s.values === active);
-          if (activeIndex > -1 && this.container) this.container.scrollToIndex(checkNumber(activeIndex-4, 0, activeIndex) , 'smooth');
-        } else {
-          this._skipScrollTo$.next(false);
-        }
-      });
+    const skip = this._skipScrollTo();
+    if (skip) {
+      this._skipScrollTo.set(false);
+      return;
+    }
+    const schemas = this.schemas() || [];
+    const active = this.activeSchema() || '';
+    const activeIndex = findIndex(schemas, s => s.values === active);
+    const container = this.container();
+    if (activeIndex > -1 && container) {
+      container.scrollToIndex(checkNumber(activeIndex - 4, 0, activeIndex), 'smooth');
+    }
   }
 
   internalClickOnSchema(sdk: Sudoku) {
-    this._skipScrollTo$.next(true)
+    this._skipScrollTo.set(true);
     this.clickOnSchema.emit(sdk);
   }
 }
-
-

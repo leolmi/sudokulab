@@ -1,16 +1,12 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, effect, HostListener, inject, signal } from '@angular/core';
 import { PageBase } from '../../model/page.base';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
-import { forEach as _forEach, forEachRight as _forEachRight } from 'lodash';
-import { handleUpdate, isSchemaString, MenuItem, NotificationType } from '@olmi/model';
+import { forEach as _forEach, forEachRight as _forEachRight, cloneDeep as _clone } from 'lodash';
+import { isSchemaString, MenuItem, NotificationType } from '@olmi/model';
 import { defaultHandleMenuItem } from '../pages.helper';
 import { MAPS_MENU_CODES } from './maps.menu';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { MatButton } from '@angular/material/button';
-import { OcrImageMapComponent } from '@olmi/ocr-components';
 
 
 class GridCell {
@@ -25,7 +21,6 @@ class GridCell {
 
 @Component({
   imports: [
-    CommonModule,
     FormsModule,
     MatSlider,
     MatSliderThumb,
@@ -35,24 +30,24 @@ class GridCell {
   templateUrl: './maps.component.html',
   styleUrl: './maps.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MapsComponent extends PageBase {
   private readonly _clipboard = inject(Clipboard);
 
-  gridSize$: BehaviorSubject<number>;
-  cells$: BehaviorSubject<GridCell[]>;
-  char$: BehaviorSubject<string>;
-  activeCell$: BehaviorSubject<GridCell|undefined>;
+  readonly gridSize = signal<number>(12);
+  readonly cells = signal<GridCell[]>(buildCells(12));
+  readonly char = signal<string>('');
+  readonly activeCell = signal<GridCell | undefined>(undefined);
 
   constructor() {
     super();
-    this.gridSize$ = new BehaviorSubject<number>(12);
-    this.cells$ = new BehaviorSubject<GridCell[]>([]);
-    this.char$ = new BehaviorSubject<string>('');
-    this.activeCell$ = new BehaviorSubject<GridCell|undefined>(undefined);
 
-    this.gridSize$.subscribe(size => this.cells$.next(buildCells(size)));
+    // gridSize → ricostruzione griglia
+    effect(() => {
+      const size = this.gridSize();
+      this.cells.set(buildCells(size));
+    });
 
     this.state.menuHandler = (item) =>
       defaultHandleMenuItem(this._router, this.state, item, undefined,
@@ -81,47 +76,37 @@ export class MapsComponent extends PageBase {
     const ser = event.clipboardData?.getData('text') || '';
     try {
       const char_map = <any>JSON.parse(ser);
-      this.char$.next(char_map.text || '');
-      this.gridSize$.next(char_map.size || 12);
-      handleUpdate(this.cells$, (cc) => {
-        cc.forEach(c => c.active = !!(char_map.map||[]).find((cmc: any) =>
-          cmc.x === c.posX && cmc.y === c.posY));
-        return true;
-      });
+      this.char.set(char_map.text || '');
+      this.gridSize.set(char_map.size || 12);
+      this._mutateCells(cc => cc.forEach(c => c.active = !!(char_map.map || []).find((cmc: any) =>
+        cmc.x === c.posX && cmc.y === c.posY)));
     } catch (err) {
-      const points = (ser||'').split(';');
-      handleUpdate(this.cells$, (cc) => {
-        cc.forEach(c => c.active = points.includes(`${c.posX}.${c.posY}`));
-        return true;
-      });
+      const points = (ser || '').split(';');
+      this._mutateCells(cc => cc.forEach(c => c.active = points.includes(`${c.posX}.${c.posY}`)));
     }
   }
 
   updateSize(e: any) {
-    this.gridSize$.next(parseInt(`${e}`, 10));
+    this.gridSize.set(parseInt(`${e}`, 10));
   }
 
   toggle(cell: GridCell) {
-    handleUpdate(this.cells$, (cc) => {
+    this._mutateCells(cc => {
       const c = cc.find(c => c.id === cell.id);
       if (c) c.active = !cell.active;
-      return !!c;
     });
   }
 
   applyChar(e: any) {
-    this.char$.next(e.target.value||'');
+    this.char.set(e.target.value || '');
   }
 
   clear() {
-    handleUpdate(this.cells$, (cc) => {
-      cc.forEach(c => c.active = false);
-      return true;
-    });
+    this._mutateCells(cc => cc.forEach(c => c.active = false));
   }
 
   move(left: boolean) {
-    handleUpdate(this.cells$, (cc) => {
+    this._mutateCells(cc => {
       if (left) {
         _forEach(cc, c => {
           if (c.active) {
@@ -137,38 +122,32 @@ export class MapsComponent extends PageBase {
           }
         });
       }
-      return true;
     });
   }
 
   copyMap() {
     const charMap: any = {
-      size: this.gridSize$.value,
-      text: this.char$.value,
-      map: this.cells$.value
+      size: this.gridSize(),
+      text: this.char(),
+      map: this.cells()
         .filter(c => c.active)
-        .map(c => ({ x: c.posX, y: c.posY }))
+        .map(c => ({ x: c.posX, y: c.posY })),
     };
     const ser = JSON.stringify(charMap);
     this._clipboard.copy(ser);
     this.notifier.notify('Char map copied successfully', NotificationType.success);
   }
 
-  // testOcr() {
-  //   this.interaction.testOcr().subscribe(res => {
-  //     if ((res.doubts||[]).length>0) {
-  //       this._dialog.open(OcrImageMapComponent, {
-  //         data: res,
-  //         width: '500px',
-  //         minHeight: '400px'
-  //       });
-  //     }
-  //     console.log('TEST OCR RESULT:', res.values);
-  //   })
-  // }
-
   over(cell: GridCell) {
-    this.activeCell$.next({ ...cell });
+    this.activeCell.set({ ...cell });
+  }
+
+  private _mutateCells(mutator: (cc: GridCell[]) => void) {
+    this.cells.update(prev => {
+      const next = _clone(prev);
+      mutator(next);
+      return next;
+    });
   }
 }
 
@@ -197,7 +176,7 @@ const buildCells = (size: number): GridCell[] => {
         posY: y,
         x: x * cs,
         y: y * cs,
-        active: false
+        active: false,
       });
     }
   }

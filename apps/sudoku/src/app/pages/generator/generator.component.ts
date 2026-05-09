@@ -1,19 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NgClass } from '@angular/common';
 import { PageBase } from '../../model/page.base';
 import {
   BoardComponent,
   BoardManager,
   BoardStatus,
   GENERATOR_BOARD_USER_OPTIONS_FEATURE,
-  getBoardCells
 } from '@olmi/board';
-import { calcStatusForMenu, MAIN } from './generator.menu';
+import { calcStatusForMenu } from './generator.menu';
 import { defaultHandleMenuItem, getStatLines, StatLine } from '../pages.helper';
-import { BehaviorSubject, combineLatest, map, Observable, of, skip, takeUntil } from 'rxjs';
+import { skip, Subscription } from 'rxjs';
 import { SUDOKU_PAGE_GENERATOR_LOGIC } from './generator.logic';
 import { GeneratorOptionsComponent } from '@olmi/generator-options';
-import { GeneratorOptions, NotificationType, Sudoku, SudokuCell, SudokuStat } from '@olmi/model';
+import { GeneratorOptions, NotificationType, Sudoku, SudokuStat } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { GeneratorSchemasComponent } from '@olmi/generator-schemas';
 import {
@@ -29,105 +29,128 @@ const GENERATOR_VISIBLE_STAT: any = {
   fixedCount: true,
   dynamicCount: true,
   fixedAndDynamicCount: true,
-}
+};
 
 @Component({
   imports: [
-    CommonModule,
+    NgClass,
     BoardComponent,
     GeneratorOptionsComponent,
     GeneratorSchemasComponent,
     MatProgressBar,
-    SchemaToolbarComponent
+    SchemaToolbarComponent,
   ],
   selector: 'sudoku-generator',
   templateUrl: './generator.component.html',
   styleUrl: './generator.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GeneratorComponent extends PageBase {
-  logic = inject(SUDOKU_PAGE_GENERATOR_LOGIC);
-  toolbarTemplate = 'nums,clear,play';
+  readonly logic = inject(SUDOKU_PAGE_GENERATOR_LOGIC);
+  readonly toolbarTemplate = 'nums,clear,play';
+  readonly globalState = SudokuState;
 
-  manager: BoardManager | undefined;
-  lines$: Observable<StatLine[]> = of([]);
-  valuesToAdd$: Observable<string> = of('none');
-  options$: BehaviorSubject<GeneratorOptions>;
-  layout$: Observable<string>;
-  generationCells$: Observable<SudokuCell[]> = of([]);
-  globalState = SudokuState;
+  readonly manager = signal<BoardManager | undefined>(undefined);
+  readonly options = signal<GeneratorOptions>(
+    AppUserOptions.getFeatures(GENERATOR_OPTIONS_FEATURE, new GeneratorOptions()));
+
+  // signal locali alimentati dai BehaviorSubject del manager (Fase 4)
+  readonly stat = signal<SudokuStat | undefined>(undefined);
+  readonly lines = signal<StatLine[]>([]);
+  readonly valuesToAdd = computed<string>(() => {
+    const stat = this.stat();
+    const o = this.options();
+    if (!stat) return 'none';
+    return getValuesToAdd(stat, o);
+  });
+
+  readonly layout = computed<string>(() => this.state.layout().narrow ? 'column' : 'row');
 
   constructor() {
     super();
-    const o = AppUserOptions.getFeatures(GENERATOR_OPTIONS_FEATURE, new GeneratorOptions());
-    this.options$ = new BehaviorSubject<GeneratorOptions>(o);
 
     this.state.menuHandler = (item) =>
-      defaultHandleMenuItem(this._router, this.state, item, this.manager);
+      defaultHandleMenuItem(this._router, this.state, item, this.manager());
 
-    this.options$.pipe(
-      takeUntil(this._destroy$),
-      skip(1))
-      .subscribe(o =>
-        AppUserOptions.updateFeature(GENERATOR_OPTIONS_FEATURE, o));
-
-    this.layout$ = this.state.layout$.pipe(map(l => l.narrow ? 'column' : 'row'));
-  }
-
-  private _init() {
-
-    const uo = AppUserOptions.getFeatures(GENERATOR_BOARD_USER_OPTIONS_FEATURE, <Partial<BoardStatus>>{
-      isCoord: true,
-      isAvailable: true,
-      editMode: 'schema',
-      isDynamic: true,
-      isPasteEnabled: true
+    // persiste le opzioni utente sul localStorage (skip primo valore = caricato)
+    let firstSeen = false;
+    effect(() => {
+      const o = this.options();
+      if (!firstSeen) { firstSeen = true; return; }
+      AppUserOptions.updateFeature(GENERATOR_OPTIONS_FEATURE, o);
     });
 
-    // assegna le opzioni iniziali
-    this.manager?.options(uo, {
-      editMode: 'schema',
-      isDynamic: true,
-    });
-    if ((<any>uo).schema) this.manager?.load((<any>uo).schema);
+    // orchestrazione delle subscription al manager: il BoardManager è ancora
+    // basato su BehaviorSubject (verrà migrato in Fase 4); le subscription
+    // sono ricreate ad ogni cambio di reference del manager.
+    effect(onCleanup => {
+      const manager = this.manager();
+      if (!manager) return;
 
-    if (this.manager) {
-      this.lines$ = this.manager.stat$.pipe(map(s => getStatLines(s, { visible: GENERATOR_VISIBLE_STAT })));
-
-      this.manager.status$
-        .pipe(takeUntil(this._destroy$))
-        .subscribe(sts =>
-          AppUserOptions.updateFeature(GENERATOR_BOARD_USER_OPTIONS_FEATURE, _omit(sts, ['schema'])));
-
-      // aggiorna lo stato del menu e salva le impostazioni utente al variare delle opzioni
-      combineLatest([this.manager.status$, SudokuState.isRunning$, this.manager.isStopping$, this.options$, this.manager.stat$])
-        .pipe(takeUntil(this._destroy$))
-        .subscribe(([sts, running, stopping, o, stat]: [BoardStatus, boolean, boolean, GeneratorOptions, SudokuStat]) => {
-          this.state.updateStatus(calcStatusForMenu(running, stopping, isMultiSchema(o, stat), sts.isLock));
-        });
-
-      this.options$.subscribe(o => this.manager?.updateGeneratorOptions(o));
-
-      // aggiorna lo stato dello schema e salva lo schema attivo
-      this.manager.stat$.subscribe(s => {
-        const schema = this.manager?.getSchema({ allowDynamic: true });
-        AppUserOptions.updateFeature(GENERATOR_BOARD_USER_OPTIONS_FEATURE, { schema });
+      const uo = AppUserOptions.getFeatures(GENERATOR_BOARD_USER_OPTIONS_FEATURE, <Partial<BoardStatus>>{
+        isCoord: true,
+        isAvailable: true,
+        editMode: 'schema',
+        isDynamic: true,
+        isPasteEnabled: true,
       });
 
-      this.valuesToAdd$ = combineLatest([this.manager.stat$, this.options$])
-        .pipe(map(([stat, o]: [SudokuStat, GeneratorOptions]) => getValuesToAdd(stat, o)));
+      // assegna le opzioni iniziali una volta sola
+      manager.options(uo, {
+        editMode: 'schema',
+        isDynamic: true,
+      });
+      if ((<any>uo).schema) manager.load((<any>uo).schema);
 
-      this.generationCells$ = this.manager.generationStat$.pipe(map(s =>
-        getBoardCells(s?.currentSchema)));
-    }
+      const subs = new Subscription();
+
+      // statistiche → signal
+      subs.add(manager.stat$.subscribe(s => {
+        this.stat.set(s);
+        this.lines.set(getStatLines(s, { visible: GENERATOR_VISIBLE_STAT }));
+        // salva lo schema attivo
+        const schema = manager.getSchema({ allowDynamic: true });
+        AppUserOptions.updateFeature(GENERATOR_BOARD_USER_OPTIONS_FEATURE, { schema });
+      }));
+
+      // status → persistenza utente (omettendo schema, già gestito sopra)
+      subs.add(manager.status$.subscribe(sts =>
+        AppUserOptions.updateFeature(GENERATOR_BOARD_USER_OPTIONS_FEATURE, _omit(sts, ['schema']))));
+
+      onCleanup(() => subs.unsubscribe());
+    });
+
+    // aggiorna lo stato del menu in base a manager + isRunning + isStopping + options
+    effect(onCleanup => {
+      const manager = this.manager();
+      const o = this.options();
+      const running = SudokuState.isRunning();
+      if (!manager) return;
+      const update = () => {
+        const sts = manager.status$.value;
+        const stopping = manager.isStopping$.value;
+        const stat = manager.stat$.value;
+        this.state.updateStatus(calcStatusForMenu(running, stopping, isMultiSchema(o, stat), sts.isLock));
+      };
+      update();
+      const subs = new Subscription();
+      subs.add(manager.status$.subscribe(() => update()));
+      subs.add(manager.isStopping$.subscribe(() => update()));
+      subs.add(manager.stat$.subscribe(() => update()));
+      onCleanup(() => subs.unsubscribe());
+    });
+
+    // propaga le opzioni al manager
+    effect(() => {
+      const manager = this.manager();
+      const o = this.options();
+      manager?.updateGeneratorOptions(o);
+    });
   }
 
   ready(manager: BoardManager) {
-    if (!this.manager) {
-      this.manager = manager;
-      this._init();
-    }
+    if (!this.manager()) this.manager.set(manager);
   }
 
   readyGen(m: BoardManager) {
@@ -135,16 +158,16 @@ export class GeneratorComponent extends PageBase {
       isDisabled: true,
       editMode: 'schema',
       isCoord: true,
-      isDynamic: true
+      isDynamic: true,
     });
   }
 
   updateOptions(o: GeneratorOptions) {
-    this.options$.next(o);
+    this.options.set(o);
   }
 
   pasteSchema(values: string) {
-    this.manager?.load(values);
+    this.manager()?.load(values);
     this.notifier.notify('Schema pasted from clipboard successfully', NotificationType.success);
   }
 
@@ -154,13 +177,9 @@ export class GeneratorComponent extends PageBase {
 }
 
 const getValuesToAdd = (stat: SudokuStat, o: GeneratorOptions) => {
-  const vta = o.fixedCount - stat.fixedAndDynamicCount
+  const vta = o.fixedCount - stat.fixedAndDynamicCount;
   if (vta <= 0) return 'none';
   return (vta > o.fixedCount) ? `${o.fixedCount}` : `${vta}`;
-}
-
-const getGenerationInfo = (data: any): string => {
-  return JSON.stringify(data, null, 2);
 }
 
 const isMultiSchema = (o: GeneratorOptions, stat: SudokuStat) => {

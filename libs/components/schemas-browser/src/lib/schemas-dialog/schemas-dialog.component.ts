@@ -1,9 +1,7 @@
-import { AfterViewInit, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
-import { BehaviorSubject, map, Observable } from 'rxjs';
 import { Algorithm, Sudoku } from '@olmi/model';
 import { SUDOKU_STORE } from '@olmi/common';
 import { MatIcon } from '@angular/material/icon';
@@ -14,13 +12,12 @@ import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
 
 export class SchemasDialogArgs {
-  sudoku?: Sudoku
+  sudoku?: Sudoku;
 }
 
 @Component({
   selector: 'schemas-dialog',
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatMenuModule,
@@ -28,14 +25,14 @@ export class SchemasDialogArgs {
     MatIcon,
     MatBadge,
     SchemasToolbarComponent,
-    MatTooltip
+    MatTooltip,
   ],
   template: `
     <!-- HEADER -->
     <div mat-dialog-title>
       <schemas-toolbar
-        [onlyPlaying]="playing$|async"
-        [algorithms]="algorithms$|async"
+        [onlyPlaying]="playing()"
+        [algorithms]="algorithms()"
         persistenceKey="dialog"
         (onFilter)="setSchemaList($event)"
       ></schemas-toolbar>
@@ -44,15 +41,15 @@ export class SchemasDialogArgs {
     <!-- BODY -->
     <mat-dialog-content class="schemas-dialog-content">
       <schemas-browser
-        [activeSchema]="(activeSchema$|async)?.values||''"
+        [activeSchema]="activeSchema()?.values||''"
         (clickOnSchema)="setSelection($event)"
-        [schemas]="schemas$|async"
+        [schemas]="schemas()"
       ></schemas-browser>
     </mat-dialog-content>
 
     <!-- ACTIONS -->
     <mat-dialog-actions>
-      @if (store.isDownload$|async) {
+      @if (store.isDownload()) {
         <button mat-icon-button
                 matTooltip="download all catalog"
                 (click)="download()">
@@ -62,26 +59,27 @@ export class SchemasDialogArgs {
       <button mat-icon-button
               matTooltip="show only playing games"
               (click)="togglePlaying()">
-        <mat-icon>{{ (playing$|async)?'edit':'edit_off' }}</mat-icon>
+        <mat-icon>{{ playing()?'edit':'edit_off' }}</mat-icon>
       </button>
       <button mat-icon-button
               matTooltip="Choose used algorithms filter"
-              [matBadge]="(algCount$|async)+''"
-              [matBadgeHidden]="((algCount$|async)||0)<1"
+              [matBadge]="algCount()+''"
+              [matBadgeHidden]="algCount()<1"
               [matMenuTriggerFor]="algmenu">
         <mat-icon>fact_check</mat-icon>
       </button>
       <div class="flex-1"></div>
       <button mat-button mat-dialog-close>Cancel</button>
       <button mat-button
-              [disabled]="!(activeSchema$|async)"
+              [disabled]="!activeSchema()"
               (click)="select()"
       >Load</button>
       <!-- MENU POPUP DEGLI ALGORITMI -->
       <mat-menu #algmenu="matMenu">
+        @let algs = algorithms();
         @for (alg of availableAlgorithms; track $index) {
           <button mat-menu-item
-                  [class.active]="((algorithms$|async)||[]).includes(alg.id)"
+                  [class.active]="algs.includes(alg.id)"
                   (click)="toggleAlg(alg)">
             <mat-icon>{{alg.icon}}</mat-icon>
             <span>{{alg.name}}</span>
@@ -91,46 +89,35 @@ export class SchemasDialogArgs {
     </mat-dialog-actions>
   `,
   styleUrl: './schemas-dialog.component.scss',
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SchemasDialogComponent implements AfterViewInit {
   private readonly _dialogRef = inject(MatDialogRef<SchemasDialogComponent>);
   private readonly _data = inject<SchemasDialogArgs>(MAT_DIALOG_DATA);
-  store = inject(SUDOKU_STORE);
-  activeSchema$: BehaviorSubject<Sudoku|undefined>;
-  playing$: BehaviorSubject<boolean>;
-  algorithms$: BehaviorSubject<string[]>;
-  algCount$: Observable<number>;
-  availableAlgorithms: Algorithm[];
-  schemas$: BehaviorSubject<Sudoku[]>;
+  readonly store = inject(SUDOKU_STORE);
 
-  constructor() {
-    this.activeSchema$ = new BehaviorSubject<Sudoku|undefined>(undefined);
-    this.playing$ = new BehaviorSubject<boolean>(false);
-    this.algorithms$ = new BehaviorSubject<string[]>([]);
-    this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
+  readonly activeSchema = signal<Sudoku | undefined>(undefined);
+  readonly playing = signal<boolean>(false);
+  readonly algorithms = signal<string[]>([]);
+  readonly schemas = signal<Sudoku[]>([]);
 
-    this.algCount$ = this.algorithms$.pipe(map(algs => (algs||[]).length));
-    this.availableAlgorithms = getAlgorithms();
-  }
+  readonly algCount = computed<number>(() => (this.algorithms() || []).length);
+  readonly availableAlgorithms: Algorithm[] = getAlgorithms();
 
   ngAfterViewInit() {
-    setTimeout(() => this.activeSchema$.next(this._data.sudoku), 200);
-  }
-
-  get activeSudoku() {
-    return this.activeSchema$.value;
+    setTimeout(() => this.activeSchema.set(this._data.sudoku), 200);
   }
 
   select() {
-    this._dialogRef.close(this.activeSudoku);
+    this._dialogRef.close(this.activeSchema());
   }
 
   setSelection(sdk?: Sudoku) {
-    if (!!sdk && this.activeSudoku?.values === sdk?.values) {
+    if (!!sdk && this.activeSchema()?.values === sdk?.values) {
       this.select();
     } else {
-      this.activeSchema$.next(sdk);
+      this.activeSchema.set(sdk);
     }
   }
 
@@ -139,20 +126,19 @@ export class SchemasDialogComponent implements AfterViewInit {
   }
 
   togglePlaying() {
-    this.playing$.next(!this.playing$.value);
+    this.playing.update(v => !v);
   }
 
   toggleAlg(alg: Algorithm) {
-    const algs = [...this.algorithms$.value];
-    if (algs.includes(alg.id)) {
-      _remove(algs, a => a === alg.id);
-    } else {
-      algs.push(alg.id);
-    }
-    this.algorithms$.next(algs);
+    this.algorithms.update(prev => {
+      const algs = [...prev];
+      if (algs.includes(alg.id)) _remove(algs, a => a === alg.id);
+      else algs.push(alg.id);
+      return algs;
+    });
   }
 
   setSchemaList(sdks?: Sudoku[]) {
-    this.schemas$.next(sdks||[])
+    this.schemas.set(sdks || []);
   }
 }

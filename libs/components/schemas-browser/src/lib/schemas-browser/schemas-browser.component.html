@@ -1,13 +1,15 @@
 <cdk-virtual-scroll-viewport #container
                              class="schemas-browser flex-1"
-                             [class.allow-compact]="allowCompact"
+                             [class.allow-compact]="allowCompact()"
                              itemSize="54">
-  <div *cdkVirtualFor="let sdk of (schemas$|async); let index = index"
+  @let active = activeSchema();
+  @let hideTip = hideTooltip();
+  <div *cdkVirtualFor="let sdk of schemas(); let index = index"
        class="schema-item sdk-color-hover board-active-contrast flex-row flex-align-start-center"
        [attr.id]="'s'+index"
-       [class.active]="sdk.values===(activeSchema$|async)"
+       [class.active]="sdk.values===active"
        [matTooltip]="sdk|itemTooltip"
-       [matTooltipDisabled]="hideTooltip$|async"
+       [matTooltipDisabled]="hideTip"
        (click)="internalClickOnSchema(sdk)">
     <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
     <div class="schema-info flex-col flex-1">

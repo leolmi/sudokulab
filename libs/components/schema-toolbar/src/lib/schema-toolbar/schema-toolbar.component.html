@@ -1,46 +1,46 @@
 <div class="schema-toolbar flex-row flex-align-start-stretch"
-     [class.progress]="showProgress">
-  @if (showProgress && manager) {
+     [class.progress]="showProgress()">
+  @let m = manager();
+  @let sts = status();
+  @if (showProgress() && m) {
     <mat-progress-bar
       class="toolbar-progress"
       mode="determinate"
-      [value]="percent$|async"
+      [value]="percent()"
     ></mat-progress-bar>
   }
-  @if (status$|async; as sts) {
-    @for (btn of buttons$|async; track $index) {
-      @if (!(sts.hidden||{})[btn.code||'']) {
-        @if (btn.icon) {
-          <div class="schemas-toolbar-button sdk-color-hover sdk-color-border flex-row flex-align-center-center flex-1"
-               [class.sdk-colors-accent]="!!(sts.active||{})[btn.code||'']"
-               [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
-               [ngClass]="'sdk-colors-'+btn.color"
-               (click)="clickOnButton(btn)"
-               (mousedown)="onPressStart(btn, $event)"
-               (mouseup)="onPressEnd()"
-               (mouseleave)="onPressEnd()"
-               (touchstart)="onPressStart(btn, $event)"
-               (touchend)="onPressEnd($event)"
-               (touchcancel)="onPressEnd($event)"
-               (contextmenu)="$event.preventDefault()">
-            <mat-icon>{{btn.icon}}</mat-icon>
-          </div>
-        } @else {
-          <div class="schemas-toolbar-button sdk-color-hover sdk-color-border flex-row flex-align-center-center flex-1"
-               [class.sdk-colors-accent]="!!(sts.active||{})[btn.code||'']"
-               [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
-               [ngClass]="'sdk-colors-'+btn.color"
-               (click)="clickOnButton(btn)"
-               (mousedown)="onPressStart(btn, $event)"
-               (mouseup)="onPressEnd()"
-               (mouseleave)="onPressEnd()"
-               (touchstart)="onPressStart(btn, $event)"
-               (touchend)="onPressEnd($event)"
-               (touchcancel)="onPressEnd($event)"
-               (contextmenu)="$event.preventDefault()">
-            <span>{{ btn.text }}</span>
-          </div>
-        }
+  @for (btn of buttons(); track $index) {
+    @if (!(sts.hidden||{})[btn.code||'']) {
+      @if (btn.icon) {
+        <div class="schemas-toolbar-button sdk-color-hover sdk-color-border flex-row flex-align-center-center flex-1"
+             [class.sdk-colors-accent]="!!(sts.active||{})[btn.code||'']"
+             [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
+             [class]="'sdk-colors-'+btn.color"
+             (click)="clickOnButton(btn)"
+             (mousedown)="onPressStart(btn, $event)"
+             (mouseup)="onPressEnd()"
+             (mouseleave)="onPressEnd()"
+             (touchstart)="onPressStart(btn, $event)"
+             (touchend)="onPressEnd($event)"
+             (touchcancel)="onPressEnd($event)"
+             (contextmenu)="$event.preventDefault()">
+          <mat-icon>{{btn.icon}}</mat-icon>
+        </div>
+      } @else {
+        <div class="schemas-toolbar-button sdk-color-hover sdk-color-border flex-row flex-align-center-center flex-1"
+             [class.sdk-colors-accent]="!!(sts.active||{})[btn.code||'']"
+             [class.disabled]="!!(sts.disabled||{})[btn.code||'']"
+             [class]="'sdk-colors-'+btn.color"
+             (click)="clickOnButton(btn)"
+             (mousedown)="onPressStart(btn, $event)"
+             (mouseup)="onPressEnd()"
+             (mouseleave)="onPressEnd()"
+             (touchstart)="onPressStart(btn, $event)"
+             (touchend)="onPressEnd($event)"
+             (touchcancel)="onPressEnd($event)"
+             (contextmenu)="$event.preventDefault()">
+          <span>{{ btn.text }}</span>
+        </div>
       }
     }
   }

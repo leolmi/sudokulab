@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PageBase } from '../../model/page.base';
 import { PrintPageComponent } from './print-page.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -8,59 +8,58 @@ import { DEFAULT_PRINT_TEMPLATE, Dictionary, MenuItem, PrintPage, PrintPageEx, S
 import { keys as _keys, reduce as _reduce } from 'lodash';
 import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
 import { AppUserOptions, PrintDocument, SUDOKU_PRINT_DOCUMENT, SudokuStore } from '@olmi/common';
-import { BehaviorSubject, combineLatest, map, Observable, takeUntil } from 'rxjs';
 import { TEMPLATES } from '@olmi/templates';
 import { calcStatusForMenu } from './print.menu';
 
 
 @Component({
   imports: [
-    CommonModule,
     ScrollingModule,
     PrintPageComponent,
     SchemasBrowserComponent,
-    SchemasToolbarComponent
+    SchemasToolbarComponent,
   ],
   selector: 'sudoku-print',
   templateUrl: './print.component.html',
   styleUrl: './print.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PrintComponent extends PageBase {
-  printDocument = inject(SUDOKU_PRINT_DOCUMENT);
+  readonly printDocument = inject(SUDOKU_PRINT_DOCUMENT);
 
-  schemas$: BehaviorSubject<Sudoku[]>;
-  pagesCount$: Observable<number>;
-  schemaCount$: Observable<number>;
+  readonly schemas = signal<Sudoku[]>([]);
+
+  // toSignal su template$ e pages$ del PrintDocument (servizio non ancora migrato a signal)
+  readonly pages = toSignal(this.printDocument.pages$, { initialValue: [] as PrintPage[] });
+  readonly template = toSignal(this.printDocument.template$, { initialValue: '' });
+  readonly activePageSchema = toSignal(this.printDocument.activePageSchema$, { initialValue: '' as string });
+
+  readonly pagesCount = computed<number>(() => (this.pages() || []).length);
+  readonly schemaCount = computed<number>(() =>
+    _reduce(this.pages() || [], (t, p) => t + getSchemaCountForPage(p), 0));
 
   constructor() {
     super();
-    this.schemas$ = new BehaviorSubject<Sudoku[]>([]);
 
     this.printDocument.template$
-      .pipe(takeUntil(this._destroy$))
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(template => AppUserOptions.updateFeature(PRINT_USER_OPTIONS_FEATURE, { template }));
 
     this.state.menuHandler = (item) => this.handleMenuItem(item);
 
-    this.pagesCount$ = this.printDocument.pages$.pipe(
-      takeUntil(this._destroy$),
-      map((pgs: PrintPage[]) => (pgs || []).length));
-    this.schemaCount$ = this.printDocument.pages$.pipe(
-      takeUntil(this._destroy$),
-      map((pgs: PrintPage[]) => _reduce(pgs || [], (t, p) => t + getSchemaCountForPage(p), 0)));
-
-    combineLatest([this.printDocument.pages$, this.printDocument.template$])
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(([pages, template]) =>
-        this.state.updateStatus(calcStatusForMenu(pages, template||DEFAULT_PRINT_TEMPLATE)))
+    // aggiorna lo stato del menu al variare di pagine/template
+    effect(() => {
+      const pages = this.pages();
+      const template = this.template();
+      this.state.updateStatus(calcStatusForMenu(pages, template || DEFAULT_PRINT_TEMPLATE));
+    });
   }
 
   handleMenuItem(item: MenuItem) {
     switch (item.logic) {
       case 'navigate':
-        this.printDocument.template$.next(item.property||'');
+        this.printDocument.template$.next(item.property || '');
         break;
       default:
         switch (item.property) {
@@ -76,7 +75,7 @@ export class PrintComponent extends PageBase {
   }
 
   setSchemas(sdks?: Sudoku[]) {
-    this.schemas$.next(sdks||[]);
+    this.schemas.set(sdks || []);
   }
 }
 

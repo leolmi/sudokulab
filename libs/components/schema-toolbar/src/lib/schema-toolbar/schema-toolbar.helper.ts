@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import { WritableSignal } from '@angular/core';
 import { extend as _extend, reduce as _reduce } from 'lodash';
 import { BoardManager } from '@olmi/board';
 import {
@@ -14,13 +14,18 @@ export const getButtons = (template: string): ToolbarButton[] => {
     <ToolbarButton[]>[]);
 }
 
-export const extendStatus = (cs$: BehaviorSubject<ToolbarStatus>, ps: Partial<ToolbarStatus>): void => {
-  const cs = cs$.value;
-  const ns = new ToolbarStatus();
-  _extend(ns.hidden, cs.hidden, ps.hidden);
-  _extend(ns.disabled, cs.disabled, ps.disabled);
-  _extend(ns.active, cs.active, ps.active);
-  cs$.next(ns);
+export const extendStatus = (cs: WritableSignal<ToolbarStatus>, ps: Partial<ToolbarStatus>): void => {
+  // `update(fn)` legge il valore precedente *fuori* da un tracking context: se
+  // questa funzione viene chiamata dall'interno di un `effect`/`computed`, NON
+  // crea una dipendenza su `cs`, quindi la successiva `cs.set(...)` non
+  // ritriggera l'effect chiamante (loop infinito).
+  cs.update(prev => {
+    const ns = new ToolbarStatus();
+    _extend(ns.hidden, prev.hidden, ps.hidden);
+    _extend(ns.disabled, prev.disabled, ps.disabled);
+    _extend(ns.active, prev.active, ps.active);
+    return ns;
+  });
 }
 
 export const isValueLocked = (manager: BoardManager | undefined, value: string): boolean => {

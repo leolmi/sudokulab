@@ -2,18 +2,21 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   ElementRef,
-  EventEmitter,
   HostBinding,
   HostListener,
   inject,
-  Input,
+  Injector,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild
+  output,
+  runInInjectionContext,
+  signal,
+  viewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   BoardCell,
   BoardChangeEvent,
@@ -22,9 +25,8 @@ import {
   BoardNextMode,
   BoardStatus,
   GEOMETRY,
-  NEXT_DIRECTION
+  NEXT_DIRECTION,
 } from './board.model';
-import { BehaviorSubject, map, Observable, of } from 'rxjs';
 import { cloneDeep as _clone, isNumber as _isNumber, isString as _isString } from 'lodash';
 import {
   Coding,
@@ -34,7 +36,7 @@ import {
   isNextStepKey,
   isSkippedKey,
   moveOnDirection,
-  parseCells
+  parseCells,
 } from './board.helper';
 import { BOARD_PREFIX, getBoardClasses } from './board.internal';
 import { BoardManager } from './board.manager';
@@ -48,11 +50,11 @@ import {
   LogicExecutor,
   NotificationType,
   SudokuCell,
-  update
 } from '@olmi/model';
 import { SUDOKU_NOTIFIER } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { CellRadialPickerComponent } from './cell-radial-picker.component';
+import { NgClass } from '@angular/common';
 
 const PICKER_LONG_PRESS_MS = 350;
 const PICKER_MOVE_TOLERANCE_PX = 8;
@@ -79,14 +81,14 @@ interface PickerState {
 @Component({
   selector: 'sudoku-board',
   imports: [
-    CommonModule,
+    NgClass,
     ClipboardModule,
-    CellRadialPickerComponent
+    CellRadialPickerComponent,
   ],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   // counter per generare id univoci dei clipPath (più board convivono in stampa,
@@ -95,38 +97,61 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostBinding('attr.focusable') focusable = '';
   @HostBinding('attr.tabIndex') tabIndex = 0;
-  @ViewChild('board') board: ElementRef|undefined = undefined;
 
   /** id del clipPath usato per arrotondare il contorno dello schema. */
   readonly boardClipId = `sdk-board-clip-${++BoardComponent._idSeq}`;
 
-  private _notifier = inject(SUDOKU_NOTIFIER);
-  private _clipboard = inject(Clipboard);
-  private _element: ElementRef;
+  private readonly _notifier = inject(SUDOKU_NOTIFIER);
+  private readonly _clipboard = inject(Clipboard);
+  private readonly _element = inject(ElementRef);
+  private readonly _injector = inject(Injector);
 
-  GEOMETRY = GEOMETRY;
-  manager: BoardManager|undefined;
-  height$: BehaviorSubject<number>;
-  cells$: BehaviorSubject<BoardCell[]>;
-  status$: BehaviorSubject<BoardStatus>;
-  highlights$: BehaviorSubject<Highlights>;
+  readonly GEOMETRY = GEOMETRY;
 
-  isFocused$: Observable<boolean> = of(false);
-  currentCellId$: Observable<string> = of('');
-  currentCellCol$: Observable<number> = of(-1);
-  currentCellRow$: Observable<number> = of(-1);
-  class$: Observable<any>;
-  hlgroups$: Observable<BoardGroup[]>;
+  // riferimento al manager: signal per supportare i `computed` derivati
+  private readonly _manager = signal<BoardManager | undefined>(undefined);
+  readonly manager = this._manager.asReadonly();
+
+  // viewChild signal-based
+  readonly boardEl = viewChild<ElementRef>('board');
+
+  // input bindable da template padre (alias preserva l'API esterna)
+  readonly cellsInput = input<SudokuCell[] | undefined | null>(undefined, { alias: 'cells' });
+  readonly statusInput = input<Partial<BoardStatus> | undefined | null>(undefined, { alias: 'status' });
+  readonly highlightsInput = input<Highlights | string | undefined | null>(undefined, { alias: 'highlights' });
+  readonly selectionInput = input<Cell | undefined | null>(undefined, { alias: 'selection' });
+  readonly logic = input<LogicExecutor | undefined>(undefined);
+
+  // signal di stato interni (sorgente di verità)
+  private readonly _height = signal<number>(10);
+  private readonly _cells = signal<BoardCell[]>(parseCells());
+  private readonly _status = signal<BoardStatus>(new BoardStatus());
+  private readonly _highlights = signal<Highlights>(new Highlights());
+
+  // getter classici → si propagano automaticamente al template via signal access
+  // (l'accesso `this._cells()` dentro il getter è tracciato da Angular per il CD)
+  get height(): number { return this._height(); }
+  get cells(): BoardCell[] { return this._cells(); }
+  get status(): BoardStatus { return this._status(); }
+  get highlights(): Highlights { return this._highlights(); }
+
+  // computed derivati
+  readonly classNames = computed(() => getBoardClasses(this._status()));
+  readonly hlgroups = computed(() => (this._highlights()?.groups || []).map(g => new BoardGroup(g)));
+  readonly currentCellId = computed(() => this._manager()?.selection()?.id || '');
+  readonly currentCellCol = computed(() => getColRow(this._manager()?.selection()?.col));
+  readonly currentCellRow = computed(() => getColRow(this._manager()?.selection()?.row));
+  readonly isFocused = computed(() => !!this._manager()?.focused());
 
   // stato del radial-picker (overlay HTML sopra la board)
-  pickerOpen$: BehaviorSubject<boolean>;
-  pickerValues$: BehaviorSubject<string[]>;
-  pickerHoveredIndex$: BehaviorSubject<number>;
-  pickerCenter$: BehaviorSubject<{x: number, y: number}>;
-  pickerRadius$: BehaviorSubject<number>;
+  readonly pickerOpen = signal<boolean>(false);
+  readonly pickerValues = signal<string[]>([]);
+  readonly pickerHoveredIndex = signal<number>(-1);
+  readonly pickerCenter = signal<{ x: number; y: number }>({ x: 0, y: 0 });
+  readonly pickerRadius = signal<number>(PICKER_RADIUS_MAX_PX);
   // pre-commit preview: id cella + valore previsto durante il drag nel picker
-  previewCellId$: BehaviorSubject<string>;
-  previewValue$: BehaviorSubject<string>;
+  readonly previewCellId = signal<string>('');
+  readonly previewValue = signal<string>('');
 
   private _pickerState: PickerState | null = null;
   private _pickerTimer: ReturnType<typeof setTimeout> | null = null;
@@ -139,114 +164,88 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   private _pickerLog: string[] = [];
   private _pickerLogT0 = 0;
   private _pickerLogActive = false;
-  private _pickerWinHandlers: Array<{target: any; type: string; fn: any; opts?: any}> = [];
+  private _pickerWinHandlers: Array<{ target: any; type: string; fn: any; opts?: any }> = [];
 
-  /**
-   * celle dello schema
-   * @param cs
-   */
-  @Input() set cells(cs: SudokuCell[]|undefined|null) {
-    this.cells$.next(parseCells(cs))
-  }
-
-  /**
-   * stato dello schema
-   * @param s
-   */
-  @Input() set status(s: Partial<BoardStatus>|undefined|null) {
-    update(this.status$, s||{});
-  }
-  get status(): BoardStatus {
-    return this.status$.value;
-  }
-
-  /**
-   * evidenze nello schema
-   * @param h
-   */
-  @Input() set highlights(h: Highlights|string|undefined|null) {
-    const hl = _isString(h) ?
-      Coding.decodeHighlightsString(h) :
-      <Highlights>h || new Highlights();
-    // console.log(...BOARD_PREFIX, 'highlights on board', hl);
-    this.highlights$.next(hl);
-  }
-
-  /**
-   * cella selezionata
-   * @param p
-   */
-  @Input() set selection(p: Cell|undefined|null) {
-    this.manager?.selection$.next(<BoardCell>getCell(this.cells$.value, p));
-  }
-
-  @Input()
-  logic: LogicExecutor|undefined;
-
-  @Output()
-  selectionChanged: EventEmitter<BoardCell|undefined> = new EventEmitter<BoardCell|undefined>();
-
-  @Output()
-  boardChangeRequest: EventEmitter<BoardChangeEvent> = new EventEmitter<BoardChangeEvent>();
-
-  @Output()
-  pasteSchemaRequest: EventEmitter<string> = new EventEmitter<string>();
-
-  @Output()
-  onReady: EventEmitter<BoardManager> = new EventEmitter<BoardManager>();
+  // output signal-based
+  readonly selectionChanged = output<BoardCell | undefined>();
+  readonly boardChangeRequest = output<BoardChangeEvent>();
+  readonly pasteSchemaRequest = output<string>();
+  readonly onReady = output<BoardManager>();
 
   constructor() {
-    this._element = inject(ElementRef);
-    this.height$ = new BehaviorSubject<number>(10);
-    this.cells$ = new BehaviorSubject<BoardCell[]>(parseCells());
-    this.status$ = new BehaviorSubject<BoardStatus>(new BoardStatus());
-    this.highlights$ = new BehaviorSubject<Highlights>(new Highlights())
+    // sync degli input bindable verso i signal interni
+    effect(() => this._cells.set(parseCells(this.cellsInput())));
 
-    this.pickerOpen$ = new BehaviorSubject<boolean>(false);
-    this.pickerValues$ = new BehaviorSubject<string[]>([]);
-    this.pickerHoveredIndex$ = new BehaviorSubject<number>(-1);
-    this.pickerCenter$ = new BehaviorSubject<{x: number, y: number}>({x: 0, y: 0});
-    this.pickerRadius$ = new BehaviorSubject<number>(PICKER_RADIUS_MAX_PX);
-    this.previewCellId$ = new BehaviorSubject<string>('');
-    this.previewValue$ = new BehaviorSubject<string>('');
+    effect(() => {
+      const inp = this.statusInput();
+      if (inp != null) this._status.update(prev => ({ ...prev, ...inp }));
+    });
 
-    this.class$ = this.status$.pipe(map((s) => getBoardClasses(s)));
+    effect(() => {
+      const h = this.highlightsInput();
+      const hl = _isString(h) ? Coding.decodeHighlightsString(h) : <Highlights>h || new Highlights();
+      this._highlights.set(hl);
+    });
 
-    this.hlgroups$ = this.highlights$.pipe(map(hl =>
-      (hl?.groups||[]).map(g => new BoardGroup(g))));
+    effect(() => {
+      const p = this.selectionInput();
+      // se nessun [selection] è bindato, niente da fare: evitiamo anche di
+      // tracciare `_cells()` (cambia spesso durante il gioco) come dipendenza,
+      // così l'effect non re-runa ad ogni mossa.
+      if (p == null) return;
+      const m = this._manager();
+      if (!m) return;
+      m.selection$.next(<BoardCell>getCell(this._cells(), p));
+    });
 
     this._calcComponentHeight();
   }
 
+  // metodi chiamati dal BoardManager per propagare i cambi di stato dal manager
+  // verso il componente (sostituiscono gli assignment legacy `_board.cells = ...`)
+  setCells(cs: SudokuCell[] | undefined | null) {
+    this._cells.set(parseCells(cs));
+  }
+
+  setStatus(s: Partial<BoardStatus> | undefined | null) {
+    if (s) this._status.update(prev => ({ ...prev, ...s }));
+  }
+
+  setHighlights(h: Highlights | string | undefined | null) {
+    const hl = _isString(h) ? Coding.decodeHighlightsString(h) : <Highlights>h || new Highlights();
+    this._highlights.set(hl);
+  }
+
   private _calcComponentHeight() {
-    const rect = this.board?.nativeElement.getBoundingClientRect();
-    if (rect?.width > 0 && rect!.width !== this.height$.value) this.height$.next(rect!.width);
+    const rect = this.boardEl()?.nativeElement.getBoundingClientRect();
+    if (rect?.width > 0 && rect.width !== this._height()) this._height.set(rect.width);
   }
 
-  private _getBoardCell(cid: BoardCell|string|undefined|null): BoardCell|undefined {
-    return <BoardCell|undefined>getCell(<SudokuCell[]>this.cells$.value||[], cid);
+  private _getBoardCell(cid: BoardCell | string | undefined | null): BoardCell | undefined {
+    return <BoardCell | undefined>getCell(<SudokuCell[]>this._cells() || [], cid);
   }
 
-  private _updateSelection(cell: BoardCell|undefined) {
-    if (this.manager) {
-      this.manager.selection$.next(cell);
-      this.selectionChanged.next(this.manager.selection$.value);
+  private _updateSelection(cell: BoardCell | undefined) {
+    const m = this._manager();
+    if (m) {
+      m.selection$.next(cell);
+      this.selectionChanged.emit(m.selection$.value);
     }
   }
 
   ngOnInit() {
-    this.manager = new BoardManager(this, this._notifier);
-
-    this.currentCellId$ = this.manager.selection$.pipe(map(s => s?.id||''));
-    this.currentCellCol$ = this.manager.selection$.pipe(map(s => getColRow(s?.col)));
-    this.currentCellRow$ = this.manager.selection$.pipe(map(s => getColRow(s?.row)));
-    this.isFocused$ = this.manager.focused$.pipe(map(f => f));
+    // istanziamo dentro un injection context: i field initializer del
+    // BoardManager usano `toSignal()` che richiede injection context.
+    runInInjectionContext(this._injector, () => {
+      this._manager.set(new BoardManager(this, this._notifier));
+    });
   }
 
   ngAfterViewInit() {
     setTimeout(() => {
       this._calcComponentHeight();
-      this.onReady.emit(this.manager);
+      const m = this._manager();
+      if (m) this.onReady.emit(m);
     });
     // listener touchstart non-passive sull'host: necessario per chiamare
     // preventDefault e inibire il long-press di sistema su Android Chrome,
@@ -271,7 +270,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
       try { this._element.nativeElement.removeEventListener('touchstart', this._hostTouchStart); } catch { /* noop */ }
       this._hostTouchStart = null;
     }
-    this.manager?.dispose();
+    this._manager()?.dispose();
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -284,8 +283,8 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:paste', ['$event'])
   pastEvent(event: ClipboardEvent) {
-    if (!this.status.isPasteEnabled || !this.manager?.focused$.value) return;
-    const values = event.clipboardData?.getData('text')||'';
+    if (!this.status.isPasteEnabled || !this._manager()?.focused$.value) return;
+    const values = event.clipboardData?.getData('text') || '';
     if (isSchemaString(values)) this.pasteSchemaRequest.emit(values);
   }
 
@@ -298,24 +297,24 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('focusin')
   @HostListener('focused')
   componentFocusIn() {
-    this.manager?.focused$.next(true);
+    this._manager()?.focused$.next(true);
   }
   @HostListener('focusout')
   componentFocusOut() {
-    this.manager?.focused$.next(false);
+    this._manager()?.focused$.next(false);
   }
 
   focus() {
     this._element.nativeElement.focus();
   }
 
-  select(cid: BoardCell|string|undefined|null) {
+  select(cid: BoardCell | string | undefined | null) {
     if (this.status.isDisabled) return;
     const cell = this._getBoardCell(cid);
     if (this.status.isDebug) console.log(...BOARD_PREFIX, 'CLICKED CELL', cell);
     this._element?.nativeElement.focus();
     this._updateSelection(cell);
-    this.manager?.checkLockedValue(cell);
+    this._manager()?.checkLockedValue(cell);
   }
 
   onCellPointerDown(cell: BoardCell, event: PointerEvent) {
@@ -337,14 +336,14 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
       target.setPointerCapture(event.pointerId);
       captureOk = (target as any).hasPointerCapture?.(event.pointerId) ?? true;
     } catch (err: any) {
-      this._logPicker('setPointerCapture-throw', { msg: String(err?.message||err) });
+      this._logPicker('setPointerCapture-throw', { msg: String(err?.message || err) });
     }
     this._logPicker('setPointerCapture', { ok: captureOk });
     const cellRect = (target as Element).getBoundingClientRect();
     // raggio del picker proporzionato alla dimensione della cella
     const radius = Math.max(
       PICKER_RADIUS_MIN_PX,
-      Math.min(PICKER_RADIUS_MAX_PX, cellRect.width * PICKER_RADIUS_CELL_RATIO)
+      Math.min(PICKER_RADIUS_MAX_PX, cellRect.width * PICKER_RADIUS_CELL_RATIO),
     );
     // centro del picker in coordinate viewport (è position: fixed → niente scrollbar anche se sfora)
     this._pickerState = {
@@ -439,7 +438,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
         (st.capturedEl as any).releasePointerCapture?.(st.pointerId);
       }
     } catch (err: any) {
-      this._logPicker('release-capture-throw', { msg: String(err?.message||err) });
+      this._logPicker('release-capture-throw', { msg: String(err?.message || err) });
     }
   }
 
@@ -454,32 +453,33 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this._pickerState) return;
     // 1. seleziona la cella se non lo è già
     this._element?.nativeElement.focus();
-    if (this.manager?.selection$.value?.id !== cell.id) {
+    const m = this._manager();
+    if (m?.selection$.value?.id !== cell.id) {
       this._updateSelection(cell);
     }
     // 2. annulla l'hold-state della toolbar se attivo (long-press cella ha priorità)
-    if (this.manager?.status$.value.isLock) {
-      this.manager.options({ isLock: false });
+    if (m?.status$.value.isLock) {
+      m.options({ isLock: false });
     }
     // 3. apri il picker
     this._pickerState.open = true;
-    this.pickerValues$.next(this._pickerState.values);
-    this.pickerHoveredIndex$.next(-1);
-    this.pickerCenter$.next({ x: this._pickerState.centerX, y: this._pickerState.centerY });
-    this.pickerRadius$.next(this._pickerState.radius);
-    this.pickerOpen$.next(true);
+    this.pickerValues.set(this._pickerState.values);
+    this.pickerHoveredIndex.set(-1);
+    this.pickerCenter.set({ x: this._pickerState.centerX, y: this._pickerState.centerY });
+    this.pickerRadius.set(this._pickerState.radius);
+    this.pickerOpen.set(true);
     this._logPicker('picker-open', {
       stillHasCapture: this._pickerHasCapture(),
-      activeElement: (document.activeElement?.tagName||'') + (document.activeElement?.id ? '#'+document.activeElement.id : ''),
+      activeElement: (document.activeElement?.tagName || '') + (document.activeElement?.id ? '#' + document.activeElement.id : ''),
     });
   }
 
-  private _closePicker(reason: string = 'unknown') {
+  private _closePicker(reason = 'unknown') {
     this._logPicker('picker-close', { reason });
-    this.pickerOpen$.next(false);
-    this.pickerHoveredIndex$.next(-1);
-    this.previewCellId$.next('');
-    this.previewValue$.next('');
+    this.pickerOpen.set(false);
+    this.pickerHoveredIndex.set(-1);
+    this.previewCellId.set('');
+    this.previewValue.set('');
   }
 
   private _updatePickerHovered(px: number, py: number) {
@@ -509,14 +509,14 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
         value: idx >= 0 ? st.values[idx] : null,
       });
       st.hoveredIndex = idx;
-      this.pickerHoveredIndex$.next(idx);
+      this.pickerHoveredIndex.set(idx);
       // pre-commit preview nella cella
       if (idx >= 0) {
-        this.previewCellId$.next(st.cell.id);
-        this.previewValue$.next(st.values[idx]);
+        this.previewCellId.set(st.cell.id);
+        this.previewValue.set(st.values[idx]);
       } else {
-        this.previewCellId$.next('');
-        this.previewValue$.next('');
+        this.previewCellId.set('');
+        this.previewValue.set('');
       }
     }
   }
@@ -529,7 +529,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
       value,
       userValues,
       cell: _clone(cell),
-      status: new BoardEventStatus({ ...this.status, isCtrl: false })
+      status: new BoardEventStatus({ ...this.status, isCtrl: false }),
     });
     if (this.status.isDebug) console.log(...BOARD_PREFIX, 'picker commit', request);
     this._logPicker('picker-commit', { cell: cell.id, value, isEffectivePencil });
@@ -602,7 +602,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     this._pickerLog.push(`ua        : ${navigator.userAgent}`);
     this._pickerLog.push(`viewport  : ${window.innerWidth}x${window.innerHeight} dpr=${window.devicePixelRatio}`);
     this._pickerLog.push(`pointer   : type=${e.pointerType} primary=${e.isPrimary} btn=${e.button} btns=${e.buttons} pid=${e.pointerId}`);
-    this._pickerLog.push(`target    : ${tg.tagName}.${(tg.classList||[])[0]||''}  has-svgRoot=${!!(tg.ownerSVGElement)}`);
+    this._pickerLog.push(`target    : ${tg.tagName}.${(tg.classList || [])[0] || ''}  has-svgRoot=${!!(tg.ownerSVGElement)}`);
     if (css) {
       this._pickerLog.push(`tgt-style : touch-action=${css.touchAction}  user-select=${css.userSelect}  -webkit-user-select=${(css as any).webkitUserSelect}`);
     }
@@ -672,7 +672,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (wasOpen) {
       this._notifier.notify(
         `Picker debug: ${this._pickerLog.length} entries ${copied ? 'copied to clipboard' : '(copy failed — see console)'}`,
-        copied ? NotificationType.success : NotificationType.warning
+        copied ? NotificationType.success : NotificationType.warning,
       );
       if (!copied) console.log('[PICKER DEBUG]\n' + text);
     }
@@ -680,7 +680,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private _getPickerValues(): string[] {
     const s = this.status;
-    const base = ['1','2','3','4','5','6','7','8','9'];
+    const base = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     if (s.editMode === 'schema' && s.isDynamic) {
       return [...base, '', '?'];
     }
@@ -688,15 +688,16 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   copySchemaToClipboard() {
-    this._clipboard.copy(getCellsSchema(this.cells$.value, { allowDynamic: !!this.status?.isDynamic }));
+    this._clipboard.copy(getCellsSchema(this._cells(), { allowDynamic: !!this.status?.isDynamic }));
     this._notifier.notify('Schema copied to clipboard successfully', NotificationType.success);
   }
 
   private _move(code: string, mode?: BoardNextMode) {
-    const current = this.manager?.selection$.value;
+    const m = this._manager();
+    const current = m?.selection$.value;
     if (!current) return;
     const target = moveOnDirection(code, current, mode);
-    const cell = <BoardCell>getCell(this.cells$.value, target);
+    const cell = <BoardCell>getCell(this._cells(), target);
     if (cell?.id !== current?.id) this._updateSelection(cell);
   }
 
@@ -708,16 +709,16 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
       // COPIA LO SCHEMA IN CLIPBOARD
       if (isCopyKeys(e)) return this.copySchemaToClipboard();
       // NEXT STEP
-      if (isNextStepKey(e)) return this.manager?.execOperation('solve-step');
+      if (isNextStepKey(e)) return this._manager()?.execOperation('solve-step');
       // SKIPPED KEYS
       if (isSkippedKey(e.code)) return;
-      const cell = this.manager?.selection$.value;
+      const cell = this._manager()?.selection$.value;
       if (this.status.editMode === 'play' && cell?.isFixed) {
         this._move(NEXT_DIRECTION, this.status.nextMode);
         return;
       }
       const isEffectivePencil = this.status.editMode === 'play' && this.status.isPencil;
-      let userValues: string[] = [...cell?.userValues||[]];
+      let userValues: string[] = [...cell?.userValues || []];
       if (isDeleteKey(e.code) && isEffectivePencil) userValues = [];
       const request = new BoardChangeEvent({
         value: isDeleteKey(e.code) ? '' : e.key,
@@ -725,8 +726,8 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
         cell: _clone(cell),
         status: new BoardEventStatus({
           ...this.status,
-          isCtrl: e.ctrlKey
-        })
+          isCtrl: e.ctrlKey,
+        }),
       });
       if (this.status.isDebug) console.log(...BOARD_PREFIX, 'board cell changes request', request);
       this.boardChangeRequest.emit(request);

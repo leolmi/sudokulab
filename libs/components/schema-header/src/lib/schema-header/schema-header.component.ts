@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Dictionary, isEmpty, LocalContext, SDK_PREFIX, Sudoku } from '@olmi/model';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { Dictionary, isEmpty, Sudoku } from '@olmi/model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -22,47 +20,40 @@ interface MapItem {
 @Component({
   selector: 'schema-header',
   imports: [
-    CommonModule,
     MatTooltipModule,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
-    MatBadgeModule
+    MatBadgeModule,
   ],
   templateUrl: './schema-header.component.html',
   styleUrl: './schema-header.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SchemaHeaderComponent {
-  schema$: BehaviorSubject<Sudoku|undefined>;
-  difficultyMap$: Observable<MapItem[]>;
-  isEmpty$: Observable<boolean>;
-
   private readonly _dialog = inject(MatDialog);
 
-  @Input()
-  set schema(s: Sudoku|undefined|null) {
-    this.schema$.next(s||undefined);
-  }
+  readonly schema = input<Sudoku | null | undefined>(undefined);
 
-  constructor() {
-    this.schema$ = new BehaviorSubject<Sudoku|undefined>(undefined);
-    this.isEmpty$ = this.schema$.pipe(map(s => !s || isEmpty(s)));
+  readonly isEmpty = computed<boolean>(() => {
+    const s = this.schema();
+    return !s || isEmpty(s);
+  });
 
-    this.difficultyMap$ = this.schema$.pipe(map(sdk => {
-      const diff_map = sdk?.info.difficultyMap||{};
-      return _keys(diff_map).map(k => {
-        const alg = getAlgorithm(k);
-        return <MapItem>{
-          id: k,
-          icon: alg?.icon||'',
-          name: alg?.name||'',
-          value: getDiffCount(diff_map, k)
-        }
-      });
-    }));
-  }
+  readonly difficultyMap = computed<MapItem[]>(() => {
+    const sdk = this.schema();
+    const diff_map = sdk?.info.difficultyMap || {};
+    return _keys(diff_map).map(k => {
+      const alg = getAlgorithm(k);
+      return <MapItem>{
+        id: k,
+        icon: alg?.icon || '',
+        name: alg?.name || '',
+        value: getDiffCount(diff_map, k),
+      };
+    });
+  });
 
   openAlgorithmInfo(id: string) {
     this._dialog.open(AlgorithmInfoDialogComponent, {

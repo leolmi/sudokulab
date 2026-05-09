@@ -1,5 +1,5 @@
-import { BehaviorSubject, catchError, of, take, throwError } from 'rxjs';
-import { inject, InjectionToken } from '@angular/core';
+import { catchError, take, throwError } from 'rxjs';
+import { inject, InjectionToken, signal } from '@angular/core';
 import { cloneDeep as _clone, extend as _extend, isArray as _isArray } from 'lodash';
 import {
   extendInfo,
@@ -17,37 +17,40 @@ import { saveAs } from 'file-saver';
 import { clearSchema, getSolution, solve } from '@olmi/logic';
 import { Notifier, SUDOKU_NOTIFIER } from './notifier';
 
+/**
+ * Catalogo schemi + stato di sincronizzazione con il server.
+ *
+ * API signal-first: lo stato è esposto come `Signal<T>` readonly (`catalog`,
+ * `generated`, `schemaOfTheDay`, `isFilling`, `isFilled`, `isDownload`); le
+ * mutazioni passano per metodi pubblici espliciti.
+ */
 export class SudokuStore {
-  private readonly _interaction: Interaction;
-  private readonly _notifier: Notifier;
-  generated$: BehaviorSubject<SudokuEx[]>;
-  catalog$: BehaviorSubject<Sudoku[]>;
-  schemaOfTheDay$: BehaviorSubject<string>;
+  private readonly _interaction: Interaction = inject(SUDOKU_API);
+  private readonly _notifier: Notifier = inject(SUDOKU_NOTIFIER);
 
-  isFilling$: BehaviorSubject<boolean>;
-  isFilled$: BehaviorSubject<boolean>;
-  isDownload$: BehaviorSubject<boolean>;
+  private readonly _generated = signal<SudokuEx[]>([]);
+  private readonly _catalog = signal<Sudoku[]>([]);
+  private readonly _schemaOfTheDay = signal<string>('');
+  private readonly _isFilling = signal<boolean>(false);
+  private readonly _isFilled = signal<boolean>(false);
+  private readonly _isDownload = signal<boolean>(!!this._interaction.env.management);
 
-  constructor() {
-    this._interaction = inject(SUDOKU_API);
-    this._notifier = inject(SUDOKU_NOTIFIER);
-    this.isFilled$ = new BehaviorSubject<boolean>(false);
-    this.isFilling$ = new BehaviorSubject<boolean>(false);
-    this.isDownload$ = new BehaviorSubject<boolean>(!!this._interaction.env.management);
-    this.generated$ = new BehaviorSubject<SudokuEx[]>([]);
-    this.catalog$ = new BehaviorSubject<Sudoku[]>([]);
-    this.schemaOfTheDay$ = new BehaviorSubject<string>('');
-  }
+  readonly generated = this._generated.asReadonly();
+  readonly catalog = this._catalog.asReadonly();
+  readonly schemaOfTheDay = this._schemaOfTheDay.asReadonly();
+  readonly isFilling = this._isFilling.asReadonly();
+  readonly isFilled = this._isFilled.asReadonly();
+  readonly isDownload = this._isDownload.asReadonly();
 
   private _updateCatalogItem(id: string, handler: (ctg: Sudoku[], item: Sudoku|undefined) => boolean) {
-    const cc = _clone(this.catalog$.value);
+    const cc = _clone(this._catalog());
     const sdk = cc.find(s => s._id === id);
-    if (handler(cc, sdk)) this.catalog$.next(cc);
+    if (handler(cc, sdk)) this._catalog.set(cc);
   }
 
   init(executor: LogicExecutor) {
-    if (this.isFilling$.value || this.isFilled$.value) return;
-    this.isFilling$.next(true);
+    if (this._isFilling() || this._isFilled()) return;
+    this._isFilling.set(true);
 
     this._interaction.getCatalog()
       .pipe(take(1))
@@ -55,10 +58,10 @@ export class SudokuStore {
   }
 
   addGeneratedSchema(sdk: SudokuEx) {
-    const store = _clone(this.generated$.value);
+    const store = _clone(this._generated());
     if (!store.find(s => s.values === sdk.values)) {
       store.push(sdk);
-      this.generated$.next(store);
+      this._generated.set(store);
       // schema generato localmente: se il server lo rifiuta lo logghiamo
       // soltanto, non interrompiamo il flusso di generazione
       this.checkSchema(sdk).catch(err =>
@@ -119,16 +122,16 @@ export class SudokuStore {
   }
 
   getSudoku(schema: string): Sudoku|undefined {
-    return this.catalog$.value.find(s => isEqualCaseInsensitive(s.name, schema) || s.values.startsWith(schema));
+    return this._catalog().find(s => isEqualCaseInsensitive(s.name, schema) || s.values.startsWith(schema));
   }
 
   getSudokuEx(schema: string): Promise<SudokuEx|undefined> {
     return new Promise<SudokuEx|undefined>((res) => {
-      let sdk = this.catalog$.value.find(s => isEqualCaseInsensitive(s.name, schema) || s.values.startsWith(schema));
+      let sdk = this._catalog().find(s => isEqualCaseInsensitive(s.name, schema) || s.values.startsWith(schema));
       if (isExtendedSudoku(sdk)) {
         res(new SudokuEx(<Partial<SudokuEx>>sdk));
       } else if (sdk) {
-        const catalog = _clone(this.catalog$.value);
+        const catalog = _clone(this._catalog());
         const csdk = catalog.find(s => s.values === sdk!.values);
         if (csdk) {
           const sol = solve(csdk);
@@ -137,7 +140,7 @@ export class SudokuStore {
             extendInfo(solved, csdk);
             clearSchema(solved.cells);
             _extend(csdk, solved);
-            this.catalog$.next(catalog);
+            this._catalog.set(catalog);
           }
         }
         res(<SudokuEx>csdk);
@@ -147,21 +150,21 @@ export class SudokuStore {
 
   load(sdks: Sudoku[]) {
     if (_isArray(sdks)) {
-      this.isFilling$.next(false);
-      this.catalog$.next(sdks);
+      this._isFilling.set(false);
+      this._catalog.set(sdks);
       const rs = getRandomSchema(sdks);
-      this.schemaOfTheDay$.next(rs._id);
-      this.isFilled$.next(true);
+      this._schemaOfTheDay.set(rs._id);
+      this._isFilled.set(true);
     }
   }
 
   getRandomSchema(): Sudoku {
-    return getRandomSchema(this.catalog$.value);
+    return getRandomSchema(this._catalog());
   }
 
   download() {
     if (!this._interaction.env.management) return;
-    const schema_str = JSON.stringify(this.catalog$.value||[], null, 2);
+    const schema_str = JSON.stringify(this._catalog()||[], null, 2);
     const blob = new Blob([schema_str], { type: "application/json;" });
     saveAs(blob, 'sudokulab-store.json');
   }

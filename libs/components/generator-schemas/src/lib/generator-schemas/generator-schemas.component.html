@@ -1,5 +1,5 @@
 <div class="generator-schemas-container">
-  @for (sdk of store.generated$|async; track sdk.values) {
+  @for (sdk of store.generated(); track sdk.values) {
     <div class="generator-schema">
       <div class="generator-schema-content sdk-color-hover flex-col flex-align-start-center">
         <sudoku-board-preview
@@ -14,7 +14,7 @@
   @for (prv of previews; track $index) {
     <generator-schema-preview
       [index]="$index"
-      [manager]="manager"
+      [manager]="manager()"
     ></generator-schema-preview>
   }
 </div>

@@ -1,33 +1,32 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { BoardManager, BoardPreviewComponent } from '@olmi/board';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ManagerComponentBase, SudokuState } from '@olmi/common';
-import { combineLatest, map, Observable, of } from 'rxjs';
-import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
+import { SudokuState } from '@olmi/common';
+import { GenerationStat } from '@olmi/model';
 
 @Component({
   selector: 'generator-schema-preview',
   imports: [
-    CommonModule,
     BoardPreviewComponent,
-    MatProgressSpinner
+    MatProgressSpinner,
   ],
   template: `
     <!-- GENERATION PREVIEW -->
-    @if (globalState.isRunning$|async) {
+    @if (globalState.isRunning()) {
+      @let m = manager();
       <div class="generator-schema generator-stat-preview">
         <div class="generator-schema-content flex-col flex-align-start-center">
-          @if (manager) {
-            @if (manager.multiGenerationStat$|async; as stat) {
-              <sudoku-board-preview [schema]="stat[index]?.currentSchema||''"></sudoku-board-preview>
-              <div class="schema-details flex-1">{{generationDesc$|async}}</div>
+          @if (m) {
+            @let stat = m.multiGenerationStat();
+            @if (stat) {
+              <sudoku-board-preview [schema]="stat[index()]?.currentSchema||''"></sudoku-board-preview>
+              <div class="schema-details flex-1">{{generationDesc()}}</div>
               <mat-progress-spinner
-                [mode]="(progressMode$|async)||'indeterminate'"
-                [value]="(progress$|async)||0"
+                [mode]="progressMode()"
+                [value]="progress()"
               ></mat-progress-spinner>
               <div class="schema-index flex-row flex-align-center-center">
-                <div>{{(index+1)}}</div>
+                <div>{{(index()+1)}}</div>
               </div>
             }
           }
@@ -36,36 +35,40 @@ import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
     }
   `,
   styleUrl: './generator-schemas.component.scss',
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GeneratorSchemaPreviewComponent extends ManagerComponentBase<BoardManager> implements OnInit {
-  generationDesc$: Observable<string> = of('');
-  progressMode$: Observable<'determinate'|'indeterminate'> = of('indeterminate');
-  progress$: Observable<number> = of(0);
-  globalState = SudokuState;
+export class GeneratorSchemaPreviewComponent {
+  readonly globalState = SudokuState;
 
-  @Input()
-  index: number = 0;
+  readonly manager = input<BoardManager | null | undefined>(null);
+  readonly index = input<number>(0);
 
-  constructor() {
-    super();
-  }
+  // GenerationStat dello slot corrente, derivata dal multiGenerationStat del manager
+  private readonly _slotStat = computed<GenerationStat | undefined>(() => {
+    const m = this.manager();
+    if (!m) return undefined;
+    return <GenerationStat>(<any>m.multiGenerationStat())[this.index()];
+  });
 
-  ngOnInit() {
-    if (this.manager) {
-      const mgstat = this.manager.multiGenerationStat$.pipe(map(ms =>
-        <GenerationStat>(<any>ms)[this.index]));
+  readonly generationDesc = computed<string>(() => {
+    const stat = this._slotStat();
+    return `running (${(stat?.generatedSchemaCount || 0)}/${(stat?.managedSchemaCount || 0)})...`;
+  });
 
-      this.generationDesc$ = mgstat.pipe(map((stat: GenerationStat|undefined) =>
-          `running (${(stat?.generatedSchemaCount||0)}/${(stat?.managedSchemaCount||0)})...`));
+  readonly progress = computed<number>(() => {
+    const m = this.manager();
+    if (!m) return 0;
+    const stat = this._slotStat();
+    const opt = m.generatorOptions();
+    return 100 - (((stat?.managedSchemaCount || 0) / (opt.maxSchemaFillCycles || 1)) * 100);
+  });
 
-      this.progress$ = combineLatest([mgstat, this.manager.generatorOptions$])
-        .pipe(map(([stat, opt]: [GenerationStat | undefined, GeneratorOptions]) =>
-          100-(((stat?.managedSchemaCount||0)/(opt.maxSchemaFillCycles||1))*100) ));
-
-      this.progressMode$ = combineLatest([this.manager.stat$, this.manager.generatorOptions$])
-        .pipe(map(([stat, opt]: [SudokuStat, GeneratorOptions]) =>
-          (stat.fixedAndDynamicCount < opt.fixedCount) ? 'determinate' : 'indeterminate'));
-    }
-  }
+  readonly progressMode = computed<'determinate' | 'indeterminate'>(() => {
+    const m = this.manager();
+    if (!m) return 'indeterminate';
+    const stat = m.stat();
+    const opt = m.generatorOptions();
+    return (stat.fixedAndDynamicCount < opt.fixedCount) ? 'determinate' : 'indeterminate';
+  });
 }

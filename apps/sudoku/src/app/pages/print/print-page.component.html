@@ -1,10 +1,11 @@
+@let addMode = isAddMode();
 <div class="print-page"
-     [class.background]="!(isAddMode$|async)"
-     [class.elevation-z5]="!(isAddMode$|async)"
-     [class.add-page-mode]="isAddMode$|async">
+     [class.background]="!addMode"
+     [class.elevation-z5]="!addMode"
+     [class.add-page-mode]="addMode">
 
   <!-- PAGE TOOLBAR -->
-  @if (!(isAddMode$|async)) {
+  @if (!addMode) {
     <div class="print-page-toolbar flex-row flex-align-start-center">
       <div class="flex-1"></div>
       <button mat-icon-button (click)="clear()" matTooltip="clear content">
@@ -18,19 +19,19 @@
 
   <!-- PAGE CONTENT -->
   <div class="print-page-content theme-light">
-    @if (isAddMode$|async) {
+    @if (addMode) {
       <div class="print-page-add flex-row flex-align-center-center flex-1" (click)="add()">
         <mat-icon>add</mat-icon>
       </div>
     } @else {
-      <ng-template [cdkPortalOutlet]="portal$|async"></ng-template>
+      <ng-template [cdkPortalOutlet]="portal()"></ng-template>
     }
   </div>
 
   <!-- FOOTER (page numbers) -->
   <div class="print-page-footer flex-row flex-align-end-center">
-    @if (!(isAddMode$|async)) {
-      <div class="page-number">{{(index+1)}}</div>
+    @if (!addMode) {
+      <div class="page-number">{{(index()+1)}}</div>
     }
   </div>
 

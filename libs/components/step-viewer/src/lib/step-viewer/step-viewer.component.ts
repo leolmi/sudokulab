@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BehaviorSubject } from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  output,
+} from '@angular/core';
 import { StepViewerItem } from './step-viewer.model';
 import { AlgorithmResult } from '@olmi/model';
 import { getItems } from './step-viewer.logic';
@@ -13,62 +19,52 @@ import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olm
 @Component({
   selector: 'step-viewer',
   imports: [
-    CommonModule,
     MatIcon,
     MatIconButton,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './step-viewer.component.html',
   styleUrl: './step-viewer.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StepViewerComponent {
   private readonly _dialog = inject(MatDialog);
 
-  items$: BehaviorSubject<StepViewerItem[]>;
-  selected$: BehaviorSubject<string>;
-  clicked$: BehaviorSubject<any>;
-  autoHeight$: BehaviorSubject<boolean>;
-  appliedIndex$: BehaviorSubject<number>;
+  readonly sequence = input<AlgorithmResult[] | null | undefined>(undefined);
+  readonly autoHeight = input<boolean>(false);
 
-  @Input()
-  set sequence(s: AlgorithmResult[]|null|undefined) {
-    const items = getItems(s||[]);
-    this.items$.next(items);
-    this.clicked$.next({});
-    this.selected$.next('');
-    this.appliedIndex$.next(items.length-1);
-  }
+  readonly onClickItem = output<StepViewerItem>();
+  readonly onApplyItem = output<AlgorithmResult>();
 
-  @Input()
-  set autoHeight(ah: boolean) {
-    this.autoHeight$.next(ah);
-  }
+  readonly items = computed<StepViewerItem[]>(() => getItems(this.sequence() || []));
 
-  @Output()
-  onClickItem: EventEmitter<StepViewerItem> = new EventEmitter<StepViewerItem>();
-  @Output()
-  onApplyItem: EventEmitter<AlgorithmResult> = new EventEmitter<AlgorithmResult>();
-
-  constructor() {
-    this.items$ = new BehaviorSubject<StepViewerItem[]>([]);
-    this.selected$ = new BehaviorSubject<string>('');
-    this.clicked$ = new BehaviorSubject<any>({});
-    this.autoHeight$ = new BehaviorSubject(false);
-    this.appliedIndex$ = new BehaviorSubject<number>(-1);
-  }
+  // linkedSignal: si resettano automaticamente quando `items` cambia (cioè
+  // all'arrivo di un nuovo `sequence`), ma sono scrivibili imperativamente
+  // dalle interazioni utente
+  readonly clicked = linkedSignal<StepViewerItem[], Record<string, boolean>>({
+    source: () => this.items(),
+    computation: () => ({}),
+  });
+  readonly selected = linkedSignal<StepViewerItem[], string>({
+    source: () => this.items(),
+    computation: () => '',
+  });
+  readonly appliedIndex = linkedSignal<StepViewerItem[], number>({
+    source: () => this.items(),
+    computation: (items) => items.length - 1,
+  });
 
   clickOnItem(item: StepViewerItem) {
     if (item.groupTitle) return;
-    this.clicked$.next({...this.clicked$.value, [item.id]: true});
-    this.selected$.next(item?.id||'');
+    this.clicked.update(c => ({ ...c, [item.id]: true }));
+    this.selected.set(item?.id || '');
     this.onClickItem.emit(item);
   }
 
   applyStep(index: number) {
-    this.appliedIndex$.next(index);
-    const item = this.items$.value[index];
+    this.appliedIndex.set(index);
+    const item = this.items()[index];
     if (item?.result) this.onApplyItem.emit(item.result);
   }
 

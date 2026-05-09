@@ -1,14 +1,17 @@
 <div class="step-viewer-container"
-     [class.auto-height]="autoHeight$|async">
+     [class.auto-height]="autoHeight()">
   <div class="step-viewer-scroller flex-col">
-    @for (item of items$|async; track item.id; let first = $first; let last = $last; let index = $index; let count = $count) {
+    @let appliedIdx = appliedIndex();
+    @let selectedId = selected();
+    @let clickedMap = clicked();
+    @for (item of items(); track item.id; let first = $first; let last = $last; let index = $index; let count = $count) {
       <div class="step-viewer-item flex-row flex-align-start-stretch"
-           [class.selected]="!item.groupTitle && (selected$|async)===item.id"
+           [class.selected]="!item.groupTitle && selectedId===item.id"
            [class.clickable]="!item.groupTitle"
            [class.has-value]="item.hasValue"
            (click)="clickOnItem(item)"
       >
-        @if (appliedIndex$|async; as aindex) {
+        @if (appliedIdx; as aindex) {
           <div class="step-viewer-navigator flex-col flex-align-center-center"
                [class.applied]="aindex>=index"
                [class.applied-throw]="aindex>index">
@@ -51,7 +54,7 @@
           <div class="step-viewer-item-text flex-1 flex-row flex-align-start-center"
                [class.hidden-value]="item.hasValue"
                [class.allow-hidden]="item.allowHidden"
-               [class.clicked]="!!((clicked$|async)||{})[item.id||'']">
+               [class.clicked]="!!clickedMap[item.id||'']">
             <div>{{item.html}}</div>
           </div>
           <div class="dot-container flex-row flex-align-center-center">

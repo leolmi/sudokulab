@@ -3,12 +3,13 @@
   <div class="page-content flex-col">
     <!-- HEADER -->
     <div class="header flex-row flex-align-start-center">
-      @if (gridSize$|async; as size) {
+      @let size = gridSize();
+      @if (size) {
         <div class="title flex-1">Char map {{size}}x{{size}}</div>
       }
       <input class="char-input"
              [maxLength]="1" type="text"
-             [value]="char$|async"
+             [value]="char()"
              (change)="applyChar($event)">
     </div>
 
@@ -22,7 +23,7 @@
         [showTickMarks]="true"
         aria-labelledby="fixed numbers count">
         <input matSliderThumb
-               [ngModel]="gridSize$|async"
+               [ngModel]="size"
                (valueChange)="updateSize($event)">
       </mat-slider>
     </div>
@@ -31,7 +32,7 @@
     <div class="grid">
       <svg class="svg-grid" viewBox="0 0 100 100">
         <g>
-          @for (cell of cells$|async; track $index) {
+          @for (cell of cells(); track $index) {
             <rect class="svg-grid-cell"
                   (mouseenter)="over(cell)"
                   [class.active]="cell.active"
@@ -48,9 +49,9 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar flex-row flex-align-start-center">
-<!--      <button mat-button (click)="testOcr()">Test OCR</button>-->
       <div class="flex-1"></div>
-      @if (activeCell$|async; as ac) {
+      @let ac = activeCell();
+      @if (ac) {
         <div class="position">{{ac.posX}},{{ac.posY}}</div>
       }
     </div>

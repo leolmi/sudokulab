@@ -1,10 +1,20 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  OnDestroy,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, Observable, of, takeUntil } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { BUTTON_STOP_CODE, ToolbarButton, ToolbarStatus } from './schema-toolbar.model';
-import { ManagerComponentBase, SudokuState } from '@olmi/common';
+import { SudokuState } from '@olmi/common';
 import { extendStatus, getButtons, isValueLocked, setValueButtonStatus } from './schema-toolbar.helper';
 import { BoardChangeEvent, BoardEventStatus, BoardManager } from '@olmi/board';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -18,57 +28,104 @@ const TB_VALUE_PREFIX = /^tb-value-/;
 @Component({
   selector: 'schema-toolbar',
   imports: [
-    CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressBar
+    MatProgressBar,
   ],
   templateUrl: './schema-toolbar.component.html',
   styleUrl: './schema-toolbar.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> implements OnInit, OnDestroy {
-  buttons$: BehaviorSubject<ToolbarButton[]>;
-  status$: BehaviorSubject<ToolbarStatus>;
-  percent$: Observable<number> = of(0);
-  disabled$: BehaviorSubject<boolean>;
+export class SchemaToolbarComponent implements OnDestroy {
+  private readonly _destroyRef = inject(DestroyRef);
+
+  readonly manager = input<BoardManager | null | undefined>(null);
+  readonly template = input<string>('');
+  readonly showProgress = input<boolean>(false);
+  readonly disabled = input<boolean | null | undefined>(false);
+
+  readonly buttons = computed<ToolbarButton[]>(() => getButtons(this.template()));
+  readonly status = signal<ToolbarStatus>(new ToolbarStatus());
+  readonly percent = signal<number>(0);
 
   private _pressTimer: ReturnType<typeof setTimeout> | null = null;
   private _longPressFired = false;
   private _activePressCode: string | null = null;
   private _lastTouchEnd = 0;
 
-  @Input()
-  set template(t: string) {
-    this.buttons$.next(getButtons(t));
-  }
-
-  @Input()
-  showProgress = false;
-
-  @Input()
-  set disabled(d: boolean|null|undefined) {
-    this.disabled$.next(!!d);
-  }
-
   constructor() {
-    super();
+    // ricalcolo dello stato dei buttons al cambiare di tutte le sorgenti
+    // rilevanti: i Subject del BoardManager (ancora basato su BehaviorSubject
+    // in attesa della Fase 4) sono ascoltati via combineLatest, ricreata ad
+    // ogni cambio di `manager`/`buttons`/`disabled` tramite il cleanup
+    // dell'effect.
+    effect(onCleanup => {
+      const m = this.manager();
+      this.buttons();
+      this.disabled();
+      // dipendenza esplicita su `isRunning` (signal): ricrea le subscription
+      // quando `isRunning` cambia, niente più `SudokuState.isRunning$` nel combineLatest
+      SudokuState.isRunning();
+      if (!m) return;
+      extendStatus(this.status, this._calcButtonsStatus());
+      const sub = combineLatest([
+        m.selection$,
+        m.focused$,
+        m.stat$,
+        m.status$,
+        m.isStopping$,
+        m.lockedValue$,
+      ])
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe(() => extendStatus(this.status, this._calcButtonsStatus()));
+      onCleanup(() => sub.unsubscribe());
+    });
 
-    this.disabled$ = new BehaviorSubject<boolean>(false);
-    this.buttons$ = new BehaviorSubject<ToolbarButton[]>([]);
-    this.status$ = new BehaviorSubject<any>(new ToolbarStatus());
+    // pencil mode è incompatibile con l'hold-state: sblocca alla transizione
+    effect(onCleanup => {
+      const m = this.manager();
+      if (!m) return;
+      const sub = m.status$.pipe(
+        map(s => s.isPencil),
+        distinctUntilChanged(),
+      )
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe(isPencil => {
+          if (isPencil && m.status$.value.isLock) m.options({ isLock: false });
+        });
+      onCleanup(() => sub.unsubscribe());
+    });
+
+    // percent della progress bar
+    effect(onCleanup => {
+      const m = this.manager();
+      if (!m) {
+        this.percent.set(0);
+        return;
+      }
+      const sub = m.stat$
+        .pipe(map(stat => stat.percent), takeUntilDestroyed(this._destroyRef))
+        .subscribe(p => this.percent.set(p));
+      onCleanup(() => sub.unsubscribe());
+    });
+  }
+
+  ngOnDestroy() {
+    this._clearPressTimer();
   }
 
   private _calcButtonsStatus(): Partial<ToolbarStatus> {
     const status = new ToolbarStatus();
-    (this.buttons$.value || []).forEach(btn => {
+    const manager = this.manager() ?? undefined;
+    const isDisabled = !!this.disabled();
+    (this.buttons() || []).forEach(btn => {
       const code = btn.code || '';
       // restore global status
       status.disabled[code] = false;
       if (TB_VALUE_PREFIX.test(code)) {
-        setValueButtonStatus(status, code, this.manager);
-        const locked = isValueLocked(this.manager, btn.value ?? '');
+        setValueButtonStatus(status, code, manager);
+        const locked = isValueLocked(manager, btn.value ?? '');
         if (locked) {
           status.active[code] = true;
           status.disabled[code] = false;
@@ -80,66 +137,30 @@ export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> i
       } else {
         switch (code) {
           case 'tb-pencil':
-            status.active[code] = !!this.manager?.status$.value.isPencil;
+            status.active[code] = !!manager?.status$.value.isPencil;
             break;
           case 'tb-play':
-            status.hidden[code] = SudokuState.isRunning$.value;
+            status.hidden[code] = SudokuState.isRunning();
             break;
           case BUTTON_STOP_CODE:
-            status.hidden[code] = !SudokuState.isRunning$.value;
-            status.disabled[code] = !!this.manager?.isStopping$.value;
+            status.hidden[code] = !SudokuState.isRunning();
+            status.disabled[code] = !!manager?.isStopping$.value;
             break;
         }
       }
       // global disabled
-      if (this.disabled$.value && code !== BUTTON_STOP_CODE) status.disabled[code] = true;
+      if (isDisabled && code !== BUTTON_STOP_CODE) status.disabled[code] = true;
     });
     // empty e dynamic condividono uno slot: il lock su uno dei due deve avere
     // priorità sullo swap automatico calcolato da setValueButtonStatus
-    if (isValueLocked(this.manager, '?')) {
+    if (isValueLocked(manager, '?')) {
       status.hidden[TB_VALUE_DYNAMIC] = false;
       status.hidden[TB_VALUE_EMPTY] = true;
-    } else if (isValueLocked(this.manager, '')) {
+    } else if (isValueLocked(manager, '')) {
       status.hidden[TB_VALUE_EMPTY] = false;
       status.hidden[TB_VALUE_DYNAMIC] = true;
     }
     return status;
-  }
-
-  ngOnInit() {
-    if (this.manager) {
-      // rileva tutte le mutazioni utili allo stato dei buttons
-      combineLatest([
-        this.manager.selection$,
-        this.manager.focused$,
-        this.manager.stat$,
-        this.manager.status$,
-        this.manager.isStopping$,
-        this.manager.lockedValue$,
-        SudokuState.isRunning$,
-        this.disabled$])
-        .pipe(takeUntil(this._destroy$))
-        .subscribe(() => extendStatus(this.status$, this._calcButtonsStatus()));
-
-      // pencil mode è incompatibile con l'hold-state: sblocca alla transizione
-      this.manager.status$
-        .pipe(
-          takeUntil(this._destroy$),
-          map(s => s.isPencil),
-          distinctUntilChanged())
-        .subscribe(isPencil => {
-          if (isPencil && this.manager!.status$.value.isLock) {
-            this.manager!.options({ isLock: false });
-          }
-        });
-
-      this.percent$ = this.manager.stat$.pipe(map(stat => stat.percent));
-    }
-  }
-
-  override ngOnDestroy() {
-    this._clearPressTimer();
-    super.ngOnDestroy();
   }
 
   clickOnButton(btn: ToolbarButton) {
@@ -149,8 +170,8 @@ export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> i
       this._activePressCode = null;
       return;
     }
-    if ((this.status$.value.disabled || {})[code]) return;
-    this.manager?.execOperation(btn.operation || 'assign', btn.value, true);
+    if ((this.status().disabled || {})[code]) return;
+    this.manager()?.execOperation(btn.operation || 'assign', btn.value, true);
   }
 
   onPressStart(btn: ToolbarButton, event?: Event) {
@@ -159,7 +180,7 @@ export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> i
     const code = btn.code || '';
     if (!TB_VALUE_PREFIX.test(code)) return;
     // in pencil mode il long-press resta abilitato solo per il bottone empty
-    const isPencil = !!this.manager?.status$.value.isPencil;
+    const isPencil = !!this.manager()?.status$.value.isPencil;
     if (isPencil && code !== TB_VALUE_EMPTY) return;
     if (this._pressTimer) return;
     this._longPressFired = false;
@@ -188,18 +209,17 @@ export class SchemaToolbarComponent extends ManagerComponentBase<BoardManager> i
   }
 
   private _toggleValueLock(value: string) {
-    if (!this.manager) return;
-    if (isValueLocked(this.manager, value)) {
-      this.manager.options({ isLock: false });
+    const manager = this.manager();
+    if (!manager) return;
+    if (isValueLocked(manager, value)) {
+      manager.options({ isLock: false });
       return;
     }
-    this.manager.options({ isLock: true });
-    this.manager.lockedValue$.next(new BoardChangeEvent({
+    manager.options({ isLock: true });
+    manager.lockedValue$.next(new BoardChangeEvent({
       value,
-      cell: this.manager.selection$.value,
-      status: new BoardEventStatus({ ...this.manager.status$.value })
+      cell: manager.selection$.value,
+      status: new BoardEventStatus({ ...manager.status$.value })
     }));
   }
 }
-
-

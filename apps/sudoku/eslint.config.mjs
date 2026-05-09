@@ -30,7 +30,7 @@ export default [
     files: ['**/*.html'],
     rules: {
       // `!(obs$|async)` unisce "null / pending / false" in un unico ramo:
-      // scelta convenzionale del progetto, non è un errore.
+      // scelta convenzionale del progetto, non Ã¨ un errore.
       '@angular-eslint/template/no-negated-async': 'off',
     },
   },
@@ -39,6 +39,7 @@ export default [
     rules: {
       '@angular-eslint/component-selector': 'off',
       '@angular-eslint/component-class-suffix': 'off',
+      '@angular-eslint/no-output-on-prefix': 'off',
     },
   },
 ];

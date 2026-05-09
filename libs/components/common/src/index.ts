@@ -1,7 +1,5 @@
 export * from './lib/common/app.state';
 export * from './lib/common/constants';
-export * from './lib/common/destroy.component.base';
-export * from './lib/common/manager.component.base';
 export * from './lib/common/interaction';
 export * from './lib/common/notifier';
 export * from './lib/common/print';

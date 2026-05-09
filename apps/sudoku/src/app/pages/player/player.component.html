@@ -1,17 +1,18 @@
-@if (store.isFilling$|async) {
+@if (store.isFilling()) {
   <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
 }
+@let mgr = manager();
 <div class="sudokulab-page page-fill flex-row">
   <div class="page-space flex-1"></div>
-  <div class="page-content" [ngClass]="(layout$|async)==='column' ? 'flex-col' : 'flex-row'">
+  <div class="page-content" [ngClass]="layout()==='column' ? 'flex-col' : 'flex-row'">
     <div class="lateral narrow-hidden flex-1 flex-col">
-      @if (manager) {
-        <schema-header [schema]="manager.sudoku$|async"></schema-header>
+      @if (mgr) {
+        <schema-header [schema]="sudoku()"></schema-header>
         <div class="stat-monitor flex-col">
-          @if (isEmpty$|async) {
+          @if (isEmpty()) {
             <div class="empty-schema">Empty schema</div>
           } @else {
-            @for (l of stat$|async; track l.description) {
+            @for (l of stat(); track l.description) {
               <div class="stat-line flex-row flex-align-start-center">
                 <div class="stat-line-desc">{{l.description}}</div>
                 <div class="stat-line-value">{{l.value}}</div>
@@ -21,20 +22,20 @@
         </div>
         <div class="flex-1">
           <step-viewer
-            [sequence]="manager.sequence$|async"
+            [sequence]="sequence()"
             (onClickItem)="openHighlights($event)"
-            (onApplyItem)="manager.applyStep($event)"
+            (onApplyItem)="mgr.applyStep($event)"
           ></step-viewer>
         </div>
       }
     </div>
     <div class="schema-container flex-col">
-      @if (manager) {
-        <schema-header class="narrow-visible" [schema]="manager.sudoku$|async"></schema-header>
+      @if (mgr) {
+        <schema-header class="narrow-visible" [schema]="sudoku()"></schema-header>
       }
       <div class="board-fx-wrap"
-           [class.fx-playing]="fxPlaying$|async"
-           [class.fx-coord]="isCoord$|async">
+           [class.fx-playing]="fxPlaying()"
+           [class.fx-coord]="isCoord()">
         <sudoku-board
           [logic]="logic"
           (onReady)="ready($event)"
@@ -46,26 +47,26 @@
           }
         </div>
       </div>
-      @if (manager) {
+      @if (mgr) {
         <schema-toolbar
           [showProgress]="true"
-          [manager]="manager"
+          [manager]="mgr"
           [template]="toolbarTemplate"
         ></schema-toolbar>
       }
     </div>
     <div class="lateral narrow-hidden highlights-container flex-1">
-      @if (manager) {
-        <highlights-editor [manager]="manager"></highlights-editor>
+      @if (mgr) {
+        <highlights-editor [manager]="mgr"></highlights-editor>
       }
     </div>
     <div class="lateral narrow-visible flex-col">
-      @if (manager) {
+      @if (mgr) {
         <step-viewer
           [autoHeight]="true"
-          [sequence]="manager.sequence$|async"
+          [sequence]="sequence()"
           (onClickItem)="openHighlights($event)"
-          (onApplyItem)="manager.applyStep($event)"
+          (onApplyItem)="mgr.applyStep($event)"
         ></step-viewer>
       }
     </div>

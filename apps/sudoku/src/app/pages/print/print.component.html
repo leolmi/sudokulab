@@ -1,8 +1,8 @@
 <div class="sudokulab-page sudokulab-page-print flex-row">
   <div class="print-container flex-1">
-    <div class="print-title">{{pagesCount$|async}}<span class="opacity-4"> pages with </span>{{schemaCount$|async}}<span class="opacity-4"> schemas</span></div>
+    <div class="print-title">{{pagesCount()}}<span class="opacity-4"> pages with </span>{{schemaCount()}}<span class="opacity-4"> schemas</span></div>
     <div class="pages-container">
-      @for (page of printDocument.pages$|async; track page.id; let index = $index) {
+      @for (page of pages(); track page.id; let index = $index) {
         <print-page [pageId]="page.id" [index]="index"></print-page>
       }
       <print-page mode="add"></print-page>
@@ -16,8 +16,8 @@
     ></schemas-toolbar>
     <div class="schemas-container flex-1">
       <schemas-browser
-        [schemas]="schemas$|async"
-        [activeSchema]="printDocument.activePageSchema$|async"
+        [schemas]="schemas()"
+        [activeSchema]="activePageSchema()"
         [allowCompact]="true"
         (clickOnSchema)="printDocument.addSchema($event.values)"
       ></schemas-browser>

@@ -1,3 +1,5 @@
+import { Signal } from '@angular/core';
+import { outputToObservable, toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, debounceTime, filter, Subject, takeUntil } from 'rxjs';
 import { cloneDeep as _clone, isBoolean as _isBoolean, isString, last as _last } from 'lodash';
 import {
@@ -20,7 +22,7 @@ import {
   SudokuInfoEx,
   SudokuStat,
   update,
-  ValueOptions
+  ValueOptions,
 } from '@olmi/model';
 import { AppUserOptions, Notifier, SudokuState } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
@@ -30,78 +32,77 @@ import { buildSchemaBoard, getBoardCells, getSequence } from './board.helper';
 import { handleBoardValue } from './board-component.helper';
 
 /**
- * gestore dello schema
- * semplifica l'accesso allo schema
+ * Gestore dello schema (board manager).
+ *
+ * API ibrida (Fase 4 del refactor a Signal):
+ *  - i `xxx$: BehaviorSubject<T>` restano come sorgente di verità interna e
+ *    come API di compat per i consumer ancora basati su `.subscribe()` /
+ *    `.value` / `.next()`;
+ *  - per ogni `xxx$` è esposto anche un signal `xxx: Signal<T>` (via
+ *    `toSignal(xxx$)`) per consumer signal-first; verrà promosso a sorgente
+ *    di verità in una fase successiva.
+ *
+ * Il BoardManager viene istanziato dal `BoardComponent` dentro un
+ * `runInInjectionContext(injector, () => new BoardManager(...))`, così i
+ * `toSignal()` dei field initializer trovano un injection context valido.
  */
 export class BoardManager {
   private readonly _board: BoardComponent;
-  private readonly _destroy$: Subject<void>;
-  private readonly _highlights$: BehaviorSubject<
-    Highlights | string | undefined | null
-  >;
+  private readonly _destroy$ = new Subject<void>();
+  private readonly _highlights$ = new BehaviorSubject<Highlights | string | undefined | null>(undefined);
   private _debounce = 200;
 
-  readonly generatorOptions$: BehaviorSubject<GeneratorOptions>;
-  status$: BehaviorSubject<BoardStatus>;
-  stat$: BehaviorSubject<SudokuStat>;
-  generationStat$: BehaviorSubject<GenerationStat | undefined>;
-  multiGenerationStat$: BehaviorSubject<Dictionary<GenerationStat | undefined>>;
-  cells$: BehaviorSubject<BoardCell[]>;
-  sequence$: BehaviorSubject<AlgorithmResult[]>;
-  sudoku$: BehaviorSubject<Sudoku>;
-  focused$: BehaviorSubject<boolean>;
-  isStopping$: BehaviorSubject<boolean>;
-  selection$: BehaviorSubject<BoardCell | undefined>;
-  lockedValue$: BehaviorSubject<BoardChangeEvent | undefined>;
+  // BehaviorSubject (sorgente di verità + compat API)
+  readonly generatorOptions$ = new BehaviorSubject<GeneratorOptions>(new GeneratorOptions());
+  readonly status$ = new BehaviorSubject<BoardStatus>(new BoardStatus());
+  readonly stat$ = new BehaviorSubject<SudokuStat>(new SudokuStat());
+  readonly generationStat$ = new BehaviorSubject<GenerationStat | undefined>(undefined);
+  readonly multiGenerationStat$ = new BehaviorSubject<Dictionary<GenerationStat | undefined>>({});
+  readonly cells$ = new BehaviorSubject<BoardCell[]>(buildSchemaBoard());
+  readonly sequence$ = new BehaviorSubject<AlgorithmResult[]>([]);
+  readonly sudoku$ = new BehaviorSubject<Sudoku>(new Sudoku());
+  readonly focused$ = new BehaviorSubject<boolean>(false);
+  readonly isStopping$ = new BehaviorSubject<boolean>(false);
+  readonly selection$ = new BehaviorSubject<BoardCell | undefined>(undefined);
+  readonly lockedValue$ = new BehaviorSubject<BoardChangeEvent | undefined>(undefined);
+
+  // signal API (alimentati dai BehaviorSubject sopra). I field initializer di
+  // queste proprietà girano in injection context perché il manager viene
+  // istanziato via `runInInjectionContext` dal BoardComponent.
+  readonly status: Signal<BoardStatus> = toSignal(this.status$, { requireSync: true });
+  readonly stat: Signal<SudokuStat> = toSignal(this.stat$, { requireSync: true });
+  readonly generationStat: Signal<GenerationStat | undefined> = toSignal(this.generationStat$, { requireSync: true });
+  readonly multiGenerationStat: Signal<Dictionary<GenerationStat | undefined>> = toSignal(this.multiGenerationStat$, { requireSync: true });
+  readonly cells: Signal<BoardCell[]> = toSignal(this.cells$, { requireSync: true });
+  readonly sequence: Signal<AlgorithmResult[]> = toSignal(this.sequence$, { requireSync: true });
+  readonly sudoku: Signal<Sudoku> = toSignal(this.sudoku$, { requireSync: true });
+  readonly focused: Signal<boolean> = toSignal(this.focused$, { requireSync: true });
+  readonly isStopping: Signal<boolean> = toSignal(this.isStopping$, { requireSync: true });
+  readonly selection: Signal<BoardCell | undefined> = toSignal(this.selection$, { requireSync: true });
+  readonly lockedValue: Signal<BoardChangeEvent | undefined> = toSignal(this.lockedValue$, { requireSync: true });
+  readonly generatorOptions: Signal<GeneratorOptions> = toSignal(this.generatorOptions$, { requireSync: true });
 
   usePersistence = false;
 
   constructor(private board: BoardComponent, private notifier?: Notifier) {
-    this._destroy$ = new Subject<void>();
-    this.focused$ = new BehaviorSubject<boolean>(false);
-    this.status$ = new BehaviorSubject<BoardStatus>(new BoardStatus());
-    this.sudoku$ = new BehaviorSubject<Sudoku>(new Sudoku());
-    this.cells$ = new BehaviorSubject<BoardCell[]>(buildSchemaBoard());
-    this.stat$ = new BehaviorSubject<SudokuStat>(new SudokuStat());
-    this.isStopping$ = new BehaviorSubject<boolean>(false);
-    this.selection$ = new BehaviorSubject<BoardCell | undefined>(
-      <BoardCell | undefined>undefined
-    );
-    this.generationStat$ = new BehaviorSubject<GenerationStat | undefined>(
-      undefined
-    );
-    this.multiGenerationStat$ = new BehaviorSubject<
-      Dictionary<GenerationStat | undefined>
-    >({});
-    this.sequence$ = new BehaviorSubject<AlgorithmResult[]>([]);
-    this.generatorOptions$ = new BehaviorSubject<GeneratorOptions>(
-      new GeneratorOptions()
-    );
-    this.lockedValue$ = new BehaviorSubject<BoardChangeEvent | undefined>(
-      undefined
-    );
-    this._highlights$ = new BehaviorSubject<
-      Highlights | string | undefined | null
-    >(undefined);
     this._board = board;
     this._init();
   }
 
   private _init() {
     if (!this._board) return;
-    if (this.board.logic) {
+    const logic = this._board.logic();
+    if (logic) {
       // valuta il ritorno del logic-worker
-      this.board.logic.completed.subscribe((data) => {
+      logic.completed.subscribe((data: LogicWorkerData) => {
         if (data.sudoku && !data.allowHidden) {
           const cells = getBoardCells(data.sudoku);
           this.cells$.next(cells);
         }
         this.sequence$.next(getSequence(data));
-        SudokuState.isRunning$.next(!!data.isRunning);
+        SudokuState.setIsRunning(!!data.isRunning);
         if (!data.isRunning) this.isStopping$.next(false);
-        this.generationStat$.next(
-          data.isRunning ? data.generationStat : undefined
-        );
+        this.generationStat$.next(data.isRunning ? data.generationStat : undefined);
         update(this.multiGenerationStat$, {
           [data.index]: data.isRunning ? data.generationStat : undefined,
         });
@@ -111,7 +112,7 @@ export class BoardManager {
     }
 
     this.status$.pipe(takeUntil(this._destroy$)).subscribe((s) => {
-      this._board!.status = s;
+      this._board.setStatus(s);
       if (!s.isLock && !!this.lockedValue$.value)
         this.lockedValue$.next(undefined);
     });
@@ -119,10 +120,10 @@ export class BoardManager {
     combineLatest([this.cells$, this.sudoku$])
       .pipe(
         takeUntil(this._destroy$),
-        filter(([cells, sdk]) => (cells || []).length > 0)
+        filter(([cells]) => (cells || []).length > 0),
       )
       .subscribe(([cells, sdk]: [BoardCell[], Sudoku]) => {
-        this._board!.cells = cells;
+        this._board.setCells(cells);
         const stat = getStat(cells);
         if (!stat.isEmpty && sdk._id && this.usePersistence)
           AppUserOptions.setUserValues(sdk._id, stat.userValues);
@@ -131,11 +132,13 @@ export class BoardManager {
 
     this._highlights$
       .pipe(takeUntil(this._destroy$), debounceTime(this._debounce))
-      .subscribe((h) => (this._board.highlights = h));
+      .subscribe((h) => this._board.setHighlights(h));
 
-    this._board.boardChangeRequest
+    // `boardChangeRequest` è un `output()` signal-based; per usarlo come
+    // Observable lo convertiamo via `outputToObservable`
+    outputToObservable(this._board.boardChangeRequest)
       .pipe(takeUntil(this._destroy$))
-      .subscribe((e) => this.applyValue(e));
+      .subscribe((e: BoardChangeEvent) => this.applyValue(e));
   }
 
   private _checkHighlights(data: LogicWorkerData) {
@@ -164,10 +167,7 @@ export class BoardManager {
         if (data.error) {
           this.notifier.notify(data.error, NotificationType.error);
         } else if (data.sudoku) {
-          this.notifier.notify(
-            'Schema solved successfully',
-            NotificationType.success
-          );
+          this.notifier.notify('Schema solved successfully', NotificationType.success);
         }
         break;
       default:
@@ -180,8 +180,6 @@ export class BoardManager {
 
   /**
    * operazioni attivabili anche senza worker
-   * @param operation
-   * @param params
    */
   private _internalLogicExecute(operation?: LogicOperation, params?: any) {
     switch (operation) {
@@ -205,13 +203,12 @@ export class BoardManager {
     const status = this.status$.value;
     if (operation) {
       if (operation === 'assign')
-        return this.applyValue(
-          getApplyBoardEvent(status, this.selection$.value, params)
-        );
+        return this.applyValue(getApplyBoardEvent(status, this.selection$.value, params));
       if (operation === 'toggle') return this.toggleOption(`${params}`);
       if (operation === 'stop') this.isStopping$.next(true);
-      if (this.board.logic) {
-        this.board.logic.execute({
+      const logic = this._board.logic();
+      if (logic) {
+        logic.execute({
           sudoku: new SudokuEx({ cells: this.cells$.value }),
           operation,
           options: {
@@ -233,10 +230,10 @@ export class BoardManager {
 
   dispose() {
     this._destroy$.next();
-    this._destroy$.unsubscribe();
+    this._destroy$.complete();
   }
 
-  private get status() {
+  private get _statusValue() {
     return this.status$.value;
   }
 
@@ -256,7 +253,7 @@ export class BoardManager {
     this.clearHighlights();
   }
 
-  values(s: string|null) {
+  values(s: string | null) {
     if (!s || s.length !== 81) return;
     handleUpdate(this.cells$, (cells) => {
       cells.forEach((c, i) => {
@@ -273,10 +270,6 @@ export class BoardManager {
    * Forza gli `available` delle celle indicate sovrascrivendo quanto
    * calcolato da `apply-rules`. Serve soprattutto agli esempi didattici
    * (algorithm-info) quando lo snapshot di fase non è autoconsistente.
-   *
-   * @param map dizionario `coord cella` → stringa candidati concatenati
-   *            (es. `{ D9: '69', D3: '16' }`). Ogni carattere non '1'..'9'
-   *            viene ignorato; celle assenti dalla mappa restano invariate.
    */
   forceAvailable(map: Dictionary<string>) {
     if (!map) return;
@@ -284,9 +277,7 @@ export class BoardManager {
       cells.forEach((c) => {
         const forced = map[c.coord];
         if (forced == null) return;
-        c.available = forced
-          .split('')
-          .filter((ch) => isNumberCellValue(ch));
+        c.available = forced.split('').filter((ch) => isNumberCellValue(ch));
       });
       return true;
     });
@@ -311,13 +302,13 @@ export class BoardManager {
   applyValue(e: BoardChangeEvent) {
     // con isLock attivo il lock "segue" l'ultima azione esplicita: qualunque valore
     // applicato (numerico, dynamic '?', empty '') sposta il lockedValue
-    if (this.status.isLock) this.lockedValue$.next(e);
+    if (this._statusValue.isLock) this.lockedValue$.next(e);
     this._handleBoardChangeEvent(e);
   }
 
   switchProp(nm: keyof BoardStatus) {
-    if (!_isBoolean(this.status[nm])) return;
-    this.options(<Partial<BoardStatus>>{ [nm]: !this.status[nm] });
+    if (!_isBoolean(this._statusValue[nm])) return;
+    this.options(<Partial<BoardStatus>>{ [nm]: !this._statusValue[nm] });
     this.resetFocus();
   }
 
@@ -344,14 +335,14 @@ export class BoardManager {
 
   switchMode() {
     this.options({
-      editMode: this.status.editMode === 'play' ? 'schema' : 'play',
+      editMode: this._statusValue.editMode === 'play' ? 'schema' : 'play',
     });
     this.resetFocus();
   }
 
   switchValues() {
     this.options({
-      valuesMode: this.status.valuesMode === 'numbers' ? 'dots' : 'numbers',
+      valuesMode: this._statusValue.valuesMode === 'numbers' ? 'dots' : 'numbers',
     });
     this.resetFocus();
   }
@@ -386,7 +377,7 @@ export class BoardManager {
 
   checkLockedValue(cell: BoardCell | undefined) {
     const lockedValue = this.lockedValue$.value;
-    if (!!cell && this.status.isLock && !!lockedValue) {
+    if (!!cell && this._statusValue.isLock && !!lockedValue) {
       const e = _clone(lockedValue);
       if (cell.text) e.value = '';
       e.cell = cell;
@@ -397,8 +388,6 @@ export class BoardManager {
 
 /**
  * alcune informazioni sono caricate dallo schema originale
- * @param statCells
- * @param sdk
  */
 const mergeStat = (statCells: SudokuStat, sdk: Sudoku): SudokuStat => {
   return new SudokuStat({
@@ -411,14 +400,14 @@ const mergeStat = (statCells: SudokuStat, sdk: Sudoku): SudokuStat => {
     difficulty: sdk.info.difficulty,
     difficultyMap: sdk.info.difficultyMap,
     difficultyValue: sdk.info.difficultyValue,
-    solution: (<SudokuInfoEx>sdk.info)?.solution
-  })
+    solution: (<SudokuInfoEx>sdk.info)?.solution,
+  });
 }
 
-const getApplyBoardEvent = (status: BoardStatus, cell: BoardCell|undefined, value: any): BoardChangeEvent => {
+const getApplyBoardEvent = (status: BoardStatus, cell: BoardCell | undefined, value: any): BoardChangeEvent => {
   return new BoardChangeEvent({
     cell,
     status: { ...status, isCtrl: false },
-    value: `${value||''}`
-  })
+    value: `${value || ''}`,
+  });
 }

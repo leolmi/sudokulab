@@ -37,6 +37,7 @@ export default [
     rules: {
       '@angular-eslint/component-selector': 'off',
       '@angular-eslint/component-class-suffix': 'off',
+      '@angular-eslint/no-output-on-prefix': 'off',
     },
   },
 ];

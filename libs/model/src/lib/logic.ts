@@ -3,7 +3,7 @@ import { ValueOptions } from './value-options';
 import { Sudoku } from './sudoku';
 import { guid } from '../generic.helper';
 import { GenerationStat } from './generator';
-import { EventEmitter } from '@angular/core';
+import { Subject } from 'rxjs';
 
 export type LogicOperation = 'apply-rules'|'check'|'solve'|'stop'|'solve-step'|'solve-to'|'solve-to-try'|'clear'|'help'|'generate'|'skip'|'generation-result'|'generation-ping'|'assign'|'toggle'|'build';
 
@@ -69,7 +69,8 @@ export interface LogicExecutor {
   execute(args: Partial<LogicWorkerArgs>): string;
 
   /**
-   * evento di ritorno dal worker
+   * canale di completamento: i consumer si iscrivono via `.subscribe()` /
+   * `.pipe()`.
    */
-  completed: EventEmitter<LogicWorkerData>;
+  completed: Subject<LogicWorkerData>;
 }

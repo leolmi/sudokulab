@@ -107,5 +107,6 @@ Node richiesto: `20.18.1` (vedi `package.json > engines`).
 
 - **Lingua**: commenti e descrizioni di dominio in italiano; identificatori in inglese.
 - **Standalone components**: tutte le feature Angular usano componenti standalone (no `NgModule` lato frontend).
+- **Signal-first**: client in rifattorizzazione progressiva a Signal (Angular 21). Convenzioni e checklist obbligatorie per ogni componente toccato in [documents/signals-conventions.md](documents/signals-conventions.md). Nei file rifattorizzati: niente `BehaviorSubject`/`@Input`/`@Output` decoratori/`| async`/`*ngIf`/`*ngFor`, `OnPush` obbligatorio, `inject()` ovunque.
 - **Worktree**: quando si lavora in un worktree isolato, riportare le modifiche nel branch locale (tipicamente `develop`) **senza commit**, lasciandole come unstaged changes (vedi [../CLAUDE.md](../CLAUDE.md)).
 - **Branch corrente**: `master`; branch base per le PR: `main`.

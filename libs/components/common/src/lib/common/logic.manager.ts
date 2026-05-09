@@ -1,4 +1,5 @@
-import { EventEmitter, inject } from '@angular/core';
+import { inject } from '@angular/core';
+import { Subject } from 'rxjs';
 import {
   checkNumber,
   EndGenerationMode,
@@ -6,7 +7,7 @@ import {
   LocalContext,
   LogicExecutor,
   LogicWorkerArgs,
-  LogicWorkerData
+  LogicWorkerData,
 } from '@olmi/model';
 import { SUDOKU_STORE, SudokuStore } from './store';
 import { AppUserOptions } from './user-options';
@@ -17,7 +18,9 @@ import { GENERATOR_OPTIONS_FEATURE } from './constants';
 class LogicManagerBase {
   private _store: SudokuStore;
 
-  completed: EventEmitter<LogicWorkerData> = new EventEmitter<LogicWorkerData>();
+  // canale di completamento: i consumer (BoardManager) si iscrivono al
+  // `completed` Subject (compatibile con `.subscribe()` / `.pipe()`).
+  readonly completed = new Subject<LogicWorkerData>();
 
   constructor() {
     this._store = inject(SUDOKU_STORE);
@@ -25,14 +28,14 @@ class LogicManagerBase {
 
   protected _handleMessage(m: MessageEvent, index?: number) {
     const data = new LogicWorkerData(m.data);
-    data.index = index||0;
+    data.index = index || 0;
     if (data.operation) {
       switch (data.operation) {
         case 'generation-result':
           if (data.generationStat?.generatedSchema) this._store.addGeneratedSchema(data.generationStat.generatedSchema);
           break;
       }
-      this.completed.emit(data);
+      this.completed.next(data);
     }
   }
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ServerBusyService } from './server-busy.service';
@@ -14,10 +14,11 @@ import { ServerBusyService } from './server-busy.service';
 @Component({
   selector: 'sudoku-server-waiter',
   standalone: true,
-  imports: [CommonModule, MatProgressBarModule, MatProgressSpinnerModule],
+  imports: [MatProgressBarModule, MatProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (busy.state$ | async; as s) {
+    @let s = state();
+    @if (s) {
       <div class="server-waiter-backdrop">
         <div class="server-waiter-card">
           <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
@@ -80,7 +81,8 @@ import { ServerBusyService } from './server-busy.service';
   `]
 })
 export class ServerWaiterComponent {
-  busy = inject(ServerBusyService);
+  private readonly _busy = inject(ServerBusyService);
+  readonly state = toSignal(this._busy.state$, { initialValue: null });
 
   taskLabel(task: string): string {
     switch (task) {

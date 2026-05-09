@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, Injector, Input, ViewContainerRef } from '@angular/core';
-import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, ViewContainerRef } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,7 +8,7 @@ import { ComponentPortal, PortalModule } from '@angular/cdk/portal';
 import { PrintDocument, SUDOKU_PRINT_DOCUMENT } from '@olmi/common';
 import { TEMPLATE_PAGE_ID, TemplateComponent, TEMPLATES } from '@olmi/templates';
 
-export type PageMode = 'page'|'add';
+export type PageMode = 'page' | 'add';
 
 @Component({
   selector: 'print-page',
@@ -18,57 +17,51 @@ export type PageMode = 'page'|'add';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     PortalModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
-  ]
+    MatTooltipModule,
+  ],
 })
 export class PrintPageComponent {
-  private _mode$: BehaviorSubject<PageMode>;
+  readonly printDocument = inject(SUDOKU_PRINT_DOCUMENT);
 
-  printDocument = inject(SUDOKU_PRINT_DOCUMENT);
-  pageId$: BehaviorSubject<string>;
-  portal$: Observable<ComponentPortal<TemplateComponent>|''>;
+  readonly pageId = input<string | null | undefined>('');
+  readonly mode = input<PageMode>('page');
+  readonly index = input<number>(0);
 
-  isAddMode$: Observable<boolean>;
+  readonly isAddMode = computed<boolean>(() => this.mode() === 'add');
 
-  @Input() set pageId(pid: string|null|undefined) {
-    this.pageId$.next(pid||'');
-  }
-  @Input() set mode(m: PageMode) {
-    this._mode$.next(m||'page');
-  };
-  @Input() index: number = 0;
+  // toSignal sul template del documento per ottenere re-eval del portal
+  // quando l'utente cambia template
+  private readonly _template = toSignal(this.printDocument.template$, { initialValue: '' });
 
-  constructor() {
-    this._mode$ = new BehaviorSubject<PageMode>('page');
-    this.pageId$ = new BehaviorSubject<string>('');
-
-    this.isAddMode$ = this._mode$.pipe(map(m => m === 'add'));
-    this.portal$ = combineLatest([this.pageId$, this.printDocument.template$]).pipe(
-      map(([pid, tmp]: [string, string]) => getPagePortal(this.printDocument, pid)));
-  }
+  readonly portal = computed<ComponentPortal<TemplateComponent> | ''>(() => {
+    this._template();
+    return getPagePortal(this.printDocument, this.pageId() || '');
+  });
 
   setActiveArea(position: number) {
-    this.printDocument.activeArea$.next(`${this.pageId$.value}.${position}`);
+    this.printDocument.activeArea$.next(`${this.pageId() || ''}.${position}`);
   }
+
   add() {
     const page = this.printDocument.addPage();
     this.printDocument.activeArea$.next(getPageArea(page.id));
   }
+
   clear() {
-    this.printDocument.updatePage(this.pageId$.value, p => p.schemas = {});
+    this.printDocument.updatePage(this.pageId() || '', p => p.schemas = {});
   }
+
   remove() {
-    this.printDocument.removePage(this.pageId$.value);
+    this.printDocument.removePage(this.pageId() || '');
   }
 }
 
-const getPagePortal = (doc: PrintDocument, pid: string): ComponentPortal<TemplateComponent>|'' => {
+const getPagePortal = (doc: PrintDocument, pid: string): ComponentPortal<TemplateComponent> | '' => {
   const template = TEMPLATES.find(t => t.name === doc.template$.value);
   if (!template) return '';
-  const inj = Injector.create({ providers: [{ provide: TEMPLATE_PAGE_ID, useValue: pid }]});
-  return new ComponentPortal<TemplateComponent>(template.editor, <ViewContainerRef|null|undefined>null, inj);
+  const inj = Injector.create({ providers: [{ provide: TEMPLATE_PAGE_ID, useValue: pid }] });
+  return new ComponentPortal<TemplateComponent>(template.editor, <ViewContainerRef | null | undefined>null, inj);
 }

@@ -21,6 +21,7 @@
       cursor: pointer;
 
       .generator-schema-content {
+        box-sizing: border-box;
         user-select: none;
         padding: var(--sdk-generate-schema-padding);
         position: absolute;

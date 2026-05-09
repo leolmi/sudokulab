@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 
 interface PickerSegment {
@@ -16,7 +16,7 @@ interface PickerSegment {
   templateUrl: './cell-radial-picker.component.html',
   styleUrl: './cell-radial-picker.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CellRadialPickerComponent {
   // viewBox è in unità logiche; la SVG viene scalata in pixel via [style.width]
@@ -25,32 +25,23 @@ export class CellRadialPickerComponent {
   readonly innerRadius = 13;
   readonly outerRadius = 48;
 
-  private _values: string[] = [];
-  segments: PickerSegment[] = [];
-
-  @Input()
-  set values(v: string[] | null | undefined) {
-    this._values = v || [];
-    this.segments = this._computeSegments(this._values);
-  }
-  get values(): string[] {
-    return this._values;
-  }
-
+  readonly values = input<string[] | null | undefined>([]);
   // indice del segmento sotto il pointer (-1 = dead-zone / nessuno)
-  @Input() hoveredIndex = -1;
-
-  get previewLabel(): string {
-    if (this.hoveredIndex < 0 || this.hoveredIndex >= this._values.length) return '';
-    return this._labelOf(this._values[this.hoveredIndex]);
-  }
-
+  readonly hoveredIndex = input<number>(-1);
   // posizione del centro in pixel relativi al contenitore overlay
-  @Input() centerX = 0;
-  @Input() centerY = 0;
-
+  readonly centerX = input<number>(0);
+  readonly centerY = input<number>(0);
   // raggio in pixel
-  @Input() radius = 100;
+  readonly radius = input<number>(100);
+
+  readonly segments = computed<PickerSegment[]>(() => this._computeSegments(this.values() || []));
+
+  readonly previewLabel = computed<string>(() => {
+    const idx = this.hoveredIndex();
+    const vals = this.values() || [];
+    if (idx < 0 || idx >= vals.length) return '';
+    return this._labelOf(vals[idx]);
+  });
 
   private _computeSegments(values: string[]): PickerSegment[] {
     const n = values.length;
