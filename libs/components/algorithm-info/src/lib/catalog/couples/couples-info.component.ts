@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
@@ -24,10 +23,10 @@ import {
 @Component({
   selector: 'couples-info',
   standalone: true,
-  imports: [CommonModule, FlexLayoutModule, SudokuBoardPreviewComponent],
+  imports: [SudokuBoardPreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="alg-page" fxLayout="column" fxLayoutGap="24px">
+    <section class="alg-page flex-col flex-gap-24">
       <div>
         <h3>Quando si applica</h3>
         <p>
@@ -82,7 +81,7 @@ import {
         </p>
       </div>
 
-      <div class="example" fxLayout="column" fxLayoutGap="12px">
+      <div class="example flex-col flex-gap-12">
         <h3>Esempio — catena (1, 2, 3) in colonna 1</h3>
         <p class="caption">
           Nello stato qui sotto la <strong>colonna 1</strong> contiene tre
@@ -94,7 +93,7 @@ import {
           diverso: il quadrato 1) e ha proprio candidati &#123;X, Z&#125; =
           &#123;1, 3&#125;.
         </p>
-        <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="flex-row flex-align-center-center">
           <sudoku-board-preview [sample]="example_1" [size]="420">
           </sudoku-board-preview>
         </div>

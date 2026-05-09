@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, Injector, Input, ViewContainerRef } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -21,7 +20,6 @@ export type PageMode = 'page'|'add';
   imports: [
     CommonModule,
     PortalModule,
-    FlexLayoutModule,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule

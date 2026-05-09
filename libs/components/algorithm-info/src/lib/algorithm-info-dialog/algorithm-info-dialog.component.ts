@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -29,7 +28,6 @@ export interface AlgorithmInfoDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    FlexLayoutModule,
     MatDialogModule,
     MatButtonModule,
     MatIcon,
@@ -37,26 +35,26 @@ export interface AlgorithmInfoDialogData {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="alg-info-root" fxLayout="column">
-      <div class="alg-info-header" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
+    <div class="alg-info-root flex-col">
+      <div class="alg-info-header flex-row flex-align-start-center flex-gap-12">
         @if (algorithm) {
           <mat-icon class="alg-info-icon">{{ algorithm.icon }}</mat-icon>
-          <div fxLayout="column" fxFlex>
+          <div class="flex-col flex-1">
             <div class="alg-info-name">{{ algorithm.name }}</div>
             <div class="alg-info-subtitle">{{ algorithm.title }}</div>
           </div>
         } @else {
-          <div fxFlex class="alg-info-name">Algoritmo sconosciuto ({{ data.algorithmId }})</div>
+          <div class="alg-info-name flex-1">Algoritmo sconosciuto ({{ data.algorithmId }})</div>
         }
         <button mat-icon-button [mat-dialog-close]="null" aria-label="Close">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <div class="alg-info-body" fxFlex>
+      <div class="alg-info-body flex-1">
         @let cmp = pageComponent$ | async;
         @if (loading$ | async) {
-          <div class="alg-info-loading" fxLayout="row" fxLayoutAlign="center center">
+          <div class="alg-info-loading flex-row flex-align-center-center">
             <mat-spinner diameter="36"></mat-spinner>
           </div>
         } @else if (cmp) {

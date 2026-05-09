@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
@@ -21,10 +20,10 @@ import {
 @Component({
   selector: 'hidden-quad-info',
   standalone: true,
-  imports: [CommonModule, FlexLayoutModule, SudokuBoardPreviewComponent],
+  imports: [SudokuBoardPreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="alg-page" fxLayout="column" fxLayoutGap="24px">
+    <section class="alg-page flex-col flex-gap-24">
       <div>
         <h3>Quando si applica</h3>
         <p>
@@ -51,7 +50,7 @@ import {
         </p>
       </div>
 
-      <div class="example" fxLayout="column" fxLayoutGap="12px">
+      <div class="example flex-col flex-gap-12">
         <h3>Esempio — quaterna (1, 2, 3, 4) in riga A</h3>
         <p class="caption">
           Nello stato qui sotto, nella <strong>riga A</strong> le cifre
@@ -66,7 +65,7 @@ import {
           <li>il 3 è escluso dalla colonna 7 (C7=3) e dal quadrato in alto a destra, quindi da A7, A8, A9;</li>
           <li>il 4 è escluso dalla colonna 8 (C8=4) e dal quadrato in alto a destra, quindi da A7, A8, A9.</li>
         </ul>
-        <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="flex-row flex-align-center-center">
           <sudoku-board-preview [sample]="example_1" [size]="420">
           </sudoku-board-preview>
         </div>

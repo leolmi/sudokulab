@@ -1,10 +1,10 @@
-<div class="sudokulab-page page-fill" fxLayout="row">
-  <div class="page-space" fxFlex></div>
-  <div class="page-content" fxLayout="column">
+<div class="sudokulab-page page-fill flex-row">
+  <div class="page-space flex-1"></div>
+  <div class="page-content flex-col">
     <!-- HEADER -->
-    <div class="header" fxLayout="row" fxLayoutAlign="start center">
+    <div class="header flex-row flex-align-start-center">
       @if (gridSize$|async; as size) {
-        <div class="title" fxFlex>Char map {{size}}x{{size}}</div>
+        <div class="title flex-1">Char map {{size}}x{{size}}</div>
       }
       <input class="char-input"
              [maxLength]="1" type="text"
@@ -47,13 +47,13 @@
     </div>
 
     <!-- TOOLBAR -->
-    <div class="toolbar" fxLayout="row" fxLayoutAlign="start center">
+    <div class="toolbar flex-row flex-align-start-center">
 <!--      <button mat-button (click)="testOcr()">Test OCR</button>-->
-      <div fxFlex></div>
+      <div class="flex-1"></div>
       @if (activeCell$|async; as ac) {
         <div class="position">{{ac.posX}},{{ac.posY}}</div>
       }
     </div>
   </div>
-  <div class="page-space" fxFlex></div>
+  <div class="page-space flex-1"></div>
 </div>

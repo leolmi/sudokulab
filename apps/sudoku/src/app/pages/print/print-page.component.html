@@ -5,8 +5,8 @@
 
   <!-- PAGE TOOLBAR -->
   @if (!(isAddMode$|async)) {
-    <div class="print-page-toolbar" fxLayout="row" fxLayoutAlign="start center">
-      <div fxFlex></div>
+    <div class="print-page-toolbar flex-row flex-align-start-center">
+      <div class="flex-1"></div>
       <button mat-icon-button (click)="clear()" matTooltip="clear content">
         <mat-icon>border_clear</mat-icon>
       </button>
@@ -19,7 +19,7 @@
   <!-- PAGE CONTENT -->
   <div class="print-page-content theme-light">
     @if (isAddMode$|async) {
-      <div class="print-page-add" (click)="add()" fxLayout="row" fxLayoutAlign="center center" fxFlex>
+      <div class="print-page-add flex-row flex-align-center-center flex-1" (click)="add()">
         <mat-icon>add</mat-icon>
       </div>
     } @else {
@@ -28,7 +28,7 @@
   </div>
 
   <!-- FOOTER (page numbers) -->
-  <div class="print-page-footer" fxLayout="row" fxLayoutAlign="end center">
+  <div class="print-page-footer flex-row flex-align-end-center">
     @if (!(isAddMode$|async)) {
       <div class="page-number">{{(index+1)}}</div>
     }

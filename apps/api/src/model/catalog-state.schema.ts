@@ -14,7 +14,7 @@ import { Document } from 'mongoose';
  *  - endpoint `POST /sudoku/invalidate-check` → invalidazione manuale esplicita
  */
 @Schema({ collection: 'catalog_state' })
-export class CatalogStateDoc extends Document {
+export class CatalogStateDoc extends Document<string> {
   @Prop()
   override _id: string;
 

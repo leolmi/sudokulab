@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MenuItem, SUDOKU_AUTHOR_LINK } from '@olmi/model';
@@ -19,7 +18,6 @@ import { ServerWaiterComponent, SUDOKU_STATE, SUDOKU_STORE, SudokuState } from '
     CommonModule,
     LayoutModule,
     RouterModule,
-    FlexLayoutModule,
     MatToolbarModule,
     MatMenuModule,
     MatTooltipModule,

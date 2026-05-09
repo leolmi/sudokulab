@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { Dictionary, isEmpty, LocalContext, SDK_PREFIX, Sudoku } from '@olmi/model';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { FlexModule } from '@angular/flex-layout';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -24,7 +23,6 @@ interface MapItem {
   selector: 'schema-header',
   imports: [
     CommonModule,
-    FlexModule,
     MatTooltipModule,
     MatIconModule,
     MatButtonModule,

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,21 +19,19 @@ export interface AlgorithmsSelectorData {
   selector: 'algorithms-selector-dialog',
   standalone: true,
   imports: [
-    CommonModule,
-    FlexLayoutModule,
     MatDialogModule,
     MatCheckbox,
     MatButtonModule,
-    MatIcon,
-  ],
+    MatIcon
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title fxLayout="row" fxLayoutAlign="space-between center">
+    <h2 mat-dialog-title class="flex-row flex-align-between-center">
       <span>Select algorithms</span>
       <span class="alg-counter">{{ selected.size }} / {{ algorithms.length }}</span>
     </h2>
     <mat-dialog-content>
-      <div class="alg-actions" fxLayout="row" fxLayoutGap="8px">
+      <div class="alg-actions flex-row flex-gap-8">
         <button mat-stroked-button (click)="selectAll()">
           <mat-icon>done_all</mat-icon> Select all
         </button>
@@ -53,7 +50,7 @@ export interface AlgorithmsSelectorData {
         }
       </div>
     </mat-dialog-content>
-    <mat-dialog-actions fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+    <mat-dialog-actions class="flex-row flex-align-end-center flex-gap-8">
       <button mat-button [mat-dialog-close]="undefined">Cancel</button>
       <button mat-raised-button color="primary" (click)="confirm()">Apply</button>
     </mat-dialog-actions>

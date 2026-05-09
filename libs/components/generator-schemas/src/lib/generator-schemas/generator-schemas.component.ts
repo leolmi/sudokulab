@@ -2,7 +2,6 @@ import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ManagerComponentBase, MultiLogicManager, SUDOKU_STORE } from '@olmi/common';
 import { BoardManager, BoardPreviewComponent } from '@olmi/board';
-import { FlexModule } from '@angular/flex-layout';
 import { Sudoku } from '@olmi/model';
 import { Router } from '@angular/router';
 import { GeneratorSchemaPreviewComponent } from './generator-schema-preview.component';
@@ -12,7 +11,6 @@ import { GeneratorSchemaPreviewComponent } from './generator-schema-preview.comp
   imports: [
     CommonModule,
     BoardPreviewComponent,
-    FlexModule,
     GeneratorSchemaPreviewComponent
   ],
   templateUrl: './generator-schemas.component.html',

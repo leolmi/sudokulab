@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { PageBase } from '../../model/page.base';
 import {
   BoardComponent,
@@ -35,7 +34,6 @@ const GENERATOR_VISIBLE_STAT: any = {
 @Component({
   imports: [
     CommonModule,
-    FlexLayoutModule,
     BoardComponent,
     GeneratorOptionsComponent,
     GeneratorSchemasComponent,

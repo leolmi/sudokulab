@@ -25,10 +25,7 @@
         ],
         "styles": ["apps/sudoku/src/styles.scss"],
         "scripts": [],
-        "allowedCommonJsDependencies": [
-          "lodash",
-          "file-saver"
-        ]
+        "allowedCommonJsDependencies": ["lodash", "file-saver"]
       },
       "configurations": {
         "production": {
@@ -70,7 +67,8 @@
           "buildTarget": "sudoku:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "continuous": true
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -85,7 +83,8 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/sudoku/jest.config.ts"
+        "jestConfig": "apps/sudoku/jest.config.ts",
+        "tsConfig": "apps/sudoku/tsconfig.spec.json"
       }
     },
     "serve-static": {

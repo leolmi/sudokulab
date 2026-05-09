@@ -4,7 +4,6 @@ import { checkNumber, Sudoku } from '@olmi/model';
 import { BehaviorSubject, combineLatest, map, Observable, take } from 'rxjs';
 import { findIndex } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
-import { FlexModule } from '@angular/flex-layout';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DestroyComponentBase, SUDOKU_STATE } from '@olmi/common';
@@ -15,7 +14,6 @@ import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrollin
   selector: 'schemas-browser',
   imports: [
     CommonModule,
-    FlexModule,
     BoardPreviewComponent,
     MatIconModule,
     MatTooltipModule,

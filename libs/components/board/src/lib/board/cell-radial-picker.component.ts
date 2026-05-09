@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 interface PickerSegment {
   index: number;
@@ -12,7 +12,7 @@ interface PickerSegment {
 
 @Component({
   selector: 'cell-radial-picker',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './cell-radial-picker.component.html',
   styleUrl: './cell-radial-picker.component.scss',
   standalone: true,

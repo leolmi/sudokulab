@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import { PageBase } from '../../model/page.base';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,12 +15,10 @@ import {
 
 @Component({
   imports: [
-    CommonModule,
-    FlexLayoutModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule,
-  ],
+    MatTooltipModule
+],
   selector: 'sudoku-infos',
   templateUrl: './infos.component.html',
   styleUrl: './infos.component.scss',

@@ -20,7 +20,6 @@ import {
 } from '@olmi/model';
 import { BehaviorSubject, combineLatest, map, Observable, of } from 'rxjs';
 import { get as _get, set as _set } from 'lodash';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import {
@@ -45,7 +44,6 @@ import { BoardManager } from '@olmi/board';
   selector: 'generator-options',
   imports: [
     CommonModule,
-    FlexLayoutModule,
     FormsModule,
     MatDialogModule,
     MatOption,

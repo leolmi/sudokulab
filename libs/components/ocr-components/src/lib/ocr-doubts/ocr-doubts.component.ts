@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, map } from 'rxjs';
-import { FlexModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { OcrScanDoubt } from '@olmi/model';
 import { cloneDeep as _clone } from 'lodash';
@@ -16,7 +15,6 @@ export interface OcrMapWrapper {
   selector: 'ocr-doubts',
   imports: [
     CommonModule,
-    FlexModule,
     MatButtonModule,
   ],
   templateUrl: './ocr-doubts.component.html',

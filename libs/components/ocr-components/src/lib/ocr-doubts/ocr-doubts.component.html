@@ -1,7 +1,7 @@
 @for (ocm of ocrMaps$|async; track $index) {
-  <div class="ocr-map" fxLayout="row" fxLayoutAlign="start center">
+  <div class="ocr-map flex-row flex-align-start-center">
     <img class="ocr-map-image" [src]="ocm.src">
-    <div fxFlex></div>
+    <div class="flex-1"></div>
     <input class="ocr-map-text"
            [maxLength]="1" type="text"
            [value]="ocm.text"

@@ -14,7 +14,12 @@
 }
 
 .sudokulab-toolbar {
+  height: 56px;
   min-height: 56px;
+  // Material 20+ ha modificato i token --mat-toolbar-*: forziamo l'altezza
+  // qui per allinearci all'aspetto pre-upgrade.
+  --mat-toolbar-standard-height: 56px;
+  --mat-toolbar-mobile-height: 56px;
 }
 
 .title {

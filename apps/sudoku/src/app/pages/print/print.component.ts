@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { PageBase } from '../../model/page.base';
 import { PrintPageComponent } from './print-page.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -18,7 +17,6 @@ import { calcStatusForMenu } from './print.menu';
   imports: [
     CommonModule,
     ScrollingModule,
-    FlexLayoutModule,
     PrintPageComponent,
     SchemasBrowserComponent,
     SchemasToolbarComponent

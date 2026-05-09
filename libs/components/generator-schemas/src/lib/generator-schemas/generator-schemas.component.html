@@ -1,14 +1,13 @@
 <div class="generator-schemas-container">
   @for (sdk of store.generated$|async; track sdk.values) {
     <div class="generator-schema">
-      <div class="generator-schema-content sdk-color-hover"
-           fxLayout="column" fxLayoutAlign="start center">
+      <div class="generator-schema-content sdk-color-hover flex-col flex-align-start-center">
         <sudoku-board-preview
           [schema]="sdk"
           (click)="previewClick(sdk)"
           (dblclick)="openInPlayer(sdk)"
         ></sudoku-board-preview>
-        <div class="schema-details" fxFlex>{{sdk.info.fixedCount}}n {{sdk.info.difficulty}} ({{sdk.info.difficultyValue}})</div>
+        <div class="schema-details flex-1">{{sdk.info.fixedCount}}n {{sdk.info.difficulty}} ({{sdk.info.difficultyValue}})</div>
       </div>
     </div>
   }

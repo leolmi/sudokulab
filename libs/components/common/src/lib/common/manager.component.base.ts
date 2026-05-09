@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { DestroyComponentBase } from './destroy.component.base';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'manager-base-component',
   template: '',
-  imports: [CommonModule],
+  imports: [],
   standalone: true
 })
 export class ManagerComponentBase<TManager = unknown> extends DestroyComponentBase {

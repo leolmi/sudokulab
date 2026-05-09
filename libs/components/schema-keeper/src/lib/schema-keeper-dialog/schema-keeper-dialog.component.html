@@ -3,7 +3,7 @@
   <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
   <input class="hidden file-resource" type="file" accept="image/*" #imageResource (change)="onImageChange($event)">
   @if (loading$|async) {
-    <div class="loader" fxLayout="row" fxLayoutAlign="center center">
+    <div class="loader flex-row flex-align-center-center">
       <mat-spinner [diameter]="100" mode="indeterminate"></mat-spinner>
     </div>
   }
@@ -25,7 +25,7 @@
             <div class="chooser-button-title">{{btn.title}}</div>
           </button>
         }
-        <div class="drop-here-area" fxLayout="row" fxLayoutAlign="center center">
+        <div class="drop-here-area flex-row flex-align-center-center">
           <div class="label">drop here</div>
         </div>
       </div>
@@ -58,7 +58,7 @@
       </div>
     }
     @case (KeeperMode.imagePreview) {
-      <div class="keeper-page page-image-preview" fxLayout="column" fxLayoutAlign="center center">
+      <div class="keeper-page page-image-preview flex-col flex-align-center-center">
         @if (image$|async; as img) {
           <div class="image-preview-wrapper">
             <img class="image-preview"
@@ -66,7 +66,7 @@
                  [style.transform]="'rotate(' + (rotationTotal$|async) + 'deg)'"
                  alt="Sudoku image">
           </div>
-          <div class="rotation-controls" fxLayout="row" fxLayoutAlign="center center">
+          <div class="rotation-controls flex-row flex-align-center-center">
             <button mat-icon-button
                     matTooltip="Rotate 90° counter-clockwise"
                     (click)="rotateOrthogonal(-90)">
@@ -103,7 +103,7 @@
   @if ((keeperMode$|async)!==KeeperMode.chooser) {
     <button mat-button (click)="setMode()">Back</button>
   }
-  <div fxFlex></div>
+  <div class="flex-1"></div>
   <button mat-button mat-dialog-close>Cancel</button>
   @if ((keeperMode$|async)!==KeeperMode.chooser) {
     @if ((localContext.isDebugMode$|async) && (keeperMode$|async)!==KeeperMode.imagePreview) {

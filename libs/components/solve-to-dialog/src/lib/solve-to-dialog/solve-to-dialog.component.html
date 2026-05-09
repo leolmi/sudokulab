@@ -5,13 +5,12 @@
       class="steps-container"
       itemSize="24">
       @for (step of items$|async; let index = $index; track index;) {
-        <div class="step-item"
+        <div class="step-item flex-row flex-align-start-center"
              [class.active]="(activeStep$|async)===index"
              [class.secondary]="!step.value"
-             (click)="clickOnItem(index)"
-             fxLayout="row" fxLayoutAlign="start center">
+             (click)="clickOnItem(index)">
           <span class="step-index">{{(index+1)}}</span>
-          <span class="step-algorithm" fxFlex>{{step.description}}</span>
+          <span class="step-algorithm flex-1">{{step.description}}</span>
           <mat-icon>{{step.icon}}</mat-icon>
         </div>
       }

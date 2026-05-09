@@ -3,8 +3,8 @@
   @if (schema$|async; as sdk) {
     @if (!(isEmpty$|async)) {
       @if (sdk?.info) {
-        <div fxLayout="column">
-          <div class="schemalab-info-toolbar" fxLayout="row" fxLayoutAlign="start center">
+        <div class="flex-col">
+          <div class="schemalab-info-toolbar flex-row flex-align-start-center">
             @if ((sdk.info.fixedCount||0)>0) {
               <div class="info-rounded info-fixed" matTooltip="Number of fixed numbers">{{sdk.info.fixedCount}}</div>
             }
@@ -12,11 +12,11 @@
               <div class="info-rounded info-t-type" matTooltip="Number of try-algorithm usage">T{{sdk.info.tryAlgorithmCount}}</div>
             }
             @if (sdk.info.difficulty) {
-              <div fxFlex fxLayout="column">
+              <div class="flex-1 flex-col">
                 <div class="difficulty">
                   <div class="difficulty-text">{{sdk.info.difficulty||''}}</div>
                 </div>
-                <div class="difficulty-value" fxLayout="row" fxLayoutAlign="start center">
+                <div class="difficulty-value flex-row flex-align-start-center">
                   <span>{{sdk.info.difficultyValue||''}}</span>
                   @if (!!sdk.info.origin) {
                     <div class="origin-label">{{sdk.info.origin}}</div>
@@ -24,7 +24,7 @@
                 </div>
               </div>
             } @else {
-              <div fxFlex></div>
+              <div class="flex-1"></div>
             }
             <button mat-icon-button
                     matTooltip="uniq solution"
@@ -47,10 +47,10 @@
                           (click)="openAlgorithmInfo(item.id)"
                           [matTooltip]="'Apri la descrizione di ' + item.name"
                           matTooltipPosition="left">
-                    <div fxLayout="row" fxLayoutAlign="start center">
+                    <div class="flex-row flex-align-start-center">
                       <mat-icon>{{item.icon}}</mat-icon>
                       <div class="alg-value"> x {{item.value}}</div>
-                      <span fxFlex>{{item.name}}</span>
+                      <span class="flex-1">{{item.name}}</span>
                       <mat-icon class="alg-info-open">open_in_new</mat-icon>
                     </div>
                   </button>

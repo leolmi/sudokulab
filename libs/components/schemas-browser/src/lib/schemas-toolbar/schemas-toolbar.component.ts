@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexModule } from '@angular/flex-layout';
 import { MatFormField } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -32,7 +31,6 @@ class FilterSortOptions {
   selector: 'schemas-toolbar',
   imports: [
     CommonModule,
-    FlexModule,
     MatFormField,
     MatIconModule,
     MatTooltipModule,

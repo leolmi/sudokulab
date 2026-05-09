@@ -80,12 +80,12 @@ class Info extends Document {
 }
 
 @Schema()
-class Sudoku extends Document {
+class Sudoku extends Document<string> {
   /**
    * fixed values string for id
    */
   @Prop()
-  _id: string;
+  override _id: string;
   /**
    * nome
    */

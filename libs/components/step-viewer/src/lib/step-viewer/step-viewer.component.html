@@ -1,20 +1,17 @@
 <div class="step-viewer-container"
      [class.auto-height]="autoHeight$|async">
-  <div class="step-viewer-scroller" fxLayout="column">
+  <div class="step-viewer-scroller flex-col">
     @for (item of items$|async; track item.id; let first = $first; let last = $last; let index = $index; let count = $count) {
-      <div class="step-viewer-item"
-           fxLayout="row"
-           fxLayoutAlign="start stretch"
+      <div class="step-viewer-item flex-row flex-align-start-stretch"
            [class.selected]="!item.groupTitle && (selected$|async)===item.id"
            [class.clickable]="!item.groupTitle"
            [class.has-value]="item.hasValue"
            (click)="clickOnItem(item)"
       >
         @if (appliedIndex$|async; as aindex) {
-          <div class="step-viewer-navigator"
+          <div class="step-viewer-navigator flex-col flex-align-center-center"
                [class.applied]="aindex>=index"
-               [class.applied-throw]="aindex>index"
-               fxLayout="column" fxLayoutAlign="center center">
+               [class.applied-throw]="aindex>index">
             @if (!first) {
               @if (index>1) {
                 <div class="navigator-link navigator-link-up"
@@ -35,10 +32,7 @@
           </div>
         }
         @if (item.groupTitle) {
-          <div class="step-viewer-item-title"
-               fxLayout="row"
-               fxLayoutAlign="start center"
-               fxFlex>
+          <div class="step-viewer-item-title flex-row flex-align-start-center flex-1">
             <span>{{item.groupTitle}}</span>
             @if (item.algorithmId) {
               <button mat-icon-button
@@ -51,21 +45,16 @@
             }
           </div>
         } @else {
-          <div class="step-viewer-item-index"
-               fxLayout="row"
-               fxLayoutAlign="center center">
+          <div class="step-viewer-item-index flex-row flex-align-center-center">
             <div class="item-index">{{((item.index||0)+1)}}</div>
           </div>
-          <div class="step-viewer-item-text"
+          <div class="step-viewer-item-text flex-1 flex-row flex-align-start-center"
                [class.hidden-value]="item.hasValue"
                [class.allow-hidden]="item.allowHidden"
-               [class.clicked]="!!((clicked$|async)||{})[item.id||'']"
-               fxFlex
-               fxLayout="row"
-               fxLayoutAlign="start center">
+               [class.clicked]="!!((clicked$|async)||{})[item.id||'']">
             <div>{{item.html}}</div>
           </div>
-          <div class="dot-container" fxLayout="row" fxLayoutAlign="center center">
+          <div class="dot-container flex-row flex-align-center-center">
             @if (item.hasValue) {
               <div class="has-value-dot"></div>
             }

@@ -1,4 +1,4 @@
-import { inject, InjectionToken } from '@angular/core';
+import { inject, InjectionToken, DOCUMENT } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -32,7 +32,7 @@ import {
 } from '@olmi/model';
 import { SUDOKU_PAGES, SudokuPageManifest } from './sudoku-page.manifest';
 import { AppUserOptions } from './user-options';
-import { DOCUMENT } from '@angular/common';
+
 import { SUDOKU_API } from './interaction';
 
 const MAX_WIDTH = 1400;

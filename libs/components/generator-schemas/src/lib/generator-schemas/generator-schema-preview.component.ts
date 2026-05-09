@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardManager, BoardPreviewComponent } from '@olmi/board';
-import { FlexModule } from '@angular/flex-layout';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ManagerComponentBase, SudokuState } from '@olmi/common';
 import { combineLatest, map, Observable, of } from 'rxjs';
@@ -12,24 +11,22 @@ import { GenerationStat, GeneratorOptions, SudokuStat } from '@olmi/model';
   imports: [
     CommonModule,
     BoardPreviewComponent,
-    FlexModule,
     MatProgressSpinner
   ],
   template: `
     <!-- GENERATION PREVIEW -->
     @if (globalState.isRunning$|async) {
       <div class="generator-schema generator-stat-preview">
-        <div class="generator-schema-content"
-             fxLayout="column" fxLayoutAlign="start center">
+        <div class="generator-schema-content flex-col flex-align-start-center">
           @if (manager) {
             @if (manager.multiGenerationStat$|async; as stat) {
               <sudoku-board-preview [schema]="stat[index]?.currentSchema||''"></sudoku-board-preview>
-              <div class="schema-details" fxFlex>{{generationDesc$|async}}</div>
+              <div class="schema-details flex-1">{{generationDesc$|async}}</div>
               <mat-progress-spinner
                 [mode]="(progressMode$|async)||'indeterminate'"
                 [value]="(progress$|async)||0"
               ></mat-progress-spinner>
-              <div class="schema-index" fxLayout="row" fxLayoutAlign="center center">
+              <div class="schema-index flex-row flex-align-center-center">
                 <div>{{(index+1)}}</div>
               </div>
             }

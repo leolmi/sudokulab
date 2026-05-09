@@ -60,3 +60,8 @@ Thumbs.db
 # Secret files — NEVER commit
 .secret
 .secret.*
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+.nx/polygraph
+.nx/self-healing

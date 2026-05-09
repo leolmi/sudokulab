@@ -6,7 +6,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, takeUntil } from 'rxjs';
-import { FlexModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 
@@ -14,7 +13,6 @@ import { MatInputModule } from '@angular/material/input';
   selector: 'highlights-editor',
   imports: [
     CommonModule,
-    FlexModule,
     MatFormFieldModule,
     CdkTextareaAutosize,
     MatIconModule,

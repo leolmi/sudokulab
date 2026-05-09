@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
@@ -18,10 +17,10 @@ import {
 @Component({
   selector: 'twins-info',
   standalone: true,
-  imports: [CommonModule, FlexLayoutModule, SudokuBoardPreviewComponent],
+  imports: [SudokuBoardPreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="alg-page" fxLayout="column" fxLayoutGap="24px">
+    <section class="alg-page flex-col flex-gap-24">
       <div>
         <h3>Quando si applica</h3>
         <p>
@@ -46,7 +45,7 @@ import {
         </ul>
       </div>
 
-      <div class="example" fxLayout="column" fxLayoutGap="12px">
+      <div class="example flex-col flex-gap-12">
         <h3>Esempio — coppia (6, 7) in riga D</h3>
         <p class="caption">
           Nella riga <strong>D</strong> i valori <strong>6</strong> e
@@ -56,7 +55,7 @@ import {
           &#123;2, 6, 7, 8&#125; — ma siccome 6 e 7 devono andare per forza lì, gli
           altri candidati di D2 e D4 diventano impossibili.
         </p>
-        <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="flex-row flex-align-center-center">
           <sudoku-board-preview [sample]="example_1" [size]="400">
           </sudoku-board-preview>
         </div>

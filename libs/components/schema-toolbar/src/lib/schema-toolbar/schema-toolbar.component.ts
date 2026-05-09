@@ -6,7 +6,6 @@ import { BehaviorSubject, combineLatest, distinctUntilChanged, map, Observable, 
 import { BUTTON_STOP_CODE, ToolbarButton, ToolbarStatus } from './schema-toolbar.model';
 import { ManagerComponentBase, SudokuState } from '@olmi/common';
 import { extendStatus, getButtons, isValueLocked, setValueButtonStatus } from './schema-toolbar.helper';
-import { FlexModule } from '@angular/flex-layout';
 import { BoardChangeEvent, BoardEventStatus, BoardManager } from '@olmi/board';
 import { MatProgressBar } from '@angular/material/progress-bar';
 
@@ -20,7 +19,6 @@ const TB_VALUE_PREFIX = /^tb-value-/;
   selector: 'schema-toolbar',
   imports: [
     CommonModule,
-    FlexModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBar

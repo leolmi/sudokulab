@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { BehaviorSubject } from 'rxjs';
 import { StepViewerItem } from './step-viewer.model';
 import { AlgorithmResult } from '@olmi/model';
@@ -15,7 +14,6 @@ import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olm
   selector: 'step-viewer',
   imports: [
     CommonModule,
-    FlexLayoutModule,
     MatIcon,
     MatIconButton,
     MatTooltipModule

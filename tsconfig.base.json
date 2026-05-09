@@ -19,9 +19,15 @@
       "@olmi/algorithms": ["libs/algorithms/src/index.ts"],
       "@olmi/board": ["libs/components/board/src/index.ts"],
       "@olmi/common": ["libs/components/common/src/index.ts"],
-      "@olmi/generator-options": ["libs/components/generator-options/src/index.ts"],
-      "@olmi/generator-schemas": ["libs/components/generator-schemas/src/index.ts"],
-      "@olmi/highlights-editor": ["libs/components/highlights-editor/src/index.ts"],
+      "@olmi/generator-options": [
+        "libs/components/generator-options/src/index.ts"
+      ],
+      "@olmi/generator-schemas": [
+        "libs/components/generator-schemas/src/index.ts"
+      ],
+      "@olmi/highlights-editor": [
+        "libs/components/highlights-editor/src/index.ts"
+      ],
       "@olmi/logic": ["libs/logic/src/index.ts"],
       "@olmi/model": ["libs/model/src/index.ts"],
       "@olmi/ocr-components": ["libs/components/ocr-components/src/index.ts"],

@@ -23,8 +23,8 @@
 
       .chooser-button {
         margin: 20px;
-        --mdc-icon-button-state-layer-size: calc(2*var(--sdk-keeper-button-size));
-        --mdc-icon-button-icon-size: var(--sdk-keeper-button-size);
+        --mat-icon-button-state-layer-size: calc(2*var(--sdk-keeper-button-size));
+        --mat-icon-button-icon-size: var(--sdk-keeper-button-size);
         position: relative;
         border: 1px var(--sdk-color-border) solid;
         padding-top: 20px;

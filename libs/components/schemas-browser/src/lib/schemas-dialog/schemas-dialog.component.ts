@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexModule } from '@angular/flex-layout';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
@@ -22,7 +21,6 @@ export class SchemasDialogArgs {
   selector: 'schemas-dialog',
   imports: [
     CommonModule,
-    FlexModule,
     MatDialogModule,
     MatButtonModule,
     MatMenuModule,
@@ -73,7 +71,7 @@ export class SchemasDialogArgs {
               [matMenuTriggerFor]="algmenu">
         <mat-icon>fact_check</mat-icon>
       </button>
-      <div fxFlex></div>
+      <div class="flex-1"></div>
       <button mat-button mat-dialog-close>Cancel</button>
       <button mat-button
               [disabled]="!(activeSchema$|async)"

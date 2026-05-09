@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexModule } from '@angular/flex-layout';
+
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -54,12 +53,10 @@ const HUMAN_ERROR_LABELS: Record<string, { title: string; hint: string }> = {
   selector: 'schema-keeper-error-dialog',
   standalone: true,
   imports: [
-    CommonModule,
-    FlexModule,
     MatDialogModule,
     MatButtonModule,
-    MatIcon,
-  ],
+    MatIcon
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h2 mat-dialog-title>
@@ -77,7 +74,7 @@ const HUMAN_ERROR_LABELS: Record<string, { title: string; hint: string }> = {
         <code class="error-values-string">{{ data.values }}</code>
       </div>
     </mat-dialog-content>
-    <mat-dialog-actions fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+    <mat-dialog-actions class="flex-row flex-align-end-center flex-gap-8">
       <button mat-button [mat-dialog-close]="'download'">
         <mat-icon>download</mat-icon>
         Scarica stringa

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { FlexModule } from '@angular/flex-layout';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { OcrScanMap, OcrScanResult } from '@olmi/model';
@@ -13,7 +12,6 @@ import { OcrDoubtsComponent, OcrMapWrapper } from '../ocr-doubts/ocr-doubts.comp
   selector: 'ocr-image-map',
   imports: [
     CommonModule,
-    FlexModule,
     MatDialogModule,
     MatButtonModule,
     OcrDoubtsComponent

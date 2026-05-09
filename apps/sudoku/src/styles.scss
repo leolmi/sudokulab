@@ -114,7 +114,7 @@ body {
     display: none !important;
   }
   &.layout-compact {
-    //--mdc-icon-button-state-layer-size: 32px;
+    //--mat-icon-button-state-layer-size: 32px;
     --sdk-menu-separator-size: 4px;
 
     .mat-mdc-menu-item {
@@ -305,6 +305,29 @@ button {
 .user-select-none {
   user-select: none;
 }
+
+// Layout flex utilities — sostituiscono @angular/flex-layout (rimosso).
+// Naming "main-cross" coerente con flexbox spec: per fxLayout="row" il primo
+// asse è orizzontale, per fxLayout="column" è verticale.
+//
+// NB: !important su display/flex perché il vecchio @angular/flex-layout
+// applicava gli stili inline tramite direttiva (specificity max), mentre
+// queste utility globali hanno specificity 0,0,1,0 e perderebbero contro
+// regole component-scoped Angular tipo `.foo { display: block }`
+// (che ottengono [_ngcontent-xxx] → specificity 0,0,2,0).
+.flex-row { display: flex !important; flex-direction: row; }
+.flex-col { display: flex !important; flex-direction: column; }
+.flex-1 { flex: 1 !important; min-width: 0; min-height: 0; }
+.flex-align-start-center   { justify-content: flex-start;   align-items: center; }
+.flex-align-center-center  { justify-content: center;       align-items: center; }
+.flex-align-end-center     { justify-content: flex-end;     align-items: center; }
+.flex-align-around-center  { justify-content: space-around;  align-items: center; }
+.flex-align-between-center { justify-content: space-between; align-items: center; }
+.flex-align-center-start   { justify-content: center;        align-items: flex-start; }
+.flex-align-start-stretch  { justify-content: flex-start;    align-items: stretch; }
+.flex-gap-8  { gap: 8px;  }
+.flex-gap-12 { gap: 12px; }
+.flex-gap-24 { gap: 24px; }
 
 .elevation-z5 {
   box-shadow: var(--mat-sys-level5);

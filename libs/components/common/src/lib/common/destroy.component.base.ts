@@ -1,11 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Subject } from 'rxjs';
 
 @Component({
   selector: 'destroy-base-component',
   template: '',
-  imports: [CommonModule],
+  imports: [],
   standalone: true
 })
 export class DestroyComponentBase implements OnDestroy {

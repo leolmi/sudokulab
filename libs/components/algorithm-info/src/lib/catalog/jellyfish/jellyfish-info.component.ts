@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
@@ -17,10 +16,10 @@ import {
 @Component({
   selector: 'jellyfish-info',
   standalone: true,
-  imports: [CommonModule, FlexLayoutModule, SudokuBoardPreviewComponent],
+  imports: [SudokuBoardPreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="alg-page" fxLayout="column" fxLayoutGap="24px">
+    <section class="alg-page flex-col flex-gap-24">
       <div>
         <h3>Quando si applica</h3>
         <p>
@@ -65,7 +64,7 @@ import {
         </p>
       </div>
 
-      <div class="example" fxLayout="column" fxLayoutGap="12px">
+      <div class="example flex-col flex-gap-12">
         <h3>Esempio — Jellyfish per il valore 8</h3>
         <p class="caption">
           Stato al passo in cui il solver applica Jellyfish. Il candidato
@@ -92,7 +91,7 @@ import {
           <strong>1</strong>, <strong>2</strong>, <strong>7</strong> e
           <strong>9</strong>: il pattern è completo.
         </p>
-        <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="flex-row flex-align-center-center">
           <sudoku-board-preview [sample]="example_1" [size]="440">
           </sudoku-board-preview>
         </div>

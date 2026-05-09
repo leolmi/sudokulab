@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
@@ -17,10 +16,10 @@ import {
 @Component({
   selector: 'unique-rectangle-info',
   standalone: true,
-  imports: [CommonModule, FlexLayoutModule, SudokuBoardPreviewComponent],
+  imports: [SudokuBoardPreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="alg-page" fxLayout="column" fxLayoutGap="24px">
+    <section class="alg-page flex-col flex-gap-24">
       <div>
         <h3>L'idea: evitare il "deadly pattern"</h3>
         <p>
@@ -69,7 +68,7 @@ import {
         </p>
       </div>
 
-      <div class="example" fxLayout="column" fxLayoutGap="12px">
+      <div class="example flex-col flex-gap-12">
         <h3>Esempio — Unique Rectangle Tipo 1 su &#123;1, 3&#125;</h3>
         <p class="caption">
           Stato al passo in cui il solver applica Unique Rectangle. I
@@ -82,7 +81,7 @@ import {
           Il quarto vertice <strong>A6</strong> (in secondario) ha
           candidati &#123;1, 3, 4&#125;: l'"extra" è 4.
         </p>
-        <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="flex-row flex-align-center-center">
           <sudoku-board-preview [sample]="example_1" [size]="420">
           </sudoku-board-preview>
         </div>

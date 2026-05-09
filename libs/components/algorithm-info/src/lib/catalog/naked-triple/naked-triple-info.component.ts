@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
@@ -17,10 +16,10 @@ import {
 @Component({
   selector: 'naked-triple-info',
   standalone: true,
-  imports: [CommonModule, FlexLayoutModule, SudokuBoardPreviewComponent],
+  imports: [SudokuBoardPreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="alg-page" fxLayout="column" fxLayoutGap="24px">
+    <section class="alg-page flex-col flex-gap-24">
       <div>
         <h3>Quando si applica</h3>
         <p>
@@ -44,7 +43,7 @@ import {
         </p>
       </div>
 
-      <div class="example" fxLayout="column" fxLayoutGap="12px">
+      <div class="example flex-col flex-gap-12">
         <h3>Esempio — terna (1, 2, 5) in riga H</h3>
         <p class="caption">
           Nella riga <strong>H</strong> le celle
@@ -55,7 +54,7 @@ import {
           devono andare in quelle tre celle. Nelle altre celle vuote di
           riga H questi valori non sono più ammissibili.
         </p>
-        <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="flex-row flex-align-center-center">
           <sudoku-board-preview [sample]="example_1" [size]="400">
           </sudoku-board-preview>
         </div>

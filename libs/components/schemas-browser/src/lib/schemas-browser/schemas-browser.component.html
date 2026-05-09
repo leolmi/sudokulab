@@ -1,18 +1,17 @@
 <cdk-virtual-scroll-viewport #container
-                             class="schemas-browser"
+                             class="schemas-browser flex-1"
                              [class.allow-compact]="allowCompact"
-                             itemSize="54" fxFlex>
+                             itemSize="54">
   <div *cdkVirtualFor="let sdk of (schemas$|async); let index = index"
-       class="schema-item sdk-color-hover board-active-contrast"
-       fxLayout="row" fxLayoutAlign="start center"
+       class="schema-item sdk-color-hover board-active-contrast flex-row flex-align-start-center"
        [attr.id]="'s'+index"
        [class.active]="sdk.values===(activeSchema$|async)"
        [matTooltip]="sdk|itemTooltip"
        [matTooltipDisabled]="hideTooltip$|async"
        (click)="internalClickOnSchema(sdk)">
     <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
-    <div class="schema-info" fxLayout="column" fxFlex>
-      <div class="title" fxFlex>{{sdk.name}} {{sdk.info.origin||''}}</div>
+    <div class="schema-info flex-col flex-1">
+      <div class="title flex-1">{{sdk.name}} {{sdk.info.origin||''}}</div>
       <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
     </div>
     @if (sdk | userPlaying) {

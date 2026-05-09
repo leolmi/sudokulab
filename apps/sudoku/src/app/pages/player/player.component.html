@@ -1,25 +1,25 @@
 @if (store.isFilling$|async) {
   <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
 }
-<div class="sudokulab-page page-fill" fxLayout="row">
-  <div class="page-space" fxFlex></div>
-  <div class="page-content" [fxLayout]="layout$|async">
-    <div class="lateral narrow-hidden" fxFlex fxLayout="column">
+<div class="sudokulab-page page-fill flex-row">
+  <div class="page-space flex-1"></div>
+  <div class="page-content" [ngClass]="(layout$|async)==='column' ? 'flex-col' : 'flex-row'">
+    <div class="lateral narrow-hidden flex-1 flex-col">
       @if (manager) {
         <schema-header [schema]="manager.sudoku$|async"></schema-header>
-        <div class="stat-monitor" fxLayout="column">
+        <div class="stat-monitor flex-col">
           @if (isEmpty$|async) {
             <div class="empty-schema">Empty schema</div>
           } @else {
             @for (l of stat$|async; track l.description) {
-              <div class="stat-line" fxLayout="row" fxLayoutAlign="start center">
+              <div class="stat-line flex-row flex-align-start-center">
                 <div class="stat-line-desc">{{l.description}}</div>
                 <div class="stat-line-value">{{l.value}}</div>
               </div>
             }
           }
         </div>
-        <div fxFlex>
+        <div class="flex-1">
           <step-viewer
             [sequence]="manager.sequence$|async"
             (onClickItem)="openHighlights($event)"
@@ -28,7 +28,7 @@
         </div>
       }
     </div>
-    <div class="schema-container" fxLayout="column">
+    <div class="schema-container flex-col">
       @if (manager) {
         <schema-header class="narrow-visible" [schema]="manager.sudoku$|async"></schema-header>
       }
@@ -54,12 +54,12 @@
         ></schema-toolbar>
       }
     </div>
-    <div class="lateral narrow-hidden highlights-container" fxFlex>
+    <div class="lateral narrow-hidden highlights-container flex-1">
       @if (manager) {
         <highlights-editor [manager]="manager"></highlights-editor>
       }
     </div>
-    <div class="lateral narrow-visible" fxLayout="column">
+    <div class="lateral narrow-visible flex-col">
       @if (manager) {
         <step-viewer
           [autoHeight]="true"
@@ -70,5 +70,5 @@
       }
     </div>
   </div>
-  <div class="page-space" fxFlex></div>
+  <div class="page-space flex-1"></div>
 </div>

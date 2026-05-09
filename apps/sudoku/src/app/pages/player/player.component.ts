@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BoardComponent, BoardManager, PLAYER_BOARD_USER_OPTIONS_FEATURE } from '@olmi/board';
 import { CommonModule, Location } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -51,7 +50,6 @@ const PLAYER_VISIBLE_STAT: any = {
   imports: [
     CommonModule,
     ClipboardModule,
-    FlexLayoutModule,
     FormsModule,
     MatButtonModule,
     MatIconModule,

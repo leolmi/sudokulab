@@ -1,6 +1,6 @@
 @if (options$|async; as opt) {
-  <div class="schemas-toolbar" fxLayout="row" fxLayoutAlign="start center">
-    <mat-form-field appearance="outline" class="no-wrapper-padding" fxFlex>
+  <div class="schemas-toolbar flex-row flex-align-start-center">
+    <mat-form-field appearance="outline" class="no-wrapper-padding flex-1">
       <mat-label>Search</mat-label>
       <input matInput [value]="opt.text||''" (input)="updateOptions($event.target, 'text', 'value')">
       <mat-label class="schemas-counter">

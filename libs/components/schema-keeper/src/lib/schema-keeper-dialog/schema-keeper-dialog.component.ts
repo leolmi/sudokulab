@@ -1,6 +1,5 @@
 import { Component, ElementRef, Inject, inject, Optional, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexModule } from '@angular/flex-layout';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, catchError, combineLatest, map, Observable, of } from 'rxjs';
@@ -52,7 +51,6 @@ interface ChooserButton {
   selector: 'schema-keeper',
   imports: [
     CommonModule,
-    FlexModule,
     MatDialogModule,
     MatButtonModule,
     MatIcon,

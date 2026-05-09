@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, combineLatest, filter, map, Observable } from 'rxjs';
 import { getQuad, Pos, Quad } from '@olmi/model';
@@ -14,7 +13,6 @@ interface CropPoint extends Pos {
   selector: 'ocr-image-crop',
   imports: [
     CommonModule,
-    FlexModule,
     MatButtonModule,
   ],
   templateUrl: './ocr-image-crop.component.html',

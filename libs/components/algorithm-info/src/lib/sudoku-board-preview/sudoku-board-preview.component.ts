@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, Input, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { BoardComponent, BoardManager, BoardStatus } from '@olmi/board';
 import { decodeHighlightsString, Dictionary } from '@olmi/model';
 
@@ -39,7 +39,7 @@ export interface SudokuBoardPreviewSample {
 @Component({
   selector: 'sudoku-board-preview',
   standalone: true,
-  imports: [CommonModule, BoardComponent],
+  imports: [BoardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="board-preview" [style.width.px]="size" [style.height.px]="size">

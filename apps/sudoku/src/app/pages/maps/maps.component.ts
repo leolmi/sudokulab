@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { PageBase } from '../../model/page.base';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -28,7 +27,6 @@ class GridCell {
   imports: [
     CommonModule,
     FormsModule,
-    FlexLayoutModule,
     MatSlider,
     MatSliderThumb,
     ReactiveFormsModule,

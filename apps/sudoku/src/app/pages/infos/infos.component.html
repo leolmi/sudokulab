@@ -1,6 +1,5 @@
 <div class="sudokulab-page sudokulab-page-help page-padding">
-  <div class="help-container"
-       fxLayout="row" fxLayoutAlign="center start">
+  <div class="help-container flex-row flex-align-center-start">
     <div class="help-content">
       <h1>Quando uno schema sudoku si può considerare <i>bello</i>?</h1>
       <p>Appassionato di questo gioco di logica, questa è stata la domanda che mi ha fatto venire la voglia di capire di
@@ -84,7 +83,7 @@
       <ul>
         @for (alg of algorithms; track alg.id) {
           <li>
-            <div class="alg-title" fxLayout="row" fxLayoutAlign="center start">
+            <div class="alg-title flex-row flex-align-center-start">
               <mat-icon>{{alg.icon}}</mat-icon>
               <div class="alg-name">{{alg.name}}</div>
               @if (hasInfoPage(alg.id)) {

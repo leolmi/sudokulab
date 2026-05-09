@@ -7,8 +7,8 @@
               matInput
               (input)="setText($event)"></textarea>
   </mat-form-field>
-  <div class="highlights-toolbar" fxLayout="row" fxLayoutAlign="start center">
-    <div fxFlex></div>
+  <div class="highlights-toolbar flex-row flex-align-start-center">
+    <div class="flex-1"></div>
     <button mat-icon-button (click)="toggleLink()">
       <mat-icon>{{(active$|async)?'visibility':'visibility_off'}}</mat-icon>
     </button>
