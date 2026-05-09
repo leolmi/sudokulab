@@ -50,6 +50,7 @@ Thumbs.db
 
 # Claude
 .claude/worktrees
+.claude/settings.local.json
 
 # Environment files — NEVER commit
 .env
