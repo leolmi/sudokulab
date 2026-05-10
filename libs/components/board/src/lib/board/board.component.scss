@@ -23,7 +23,7 @@
   &:not(.focused) {
     .svg-board-cell {
       &.svg-selection-cell {
-        stroke-width: .3;
+        stroke-width: 1;
         transform: scale(.97);
       }
     }
@@ -45,6 +45,11 @@
 .svg-board-cell {
   transition: fill .5s ease-in-out;
   fill: transparent;
+  // stroke-width interpretato in pixel del viewport finale (non scalato dal viewBox)
+  // così il bordo cella resta visibile anche quando la board è renderizzata piccola
+  // (es. dialog del keeper).
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1;
   // su Android il browser interpreta il movimento dopo un long-press come pan
   // e invalida il pointer capture (pointercancel) chiudendo il radial-picker;
   // touch-action:none e -webkit-touch-callout:none impediscono questo comportamento.
@@ -54,7 +59,7 @@
   user-select: none;
 
   &.svg-selection-cell {
-    stroke-width: 1;
+    stroke-width: 2;
     transform: scale(.9);
     transform-origin: center;
     transform-box: border-box;

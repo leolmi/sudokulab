@@ -1,11 +1,18 @@
 ## DA FARE
-- [ ] verifiche su Observables di BoardManager;
-- [ ] manca refactoring su componenti:
-    - [ ] libs\components\schema-keeper\src\lib\schema-keeper-dialog;
-    - [ ] libs\components\schema-keeper\src\lib\schema-keeper-error-dialog;
+- [ ] multilingua (ita - en);
+- [ ] player su soluzione: la toolbar dei valori si trasformerebbe in una toolbar di player con i
+      comandi avanti, indietro per navigare negli step di risoluzione con il testo dei vari step;
 
 ## FATTI
+- [x] aggiornare l'help dell'applicazione;
 - [x] verifica tema su picker;
+- [x] **Refactor signal-first finale** (v3.0.26) — chiusura del debito residuo Fase 4 + ondata di pulizia trasversale:
+  - **BoardManager**: da classe `new BoardManager(...)` a `@Injectable` headless per-board (provider sui consumer); rovesciamento dipendenza con `BoardComponent`; rimossi output `onReady`/`boardChangeRequest`/`selectionChanged` e input `[manager]`; 12 `BehaviorSubject` → 12 `Signal` readonly + setter espliciti; focus DOM via signal-counter `focusTick`.
+  - **Interaction**: 5 metodi HTTP `Observable<T>` → `Promise<T>` via `firstValueFrom`; consumer (`SudokuStore.checkSchema`, `app.state.ping`, `management.updateCatalog`, `schema-keeper._manageScan`) migrati a async/await.
+  - **PrintDocument**: 3 BS + 2 Observable derivati → `Signal` readonly + `computed`; setter espliciti (`setTemplate`/`setActiveArea`/`clearPages`); 6 `toSignal()` rimossi nei 5 consumer.
+  - **LocalContext**: `BehaviorSubject changed$` + `isDebugMode$ Observable` → `_tick: signal` + `isDebugMode: Signal computed`.
+  - **ServerBusyService**: `state$/isBusy$ Observable` → signal+computed; rimozione token `SERVER_BUSY_SERVICE` morto.
+  - **RxJS legittimo rimasto**: `GeneratorContext` (worker, framework-agnostic), `LogicManagerBase.completed` (evento worker), `Interaction` interno (`firstValueFrom`), `serverBusyInterceptor` (API `HttpInterceptorFn`), `app.state.route` (Router non ancora signal-native).
 - [x] **Fix loop infinito post-Signal refactor** (v3.0.20) — in `extendStatus(cs, ps)` ([schema-toolbar.helper.ts](libs/components/schema-toolbar/src/lib/schema-toolbar/schema-toolbar.helper.ts)) la lettura `cs()` + `cs.set(...)` veniva eseguita dentro un `effect()` di `SchemaToolbarComponent`, registrando `cs` come dipendenza dell'effect e ritriggerando il re-run su ogni `set` → loop infinito (l'app freezava al boot, prima che il browser potesse caricare anche il font). Risolto sostituendo con `cs.update(prev => …)`, che legge il valore precedente fuori dal tracking context. Drop concomitante di `LogicManager.completedSignal` (toSignal di un `Subject`, mai consumato).
 - [x] **Rifattorizzazione graduale a Signal** (5 fasi, v3.0.14 → v3.0.19) — eliminato `BehaviorSubject` e `| async` dai componenti, modernizzazione completa del client (Angular 21). Convenzioni in [documents/signals-conventions.md](documents/signals-conventions.md).
   - **Fase 0 — Fondamenta**: convenzioni e checklist per componente; `takeUntilDestroyed()` adottato come standard; nota in [CLAUDE.md](CLAUDE.md);
@@ -21,3 +28,7 @@
   - il visore contiene tutti i valori e quello per valore empty disposti a raggera;
   - senza togliere il touch (o il click) lo spostamento verso uno dei valori periferici
     innesca la valorizzazione e la chiusura del visore;
+- [x] verifiche su Observables di BoardManager;
+- [x] manca refactoring su componenti:
+  - [x] libs\components\schema-keeper\src\lib\schema-keeper-dialog;
+  - [x] libs\components\schema-keeper\src\lib\schema-keeper-error-dialog;

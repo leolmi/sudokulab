@@ -50,6 +50,12 @@
   font-weight: bold;
 }
 
+.project-info {
+  a {
+    color: var(--sdk-color-accent);
+  }
+}
+
 .author-name {
   text-decoration: none;
 }
@@ -97,11 +103,14 @@
 }
 
 .toolbar-commands {
+  li {
+    margin: 10px 0;
+  }
+
   .mat-icon {
     border-radius: 50%;
     padding: 4px;
-    //background-color: $color-hover;
-    margin-top: 10px;
+    vertical-align: middle;
   }
 }
 

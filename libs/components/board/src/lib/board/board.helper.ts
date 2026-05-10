@@ -132,7 +132,9 @@ export const getCellValue = (v?: string, status?: BoardStatus): string => {
 }
 
 export const buildSchemaBoard = (v?: string): BoardCell[] => {
-  return buildSudokuCells(v).map(sc => new BoardCell(sc));
+  // parseCells calcola anche le coordinate x/y di rendering: senza questo passaggio
+  // le 81 <rect> vengono renderizzate tutte in (0,0) — vedi keeper-dialog vuoto.
+  return parseCells(buildSudokuCells(v));
 }
 
 /**

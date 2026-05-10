@@ -6,6 +6,7 @@ import {
   ElementRef,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -132,9 +133,13 @@ export class SchemaKeeperDialogComponent {
 
     // sincronizza `text` con le cells del manager: ogni volta che le cells
     // cambiano (utente che edita la board nel keeper schema) ricalcola la
-    // stringa schema.
+    // stringa schema. Limitato alla sola modalità `schema`: nelle altre
+    // (chooser/text/imagePreview) il signal è gestito dall'input utente o dal
+    // reset, e farlo coincidere con la stringa-celle (81 zeri all'init) farebbe
+    // mostrare "81/81" nel counter dell'input vuoto.
     effect(() => {
       const cells = this.manager.cells();
+      if (untracked(() => this.keeperMode()) !== KeeperMode.schema) return;
       this.text.set(getCellsSchema(cells));
     });
   }

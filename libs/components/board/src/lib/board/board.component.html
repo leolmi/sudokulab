@@ -44,7 +44,8 @@
       <g [class.highlight]="(hl?.cell||{})[cell.id]"
          [class.highlight-secondary]="(hl?.secondaryCell||{})[cell.id]">
         <rect class="svg-board-cell"
-              [attr.stroke-width]="GEOMETRY.line.thin"
+              vector-effect="non-scaling-stroke"
+              stroke-width="1"
               [class.error]="cell.error"
               [class.dynamic]="cell.isDynamic"
               [class.fixed]="cell.isFixed"
@@ -110,6 +111,7 @@
     @let sel = manager.selection();
     @if (sel) {
       <rect class="svg-board-cell svg-selection-cell"
+            vector-effect="non-scaling-stroke"
             [attr.width]="GEOMETRY.cell.width"
             [attr.height]="GEOMETRY.cell.height"
             [attr.x]="sel.x"
