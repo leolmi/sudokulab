@@ -1,19 +1,20 @@
-import { Signal } from '@angular/core';
-import { outputToObservable, toSignal } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, combineLatest, debounceTime, filter, Subject, takeUntil } from 'rxjs';
+import { DestroyRef, effect, inject, Injectable, signal, Signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { cloneDeep as _clone, isBoolean as _isBoolean, isString, last as _last } from 'lodash';
 import {
   AlgorithmResult,
   applySudokuRules,
   ApplySudokuRulesOptions,
+  decodeHighlightsString,
   Dictionary,
   GenerationStat,
   GeneratorOptions,
+  getCell,
   getCellsSchema,
   getStat,
-  handleUpdate,
   Highlights,
   isNumberCellValue,
+  LogicExecutor,
   LogicOperation,
   LogicWorkerData,
   NotificationType,
@@ -21,124 +22,133 @@ import {
   SudokuEx,
   SudokuInfoEx,
   SudokuStat,
-  update,
   ValueOptions,
 } from '@olmi/model';
-import { AppUserOptions, Notifier, SudokuState } from '@olmi/common';
+import { AppUserOptions, SUDOKU_NOTIFIER, SudokuState } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
-import { BoardComponent } from './board.component';
 import { BoardCell, BoardChangeEvent, BoardStatus } from './board.model';
 import { buildSchemaBoard, getBoardCells, getSequence } from './board.helper';
 import { handleBoardValue } from './board-component.helper';
 
 /**
- * Gestore dello schema (board manager).
+ * Servizio per-board: gestisce stato (cells/status/selection/highlights/...)
+ * e orchestrazione del logic-worker. Headless: non conosce il
+ * `BoardComponent`, espone solo `Signal<T>` readonly + metodi imperativi.
  *
- * API ibrida (Fase 4 del refactor a Signal):
- *  - i `xxx$: BehaviorSubject<T>` restano come sorgente di verità interna e
- *    come API di compat per i consumer ancora basati su `.subscribe()` /
- *    `.value` / `.next()`;
- *  - per ogni `xxx$` è esposto anche un signal `xxx: Signal<T>` (via
- *    `toSignal(xxx$)`) per consumer signal-first; verrà promosso a sorgente
- *    di verità in una fase successiva.
+ * Provided sul `BoardComponent` (default per-istanza). Un consumer che vuole
+ * condividere lo stesso manager fra board e UI dichiara `providers:
+ * [BoardManager]` a livello componente: la DI hierarchy unifica le istanze.
  *
- * Il BoardManager viene istanziato dal `BoardComponent` dentro un
- * `runInInjectionContext(injector, () => new BoardManager(...))`, così i
- * `toSignal()` dei field initializer trovano un injection context valido.
+ * Eventi non-stato (highlights con debounce, focus richiesto al componente)
+ * sono `Subject` privati. Il teardown è automatico via `DestroyRef` del
+ * provider scope.
  */
+@Injectable()
 export class BoardManager {
-  private readonly _board: BoardComponent;
-  private readonly _destroy$ = new Subject<void>();
-  private readonly _highlights$ = new BehaviorSubject<Highlights | string | undefined | null>(undefined);
-  private _debounce = 200;
+  private readonly _notifier = inject(SUDOKU_NOTIFIER, { optional: true });
+  private readonly _destroyRef = inject(DestroyRef);
 
-  // BehaviorSubject (sorgente di verità + compat API)
-  readonly generatorOptions$ = new BehaviorSubject<GeneratorOptions>(new GeneratorOptions());
-  readonly status$ = new BehaviorSubject<BoardStatus>(new BoardStatus());
-  readonly stat$ = new BehaviorSubject<SudokuStat>(new SudokuStat());
-  readonly generationStat$ = new BehaviorSubject<GenerationStat | undefined>(undefined);
-  readonly multiGenerationStat$ = new BehaviorSubject<Dictionary<GenerationStat | undefined>>({});
-  readonly cells$ = new BehaviorSubject<BoardCell[]>(buildSchemaBoard());
-  readonly sequence$ = new BehaviorSubject<AlgorithmResult[]>([]);
-  readonly sudoku$ = new BehaviorSubject<Sudoku>(new Sudoku());
-  readonly focused$ = new BehaviorSubject<boolean>(false);
-  readonly isStopping$ = new BehaviorSubject<boolean>(false);
-  readonly selection$ = new BehaviorSubject<BoardCell | undefined>(undefined);
-  readonly lockedValue$ = new BehaviorSubject<BoardChangeEvent | undefined>(undefined);
+  // sorgente di verità: WritableSignal privati
+  private readonly _generatorOptions = signal<GeneratorOptions>(new GeneratorOptions());
+  private readonly _status = signal<BoardStatus>(new BoardStatus());
+  private readonly _stat = signal<SudokuStat>(new SudokuStat());
+  private readonly _generationStat = signal<GenerationStat | undefined>(undefined);
+  private readonly _multiGenerationStat = signal<Dictionary<GenerationStat | undefined>>({});
+  private readonly _cells = signal<BoardCell[]>(buildSchemaBoard());
+  private readonly _sequence = signal<AlgorithmResult[]>([]);
+  private readonly _sudoku = signal<Sudoku>(new Sudoku());
+  private readonly _focused = signal<boolean>(false);
+  private readonly _isStopping = signal<boolean>(false);
+  private readonly _selection = signal<BoardCell | undefined>(undefined);
+  private readonly _lockedValue = signal<BoardChangeEvent | undefined>(undefined);
+  private readonly _highlights = signal<Highlights>(new Highlights());
 
-  // signal API (alimentati dai BehaviorSubject sopra). I field initializer di
-  // queste proprietà girano in injection context perché il manager viene
-  // istanziato via `runInInjectionContext` dal BoardComponent.
-  readonly status: Signal<BoardStatus> = toSignal(this.status$, { requireSync: true });
-  readonly stat: Signal<SudokuStat> = toSignal(this.stat$, { requireSync: true });
-  readonly generationStat: Signal<GenerationStat | undefined> = toSignal(this.generationStat$, { requireSync: true });
-  readonly multiGenerationStat: Signal<Dictionary<GenerationStat | undefined>> = toSignal(this.multiGenerationStat$, { requireSync: true });
-  readonly cells: Signal<BoardCell[]> = toSignal(this.cells$, { requireSync: true });
-  readonly sequence: Signal<AlgorithmResult[]> = toSignal(this.sequence$, { requireSync: true });
-  readonly sudoku: Signal<Sudoku> = toSignal(this.sudoku$, { requireSync: true });
-  readonly focused: Signal<boolean> = toSignal(this.focused$, { requireSync: true });
-  readonly isStopping: Signal<boolean> = toSignal(this.isStopping$, { requireSync: true });
-  readonly selection: Signal<BoardCell | undefined> = toSignal(this.selection$, { requireSync: true });
-  readonly lockedValue: Signal<BoardChangeEvent | undefined> = toSignal(this.lockedValue$, { requireSync: true });
-  readonly generatorOptions: Signal<GeneratorOptions> = toSignal(this.generatorOptions$, { requireSync: true });
+  // API pubblica readonly
+  readonly generatorOptions: Signal<GeneratorOptions> = this._generatorOptions.asReadonly();
+  readonly status: Signal<BoardStatus> = this._status.asReadonly();
+  readonly stat: Signal<SudokuStat> = this._stat.asReadonly();
+  readonly generationStat: Signal<GenerationStat | undefined> = this._generationStat.asReadonly();
+  readonly multiGenerationStat: Signal<Dictionary<GenerationStat | undefined>> = this._multiGenerationStat.asReadonly();
+  readonly cells: Signal<BoardCell[]> = this._cells.asReadonly();
+  readonly sequence: Signal<AlgorithmResult[]> = this._sequence.asReadonly();
+  readonly sudoku: Signal<Sudoku> = this._sudoku.asReadonly();
+  readonly focused: Signal<boolean> = this._focused.asReadonly();
+  readonly isStopping: Signal<boolean> = this._isStopping.asReadonly();
+  readonly selection: Signal<BoardCell | undefined> = this._selection.asReadonly();
+  readonly lockedValue: Signal<BoardChangeEvent | undefined> = this._lockedValue.asReadonly();
+  readonly highlights: Signal<Highlights> = this._highlights.asReadonly();
+
+  // contatore "tick" di richieste di focus: il manager incrementa quando vuole
+  // che il componente dia focus al DOM; il componente reagisce con un effect
+  // che ignora il primo run (valore iniziale) e chiama `element.focus()` sui
+  // successivi.
+  private readonly _focusTick = signal<number>(0);
+  readonly focusTick: Signal<number> = this._focusTick.asReadonly();
+
+  // logic executor (worker boundary): il componente lo passa via setLogic
+  private _logic: LogicExecutor | undefined;
+
+  // debounce highlights (tempo a cui applicare effettivamente l'evento)
+  private _highlightsTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly DEFAULT_HIGHLIGHTS_DEBOUNCE = 500;
 
   usePersistence = false;
 
-  constructor(private board: BoardComponent, private notifier?: Notifier) {
-    this._board = board;
-    this._init();
-  }
-
-  private _init() {
-    if (!this._board) return;
-    const logic = this._board.logic();
-    if (logic) {
-      // valuta il ritorno del logic-worker
-      logic.completed.subscribe((data: LogicWorkerData) => {
-        if (data.sudoku && !data.allowHidden) {
-          const cells = getBoardCells(data.sudoku);
-          this.cells$.next(cells);
-        }
-        this.sequence$.next(getSequence(data));
-        SudokuState.setIsRunning(!!data.isRunning);
-        if (!data.isRunning) this.isStopping$.next(false);
-        this.generationStat$.next(data.isRunning ? data.generationStat : undefined);
-        update(this.multiGenerationStat$, {
-          [data.index]: data.isRunning ? data.generationStat : undefined,
-        });
-        this._checkHighlights(data);
-        this._checkNotifies(data);
-      });
-    }
-
-    this.status$.pipe(takeUntil(this._destroy$)).subscribe((s) => {
-      this._board.setStatus(s);
-      if (!s.isLock && !!this.lockedValue$.value)
-        this.lockedValue$.next(undefined);
+  constructor() {
+    // status → reset lockedValue quando il lock viene rilasciato
+    effect(() => {
+      const s = this._status();
+      if (!s.isLock && untracked(() => !!this._lockedValue())) {
+        untracked(() => this._lockedValue.set(undefined));
+      }
     });
 
-    combineLatest([this.cells$, this.sudoku$])
-      .pipe(
-        takeUntil(this._destroy$),
-        filter(([cells]) => (cells || []).length > 0),
-      )
-      .subscribe(([cells, sdk]: [BoardCell[], Sudoku]) => {
-        this._board.setCells(cells);
-        const stat = getStat(cells);
-        if (!stat.isEmpty && sdk._id && this.usePersistence)
-          AppUserOptions.setUserValues(sdk._id, stat.userValues);
-        this.stat$.next(mergeStat(stat, sdk));
-      });
+    // cells/sudoku → ricalcolo stat (filtro: cells non vuote)
+    effect(() => {
+      const cells = this._cells();
+      const sdk = this._sudoku();
+      if ((cells || []).length === 0) return;
+      const stat = getStat(cells);
+      if (!stat.isEmpty && sdk._id && this.usePersistence) {
+        AppUserOptions.setUserValues(sdk._id, stat.userValues);
+      }
+      untracked(() => this._stat.set(mergeStat(stat, sdk)));
+    });
 
-    this._highlights$
-      .pipe(takeUntil(this._destroy$), debounceTime(this._debounce))
-      .subscribe((h) => this._board.setHighlights(h));
+    // teardown: cancella eventuale debounce pendente
+    this._destroyRef.onDestroy(() => {
+      if (this._highlightsTimer) clearTimeout(this._highlightsTimer);
+    });
+  }
 
-    // `boardChangeRequest` è un `output()` signal-based; per usarlo come
-    // Observable lo convertiamo via `outputToObservable`
-    outputToObservable(this._board.boardChangeRequest)
-      .pipe(takeUntil(this._destroy$))
-      .subscribe((e: BoardChangeEvent) => this.applyValue(e));
+  /**
+   * Aggancia il logic-executor (worker). Si può chiamare più volte: ogni cambio
+   * scollega l'executor precedente (le subscribe sono auto-disposed dal
+   * DestroyRef del provider scope).
+   */
+  setLogic(logic: LogicExecutor | undefined) {
+    if (this._logic === logic) return;
+    this._logic = logic;
+    if (!logic) return;
+    logic.completed
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((data: LogicWorkerData) => this._onLogicCompleted(data));
+  }
+
+  private _onLogicCompleted(data: LogicWorkerData) {
+    if (data.sudoku && !data.allowHidden) {
+      this._cells.set(getBoardCells(data.sudoku));
+    }
+    this._sequence.set(getSequence(data));
+    SudokuState.setIsRunning(!!data.isRunning);
+    if (!data.isRunning) this._isStopping.set(false);
+    this._generationStat.set(data.isRunning ? data.generationStat : undefined);
+    this._multiGenerationStat.update(prev => ({
+      ...prev,
+      [data.index]: data.isRunning ? data.generationStat : undefined,
+    }));
+    this._checkHighlights(data);
+    this._checkNotifies(data);
   }
 
   private _checkHighlights(data: LogicWorkerData) {
@@ -154,87 +164,81 @@ export class BoardManager {
         if ((infoex?.solution || []).length > 0) {
           const item = _last(infoex!.solution);
           if (item?.value)
-            this._highlights$.next(new Highlights(item.highlights));
+            this._scheduleHighlights(new Highlights(item.highlights), BoardManager.DEFAULT_HIGHLIGHTS_DEBOUNCE);
         }
       }
     }
   }
 
   private _checkNotifies(data: LogicWorkerData) {
-    if (!this.notifier || !this.status$.value?.isNotify) return;
+    if (!this._notifier || !this._status()?.isNotify) return;
     switch (data.operation) {
       case 'solve':
         if (data.error) {
-          this.notifier.notify(data.error, NotificationType.error);
+          this._notifier.notify(data.error, NotificationType.error);
         } else if (data.sudoku) {
-          this.notifier.notify('Schema solved successfully', NotificationType.success);
+          this._notifier.notify('Schema solved successfully', NotificationType.success);
         }
         break;
       default:
         if (data.error) {
-          this.notifier.notify(data.error, NotificationType.error);
+          this._notifier.notify(data.error, NotificationType.error);
         }
         break;
     }
   }
 
-  /**
-   * operazioni attivabili anche senza worker
-   */
+  private _scheduleHighlights(h: Highlights | string | undefined | null, debounce: number) {
+    if (this._highlightsTimer) clearTimeout(this._highlightsTimer);
+    const apply = () => this._highlights.set(toHighlights(h));
+    if (debounce <= 0) apply();
+    else this._highlightsTimer = setTimeout(apply, debounce);
+  }
+
   private _internalLogicExecute(operation?: LogicOperation, params?: any) {
     switch (operation) {
       case 'apply-rules':
-        handleUpdate(this.cells$, (cells) => {
-          applySudokuRules(cells, <ApplySudokuRulesOptions>params);
-          console.log('apply-rules', cells);
-          return true;
+        this._cells.update(prev => {
+          const co = _clone(prev);
+          applySudokuRules(co, <ApplySudokuRulesOptions>params);
+          return co;
         });
         break;
       case 'clear':
-        handleUpdate(this.cells$, (cells) => {
-          cells.forEach((c) => clearCell(c));
-          return true;
+        this._cells.update(prev => {
+          const co = _clone(prev);
+          co.forEach((c) => clearCell(c));
+          return co;
         });
         break;
     }
   }
 
-  execOperation(operation?: LogicOperation, params?: any, setFocus = false) {
-    const status = this.status$.value;
-    if (operation) {
-      if (operation === 'assign')
-        return this.applyValue(getApplyBoardEvent(status, this.selection$.value, params));
-      if (operation === 'toggle') return this.toggleOption(`${params}`);
-      if (operation === 'stop') this.isStopping$.next(true);
-      const logic = this._board.logic();
-      if (logic) {
-        logic.execute({
-          sudoku: new SudokuEx({ cells: this.cells$.value }),
-          operation,
-          options: {
-            ...this.generatorOptions$.value,
-            allowDynamic: !!status.isDynamic,
-            schemaMode: status.editMode === 'schema',
-          },
-          params,
-        });
-      } else {
-        this._internalLogicExecute(operation, params);
-      }
+  execOperation(operation?: LogicOperation, params?: any) {
+    if (!operation) return;
+    const status = this._status();
+    if (operation === 'assign')
+      return this.applyValue(getApplyBoardEvent(status, this._selection(), params));
+    if (operation === 'toggle') return this.toggleOption(`${params}`);
+    if (operation === 'stop') this._isStopping.set(true);
+    if (this._logic) {
+      this._logic.execute({
+        sudoku: new SudokuEx({ cells: this._cells() }),
+        operation,
+        options: {
+          ...this._generatorOptions(),
+          allowDynamic: !!status.isDynamic,
+          schemaMode: status.editMode === 'schema',
+        },
+        params,
+      });
+    } else {
+      this._internalLogicExecute(operation, params);
     }
   }
 
   updateGeneratorOptions(o: GeneratorOptions) {
-    this.generatorOptions$.next(o);
-  }
-
-  dispose() {
-    this._destroy$.next();
-    this._destroy$.complete();
-  }
-
-  private get _statusValue() {
-    return this.status$.value;
+    this._generatorOptions.set(o);
   }
 
   private _refreshStatus() {
@@ -243,26 +247,25 @@ export class BoardManager {
 
   load(s: string | Sudoku) {
     const sdk = isString(s) ? new Sudoku({ values: s }) : <Sudoku>s;
-    this.cells$.next([]);
-    this.sudoku$.next(sdk);
-    const values = this.usePersistence
-      ? AppUserOptions.getUserValues(sdk._id)
-      : undefined;
-    this.cells$.next(getBoardCells(sdk, false, values));
+    this._cells.set([]);
+    this._sudoku.set(sdk);
+    const values = this.usePersistence ? AppUserOptions.getUserValues(sdk._id) : undefined;
+    this._cells.set(getBoardCells(sdk, false, values));
     this._refreshStatus();
     this.clearHighlights();
   }
 
   values(s: string | null) {
     if (!s || s.length !== 81) return;
-    handleUpdate(this.cells$, (cells) => {
-      cells.forEach((c, i) => {
+    this._cells.update(prev => {
+      const co = _clone(prev);
+      co.forEach((c, i) => {
         if (!c.isFixed) {
           const cv = s.charAt(i);
           c.text = isNumberCellValue(cv) ? cv : '';
         }
       });
-      return true;
+      return co;
     });
   }
 
@@ -273,51 +276,59 @@ export class BoardManager {
    */
   forceAvailable(map: Dictionary<string>) {
     if (!map) return;
-    handleUpdate(this.cells$, (cells) => {
-      cells.forEach((c) => {
+    this._cells.update(prev => {
+      const co = _clone(prev);
+      co.forEach((c) => {
         const forced = map[c.coord];
         if (forced == null) return;
         c.available = forced.split('').filter((ch) => isNumberCellValue(ch));
       });
-      return true;
+      return co;
     });
   }
 
   options(o: Partial<BoardStatus>, fixed?: Partial<BoardStatus>) {
-    update(this.status$, { ...o, ...fixed });
+    this._status.update(prev => ({ ...prev, ...o, ...fixed }));
   }
 
   toggleOption(pn: string) {
-    const o: Partial<BoardStatus> = {};
-    (<any>o)[pn] = !(<any>this.status$.value)[pn];
-    update(this.status$, o);
+    this._status.update(prev => ({ ...prev, [pn]: !(<any>prev)[pn] }));
   }
 
   private _handleBoardChangeEvent(e: BoardChangeEvent) {
-    handleBoardValue(this.cells$, e);
+    const next = handleBoardValue(this._cells(), e);
+    if (next) this._cells.set(next);
     this._refreshStatus();
     this.clearHighlights();
   }
 
   applyValue(e: BoardChangeEvent) {
-    // con isLock attivo il lock "segue" l'ultima azione esplicita: qualunque valore
-    // applicato (numerico, dynamic '?', empty '') sposta il lockedValue
-    if (this._statusValue.isLock) this.lockedValue$.next(e);
+    // con isLock attivo il lock "segue" l'ultima azione esplicita
+    if (this._status().isLock) this._lockedValue.set(e);
     this._handleBoardChangeEvent(e);
   }
 
   switchProp(nm: keyof BoardStatus) {
-    if (!_isBoolean(this._statusValue[nm])) return;
-    this.options(<Partial<BoardStatus>>{ [nm]: !this._statusValue[nm] });
-    this.resetFocus();
+    const status = this._status();
+    if (!_isBoolean(status[nm])) return;
+    this.options(<Partial<BoardStatus>>{ [nm]: !status[nm] });
+    this.requestFocus();
   }
 
-  select(id: string) {
-    this._board.select(id);
+  /**
+   * Seleziona una cella per id o riferimento; se isDisabled non fa nulla.
+   * Esegue il check del lockedValue (long-press toolbar) e richiede focus.
+   */
+  select(id: string | BoardCell | undefined | null) {
+    if (this._status().isDisabled) return;
+    const cell = <BoardCell | undefined>getCell(this._cells(), id ?? undefined);
+    this._selection.set(cell);
+    this.checkLockedValue(cell);
+    this.requestFocus();
   }
 
   cycleNextMode() {
-    let nextMode = this.status$.value.nextMode;
+    let nextMode = this._status().nextMode;
     if (nextMode === 'none') {
       nextMode = 'next-in-row';
     } else if (nextMode === 'next-in-row') {
@@ -326,34 +337,46 @@ export class BoardManager {
       nextMode = 'none';
     }
     this.options(<Partial<BoardStatus>>{ nextMode });
-    this.resetFocus();
+    this.requestFocus();
   }
 
-  resetFocus(timeout = 0) {
-    setTimeout(() => this._board.focus(), timeout);
+  /** Chiede al componente di mettere il focus DOM sulla board. */
+  requestFocus() {
+    this._focusTick.update(v => v + 1);
   }
 
   switchMode() {
     this.options({
-      editMode: this._statusValue.editMode === 'play' ? 'schema' : 'play',
+      editMode: this._status().editMode === 'play' ? 'schema' : 'play',
     });
-    this.resetFocus();
+    this.requestFocus();
   }
 
   switchValues() {
     this.options({
-      valuesMode: this._statusValue.valuesMode === 'numbers' ? 'dots' : 'numbers',
+      valuesMode: this._status().valuesMode === 'numbers' ? 'dots' : 'numbers',
     });
-    this.resetFocus();
+    this.requestFocus();
   }
 
   clearHighlights() {
-    this._highlights$.next('');
+    this._scheduleHighlights('', 0);
   }
 
-  setHighlights(h?: Highlights | string | undefined | null, debounce = 500) {
-    this._debounce = debounce;
-    this._highlights$.next(h);
+  setHighlights(h?: Highlights | string | undefined | null, debounce = BoardManager.DEFAULT_HIGHLIGHTS_DEBOUNCE) {
+    this._scheduleHighlights(h, debounce);
+  }
+
+  setLockedValue(e: BoardChangeEvent | undefined) {
+    this._lockedValue.set(e);
+  }
+
+  setSelection(cell: BoardCell | undefined) {
+    this._selection.set(cell);
+  }
+
+  setFocused(focused: boolean) {
+    this._focused.set(focused);
   }
 
   clear() {
@@ -367,17 +390,17 @@ export class BoardManager {
   }
 
   getSchema(o?: ValueOptions) {
-    return getCellsSchema(this.cells$.value, o);
+    return getCellsSchema(this._cells(), o);
   }
 
   applyStep(r: AlgorithmResult) {
     if (!r || !r.cellsSnapshot) return;
-    this.cells$.next(r.cellsSnapshot.map((c) => new BoardCell(c)));
+    this._cells.set(r.cellsSnapshot.map((c) => new BoardCell(c)));
   }
 
   checkLockedValue(cell: BoardCell | undefined) {
-    const lockedValue = this.lockedValue$.value;
-    if (!!cell && this._statusValue.isLock && !!lockedValue) {
+    const lockedValue = this._lockedValue();
+    if (!!cell && this._status().isLock && !!lockedValue) {
       const e = _clone(lockedValue);
       if (cell.text) e.value = '';
       e.cell = cell;
@@ -386,9 +409,12 @@ export class BoardManager {
   }
 }
 
-/**
- * alcune informazioni sono caricate dallo schema originale
- */
+const toHighlights = (h: Highlights | string | undefined | null): Highlights => {
+  if (!h) return new Highlights();
+  if (isString(h)) return decodeHighlightsString(h);
+  return h;
+};
+
 const mergeStat = (statCells: SudokuStat, sdk: Sudoku): SudokuStat => {
   return new SudokuStat({
     ...statCells,
@@ -402,7 +428,7 @@ const mergeStat = (statCells: SudokuStat, sdk: Sudoku): SudokuStat => {
     difficultyValue: sdk.info.difficultyValue,
     solution: (<SudokuInfoEx>sdk.info)?.solution,
   });
-}
+};
 
 const getApplyBoardEvent = (status: BoardStatus, cell: BoardCell | undefined, value: any): BoardChangeEvent => {
   return new BoardChangeEvent({
@@ -410,4 +436,4 @@ const getApplyBoardEvent = (status: BoardStatus, cell: BoardCell | undefined, va
     status: { ...status, isCtrl: false },
     value: `${value || ''}`,
   });
-}
+};

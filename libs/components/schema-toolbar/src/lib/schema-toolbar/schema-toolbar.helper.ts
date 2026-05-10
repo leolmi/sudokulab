@@ -28,20 +28,19 @@ export const extendStatus = (cs: WritableSignal<ToolbarStatus>, ps: Partial<Tool
   });
 }
 
-export const isValueLocked = (manager: BoardManager | undefined, value: string): boolean => {
-  if (!manager) return false;
-  const locked = manager.lockedValue$.value;
-  return !!manager.status$.value.isLock && !!locked && locked.value === value;
+export const isValueLocked = (manager: BoardManager, value: string): boolean => {
+  const locked = manager.lockedValue();
+  return manager.status().isLock && !!locked && locked.value === value;
 }
 
-export const setValueButtonStatus = (status: ToolbarStatus, code?: string, manager?: BoardManager): void => {
+export const setValueButtonStatus = (status: ToolbarStatus, code: string | undefined, manager: BoardManager): void => {
   const action = (code || '').substring(9);
-  const cells = manager?.cells$.value || [];
-  const isFocused = !!manager?.focused$.value;
-  const cell = cells.find(c => c.coord === manager?.selection$.value?.coord);
-  const isSchemaMode = manager?.status$.value.editMode === 'schema';
-  const isDynamic = !!manager?.status$.value?.isDynamic;
-  const isPencil = !!manager?.status$.value?.isPencil;
+  const cells = manager.cells();
+  const status$ = manager.status();
+  const cell = cells.find(c => c.coord === manager.selection()?.coord);
+  const isSchemaMode = status$.editMode === 'schema';
+  const isDynamic = !!status$.isDynamic;
+  const isPencil = !!status$.isPencil;
   const dynamicVisible = isDynamic && !cell?.text;
   const hasUserValues = (cell?.userValues||[]).length>0;
   const hasUserValue = (!!cell?.text || hasUserValues) && !cell?.isFixed;

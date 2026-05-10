@@ -2,17 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   effect,
   inject,
   input,
   OnDestroy,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { BUTTON_STOP_CODE, ToolbarButton, ToolbarStatus } from './schema-toolbar.model';
 import { SudokuState } from '@olmi/common';
 import { extendStatus, getButtons, isValueLocked, setValueButtonStatus } from './schema-toolbar.helper';
@@ -27,6 +24,7 @@ const TB_VALUE_PREFIX = /^tb-value-/;
 
 @Component({
   selector: 'schema-toolbar',
+  standalone: true,
   imports: [
     MatButtonModule,
     MatIconModule,
@@ -34,20 +32,20 @@ const TB_VALUE_PREFIX = /^tb-value-/;
   ],
   templateUrl: './schema-toolbar.component.html',
   styleUrl: './schema-toolbar.component.scss',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SchemaToolbarComponent implements OnDestroy {
-  private readonly _destroyRef = inject(DestroyRef);
+  protected readonly manager = inject(BoardManager);
 
-  readonly manager = input<BoardManager | null | undefined>(null);
   readonly template = input<string>('');
   readonly showProgress = input<boolean>(false);
   readonly disabled = input<boolean | null | undefined>(false);
 
   readonly buttons = computed<ToolbarButton[]>(() => getButtons(this.template()));
   readonly status = signal<ToolbarStatus>(new ToolbarStatus());
-  readonly percent = signal<number>(0);
+
+  // percent → computed direttamente dal signal del manager
+  readonly percent = computed<number>(() => this.manager.stat().percent);
 
   private _pressTimer: ReturnType<typeof setTimeout> | null = null;
   private _longPressFired = false;
@@ -55,59 +53,25 @@ export class SchemaToolbarComponent implements OnDestroy {
   private _lastTouchEnd = 0;
 
   constructor() {
-    // ricalcolo dello stato dei buttons al cambiare di tutte le sorgenti
-    // rilevanti: i Subject del BoardManager (ancora basato su BehaviorSubject
-    // in attesa della Fase 4) sono ascoltati via combineLatest, ricreata ad
-    // ogni cambio di `manager`/`buttons`/`disabled` tramite il cleanup
-    // dell'effect.
-    effect(onCleanup => {
-      const m = this.manager();
+    // ricalcolo dello stato dei buttons al cambiare delle sorgenti rilevanti.
+    // Le helper functions invocate (`_calcButtonsStatus`/`setValueButtonStatus`)
+    // leggono signal del manager (cells/status/selection/focused/lockedValue),
+    // quindi le dipendenze vengono registrate automaticamente in tracking context.
+    effect(() => {
       this.buttons();
       this.disabled();
-      // dipendenza esplicita su `isRunning` (signal): ricrea le subscription
-      // quando `isRunning` cambia, niente più `SudokuState.isRunning$` nel combineLatest
       SudokuState.isRunning();
-      if (!m) return;
+      // dipendenze esplicite di sicurezza sui signal usati nei rami
+      // del calcolo (stat/isStopping non sono toccati dalle helper)
+      this.manager.stat();
+      this.manager.isStopping();
       extendStatus(this.status, this._calcButtonsStatus());
-      const sub = combineLatest([
-        m.selection$,
-        m.focused$,
-        m.stat$,
-        m.status$,
-        m.isStopping$,
-        m.lockedValue$,
-      ])
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe(() => extendStatus(this.status, this._calcButtonsStatus()));
-      onCleanup(() => sub.unsubscribe());
     });
 
     // pencil mode è incompatibile con l'hold-state: sblocca alla transizione
-    effect(onCleanup => {
-      const m = this.manager();
-      if (!m) return;
-      const sub = m.status$.pipe(
-        map(s => s.isPencil),
-        distinctUntilChanged(),
-      )
-        .pipe(takeUntilDestroyed(this._destroyRef))
-        .subscribe(isPencil => {
-          if (isPencil && m.status$.value.isLock) m.options({ isLock: false });
-        });
-      onCleanup(() => sub.unsubscribe());
-    });
-
-    // percent della progress bar
-    effect(onCleanup => {
-      const m = this.manager();
-      if (!m) {
-        this.percent.set(0);
-        return;
-      }
-      const sub = m.stat$
-        .pipe(map(stat => stat.percent), takeUntilDestroyed(this._destroyRef))
-        .subscribe(p => this.percent.set(p));
-      onCleanup(() => sub.unsubscribe());
+    effect(() => {
+      const status = this.manager.status();
+      if (status.isPencil && status.isLock) this.manager.options({ isLock: false });
     });
   }
 
@@ -117,7 +81,7 @@ export class SchemaToolbarComponent implements OnDestroy {
 
   private _calcButtonsStatus(): Partial<ToolbarStatus> {
     const status = new ToolbarStatus();
-    const manager = this.manager() ?? undefined;
+    const manager = this.manager;
     const isDisabled = !!this.disabled();
     (this.buttons() || []).forEach(btn => {
       const code = btn.code || '';
@@ -137,14 +101,14 @@ export class SchemaToolbarComponent implements OnDestroy {
       } else {
         switch (code) {
           case 'tb-pencil':
-            status.active[code] = !!manager?.status$.value.isPencil;
+            status.active[code] = manager.status().isPencil;
             break;
           case 'tb-play':
             status.hidden[code] = SudokuState.isRunning();
             break;
           case BUTTON_STOP_CODE:
             status.hidden[code] = !SudokuState.isRunning();
-            status.disabled[code] = !!manager?.isStopping$.value;
+            status.disabled[code] = manager.isStopping();
             break;
         }
       }
@@ -171,7 +135,7 @@ export class SchemaToolbarComponent implements OnDestroy {
       return;
     }
     if ((this.status().disabled || {})[code]) return;
-    this.manager()?.execOperation(btn.operation || 'assign', btn.value, true);
+    this.manager.execOperation(btn.operation || 'assign', btn.value);
   }
 
   onPressStart(btn: ToolbarButton, event?: Event) {
@@ -180,7 +144,7 @@ export class SchemaToolbarComponent implements OnDestroy {
     const code = btn.code || '';
     if (!TB_VALUE_PREFIX.test(code)) return;
     // in pencil mode il long-press resta abilitato solo per il bottone empty
-    const isPencil = !!this.manager()?.status$.value.isPencil;
+    const isPencil = this.manager.status().isPencil;
     if (isPencil && code !== TB_VALUE_EMPTY) return;
     if (this._pressTimer) return;
     this._longPressFired = false;
@@ -209,17 +173,16 @@ export class SchemaToolbarComponent implements OnDestroy {
   }
 
   private _toggleValueLock(value: string) {
-    const manager = this.manager();
-    if (!manager) return;
+    const manager = this.manager;
     if (isValueLocked(manager, value)) {
       manager.options({ isLock: false });
       return;
     }
     manager.options({ isLock: true });
-    manager.lockedValue$.next(new BoardChangeEvent({
+    manager.setLockedValue(new BoardChangeEvent({
       value,
-      cell: manager.selection$.value,
-      status: new BoardEventStatus({ ...manager.status$.value })
+      cell: manager.selection(),
+      status: new BoardEventStatus({ ...manager.status() }),
     }));
   }
 }

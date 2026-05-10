@@ -1,3 +1,5 @@
+@let status = manager.status();
+@let hl = manager.highlights();
 <svg class="svg-interactive-board"
      #board
      [ngClass]="classNames()"
@@ -36,10 +38,9 @@
     ></rect>
 
     @let curCellId = currentCellId();
-    @let hl = highlights;
     @let prevCellId = previewCellId();
     @let prevValue = previewValue();
-    @for (cell of cells; track cell.id) {
+    @for (cell of manager.cells(); track cell.id) {
       <g [class.highlight]="(hl?.cell||{})[cell.id]"
          [class.highlight-secondary]="(hl?.secondaryCell||{})[cell.id]">
         <rect class="svg-board-cell"
@@ -106,17 +107,14 @@
     }
 
     <!-- SELEZIONE -->
-    @let mgr = manager();
-    @if (mgr) {
-      @let sel = mgr.selection();
-      @if (sel) {
-        <rect class="svg-board-cell svg-selection-cell"
-              [attr.width]="GEOMETRY.cell.width"
-              [attr.height]="GEOMETRY.cell.height"
-              [attr.x]="sel.x"
-              [attr.y]="sel.y"
-        ></rect>
-      }
+    @let sel = manager.selection();
+    @if (sel) {
+      <rect class="svg-board-cell svg-selection-cell"
+            [attr.width]="GEOMETRY.cell.width"
+            [attr.height]="GEOMETRY.cell.height"
+            [attr.x]="sel.x"
+            [attr.y]="sel.y"
+      ></rect>
     }
 
     <!-- GRUPPI EVIDENZIATI -->

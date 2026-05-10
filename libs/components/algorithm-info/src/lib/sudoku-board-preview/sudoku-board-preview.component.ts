@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, Input, input, signal } from '@angular/core';
-
+import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { BoardComponent, BoardManager, BoardStatus } from '@olmi/board';
 import { decodeHighlightsString, Dictionary } from '@olmi/model';
 
@@ -40,10 +39,11 @@ export interface SudokuBoardPreviewSample {
   selector: 'sudoku-board-preview',
   standalone: true,
   imports: [BoardComponent],
+  providers: [BoardManager],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="board-preview" [style.width.px]="size" [style.height.px]="size">
-      <sudoku-board (onReady)="onBoard($event)"></sudoku-board>
+    <div class="board-preview" [style.width.px]="size()" [style.height.px]="size()">
+      <sudoku-board></sudoku-board>
     </div>
   `,
   styles: [
@@ -61,45 +61,37 @@ export interface SudokuBoardPreviewSample {
   ],
 })
 export class SudokuBoardPreviewComponent {
+  private readonly _manager = inject(BoardManager);
+
   readonly sample = input<SudokuBoardPreviewSample | null>(null);
 
   /** Lato in px del quadrato della board (default 360). */
-  @Input() size = 360;
-
-  private readonly _manager = signal<BoardManager | null>(null);
-
-  // Costanti: la preview è sempre read-only, no edit / pencil / paste.
-  private readonly previewStatus: Partial<BoardStatus> = {
-    isDisabled: false,
-    isLock: false,
-    isPencil: false,
-    isAvailable: true,
-    isCoord: true,
-    isPasteEnabled: false,
-  };
-
-  onBoard(manager: BoardManager) {
-    // `previewStatus` è costante: impostato una sola volta all'arrivo del
-    // manager, non serve un effect dedicato.
-    manager.options(this.previewStatus);
-    this._manager.set(manager);
-  }
+  readonly size = input<number>(360);
 
   constructor() {
-    // Unico effect: quando il manager è pronto e arriva un sample, lo applica
-    // in ordine deterministico (load → values → apply-rules → available →
-    // highlights). Gli `available` sono forzati dopo `apply-rules` così da
-    // sovrascrivere quanto calcolato dalle regole; gli highlights sono in
-    // coda per non essere spazzati via da un successivo apply-rules.
+    // status fisso: la preview è sempre read-only, no edit / pencil / paste.
+    this._manager.options(<Partial<BoardStatus>>{
+      isDisabled: false,
+      isLock: false,
+      isPencil: false,
+      isAvailable: true,
+      isCoord: true,
+      isPasteEnabled: false,
+    });
+
+    // applica il sample in ordine deterministico (load → values → apply-rules
+    // → available → highlights). Gli `available` sono forzati dopo
+    // `apply-rules` così da sovrascrivere quanto calcolato dalle regole; gli
+    // highlights sono in coda per non essere spazzati via da un successivo
+    // apply-rules.
     effect(() => {
-      const manager = this._manager();
       const s = this.sample();
-      if (!manager || !s?.schema) return;
-      manager.load(s.schema);
-      if (s.values) manager.values(s.values);
-      manager.execOperation('apply-rules', { resetBefore: true });
-      if (s.available) manager.forceAvailable(s.available);
-      if (s.highlights) manager.setHighlights(decodeHighlightsString(s.highlights));
+      if (!s?.schema) return;
+      this._manager.load(s.schema);
+      if (s.values) this._manager.values(s.values);
+      this._manager.execOperation('apply-rules', { resetBefore: true });
+      if (s.available) this._manager.forceAvailable(s.available);
+      if (s.highlights) this._manager.setHighlights(decodeHighlightsString(s.highlights));
     });
   }
 }

@@ -11,10 +11,7 @@
       </div>
     </div>
   }
-  @for (prv of previews; track $index) {
-    <generator-schema-preview
-      [index]="$index"
-      [manager]="manager()"
-    ></generator-schema-preview>
+  @for (i of previews; track i) {
+    <generator-schema-preview [index]="i"></generator-schema-preview>
   }
 </div>

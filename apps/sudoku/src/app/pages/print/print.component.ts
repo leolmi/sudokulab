@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { PageBase } from '../../model/page.base';
 import { PrintPageComponent } from './print-page.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -30,21 +29,23 @@ export class PrintComponent extends PageBase {
 
   readonly schemas = signal<Sudoku[]>([]);
 
-  // toSignal su template$ e pages$ del PrintDocument (servizio non ancora migrato a signal)
-  readonly pages = toSignal(this.printDocument.pages$, { initialValue: [] as PrintPage[] });
-  readonly template = toSignal(this.printDocument.template$, { initialValue: '' });
-  readonly activePageSchema = toSignal(this.printDocument.activePageSchema$, { initialValue: '' as string });
+  // alias dei signal del PrintDocument (utilizzati nel template)
+  readonly pages = this.printDocument.pages;
+  readonly template = this.printDocument.template;
+  readonly activePageSchema = this.printDocument.activePageSchema;
 
-  readonly pagesCount = computed<number>(() => (this.pages() || []).length);
+  readonly pagesCount = computed<number>(() => this.pages().length);
   readonly schemaCount = computed<number>(() =>
-    _reduce(this.pages() || [], (t, p) => t + getSchemaCountForPage(p), 0));
+    _reduce(this.pages(), (t, p) => t + getSchemaCountForPage(p), 0));
 
   constructor() {
     super();
 
-    this.printDocument.template$
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(template => AppUserOptions.updateFeature(PRINT_USER_OPTIONS_FEATURE, { template }));
+    // persiste il template scelto sul localStorage
+    effect(() => {
+      const template = this.template();
+      untracked(() => AppUserOptions.updateFeature(PRINT_USER_OPTIONS_FEATURE, { template }));
+    });
 
     this.state.menuHandler = (item) => this.handleMenuItem(item);
 
@@ -52,14 +53,14 @@ export class PrintComponent extends PageBase {
     effect(() => {
       const pages = this.pages();
       const template = this.template();
-      this.state.updateStatus(calcStatusForMenu(pages, template || DEFAULT_PRINT_TEMPLATE));
+      untracked(() => this.state.updateStatus(calcStatusForMenu(pages, template || DEFAULT_PRINT_TEMPLATE)));
     });
   }
 
   handleMenuItem(item: MenuItem) {
     switch (item.logic) {
       case 'navigate':
-        this.printDocument.template$.next(item.property || '');
+        this.printDocument.setTemplate(item.property || '');
         break;
       default:
         switch (item.property) {
@@ -67,7 +68,7 @@ export class PrintComponent extends PageBase {
             doPrintDocument(this.printDocument, this.store);
             break;
           case 'clear':
-            this.printDocument.pages$.next([]);
+            this.printDocument.clearPages();
             break;
         }
         break;
@@ -85,21 +86,20 @@ const getSchemaCountForPage = (p: PrintPage): number => {
 }
 
 const doPrintDocument = (doc: PrintDocument, store: SudokuStore): void => {
-  const template = TEMPLATES.find(t => t.name === doc.template$.value);
-  if (template) {
-    const pages = doc.pages$.value || [];
-    const html = pages
-      .map((page, i) => {
-        const sudokus: Dictionary<Sudoku> = {};
-        _keys(page.schemas).forEach(k => {
-          const sdk = store.getSudoku(page.schemas[k]);
-          if (sdk) sudokus[k] = sdk;
-        });
-        const pageEx = new PrintPageEx({ ...page, sudokus });
-        return template.compose(pageEx, i >= (pages.length - 1));
-      })
-      .join('\n');
-    const print_page: any = window.open(`../assets/print.html`);
-    if (!!print_page) print_page.data = { html };
-  }
+  const template = TEMPLATES.find(t => t.name === doc.template());
+  if (!template) return;
+  const pages = doc.pages();
+  const html = pages
+    .map((page, i) => {
+      const sudokus: Dictionary<Sudoku> = {};
+      _keys(page.schemas).forEach(k => {
+        const sdk = store.getSudoku(page.schemas[k]);
+        if (sdk) sudokus[k] = sdk;
+      });
+      const pageEx = new PrintPageEx({ ...page, sudokus });
+      return template.compose(pageEx, i >= (pages.length - 1));
+    })
+    .join('\n');
+  const print_page: any = window.open(`../assets/print.html`);
+  if (!!print_page) print_page.data = { html };
 }

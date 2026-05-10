@@ -1,5 +1,4 @@
-import { Injectable, InjectionToken } from '@angular/core';
-import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
+import { computed, Injectable, signal, Signal } from '@angular/core';
 
 /**
  * Informazioni sullo stato di un task lungo in corso lato server,
@@ -24,29 +23,16 @@ export interface ServerBusyInfo {
  */
 @Injectable({ providedIn: 'root' })
 export class ServerBusyService {
-  private readonly _state$ = new BehaviorSubject<ServerBusyInfo | null>(null);
+  private readonly _state = signal<ServerBusyInfo | null>(null);
 
-  readonly state$: Observable<ServerBusyInfo | null> = this._state$.asObservable();
-  readonly isBusy$: Observable<boolean> = this._state$.pipe(
-    map(s => !!s),
-    distinctUntilChanged()
-  );
-
-  get isBusy(): boolean {
-    return !!this._state$.value;
-  }
-
-  get current(): ServerBusyInfo | null {
-    return this._state$.value;
-  }
+  readonly state: Signal<ServerBusyInfo | null> = this._state.asReadonly();
+  readonly isBusy: Signal<boolean> = computed(() => this._state() !== null);
 
   set(info: ServerBusyInfo): void {
-    this._state$.next(info);
+    this._state.set(info);
   }
 
   clear(): void {
-    if (this._state$.value !== null) this._state$.next(null);
+    if (this._state() !== null) this._state.set(null);
   }
 }
-
-export const SERVER_BUSY_SERVICE = new InjectionToken<ServerBusyService>('SERVER_BUSY_SERVICE');

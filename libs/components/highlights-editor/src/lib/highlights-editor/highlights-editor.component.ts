@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { BoardManager } from '@olmi/board';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'highlights-editor',
+  standalone: true,
   imports: [
     MatFormFieldModule,
     CdkTextareaAutosize,
@@ -17,11 +18,10 @@ import { MatInputModule } from '@angular/material/input';
   ],
   templateUrl: './highlights-editor.component.html',
   styleUrl: './highlights-editor.component.scss',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HighlightsEditorComponent {
-  readonly manager = input<BoardManager | null | undefined>(null);
+  private readonly _manager = inject(BoardManager);
 
   readonly text = signal<string>('');
   readonly active = signal<boolean>(true);
@@ -29,11 +29,9 @@ export class HighlightsEditorComponent {
   constructor() {
     // text + active → highlights del manager (con reset quando active diventa false)
     effect(() => {
-      const m = this.manager();
       const txt = this.text();
       const isActive = this.active();
-      if (!m) return;
-      m.setHighlights(isActive ? txt : undefined);
+      this._manager.setHighlights(isActive ? txt : undefined);
     });
   }
 
@@ -45,7 +43,7 @@ export class HighlightsEditorComponent {
     this.text.set('');
   }
 
-  setText(e: any) {
-    this.text.set(e.target.value);
+  setText(e: Event) {
+    this.text.set((e.target as HTMLInputElement).value);
   }
 }

@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PageBase } from '../../model/page.base';
 import { MenuItem, NotificationType } from '@olmi/model';
-import { catchError, of } from 'rxjs';
 import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
@@ -23,21 +21,22 @@ export class ManagementComponent extends PageBase {
     this.state.menuHandler = (item) => this.handleMenuItem(item);
   }
 
-  handleMenuItem(item: MenuItem) {
+  async handleMenuItem(item: MenuItem) {
     switch (item.property) {
-      case 'upload':
+      case 'upload': {
         this.working.set(true);
-        this.interaction.updateCatalog()
-          .pipe(catchError(() => {
-            this.working.set(false);
-            return of(undefined);
-          }), takeUntilDestroyed(this._destroyRef))
-          .subscribe(r => {
-            this.working.set(false);
-            this.notifier.notify('upload terminated', !!r ? NotificationType.success : NotificationType.error);
-            console.log('UPLOAD RESULT', r);
-          });
+        try {
+          const r = await this.interaction.updateCatalog();
+          this.notifier.notify('upload terminated', r ? NotificationType.success : NotificationType.error);
+          console.log('UPLOAD RESULT', r);
+        } catch (err) {
+          console.error('upload failed', err);
+          this.notifier.notify('upload terminated', NotificationType.error);
+        } finally {
+          this.working.set(false);
+        }
         break;
+      }
     }
   }
 }

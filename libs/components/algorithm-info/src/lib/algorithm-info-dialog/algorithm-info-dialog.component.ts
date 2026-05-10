@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, Type } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal, Type } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { BehaviorSubject } from 'rxjs';
 import { getAlgorithm } from '@olmi/algorithms';
 import { Algorithm } from '@olmi/model';
 import { loadAlgorithmInfoPage } from '../algorithm-info-registry';
@@ -27,7 +26,7 @@ export interface AlgorithmInfoDialogData {
   selector: 'algorithm-info-dialog',
   standalone: true,
   imports: [
-    CommonModule,
+    NgComponentOutlet,
     MatDialogModule,
     MatButtonModule,
     MatIcon,
@@ -37,11 +36,12 @@ export interface AlgorithmInfoDialogData {
   template: `
     <div class="alg-info-root flex-col">
       <div class="alg-info-header flex-row flex-align-start-center flex-gap-12">
-        @if (algorithm) {
-          <mat-icon class="alg-info-icon">{{ algorithm.icon }}</mat-icon>
+        @let alg = algorithm;
+        @if (alg) {
+          <mat-icon class="alg-info-icon">{{ alg.icon }}</mat-icon>
           <div class="flex-col flex-1">
-            <div class="alg-info-name">{{ algorithm.name }}</div>
-            <div class="alg-info-subtitle">{{ algorithm.title }}</div>
+            <div class="alg-info-name">{{ alg.name }}</div>
+            <div class="alg-info-subtitle">{{ alg.title }}</div>
           </div>
         } @else {
           <div class="alg-info-name flex-1">Algoritmo sconosciuto ({{ data.algorithmId }})</div>
@@ -52,8 +52,8 @@ export interface AlgorithmInfoDialogData {
       </div>
 
       <div class="alg-info-body flex-1">
-        @let cmp = pageComponent$ | async;
-        @if (loading$ | async) {
+        @let cmp = pageComponent();
+        @if (loading()) {
           <div class="alg-info-loading flex-row flex-align-center-center">
             <mat-spinner diameter="36"></mat-spinner>
           </div>
@@ -61,11 +61,11 @@ export interface AlgorithmInfoDialogData {
           <ng-container *ngComponentOutlet="cmp"></ng-container>
         } @else {
           <div class="alg-info-fallback">
-            @if (algorithm) {
-              <p class="alg-info-description">{{ algorithm.description }}</p>
-              @if (algorithm.factor) {
+            @if (alg) {
+              <p class="alg-info-description">{{ alg.description }}</p>
+              @if (alg.factor) {
                 <p class="alg-info-factor">
-                  <strong>Fattore di difficoltà:</strong> <code>{{ algorithm.factor }}</code>
+                  <strong>Fattore di difficoltà:</strong> <code>{{ alg.factor }}</code>
                 </p>
               }
               <p class="alg-info-missing">
@@ -110,25 +110,23 @@ export interface AlgorithmInfoDialogData {
       border-radius: 4px;
     }
     .alg-info-missing { font-size: 13px; opacity: 0.6; margin-top: 16px; }
-  `]
+  `],
 })
-export class AlgorithmInfoDialogComponent implements OnInit {
-  readonly data: AlgorithmInfoDialogData = inject(MAT_DIALOG_DATA);
-  private readonly _ref = inject(MatDialogRef<AlgorithmInfoDialogComponent>);
+export class AlgorithmInfoDialogComponent {
+  protected readonly data: AlgorithmInfoDialogData = inject(MAT_DIALOG_DATA);
 
-  algorithm: Algorithm | undefined;
-  readonly loading$ = new BehaviorSubject<boolean>(false);
-  readonly pageComponent$ = new BehaviorSubject<Type<unknown> | null>(null);
+  protected readonly algorithm: Algorithm | undefined = getAlgorithm(this.data.algorithmId);
+  protected readonly loading = signal<boolean>(false);
+  protected readonly pageComponent = signal<Type<unknown> | null>(null);
 
-  ngOnInit(): void {
-    this.algorithm = getAlgorithm(this.data.algorithmId);
+  constructor() {
     const loader = loadAlgorithmInfoPage(this.data.algorithmId);
     if (!loader) return;
-    this.loading$.next(true);
+    this.loading.set(true);
     loader
-      .then(cmp => this.pageComponent$.next(cmp))
+      .then(cmp => this.pageComponent.set(cmp))
       .catch(err => console.error('Failed to load algorithm info page', err))
-      .finally(() => this.loading$.next(false));
+      .finally(() => this.loading.set(false));
   }
 }
 

@@ -5,7 +5,6 @@ import { BoardComponent, BoardManager, PLAYER_BOARD_USER_OPTIONS_FEATURE } from 
 import { Location, NgClass } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { filter, pairwise, Subscription } from 'rxjs';
 import { StepViewerComponent, StepViewerItem } from '@olmi/step-viewer';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
@@ -69,6 +68,7 @@ const PLAYER_VISIBLE_STAT: any = {
   templateUrl: './player.component.html',
   styleUrl: './player.component.scss',
   standalone: true,
+  providers: [BoardManager],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayerComponent extends PageBase {
@@ -79,16 +79,19 @@ export class PlayerComponent extends PageBase {
   readonly logic = inject(SUDOKU_PAGE_PLAYER_LOGIC);
   readonly toolbarTemplate = 'nums,clear,pencil';
 
-  readonly manager = signal<BoardManager | undefined>(undefined);
+  readonly manager = inject(BoardManager);
 
-  // signal locali alimentati dai BehaviorSubject del manager (vedi effect in
-  // constructor); restano in attesa che la Fase 4 migri il BoardManager.
-  readonly sudoku = signal<Sudoku | undefined>(undefined);
-  readonly sequence = signal<AlgorithmResult[]>([]);
-  readonly stat = signal<StatLine[]>([]);
-  readonly isComplete = signal<boolean>(false);
-  readonly isEmpty = signal<boolean>(true);
-  readonly isCoord = signal<boolean>(false);
+  // viste signal-derived dei segnali del manager
+  readonly sudoku = computed<Sudoku>(() => this.manager.sudoku());
+  readonly sequence = computed<AlgorithmResult[]>(() => this.manager.sequence());
+  readonly stat = computed<StatLine[]>(() =>
+    getStatLines(this.manager.stat(), { visible: PLAYER_VISIBLE_STAT }));
+  readonly isComplete = computed<boolean>(() => {
+    const s = this.manager.stat();
+    return s.hasErrors || s.percent >= 100;
+  });
+  readonly isEmpty = computed<boolean>(() => this.manager.stat().isEmpty);
+  readonly isCoord = computed<boolean>(() => this.manager.status().isCoord);
 
   readonly layout = computed<string>(() => this.state.layout().narrow ? 'column' : 'row');
 
@@ -105,10 +108,24 @@ export class PlayerComponent extends PageBase {
 
   constructor() {
     super();
+    this.manager.usePersistence = true;
+
     const o = AppUserOptions.getFeatures<any>(PLAYER_BOARD_USER_OPTIONS_FEATURE);
     if (LocalContext.isLevel('debug'))
       console.log(...SDK_PREFIX, 'init game to last storage value >', o.game || '');
     this._game.set(o.game || '');
+
+    // opzioni iniziali (one-shot)
+    this.manager.options(
+      AppUserOptions.getFeatures(PLAYER_BOARD_USER_OPTIONS_FEATURE, {
+        isCoord: true,
+        isAvailable: true,
+        isNotify: true,
+        isPasteEnabled: true,
+      }), {
+        editMode: 'play',
+        isDynamic: false,
+      });
 
     this._route.params
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -134,16 +151,10 @@ export class PlayerComponent extends PageBase {
     });
 
     this.state.menuHandler = (item) =>
-      defaultHandleMenuItem(this._router, this.state, item, this.manager(),
+      defaultHandleMenuItem(this._router, this.state, item, this.manager,
         (it) => this._handlePrivateItems(it));
 
-    // apre lo schema scelto quando catalogo pronto + game definito + manager
-    // pronto. La dipendenza esplicita su `manager()` è necessaria al ritorno
-    // sulla page: `isFilled` è già `true` e `_game` viene riletto da
-    // localStorage prima ancora che il `BoardComponent` istanzi il manager,
-    // quindi senza questa dipendenza `_openSchema` partirebbe quando
-    // `manager()` è ancora `undefined` (no-op).
-    //
+    // apre lo schema scelto quando catalogo pronto + game definito.
     // `getSudoku()` viene letto in `untracked()`: legge `_catalog()` ma non
     // vogliamo che l'effect dipenda da `_catalog`, perché `_openSchema()`
     // scrive `_catalog` (via `getSudokuEx().solve() + _catalog.set(...)`),
@@ -152,8 +163,7 @@ export class PlayerComponent extends PageBase {
     effect(() => {
       const filled = this.store.isFilled();
       const game = this._game();
-      const manager = this.manager();
-      if (!filled || !game || !manager) return;
+      if (!filled || !game) return;
       const sdk = untracked(() => this.store.getSudoku(game));
       if (sdk) {
         if (LocalContext.isLevel('debug'))
@@ -164,88 +174,49 @@ export class PlayerComponent extends PageBase {
       }
     });
 
-    // orchestrazione delle subscription al manager: il BoardManager è ancora
-    // basato su BehaviorSubject (verrà migrato in Fase 4); le subscription
-    // sono ricreate ad ogni cambio di reference del manager.
-    effect(onCleanup => {
-      const manager = this.manager();
-      if (!manager) return;
+    // persistenza delle opzioni utente al variare dello status
+    effect(() => {
+      const s = this.manager.status();
+      AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, s);
+    });
 
-      // assegna le opzioni iniziali una volta sola, alla prima ready
-      manager.options(
-        AppUserOptions.getFeatures(PLAYER_BOARD_USER_OPTIONS_FEATURE, {
-          isCoord: true,
-          isAvailable: true,
-          isNotify: true,
-          isPasteEnabled: true,
-        }), {
-          editMode: 'play',
-          isDynamic: false,
+    // FX "schema completato": solo sulla transizione incompleto→completo, senza errori.
+    // - lo stato iniziale (`isEmpty`) viene scartato, così uno schema caricato già
+    //   completo non scatena l'effetto.
+    // - `stat.hasErrors` non è affidabile qui: `handleBoardValue` aggiorna cells in
+    //   modo SINCRONO senza passare dal check errori (che è a carico del
+    //   logic-worker, asincrono), quindi la prima emissione di stat dopo l'ultima
+    //   cifra può avere `hasErrors=false` anche se il valore è errato.
+    //   Riverifichiamo esplicitamente con `checkStatus` prima di partire.
+    let prevComplete: boolean | null = null;
+    effect(() => {
+      const stat = this.manager.stat();
+      if (stat.isEmpty) {
+        prevComplete = null;
+        return;
+      }
+      const currComplete = stat.isComplete;
+      if (prevComplete === false && currComplete) {
+        untracked(() => {
+          const cells = _clone(this.manager.cells());
+          checkStatus(cells);
+          if (!hasErrors(cells)) this._playCompletionFx();
         });
-
-      const subs = new Subscription();
-
-      subs.add(manager.sudoku$.subscribe(sdk => this.sudoku.set(sdk)));
-      subs.add(manager.sequence$.subscribe(seq => this.sequence.set(seq || [])));
-      subs.add(manager.status$.subscribe(s => this.isCoord.set(!!s.isCoord)));
-      subs.add(manager.stat$.subscribe(stat => {
-        this.isEmpty.set(stat.isEmpty);
-        this.isComplete.set(stat.hasErrors || stat.percent >= 100);
-        this.stat.set(getStatLines(stat, { visible: PLAYER_VISIBLE_STAT }));
-      }));
-      // salva le impostazioni utente al variare delle opzioni
-      subs.add(manager.status$.subscribe(s => AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, s)));
-
-      // FX "schema completato": solo sulla transizione incompleto→completo, senza errori.
-      // - filter(!isEmpty) scarta lo stato iniziale del BehaviorSubject, così il
-      //   pairwise non scatta su uno schema caricato già completo (rimane orfano
-      //   di "prev incompleto").
-      // - `stat.hasErrors` non è affidabile qui: `handleBoardValue` aggiorna
-      //   cells$ in modo SINCRONO senza passare dal check errori (che è a carico
-      //   del logic-worker, asincrono), quindi la prima emissione di stat$ dopo
-      //   l'ultima cifra può avere `hasErrors=false` anche se il valore è errato.
-      //   Riverifichiamo esplicitamente con `checkStatus` prima di partire.
-      subs.add(manager.stat$.pipe(
-        filter(s => !s.isEmpty),
-        pairwise(),
-        filter(([prev, curr]) => !prev.isComplete && curr.isComplete),
-      ).subscribe(() => {
-        const cells = _clone(manager.cells$.value);
-        checkStatus(cells);
-        if (!hasErrors(cells)) this._playCompletionFx();
-      }));
-
-      onCleanup(() => subs.unsubscribe());
+      }
+      prevComplete = currComplete;
     });
 
     // aggiorna lo stato del menu in base allo schema corrente
-    effect(onCleanup => {
-      const manager = this.manager();
-      if (!manager) return;
-      const sub = manager.sudoku$.subscribe(sdk => {
-        const s = manager.status$.value;
-        const stat = manager.stat$.value;
-        const filled = this.store.isFilled();
-        this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled));
-      });
-      const sub2 = manager.status$.subscribe(s => {
-        const sdk = manager.sudoku$.value;
-        const stat = manager.stat$.value;
-        const filled = this.store.isFilled();
-        this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled));
-      });
-      const sub3 = manager.stat$.subscribe(stat => {
-        const sdk = manager.sudoku$.value;
-        const s = manager.status$.value;
-        const filled = this.store.isFilled();
-        this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled));
-      });
-      onCleanup(() => { sub.unsubscribe(); sub2.unsubscribe(); sub3.unsubscribe(); });
+    effect(() => {
+      const sdk = this.manager.sudoku();
+      const s = this.manager.status();
+      const stat = this.manager.stat();
+      const filled = this.store.isFilled();
+      untracked(() => this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled)));
     });
   }
 
   private _handlePrivateItems(item: MenuItem) {
-    const manager = this.manager();
     switch (item.property) {
       case 'browse': {
         const sudoku = this.store.getSudoku(this._game());
@@ -256,7 +227,7 @@ export class PlayerComponent extends PageBase {
       case 'solve-to': {
         const schema = this.store.getSudoku(this._game());
         this.openDialog<string>(SolveToDialogComponent, (step) =>
-          manager?.goToStep(step), { data: { schema } });
+          this.manager.goToStep(step), { data: { schema } });
         break;
       }
       case 'keeper': {
@@ -265,7 +236,7 @@ export class PlayerComponent extends PageBase {
         break;
       }
       case 'clear-highlights': {
-        manager?.setHighlights();
+        this.manager.setHighlights();
         break;
       }
       case 'random': {
@@ -294,7 +265,7 @@ export class PlayerComponent extends PageBase {
       .getSudokuEx(sdk.values)
       .then(sdkx => {
         if (sdkx) {
-          this.manager()?.load(<Sudoku>sdkx);
+          this.manager.load(<Sudoku>sdkx);
           const name = sdkx.values;
           const route = `/${PLAYER_PAGE_ROUTE}/${name}`;
           this.state.updateRoute(route);
@@ -346,21 +317,13 @@ export class PlayerComponent extends PageBase {
       });
   }
 
-  ready(manager: BoardManager) {
-    if (!this.manager()) {
-      manager.usePersistence = true;
-      this.manager.set(manager);
-    }
-  }
-
   pasteSchema(values: string) {
     this._checkValues(values);
   }
 
   openHighlights(item: StepViewerItem) {
-    const manager = this.manager();
-    if (item?.highlights) manager?.setHighlights(item.highlights);
-    if (item?.cell) manager?.select(item.cell);
+    if (item?.highlights) this.manager.setHighlights(item.highlights);
+    if (item?.cell) this.manager.select(item.cell);
   }
 }
 

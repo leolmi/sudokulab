@@ -1,7 +1,6 @@
 @if (globalState.isRunning()) {
   <mat-progress-bar mode="indeterminate" class="top-loading-bar"></mat-progress-bar>
 }
-@let mgr = manager();
 @let opts = options();
 <div class="sudokulab-page page-fill flex-row">
   <div class="page-space flex-1"></div>
@@ -22,52 +21,32 @@
         <div class="stat-line-value">{{valuesToAdd()}}</div>
       </div>
     </div>
-    @if (mgr) {
-      <generator-options
-        [manager]="mgr"
-        [options]="opts"
-        (onOptionsChanged)="updateOptions($event)"
-      ></generator-options>
-    }
+    <generator-options
+      [options]="opts"
+      (onOptionsChanged)="updateOptions($event)"
+    ></generator-options>
   </div>
   <div class="schema-container">
     <sudoku-board
       [logic]="logic"
-      (onReady)="ready($event)"
       (pasteSchemaRequest)="pasteSchema($event)"
     ></sudoku-board>
-    @if (mgr) {
-      <schema-toolbar
-        [manager]="mgr"
-        [template]="toolbarTemplate"
-        [disabled]="globalState.isRunning()"
-      ></schema-toolbar>
-    }
+    <schema-toolbar
+      [template]="toolbarTemplate"
+      [disabled]="globalState.isRunning()"
+    ></schema-toolbar>
   </div>
   <div class="generator-results narrow-visible">
-    @if (mgr) {
-      <generator-schemas
-        [manager]="mgr"
-        (clickOnSchema)="clickOnGeneratedSchema($event)"
-      ></generator-schemas>
-    }
+    <generator-schemas (clickOnSchema)="clickOnGeneratedSchema($event)"></generator-schemas>
   </div>
   <div class="generator-options narrow-visible">
-    @if (mgr) {
-      <generator-options
-        [manager]="mgr"
-        [options]="opts"
-        (onOptionsChanged)="updateOptions($event)"
-      ></generator-options>
-    }
+    <generator-options
+      [options]="opts"
+      (onOptionsChanged)="updateOptions($event)"
+    ></generator-options>
   </div>
   <div class="generator-results narrow-hidden flex-1">
-    @if (mgr) {
-      <generator-schemas
-        [manager]="mgr"
-        (clickOnSchema)="clickOnGeneratedSchema($event)"
-      ></generator-schemas>
-    }
+    <generator-schemas (clickOnSchema)="clickOnGeneratedSchema($event)"></generator-schemas>
   </div>
 
 

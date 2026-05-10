@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, ViewContainerRef } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -32,22 +31,19 @@ export class PrintPageComponent {
 
   readonly isAddMode = computed<boolean>(() => this.mode() === 'add');
 
-  // toSignal sul template del documento per ottenere re-eval del portal
-  // quando l'utente cambia template
-  private readonly _template = toSignal(this.printDocument.template$, { initialValue: '' });
-
+  // re-eval del portal quando l'utente cambia template
   readonly portal = computed<ComponentPortal<TemplateComponent> | ''>(() => {
-    this._template();
+    this.printDocument.template();
     return getPagePortal(this.printDocument, this.pageId() || '');
   });
 
   setActiveArea(position: number) {
-    this.printDocument.activeArea$.next(`${this.pageId() || ''}.${position}`);
+    this.printDocument.setActiveArea(`${this.pageId() || ''}.${position}`);
   }
 
   add() {
     const page = this.printDocument.addPage();
-    this.printDocument.activeArea$.next(getPageArea(page.id));
+    this.printDocument.setActiveArea(getPageArea(page.id));
   }
 
   clear() {
@@ -60,7 +56,7 @@ export class PrintPageComponent {
 }
 
 const getPagePortal = (doc: PrintDocument, pid: string): ComponentPortal<TemplateComponent> | '' => {
-  const template = TEMPLATES.find(t => t.name === doc.template$.value);
+  const template = TEMPLATES.find(t => t.name === doc.template());
   if (!template) return '';
   const inj = Injector.create({ providers: [{ provide: TEMPLATE_PAGE_ID, useValue: pid }] });
   return new ComponentPortal<TemplateComponent>(template.editor, <ViewContainerRef | null | undefined>null, inj);

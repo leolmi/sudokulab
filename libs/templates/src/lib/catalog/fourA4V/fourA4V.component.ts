@@ -46,6 +46,6 @@ export class FourA4VComponent extends TemplateComponent {
   protected readonly schemaBottomRight = this.getSchema(3);
 
   setActive(index: number) {
-    this.printDocument.activeArea$.next(getPageArea(this.pageId, index));
+    this.printDocument.setActiveArea(getPageArea(this.pageId, index));
   }
 }

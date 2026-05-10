@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ServerBusyService } from './server-busy.service';
@@ -81,8 +80,7 @@ import { ServerBusyService } from './server-busy.service';
   `]
 })
 export class ServerWaiterComponent {
-  private readonly _busy = inject(ServerBusyService);
-  readonly state = toSignal(this._busy.state$, { initialValue: null });
+  readonly state = inject(ServerBusyService).state;
 
   taskLabel(task: string): string {
     switch (task) {

@@ -8,12 +8,9 @@ import {
   HostBinding,
   HostListener,
   inject,
-  Injector,
   input,
   OnDestroy,
-  OnInit,
   output,
-  runInInjectionContext,
   signal,
   viewChild,
 } from '@angular/core';
@@ -23,33 +20,27 @@ import {
   BoardEventStatus,
   BoardGroup,
   BoardNextMode,
-  BoardStatus,
   GEOMETRY,
   NEXT_DIRECTION,
 } from './board.model';
-import { cloneDeep as _clone, isNumber as _isNumber, isString as _isString } from 'lodash';
+import { cloneDeep as _clone, isNumber as _isNumber } from 'lodash';
 import {
-  Coding,
   isCopyKeys,
   isDeleteKey,
   isDirectionKey,
   isNextStepKey,
   isSkippedKey,
   moveOnDirection,
-  parseCells,
 } from './board.helper';
 import { BOARD_PREFIX, getBoardClasses } from './board.internal';
 import { BoardManager } from './board.manager';
 import {
-  Cell,
   DEFAULT_RANK,
   getCell,
   getCellsSchema,
-  Highlights,
   isSchemaString,
   LogicExecutor,
   NotificationType,
-  SudokuCell,
 } from '@olmi/model';
 import { SUDOKU_NOTIFIER } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
@@ -78,8 +69,16 @@ interface PickerState {
   longPressFired: boolean;
 }
 
+/**
+ * Componente presentazionale della board. Inietta `BoardManager` dalla DI
+ * hierarchy: il provider va dichiarato dal consumer parent (player, generator,
+ * dialog, preview...) — `<sudoku-board>` non è autonomo. Vedi i `providers:
+ * [BoardManager]` in `PlayerComponent` / `GeneratorComponent` /
+ * `SchemaKeeperDialogComponent` / `SudokuBoardPreviewComponent`.
+ */
 @Component({
   selector: 'sudoku-board',
+  standalone: true,
   imports: [
     NgClass,
     ClipboardModule,
@@ -87,10 +86,9 @@ interface PickerState {
   ],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class BoardComponent implements AfterViewInit, OnDestroy {
   // counter per generare id univoci dei clipPath (più board convivono in stampa,
   // catalogo, ecc.); gli id nei <defs> SVG sono globali al documento.
   private static _idSeq = 0;
@@ -104,44 +102,33 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly _notifier = inject(SUDOKU_NOTIFIER);
   private readonly _clipboard = inject(Clipboard);
   private readonly _element = inject(ElementRef);
-  private readonly _injector = inject(Injector);
+
+  /**
+   * Manager iniettato. Provided dal componente stesso (default: una istanza
+   * per board); un consumer parent che dichiara `providers: [BoardManager]`
+   * condivide la stessa istanza fra board e UI tramite la DI hierarchy.
+   */
+  protected readonly manager = inject(BoardManager);
 
   readonly GEOMETRY = GEOMETRY;
-
-  // riferimento al manager: signal per supportare i `computed` derivati
-  private readonly _manager = signal<BoardManager | undefined>(undefined);
-  readonly manager = this._manager.asReadonly();
 
   // viewChild signal-based
   readonly boardEl = viewChild<ElementRef>('board');
 
-  // input bindable da template padre (alias preserva l'API esterna)
-  readonly cellsInput = input<SudokuCell[] | undefined | null>(undefined, { alias: 'cells' });
-  readonly statusInput = input<Partial<BoardStatus> | undefined | null>(undefined, { alias: 'status' });
-  readonly highlightsInput = input<Highlights | string | undefined | null>(undefined, { alias: 'highlights' });
-  readonly selectionInput = input<Cell | undefined | null>(undefined, { alias: 'selection' });
+  // input bindable: il logic-executor (worker boundary) viene propagato al
+  // manager via effect.
   readonly logic = input<LogicExecutor | undefined>(undefined);
 
-  // signal di stato interni (sorgente di verità)
   private readonly _height = signal<number>(10);
-  private readonly _cells = signal<BoardCell[]>(parseCells());
-  private readonly _status = signal<BoardStatus>(new BoardStatus());
-  private readonly _highlights = signal<Highlights>(new Highlights());
-
-  // getter classici → si propagano automaticamente al template via signal access
-  // (l'accesso `this._cells()` dentro il getter è tracciato da Angular per il CD)
   get height(): number { return this._height(); }
-  get cells(): BoardCell[] { return this._cells(); }
-  get status(): BoardStatus { return this._status(); }
-  get highlights(): Highlights { return this._highlights(); }
 
-  // computed derivati
-  readonly classNames = computed(() => getBoardClasses(this._status()));
-  readonly hlgroups = computed(() => (this._highlights()?.groups || []).map(g => new BoardGroup(g)));
-  readonly currentCellId = computed(() => this._manager()?.selection()?.id || '');
-  readonly currentCellCol = computed(() => getColRow(this._manager()?.selection()?.col));
-  readonly currentCellRow = computed(() => getColRow(this._manager()?.selection()?.row));
-  readonly isFocused = computed(() => !!this._manager()?.focused());
+  // computed derivati dai signal del manager
+  readonly classNames = computed(() => getBoardClasses(this.manager.status()));
+  readonly hlgroups = computed(() => (this.manager.highlights()?.groups || []).map(g => new BoardGroup(g)));
+  readonly currentCellId = computed(() => this.manager.selection()?.id || '');
+  readonly currentCellCol = computed(() => getColRow(this.manager.selection()?.col));
+  readonly currentCellRow = computed(() => getColRow(this.manager.selection()?.row));
+  readonly isFocused = computed(() => this.manager.focused());
 
   // stato del radial-picker (overlay HTML sopra la board)
   readonly pickerOpen = signal<boolean>(false);
@@ -149,9 +136,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly pickerHoveredIndex = signal<number>(-1);
   readonly pickerCenter = signal<{ x: number; y: number }>({ x: 0, y: 0 });
   readonly pickerRadius = signal<number>(PICKER_RADIUS_MAX_PX);
-  // valore attualmente nella cella sotto il picker (per evidenziare l'arco esterno)
   readonly pickerCurrentValue = signal<string>('');
-  // numeri ammessi nella cella sotto il picker (per attenuare i forbidden)
   readonly pickerAvailable = signal<string[]>([]);
   // pre-commit preview: id cella + valore previsto durante il drag nel picker
   readonly previewCellId = signal<string>('');
@@ -162,95 +147,33 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   private _hostTouchStart: ((e: TouchEvent) => void) | null = null;
 
   // === DEBUG REPORT (radial-picker) ==========================================
-  // Strumentazione attivabile via status.isDebug: raccoglie tutti gli eventi
-  // rilevanti durante la vita del picker (pointer, capture, touch, contextmenu,
-  // scroll, ecc.) e alla chiusura copia un report testuale in clipboard.
   private _pickerLog: string[] = [];
   private _pickerLogT0 = 0;
   private _pickerLogActive = false;
   private _pickerWinHandlers: Array<{ target: any; type: string; fn: any; opts?: any }> = [];
 
-  // output signal-based
-  readonly selectionChanged = output<BoardCell | undefined>();
-  readonly boardChangeRequest = output<BoardChangeEvent>();
+  // output residuo verso il parent: solo eventi che non sono stato del manager.
   readonly pasteSchemaRequest = output<string>();
-  readonly onReady = output<BoardManager>();
 
   constructor() {
-    // sync degli input bindable verso i signal interni
-    effect(() => this._cells.set(parseCells(this.cellsInput())));
+    // propaga il logic-executor (input) al manager
+    effect(() => this.manager.setLogic(this.logic()));
 
+    // reagisce alle richieste di focus del manager (cycleNextMode, switchMode,
+    // select, …): il primo run (tick=0) è ignorato, gli incrementi successivi
+    // mettono il focus DOM sulla board.
+    let firstFocusTick = true;
     effect(() => {
-      const inp = this.statusInput();
-      if (inp != null) this._status.update(prev => ({ ...prev, ...inp }));
-    });
-
-    effect(() => {
-      const h = this.highlightsInput();
-      const hl = _isString(h) ? Coding.decodeHighlightsString(h) : <Highlights>h || new Highlights();
-      this._highlights.set(hl);
-    });
-
-    effect(() => {
-      const p = this.selectionInput();
-      // se nessun [selection] è bindato, niente da fare: evitiamo anche di
-      // tracciare `_cells()` (cambia spesso durante il gioco) come dipendenza,
-      // così l'effect non re-runa ad ogni mossa.
-      if (p == null) return;
-      const m = this._manager();
-      if (!m) return;
-      m.selection$.next(<BoardCell>getCell(this._cells(), p));
+      this.manager.focusTick();
+      if (firstFocusTick) { firstFocusTick = false; return; }
+      this._element.nativeElement.focus();
     });
 
     this._calcComponentHeight();
   }
 
-  // metodi chiamati dal BoardManager per propagare i cambi di stato dal manager
-  // verso il componente (sostituiscono gli assignment legacy `_board.cells = ...`)
-  setCells(cs: SudokuCell[] | undefined | null) {
-    this._cells.set(parseCells(cs));
-  }
-
-  setStatus(s: Partial<BoardStatus> | undefined | null) {
-    if (s) this._status.update(prev => ({ ...prev, ...s }));
-  }
-
-  setHighlights(h: Highlights | string | undefined | null) {
-    const hl = _isString(h) ? Coding.decodeHighlightsString(h) : <Highlights>h || new Highlights();
-    this._highlights.set(hl);
-  }
-
-  private _calcComponentHeight() {
-    const rect = this.boardEl()?.nativeElement.getBoundingClientRect();
-    if (rect?.width > 0 && rect.width !== this._height()) this._height.set(rect.width);
-  }
-
-  private _getBoardCell(cid: BoardCell | string | undefined | null): BoardCell | undefined {
-    return <BoardCell | undefined>getCell(<SudokuCell[]>this._cells() || [], cid);
-  }
-
-  private _updateSelection(cell: BoardCell | undefined) {
-    const m = this._manager();
-    if (m) {
-      m.selection$.next(cell);
-      this.selectionChanged.emit(m.selection$.value);
-    }
-  }
-
-  ngOnInit() {
-    // istanziamo dentro un injection context: i field initializer del
-    // BoardManager usano `toSignal()` che richiede injection context.
-    runInInjectionContext(this._injector, () => {
-      this._manager.set(new BoardManager(this, this._notifier));
-    });
-  }
-
   ngAfterViewInit() {
-    setTimeout(() => {
-      this._calcComponentHeight();
-      const m = this._manager();
-      if (m) this.onReady.emit(m);
-    });
+    setTimeout(() => this._calcComponentHeight());
     // listener touchstart non-passive sull'host: necessario per chiamare
     // preventDefault e inibire il long-press di sistema su Android Chrome,
     // che altrimenti emette pointercancel al primo movimento dopo il long-press.
@@ -274,12 +197,16 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
       try { this._element.nativeElement.removeEventListener('touchstart', this._hostTouchStart); } catch { /* noop */ }
       this._hostTouchStart = null;
     }
-    this._manager()?.dispose();
+  }
+
+  private _calcComponentHeight() {
+    const rect = this.boardEl()?.nativeElement.getBoundingClientRect();
+    if (rect?.width > 0 && rect.width !== this._height()) this._height.set(rect.width);
   }
 
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    if (document.activeElement !== this._element?.nativeElement || this.status.isDisabled) return;
+    if (document.activeElement !== this._element?.nativeElement || this.manager.status().isDisabled) return;
     event.stopPropagation();
     event.preventDefault();
     this._handleKeyboardEvents(event);
@@ -287,7 +214,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:paste', ['$event'])
   pastEvent(event: ClipboardEvent) {
-    if (!this.status.isPasteEnabled || !this._manager()?.focused$.value) return;
+    if (!this.manager.status().isPasteEnabled || !this.manager.focused()) return;
     const values = event.clipboardData?.getData('text') || '';
     if (isSchemaString(values)) this.pasteSchemaRequest.emit(values);
   }
@@ -301,32 +228,29 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('focusin')
   @HostListener('focused')
   componentFocusIn() {
-    this._manager()?.focused$.next(true);
+    this.manager.setFocused(true);
   }
   @HostListener('focusout')
   componentFocusOut() {
-    this._manager()?.focused$.next(false);
-  }
-
-  focus() {
-    this._element.nativeElement.focus();
+    this.manager.setFocused(false);
   }
 
   select(cid: BoardCell | string | undefined | null) {
-    if (this.status.isDisabled) return;
-    const cell = this._getBoardCell(cid);
-    if (this.status.isDebug) console.log(...BOARD_PREFIX, 'CLICKED CELL', cell);
+    if (this.manager.status().isDisabled) return;
+    const cell = <BoardCell | undefined>getCell(this.manager.cells() || [], cid ?? undefined);
+    if (this.manager.status().isDebug) console.log(...BOARD_PREFIX, 'CLICKED CELL', cell);
     this._element?.nativeElement.focus();
-    this._updateSelection(cell);
-    this._manager()?.checkLockedValue(cell);
+    this.manager.setSelection(cell);
+    this.manager.checkLockedValue(cell);
   }
 
   onCellPointerDown(cell: BoardCell, event: PointerEvent) {
-    if (this.status.isDisabled) return;
+    const status = this.manager.status();
+    if (status.isDisabled) return;
     // accetta solo il primary button: ignora right-click / middle-click
     if (event.button !== 0) return;
     // long-press disabilitato sulle celle fisse in play (non si possono modificare)
-    if (this.status.editMode === 'play' && cell.isFixed) return;
+    if (status.editMode === 'play' && cell.isFixed) return;
     const target = event.target as Element;
     if (!target || typeof (target as any).setPointerCapture !== 'function') return;
     // su Android Chrome questo inibisce il long-press di sistema (selezione/drag)
@@ -457,13 +381,13 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this._pickerState) return;
     // 1. seleziona la cella se non lo è già
     this._element?.nativeElement.focus();
-    const m = this._manager();
-    if (m?.selection$.value?.id !== cell.id) {
-      this._updateSelection(cell);
+    if (this.manager.selection()?.id !== cell.id) {
+      this.manager.setSelection(cell);
+      this.manager.checkLockedValue(cell);
     }
     // 2. annulla l'hold-state della toolbar se attivo (long-press cella ha priorità)
-    if (m?.status$.value.isLock) {
-      m.options({ isLock: false });
+    if (this.manager.status().isLock) {
+      this.manager.options({ isLock: false });
     }
     // 3. apri il picker
     this._pickerState.open = true;
@@ -528,18 +452,19 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private _commitPickerValue(cell: BoardCell, value: string) {
-    const isEffectivePencil = this.status.editMode === 'play' && this.status.isPencil;
+    const status = this.manager.status();
+    const isEffectivePencil = status.editMode === 'play' && status.isPencil;
     // in pencil + empty l'utente vuole svuotare anche i user-values della cella
     const userValues = isEffectivePencil && value === '' ? [] : [...(cell.userValues || [])];
     const request = new BoardChangeEvent({
       value,
       userValues,
       cell: _clone(cell),
-      status: new BoardEventStatus({ ...this.status, isCtrl: false }),
+      status: new BoardEventStatus({ ...status, isCtrl: false }),
     });
-    if (this.status.isDebug) console.log(...BOARD_PREFIX, 'picker commit', request);
+    if (status.isDebug) console.log(...BOARD_PREFIX, 'picker commit', request);
     this._logPicker('picker-commit', { cell: cell.id, value, isEffectivePencil });
-    this.boardChangeRequest.emit(request);
+    this.manager.applyValue(request);
   }
 
   // === DEBUG REPORT helpers (radial-picker) =================================
@@ -597,12 +522,13 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private _pickerLogStart(cell: BoardCell, e: PointerEvent, target: Element) {
-    if (!this.status.isDebug) return;
+    if (!this.manager.status().isDebug) return;
     this._pickerLog = [];
     this._pickerLogT0 = performance.now();
     this._pickerLogActive = true;
     const tg = target as any;
     const css = (typeof getComputedStyle === 'function') ? getComputedStyle(tg) : null;
+    const status = this.manager.status();
     this._pickerLog.push('=== RADIAL PICKER DEBUG REPORT ===');
     this._pickerLog.push(`when      : ${new Date().toISOString()}`);
     this._pickerLog.push(`ua        : ${navigator.userAgent}`);
@@ -612,7 +538,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (css) {
       this._pickerLog.push(`tgt-style : touch-action=${css.touchAction}  user-select=${css.userSelect}  -webkit-user-select=${(css as any).webkitUserSelect}`);
     }
-    this._pickerLog.push(`status    : editMode=${this.status.editMode} isPencil=${this.status.isPencil} isDynamic=${this.status.isDynamic} isLock=${this.status.isLock}`);
+    this._pickerLog.push(`status    : editMode=${status.editMode} isPencil=${status.isPencil} isDynamic=${status.isDynamic} isLock=${status.isLock}`);
     this._pickerLog.push(`cell      : id=${cell.id} fixed=${cell.isFixed} dynamic=${cell.isDynamic}`);
     this._pickerLog.push('--- timeline ---');
     this._logPicker('rect:pointerdown', this._evInfoPointer(e));
@@ -685,7 +611,7 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private _getPickerValues(): string[] {
-    const s = this.status;
+    const s = this.manager.status();
     const base = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     if (s.editMode === 'schema' && s.isDynamic) {
       return [...base, '', '?'];
@@ -694,36 +620,40 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   copySchemaToClipboard() {
-    this._clipboard.copy(getCellsSchema(this._cells(), { allowDynamic: !!this.status?.isDynamic }));
+    const status = this.manager.status();
+    this._clipboard.copy(getCellsSchema(this.manager.cells(), { allowDynamic: !!status.isDynamic }));
     this._notifier.notify('Schema copied to clipboard successfully', NotificationType.success);
   }
 
   private _move(code: string, mode?: BoardNextMode) {
-    const m = this._manager();
-    const current = m?.selection$.value;
+    const current = this.manager.selection();
     if (!current) return;
     const target = moveOnDirection(code, current, mode);
-    const cell = <BoardCell>getCell(this._cells(), target);
-    if (cell?.id !== current?.id) this._updateSelection(cell);
+    const cell = <BoardCell>getCell(this.manager.cells(), target);
+    if (cell?.id !== current?.id) {
+      this.manager.setSelection(cell);
+      this.manager.checkLockedValue(cell);
+    }
   }
 
   private _handleKeyboardEvents(e: KeyboardEvent) {
-    if (this.status.isDebug) console.log(...BOARD_PREFIX, 'BOARD KEY EVENT', e.key, '\nORIGINAL', e);
+    const status = this.manager.status();
+    if (status.isDebug) console.log(...BOARD_PREFIX, 'BOARD KEY EVENT', e.key, '\nORIGINAL', e);
     if (isDirectionKey(e)) {
-      this._move(e.code, this.status.nextMode);
+      this._move(e.code, status.nextMode);
     } else {
       // COPIA LO SCHEMA IN CLIPBOARD
       if (isCopyKeys(e)) return this.copySchemaToClipboard();
       // NEXT STEP
-      if (isNextStepKey(e)) return this._manager()?.execOperation('solve-step');
+      if (isNextStepKey(e)) return this.manager.execOperation('solve-step');
       // SKIPPED KEYS
       if (isSkippedKey(e.code)) return;
-      const cell = this._manager()?.selection$.value;
-      if (this.status.editMode === 'play' && cell?.isFixed) {
-        this._move(NEXT_DIRECTION, this.status.nextMode);
+      const cell = this.manager.selection();
+      if (status.editMode === 'play' && cell?.isFixed) {
+        this._move(NEXT_DIRECTION, status.nextMode);
         return;
       }
-      const isEffectivePencil = this.status.editMode === 'play' && this.status.isPencil;
+      const isEffectivePencil = status.editMode === 'play' && status.isPencil;
       let userValues: string[] = [...cell?.userValues || []];
       if (isDeleteKey(e.code) && isEffectivePencil) userValues = [];
       const request = new BoardChangeEvent({
@@ -731,13 +661,13 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
         userValues,
         cell: _clone(cell),
         status: new BoardEventStatus({
-          ...this.status,
+          ...status,
           isCtrl: e.ctrlKey,
         }),
       });
-      if (this.status.isDebug) console.log(...BOARD_PREFIX, 'board cell changes request', request);
-      this.boardChangeRequest.emit(request);
-      this._move(NEXT_DIRECTION, this.status.nextMode);
+      if (status.isDebug) console.log(...BOARD_PREFIX, 'board cell changes request', request);
+      this.manager.applyValue(request);
+      this._move(NEXT_DIRECTION, status.nextMode);
     }
   }
 }

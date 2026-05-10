@@ -2,13 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AlgorithmsSelectorDialogComponent } from '../algorithms-selector-dialog/algorithms-selector-dialog.component';
 import {
@@ -83,7 +80,8 @@ export class GeneratorOptionsComponent {
   readonly EndGenerationMode = EndGenerationMode;
   readonly algorithms: Algorithm[] = getAlgorithms();
 
-  readonly manager = input<BoardManager | null | undefined>(null);
+  private readonly _manager = inject(BoardManager);
+
   readonly options = input<GeneratorOptions | null | undefined>(new GeneratorOptions());
 
   readonly onOptionsChanged = output<GeneratorOptions>();
@@ -97,24 +95,14 @@ export class GeneratorOptionsComponent {
 
   readonly algorithmsSummary = computed<string>(() => this._buildSummary(this.opt()));
 
-  // signal alimentati dai BehaviorSubject del manager (Fase 4)
-  private readonly _cells = signal<SudokuCell[]>([]);
+  // celle correnti del manager (signal-derived)
+  private readonly _cells = computed<SudokuCell[]>(() => this._manager.cells());
 
   readonly isMultischema = computed<boolean>(() => isMultischema(this._cells(), this.opt()));
   readonly hasNewOrDynamicFixed = computed<boolean>(() => hasNewOrDynamicFixed(this._cells(), this.opt()));
   readonly fixedCount = computed<number>(() => getFixedCount(this._cells()));
 
   private readonly _dialog = inject(MatDialog);
-
-  constructor() {
-    // sottoscrive le cells del manager quando cambia
-    effect(onCleanup => {
-      const m = this.manager();
-      if (!m) return;
-      const sub = m.cells$.subscribe(cells => this._cells.set(cells || []));
-      onCleanup(() => sub.unsubscribe());
-    });
-  }
 
   private _buildSummary(opt: GeneratorOptions): string {
     const usable = getUsableAlgorithms(this.algorithms, opt.allowTryAlgorithm);

@@ -1,4 +1,3 @@
-import { catchError, take, throwError } from 'rxjs';
 import { inject, InjectionToken, signal } from '@angular/core';
 import { cloneDeep as _clone, extend as _extend, isArray as _isArray } from 'lodash';
 import {
@@ -51,10 +50,7 @@ export class SudokuStore {
   init(executor: LogicExecutor) {
     if (this._isFilling() || this._isFilled()) return;
     this._isFilling.set(true);
-
-    this._interaction.getCatalog()
-      .pipe(take(1))
-      .subscribe(sdks => this.load(sdks));
+    this._interaction.getCatalog().then(sdks => this.load(sdks));
   }
 
   addGeneratedSchema(sdk: SudokuEx) {
@@ -70,55 +66,39 @@ export class SudokuStore {
   }
 
   /**
-   * verifica lo schema lato server. Se il server risponde 4xx/5xx con
+   * Verifica lo schema lato server. Se il server risponde 4xx/5xx con
    * un body strutturato (`{ code, message, solutionCount? }`) la Promise
    * viene rigettata con quell'oggetto, così il chiamante può mostrare
    * all'utente un report preciso dell'errore (non univoco, incoerente,
    * regressione motore, ecc.).
-   * @param sdk
    */
-  checkSchema(sdk: Sudoku): Promise<SudokuEx|undefined> {
-    return new Promise<SudokuEx | undefined>((resolve, reject) => {
-      try {
-        this._interaction
-          .checkSchema(sdk)
-          .pipe(catchError((err: any) => {
-            console.error(...SDK_PREFIX, `error while check schema\n\t${sdk.values}`, err);
-            const body = err?.error || {};
-            const httpStatus = err?.status;
-            // errori generici di rete (status 0, timeout, ecc.) ricadono nella
-            // notifica fallback; gli errori strutturati vengono propagati
-            if (!body?.code && httpStatus !== 0) {
-              this._notifier.notify(`error while check schema`, NotificationType.error);
-            }
-            return throwError(() => ({
-              code: body.code || 'unknown-error',
-              message: body.message || err?.message || 'Errore sconosciuto',
-              solutionCount: body.solutionCount,
-              httpStatus,
-            }));
-          }))
-          .subscribe({
-            next: (r: SudokuEx|undefined) => {
-              if (r) {
-                this._updateCatalogItem(r._id, (ctg, s) => {
-                  if (s) {
-                    _extend(s, r);
-                  } else {
-                    ctg.push(r);
-                  }
-                  return true;
-                });
-              }
-              resolve(r);
-            },
-            error: (err) => reject(err),
-          });
-      } catch (err: any) {
-        console.error(...SDK_PREFIX, `error while check client schema "${sdk._id}"`, err);
-        reject({ code: 'client-error', message: err?.message || 'Errore client', httpStatus: 0 });
+  async checkSchema(sdk: Sudoku): Promise<SudokuEx | undefined> {
+    try {
+      const r = await this._interaction.checkSchema(sdk);
+      if (r) {
+        this._updateCatalogItem(r._id, (ctg, s) => {
+          if (s) _extend(s, r);
+          else ctg.push(r);
+          return true;
+        });
       }
-    })
+      return r;
+    } catch (err: any) {
+      console.error(...SDK_PREFIX, `error while check schema\n\t${sdk.values}`, err);
+      const body = err?.error || {};
+      const httpStatus = err?.status;
+      // errori generici di rete (status 0, timeout, ecc.) ricadono nella
+      // notifica fallback; gli errori strutturati vengono propagati
+      if (!body?.code && httpStatus !== 0) {
+        this._notifier.notify(`error while check schema`, NotificationType.error);
+      }
+      throw {
+        code: body.code || 'unknown-error',
+        message: body.message || err?.message || 'Errore sconosciuto',
+        solutionCount: body.solutionCount,
+        httpStatus,
+      };
+    }
   }
 
   getSudoku(schema: string): Sudoku|undefined {

@@ -2,16 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
+  effect,
   ElementRef,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { catchError, of } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -30,7 +28,6 @@ import {
   SolveOptions,
   stopEvent,
   Sudoku,
-  ValueOptions,
 } from '@olmi/model';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { SUDOKU_API, SUDOKU_NOTIFIER } from '@olmi/common';
@@ -75,14 +72,15 @@ interface ChooserButton {
   ],
   templateUrl: './schema-keeper-dialog.component.html',
   styleUrl: './schema-keeper-dialog.component.scss',
+  providers: [BoardManager],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SchemaKeeperDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<SchemaKeeperDialogComponent>);
   private readonly _interaction = inject(SUDOKU_API);
   private readonly _notifier = inject(SUDOKU_NOTIFIER);
-  private readonly _destroyRef = inject(DestroyRef);
   private readonly _data = inject<{ values?: string } | null>(MAT_DIALOG_DATA, { optional: true });
+  protected readonly manager = inject(BoardManager);
 
   protected readonly localContext = LocalContext;
   protected readonly DEFAULT_TOTAL_RANK = DEFAULT_TOTAL_RANK;
@@ -112,9 +110,8 @@ export class SchemaKeeperDialogComponent {
     return isSchemaString(this.text());
   });
 
-  protected readonly isDebugMode = toSignal(LocalContext.isDebugMode$, { initialValue: false });
+  protected readonly isDebugMode = LocalContext.isDebugMode;
 
-  protected manager: BoardManager | undefined;
   protected readonly toolbarTemplate = 'nums,clear,delete';
 
   protected readonly chooserButtons: ChooserButton[] = [
@@ -123,6 +120,24 @@ export class SchemaKeeperDialogComponent {
     { mode: KeeperMode.file, icon: 'description', title: 'Import json file' },
     { mode: KeeperMode.imagePreview, icon: 'image', title: 'Scan image' },
   ];
+
+  constructor() {
+    // configurazione iniziale del manager (one-shot)
+    this.manager.options(<Partial<BoardStatus>>{
+      editMode: 'schema',
+      isDynamic: false,
+      nextMode: 'next-in-row',
+    });
+    if (this._presetValues) this.manager.load(this._presetValues);
+
+    // sincronizza `text` con le cells del manager: ogni volta che le cells
+    // cambiano (utente che edita la board nel keeper schema) ricalcola la
+    // stringa schema.
+    effect(() => {
+      const cells = this.manager.cells();
+      this.text.set(getCellsSchema(cells));
+    });
+  }
 
   private _reset() {
     this.text.set('');
@@ -235,20 +250,6 @@ export class SchemaKeeperDialogComponent {
     this.setMode();
   }
 
-  private _initBoard() {
-    if (!this.manager) return;
-    const o = <ValueOptions>{
-      editMode: 'schema',
-      isDynamic: false,
-      nextMode: 'next-in-row',
-    };
-    this.manager.options(<Partial<BoardStatus>>o);
-    if (this.text()) this.manager.load(this.text());
-    this.manager.cells$
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(cells => this.text.set(getCellsSchema(cells, o)));
-  }
-
   private _manageScanResult(res?: { values?: string }) {
     if (!res) return this.setMode();
     if (res.values) {
@@ -257,24 +258,18 @@ export class SchemaKeeperDialogComponent {
     }
   }
 
-  private _manageScan() {
+  private async _manageScan() {
     this.loading.set(true);
     const angle = this.rotation() + this.rotationOrthogonal();
-    this._rotateImage(this.image(), angle).then(data => {
-      this._interaction
-        .ocrScan({ data })
-        .pipe(
-          catchError(err => {
-            console.error('error while scan image', err);
-            return of(undefined);
-          }),
-          takeUntilDestroyed(this._destroyRef),
-        )
-        .subscribe(res => {
-          this.loading.set(false);
-          this._manageScanResult(res);
-        });
-    });
+    const data = await this._rotateImage(this.image(), angle);
+    let res: { values?: string } | undefined;
+    try {
+      res = await this._interaction.ocrScan({ data });
+    } catch (err) {
+      console.error('error while scan image', err);
+    }
+    this.loading.set(false);
+    this._manageScanResult(res);
   }
 
   allowDrop(e: DragEvent) {
@@ -301,13 +296,6 @@ export class SchemaKeeperDialogComponent {
     stopEvent(e);
     this.dragExit();
     this._importFromFiles(e.dataTransfer?.files);
-  }
-
-  boardReady(manager: BoardManager) {
-    if (!this.manager) {
-      this.manager = manager;
-      this._initBoard();
-    }
   }
 
   setMode(mode?: KeeperMode) {

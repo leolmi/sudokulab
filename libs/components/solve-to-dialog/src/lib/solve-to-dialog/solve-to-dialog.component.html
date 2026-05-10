@@ -1,17 +1,18 @@
+@let active = activeStep();
 <h2 mat-dialog-title>Solve to step</h2>
 <mat-dialog-content class="step-to-dialog-content">
   <div class="items-container">
     <cdk-virtual-scroll-viewport
       class="steps-container"
       itemSize="24">
-      @for (step of items$|async; let index = $index; track index;) {
+      @for (step of items(); let index = $index; track index) {
         <div class="step-item flex-row flex-align-start-center"
-             [class.active]="(activeStep$|async)===index"
+             [class.active]="active === index"
              [class.secondary]="!step.value"
              (click)="clickOnItem(index)">
-          <span class="step-index">{{(index+1)}}</span>
-          <span class="step-algorithm flex-1">{{step.description}}</span>
-          <mat-icon>{{step.icon}}</mat-icon>
+          <span class="step-index">{{ index + 1 }}</span>
+          <span class="step-algorithm flex-1">{{ step.description }}</span>
+          <mat-icon>{{ step.icon }}</mat-icon>
         </div>
       }
     </cdk-virtual-scroll-viewport>
@@ -20,7 +21,7 @@
 <mat-dialog-actions>
   <button mat-button mat-dialog-close>Cancel</button>
   <button mat-button
-          [disabled]="!(activeStep$|async)"
+          [disabled]="active === undefined"
           (click)="select()"
           cdkFocusInitial
   >Go</button>

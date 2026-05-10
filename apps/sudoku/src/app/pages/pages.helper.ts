@@ -55,14 +55,14 @@ export const defaultHandleMenuItem = (router: Router, state: SudokuState, item: 
       break;
     case 'switch': {
       if (manager) {
-        const status = manager.status$.value;
-        if (item.property) manager?.options(<Partial<BoardStatus>>{ [item.property]: !_get(status, item.property) });
+        const status = manager.status();
+        if (item.property) manager.options(<Partial<BoardStatus>>{ [item.property]: !_get(status, item.property) });
       }
       break;
     }
     case 'toggle': {
       if (manager) {
-        const status = manager.status$.value;
+        const status = manager.status();
         if (item.property) manager.options(<Partial<BoardStatus>>{ [item.property]: getNextValue(status, item.property) });
       }
       break;

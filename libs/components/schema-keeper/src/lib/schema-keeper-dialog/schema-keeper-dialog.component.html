@@ -35,10 +35,8 @@
     }
     @case (KeeperMode.schema) {
       <div class="keeper-page page-keeper">
-        <sudoku-board (onReady)="boardReady($event)"></sudoku-board>
-        @if (manager) {
-          <schema-toolbar [manager]="manager" [template]="toolbarTemplate"></schema-toolbar>
-        }
+        <sudoku-board></sudoku-board>
+        <schema-toolbar [template]="toolbarTemplate"></schema-toolbar>
       </div>
     }
     @case (KeeperMode.text) {

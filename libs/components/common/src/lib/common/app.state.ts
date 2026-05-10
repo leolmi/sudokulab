@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter, map, take } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { keys as _keys, values as _values } from 'lodash';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
@@ -113,10 +113,7 @@ export class SudokuState {
     this.theme = this._theme.asReadonly();
     this.androidBottomBarBugFix = this._androidBottomBarBugFix.asReadonly();
 
-    this.isDebugMode = toSignal(
-      LocalContext.changed$.pipe(map(() => LocalContext.isLevel('debug'))),
-      { initialValue: LocalContext.isLevel('debug') }
-    );
+    this.isDebugMode = LocalContext.isDebugMode;
 
     this.route = toSignal(
       this._router.events.pipe(
@@ -198,13 +195,12 @@ export class SudokuState {
     });
 
     // ping iniziale per recuperare versione e algoritmi dal server
-    this._interaction.ping()
-      .pipe(filter(i => !!i), take(1))
-      .subscribe((i: SudokulabInfo) => {
-        SudokuState.version = i?.version||'';
-        SudokuState.algorithmsVersion = i?.algorithmsVersion||'';
-        this._info.set(i);
-      });
+    this._interaction.ping().then((i: SudokulabInfo | undefined) => {
+      if (!i) return;
+      SudokuState.version = i.version || '';
+      SudokuState.algorithmsVersion = i.algorithmsVersion || '';
+      this._info.set(i);
+    });
   }
 
   private _updateMenuStatus(menu?: MenuItem[], status?: ButtonsStatus) {

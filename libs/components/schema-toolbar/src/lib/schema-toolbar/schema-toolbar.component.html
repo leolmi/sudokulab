@@ -1,8 +1,7 @@
 <div class="schema-toolbar flex-row flex-align-start-stretch"
      [class.progress]="showProgress()">
-  @let m = manager();
   @let sts = status();
-  @if (showProgress() && m) {
+  @if (showProgress()) {
     <mat-progress-bar
       class="toolbar-progress"
       mode="determinate"

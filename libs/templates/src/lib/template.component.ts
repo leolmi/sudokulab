@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, InjectionToken, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, InjectionToken, Signal } from '@angular/core';
 import { SUDOKU_PRINT_DOCUMENT } from '@olmi/common';
-import { map } from 'rxjs';
 
 export const TEMPLATE_PAGE_ID = new InjectionToken<string>('TEMPLATE_PAGE_ID');
 
@@ -15,15 +13,12 @@ export class TemplateComponent {
   protected readonly pageId = inject(TEMPLATE_PAGE_ID);
   protected readonly printDocument = inject(SUDOKU_PRINT_DOCUMENT);
 
-  protected readonly activeArea = toSignal(this.printDocument.activeArea$, { initialValue: '' });
+  protected readonly activeArea = this.printDocument.activeArea;
 
   protected getSchema(pos: number): Signal<string> {
-    return toSignal(
-      this.printDocument.pages$.pipe(map(pgs => {
-        const page = pgs.find(p => p.id === this.pageId);
-        return page?.schemas[`${pos}`] || '';
-      })),
-      { initialValue: '' },
-    );
+    return computed(() => {
+      const page = this.printDocument.pages().find(p => p.id === this.pageId);
+      return page?.schemas[`${pos}`] || '';
+    });
   }
 }

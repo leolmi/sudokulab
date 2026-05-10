@@ -30,6 +30,6 @@ export class CoupleA4VComponent extends TemplateComponent {
   protected readonly schemaBottom = this.getSchema(1);
 
   setActive(index: number) {
-    this.printDocument.activeArea$.next(getPageArea(this.pageId, index));
+    this.printDocument.setActiveArea(getPageArea(this.pageId, index));
   }
 }
