@@ -1,24 +1,29 @@
-import { Component, inject, InjectionToken } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, InjectionToken, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { SUDOKU_PRINT_DOCUMENT } from '@olmi/common';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 
 export const TEMPLATE_PAGE_ID = new InjectionToken<string>('TEMPLATE_PAGE_ID');
 
 @Component({
   selector: 'template-component',
   template: '',
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplateComponent {
-  pageId = inject(TEMPLATE_PAGE_ID);
-  printDocument = inject(SUDOKU_PRINT_DOCUMENT);
+  protected readonly pageId = inject(TEMPLATE_PAGE_ID);
+  protected readonly printDocument = inject(SUDOKU_PRINT_DOCUMENT);
 
-  constructor() {}
+  protected readonly activeArea = toSignal(this.printDocument.activeArea$, { initialValue: '' });
 
-  getSchema$(pos: number): Observable<string> {
-    return this.printDocument.pages$.pipe(map(pgs => {
-      const page = pgs.find(p => p.id === this.pageId);
-      return page?.schemas[`${pos}`]||'';
-    }))
+  protected getSchema(pos: number): Signal<string> {
+    return toSignal(
+      this.printDocument.pages$.pipe(map(pgs => {
+        const page = pgs.find(p => p.id === this.pageId);
+        return page?.schemas[`${pos}`] || '';
+      })),
+      { initialValue: '' },
+    );
   }
 }

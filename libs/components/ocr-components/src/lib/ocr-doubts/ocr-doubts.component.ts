@@ -1,9 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BehaviorSubject, map } from 'rxjs';
+import { ChangeDetectionStrategy, Component, effect, input, linkedSignal, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { OcrScanDoubt } from '@olmi/model';
-import { cloneDeep as _clone } from 'lodash';
 
 export interface OcrMapWrapper {
   text: string;
@@ -13,56 +10,36 @@ export interface OcrMapWrapper {
 
 @Component({
   selector: 'ocr-doubts',
-  imports: [
-    CommonModule,
-    MatButtonModule,
-  ],
+  standalone: true,
+  imports: [MatButtonModule],
   templateUrl: './ocr-doubts.component.html',
   styleUrl: './ocr-doubts.component.scss',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OcrDoubtsComponent {
-  ocrMaps$: BehaviorSubject<OcrMapWrapper[]>;
+  readonly ocrMaps = input<OcrScanDoubt[] | null | undefined>();
 
-  @Input()
-  set ocrMaps(ds: OcrScanDoubt[]|null|undefined) {
-    this.ocrMaps$.next(getMaps(ds||[]));
-  }
+  readonly isValid = output<boolean>();
+  readonly doubts = output<OcrMapWrapper[]>();
 
-  @Output()
-  isValid: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-  @Output()
-  doubts: EventEmitter<OcrMapWrapper[]> = new EventEmitter<OcrMapWrapper[]>();
+  // stato locale derivato dall'input: parte dai doubts in ingresso e si lascia
+  // mutare da `applyChar` quando l'utente compila i caratteri ambigui.
+  protected readonly maps = linkedSignal<OcrMapWrapper[]>(() => getMaps(this.ocrMaps() || []));
 
   constructor() {
-    this.ocrMaps$ = new BehaviorSubject<OcrMapWrapper[]>([]);
-
-    this.ocrMaps$
-      .pipe(map(oms => oms.length>0 && !oms.find(o => !o.text)))
-      .subscribe(valid => {
-        this.isValid.emit(valid);
-        if (valid) this.doubts.emit(this.ocrMaps$.value);
-      });
+    effect(() => {
+      const maps = this.maps();
+      const valid = maps.length > 0 && !maps.some(o => !o.text);
+      this.isValid.emit(valid);
+      if (valid) this.doubts.emit(maps);
+    });
   }
 
-  applyChar(e: any, omw: OcrMapWrapper) {
-    const ms = _clone(this.ocrMaps$.value);
-    const omwc = ms.find(m => m.src === omw.src);
-    if (omwc) {
-      omwc.text = e.target.value||'';
-      this.ocrMaps$.next(ms);
-    }
+  applyChar(e: Event, omw: OcrMapWrapper) {
+    const value = (e.target as HTMLInputElement).value || '';
+    this.maps.update(ms => ms.map(m => m.src === omw.src ? { ...m, text: value } : m));
   }
 }
 
-const getMaps = (ds: OcrScanDoubt[]): OcrMapWrapper[] => {
-  return ds.map(d => {
-    return <OcrMapWrapper>{
-      src: d.image||'',
-      text: '',
-      map: d.map||''
-    };
-  });
-}
+const getMaps = (ds: OcrScanDoubt[]): OcrMapWrapper[] =>
+  ds.map(d => ({ src: d.image || '', text: '', map: d.map || '' }));

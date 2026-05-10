@@ -1,6 +1,6 @@
-@for (ocm of ocrMaps$|async; track $index) {
+@for (ocm of maps(); track ocm.src) {
   <div class="ocr-map flex-row flex-align-start-center">
-    <img class="ocr-map-image" [src]="ocm.src">
+    <img class="ocr-map-image" [src]="ocm.src" alt="ambiguous character">
     <div class="flex-1"></div>
     <input class="ocr-map-text"
            [maxLength]="1" type="text"

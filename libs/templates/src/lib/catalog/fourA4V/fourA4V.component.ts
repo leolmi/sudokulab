@@ -1,61 +1,49 @@
 import { TemplateComponent } from '../../template.component';
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { getPageArea } from '@olmi/model';
 import { BoardPreviewComponent } from '@olmi/board';
-import { map, Observable } from 'rxjs';
 
 @Component({
   selector: 'print-page-template-four-a4v',
   standalone: true,
-  imports: [
-    CommonModule,
-    BoardPreviewComponent
-  ],
+  imports: [BoardPreviewComponent],
   template: `
+    @let area = activeArea();
     <div class="print-template-container flex-col">
       <div class="flex-row flex-align-start-stretch flex-1">
         <div class="print-page-area top flex-1"
-             [class.active]="(printDocument.activeArea$|async)===(pageId+'.0')"
+             [class.active]="area === pageId + '.0'"
              (click)="setActive(0)">
-          <sudoku-board-preview [schema]="schemaTopLeft$|async"></sudoku-board-preview>
+          <sudoku-board-preview [schema]="schemaTopLeft()"></sudoku-board-preview>
         </div>
         <div class="print-page-area left-line bottom flex-1"
-             [class.active]="(printDocument.activeArea$|async)===(pageId+'.1')"
+             [class.active]="area === pageId + '.1'"
              (click)="setActive(1)">
-          <sudoku-board-preview [schema]="schemaTopRight$|async"></sudoku-board-preview>
+          <sudoku-board-preview [schema]="schemaTopRight()"></sudoku-board-preview>
         </div>
       </div>
       <div class="top-line flex-row flex-align-start-stretch flex-1">
         <div class="print-page-area top flex-1"
-             [class.active]="(printDocument.activeArea$|async)===(pageId+'.2')"
+             [class.active]="area === pageId + '.2'"
              (click)="setActive(2)">
-          <sudoku-board-preview [schema]="schemaBottomLeft$|async"></sudoku-board-preview>
+          <sudoku-board-preview [schema]="schemaBottomLeft()"></sudoku-board-preview>
         </div>
         <div class="print-page-area left-line bottom flex-1"
-             [class.active]="(printDocument.activeArea$|async)===(pageId+'.3')"
+             [class.active]="area === pageId + '.3'"
              (click)="setActive(3)">
-          <sudoku-board-preview [schema]="schemaBottomRight$|async"></sudoku-board-preview>
+          <sudoku-board-preview [schema]="schemaBottomRight()"></sudoku-board-preview>
         </div>
       </div>
     </div>
   `,
-  styleUrls: ['../../template.component.scss', './fourA4V.component.scss']
+  styleUrls: ['../../template.component.scss', './fourA4V.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FourA4VComponent extends TemplateComponent {
-  schemaTopLeft$: Observable<string>;
-  schemaTopRight$: Observable<string>;
-  schemaBottomLeft$: Observable<string>;
-  schemaBottomRight$: Observable<string>;
-
-  constructor() {
-    super();
-    this.schemaTopLeft$ = this.getSchema$(0);
-    this.schemaTopRight$ = this.getSchema$(1);
-    this.schemaBottomLeft$ = this.getSchema$(2);
-    this.schemaBottomRight$ = this.getSchema$(3);
-
-  }
+  protected readonly schemaTopLeft = this.getSchema(0);
+  protected readonly schemaTopRight = this.getSchema(1);
+  protected readonly schemaBottomLeft = this.getSchema(2);
+  protected readonly schemaBottomRight = this.getSchema(3);
 
   setActive(index: number) {
     this.printDocument.activeArea$.next(getPageArea(this.pageId, index));

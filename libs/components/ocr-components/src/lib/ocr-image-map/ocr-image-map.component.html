@@ -2,12 +2,12 @@
 <mat-dialog-content class="schema-keeper-content">
   <ocr-doubts
     [ocrMaps]="data.doubts"
-    (isValid)="valid$.next($event)"
-    (doubts)="ocrMaps$.next($event)"
+    (isValid)="valid.set($event)"
+    (doubts)="ocrMaps.set($event)"
   ></ocr-doubts>
 </mat-dialog-content>
 <mat-dialog-actions>
   <div class="flex-1"></div>
   <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-button [disabled]="!(valid$|async)" (click)="apply()">Apply</button>
+  <button mat-button [disabled]="!valid()" (click)="apply()">Apply</button>
 </mat-dialog-actions>

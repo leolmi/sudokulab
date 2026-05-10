@@ -10,13 +10,13 @@ import { Clipboard } from '@angular/cdk/clipboard';
 
 
 class GridCell {
-  id: number = 0;
-  size: number = 0;
-  x: number = 0;
-  y: number = 0;
-  posX: number = 0;
-  posY: number = 0;
-  active: boolean = false;
+  id = 0;
+  size = 0;
+  x = 0;
+  y = 0;
+  posX = 0;
+  posY = 0;
+  active = false;
 }
 
 @Component({

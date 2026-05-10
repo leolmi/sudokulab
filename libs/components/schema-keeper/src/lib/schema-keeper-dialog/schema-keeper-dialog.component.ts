@@ -1,8 +1,17 @@
-import { Component, ElementRef, Inject, inject, Optional, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { BehaviorSubject, catchError, combineLatest, map, Observable, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -21,7 +30,7 @@ import {
   SolveOptions,
   stopEvent,
   Sudoku,
-  ValueOptions
+  ValueOptions,
 } from '@olmi/model';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { SUDOKU_API, SUDOKU_NOTIFIER } from '@olmi/common';
@@ -49,8 +58,8 @@ interface ChooserButton {
 
 @Component({
   selector: 'schema-keeper',
+  standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatIcon,
@@ -66,82 +75,75 @@ interface ChooserButton {
   ],
   templateUrl: './schema-keeper-dialog.component.html',
   styleUrl: './schema-keeper-dialog.component.scss',
-  standalone: true
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SchemaKeeperDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<SchemaKeeperDialogComponent>);
   private readonly _interaction = inject(SUDOKU_API);
   private readonly _notifier = inject(SUDOKU_NOTIFIER);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _data = inject<{ values?: string } | null>(MAT_DIALOG_DATA, { optional: true });
+
   protected readonly localContext = LocalContext;
-  @ViewChild('textInput') textInput: ElementRef|undefined;
-  @ViewChild('fileResource') fileResource: ElementRef|undefined;
-  @ViewChild('imageResource') imageResource: ElementRef|undefined;
-  keeperMode$: BehaviorSubject<KeeperMode>;
-  text$: BehaviorSubject<string>;
-  image$: BehaviorSubject<string>;
-  dragging$: BehaviorSubject<boolean>;
-  loading$: BehaviorSubject<boolean>;
-  rotation$: BehaviorSubject<number>;
-  rotationOrthogonal$: BehaviorSubject<number>;
-  rotationTotal$: Observable<number>;
-  readonly ROTATION_RANGE = ROTATION_RANGE;
+  protected readonly DEFAULT_TOTAL_RANK = DEFAULT_TOTAL_RANK;
+  protected readonly KeeperMode = KeeperMode;
+  protected readonly ROTATION_RANGE = ROTATION_RANGE;
 
-  manager: BoardManager | undefined;
-  toolbarTemplate = 'nums,clear,delete';
+  protected readonly textInput = viewChild<ElementRef<HTMLInputElement>>('textInput');
+  protected readonly fileResource = viewChild<ElementRef<HTMLInputElement>>('fileResource');
+  protected readonly imageResource = viewChild<ElementRef<HTMLInputElement>>('imageResource');
 
-  chooserButtons: ChooserButton[] = [
+  private readonly _presetValues = (this._data?.values || '').trim();
+
+  protected readonly keeperMode = signal<KeeperMode>(
+    this._presetValues ? KeeperMode.schema : KeeperMode.chooser,
+  );
+  protected readonly text = signal<string>(this._presetValues);
+  protected readonly image = signal<string>('');
+  protected readonly dragging = signal<boolean>(false);
+  protected readonly loading = signal<boolean>(false);
+  protected readonly rotation = signal<number>(0);
+  protected readonly rotationOrthogonal = signal<number>(0);
+
+  protected readonly rotationTotal = computed(() => this.rotation() + this.rotationOrthogonal());
+  protected readonly textLength = computed(() => `${this.text() || ''}`.length);
+  protected readonly valid = computed(() => {
+    if (this.keeperMode() === KeeperMode.imagePreview) return !!this.image();
+    return isSchemaString(this.text());
+  });
+
+  protected readonly isDebugMode = toSignal(LocalContext.isDebugMode$, { initialValue: false });
+
+  protected manager: BoardManager | undefined;
+  protected readonly toolbarTemplate = 'nums,clear,delete';
+
+  protected readonly chooserButtons: ChooserButton[] = [
     { mode: KeeperMode.schema, icon: 'grid_on', title: 'Schema' },
     { mode: KeeperMode.text, icon: 'money', title: 'String of numbers' },
     { mode: KeeperMode.file, icon: 'description', title: 'Import json file' },
     { mode: KeeperMode.imagePreview, icon: 'image', title: 'Scan image' },
   ];
-  textLength$: Observable<number>;
-  valid$: Observable<boolean>;
-
-  constructor(@Optional() @Inject(MAT_DIALOG_DATA) data?: { values?: string }) {
-    const presetValues = (data?.values || '').trim();
-    this.keeperMode$ = new BehaviorSubject<KeeperMode>(presetValues ? KeeperMode.schema : KeeperMode.chooser);
-    this.loading$ = new BehaviorSubject<boolean>(false);
-    this.dragging$ = new BehaviorSubject<boolean>(false);
-    this.text$ = new BehaviorSubject<string>(presetValues);
-    this.image$ = new BehaviorSubject<string>('');
-    this.rotation$ = new BehaviorSubject<number>(0);
-    this.rotationOrthogonal$ = new BehaviorSubject<number>(0);
-    this.rotationTotal$ = combineLatest([this.rotation$, this.rotationOrthogonal$])
-      .pipe(map(([r, o]) => r + o));
-
-    this.textLength$ = this.text$.pipe(map(t => `${t||''}`.length));
-    this.valid$ = combineLatest([this.keeperMode$, this.text$, this.image$]).pipe(map(
-      ([mode, text, img]: [KeeperMode, string, string]) => {
-        switch (mode) {
-          case KeeperMode.imagePreview:
-            return !!img;
-          default:
-            return isSchemaString(text);
-        }
-      }));
-  }
 
   private _reset() {
-    this.text$.next('');
-    this.image$.next('');
-    this.loading$.next(false);
-    this.dragging$.next(false);
+    this.text.set('');
+    this.image.set('');
+    this.loading.set(false);
+    this.dragging.set(false);
     this._resetRotation();
   }
 
   private _resetRotation() {
-    this.rotation$.next(0);
-    this.rotationOrthogonal$.next(0);
+    this.rotation.set(0);
+    this.rotationOrthogonal.set(0);
   }
 
   private _onChangeMode() {
-    switch (this.keeperMode$.value) {
+    switch (this.keeperMode()) {
       case KeeperMode.chooser:
         this._reset();
         break;
       case KeeperMode.text:
-        setTimeout(() => this.textInput?.nativeElement.focus(), 250);
+        setTimeout(() => this.textInput()?.nativeElement.focus(), 250);
         break;
       case KeeperMode.file:
         this.importFile();
@@ -153,21 +155,21 @@ export class SchemaKeeperDialogComponent {
   }
 
   private _pickImage() {
-    if (this.imageResource) {
-      this.imageResource.nativeElement.click();
-    }
+    this.imageResource()?.nativeElement.click();
   }
 
-  onImageChange(e: any) {
-    const files = e.target?.files;
+  onImageChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const files = input.files;
     const file = getFirstImageFile(files);
     // Reset input per consentire di selezionare lo stesso file
-    if (this.imageResource) this.imageResource.nativeElement.value = '';
+    const imageEl = this.imageResource()?.nativeElement;
+    if (imageEl) imageEl.value = '';
     if (file) {
       getImageByFile(file, (img) => {
         if (img) {
           this._resetRotation();
-          this.image$.next(img);
+          this.image.set(img);
         } else {
           this.setMode();
         }
@@ -179,12 +181,11 @@ export class SchemaKeeperDialogComponent {
   }
 
   setRotation(value: number) {
-    this.rotation$.next(value);
+    this.rotation.set(value);
   }
 
   rotateOrthogonal(delta: number) {
-    const next = (this.rotationOrthogonal$.value + delta) % 360;
-    this.rotationOrthogonal$.next(next);
+    this.rotationOrthogonal.update(v => (v + delta) % 360);
   }
 
   resetRotation() {
@@ -219,13 +220,13 @@ export class SchemaKeeperDialogComponent {
     });
   }
 
-  private _importFromFiles(files: any) {
+  private _importFromFiles(files: FileList | null | undefined) {
     let file = getFirstJsonFile(files);
     if (file) return getSudokuByFile(file, (sdk) => this._dialogRef.close(sdk.values));
     file = getFirstImageFile(files);
     if (file) return getImageByFile(file, (img) => {
       if (img) {
-        this.image$.next(img);
+        this.image.set(img);
         this.setMode(KeeperMode.imagePreview);
       } else {
         this.setMode();
@@ -235,62 +236,68 @@ export class SchemaKeeperDialogComponent {
   }
 
   private _initBoard() {
-    if (this.manager) {
-      const o = <ValueOptions>{
-        editMode: 'schema',
-        isDynamic: false,
-        nextMode: 'next-in-row'
-      };
-      this.manager.options(<Partial<BoardStatus>>o);
-      if (this.text$.value) this.manager.load(this.text$.value);
-      this.manager.cells$.subscribe(cells =>
-        this.text$.next(getCellsSchema(cells, o)));    }
+    if (!this.manager) return;
+    const o = <ValueOptions>{
+      editMode: 'schema',
+      isDynamic: false,
+      nextMode: 'next-in-row',
+    };
+    this.manager.options(<Partial<BoardStatus>>o);
+    if (this.text()) this.manager.load(this.text());
+    this.manager.cells$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(cells => this.text.set(getCellsSchema(cells, o)));
   }
 
-  private _manageScanResult(res?: any) {
+  private _manageScanResult(res?: { values?: string }) {
     if (!res) return this.setMode();
     if (res.values) {
-      this.text$.next(res.values);
+      this.text.set(res.values);
       this.setMode(KeeperMode.schema);
     }
   }
 
   private _manageScan() {
-    this.loading$.next(true);
-    const angle = this.rotation$.value + this.rotationOrthogonal$.value;
-    this._rotateImage(this.image$.value, angle).then(data => {
+    this.loading.set(true);
+    const angle = this.rotation() + this.rotationOrthogonal();
+    this._rotateImage(this.image(), angle).then(data => {
       this._interaction
         .ocrScan({ data })
-        .pipe(catchError(err => {
-          console.error('error while scan image', err);
-          return of(undefined);
-        }))
+        .pipe(
+          catchError(err => {
+            console.error('error while scan image', err);
+            return of(undefined);
+          }),
+          takeUntilDestroyed(this._destroyRef),
+        )
         .subscribe(res => {
-          this.loading$.next(false);
+          this.loading.set(false);
           this._manageScanResult(res);
-        })
+        });
     });
   }
 
-  allowDrop(e: any) {
-    this.dragging$.next(true);
+  allowDrop(e: DragEvent) {
+    this.dragging.set(true);
     e.preventDefault();
     const enabled = (<HTMLElement>e.target)?.classList.contains('drop-enabled');
     const file = getFirstJsonFile(e.dataTransfer?.items);
-    e.dataTransfer.dropEffect = (!!file && enabled) ? 'copy' : 'none';
+    if (e.dataTransfer) e.dataTransfer.dropEffect = (!!file && enabled) ? 'copy' : 'none';
   }
 
   dragExit() {
-    this.dragging$.next(false)
+    this.dragging.set(false);
   }
 
-  onFileChange(e: any) {
+  onFileChange(e: Event) {
     stopEvent(e);
-    this._importFromFiles((e.dataTransfer || e.target).files);
-    (<HTMLInputElement>this.fileResource?.nativeElement).value = '';
+    const input = e.target as HTMLInputElement;
+    this._importFromFiles(input.files);
+    const fileEl = this.fileResource()?.nativeElement;
+    if (fileEl) fileEl.value = '';
   }
 
-  drop(e: any) {
+  drop(e: DragEvent) {
     stopEvent(e);
     this.dragExit();
     this._importFromFiles(e.dataTransfer?.files);
@@ -307,17 +314,17 @@ export class SchemaKeeperDialogComponent {
     if (mode === KeeperMode.file) {
       this.importFile();
     } else {
-      this.keeperMode$.next(mode || KeeperMode.chooser);
+      this.keeperMode.set(mode || KeeperMode.chooser);
       this._onChangeMode();
     }
   }
 
   get schema() {
-    return `${this.text$.value||''}`.trim().toLowerCase();
+    return `${this.text() || ''}`.trim().toLowerCase();
   }
 
   load() {
-    switch (this.keeperMode$.value) {
+    switch (this.keeperMode()) {
       case KeeperMode.imagePreview:
         this._manageScan();
         break;
@@ -330,10 +337,10 @@ export class SchemaKeeperDialogComponent {
 
   testSolve() {
     const values = this.schema;
-    const sdk = new Sudoku({ values })
+    const sdk = new Sudoku({ values });
     const options = new SolveOptions({
       useTryAlgorithm: true,
-      debug: true
+      debug: true,
     });
     const res = solve(sdk, options);
     const stat = getWorkStat(res);
@@ -347,13 +354,11 @@ export class SchemaKeeperDialogComponent {
   }
 
   importFile() {
-    if (this.fileResource) this.fileResource.nativeElement.click();
+    this.fileResource()?.nativeElement.click();
   }
 
-  keepText(e: any) {
-    this.text$.next(e.target.value||'');
+  keepText(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.text.set(input.value || '');
   }
-
-  protected readonly DEFAULT_TOTAL_RANK = DEFAULT_TOTAL_RANK;
-  protected readonly KeeperMode = KeeperMode;
 }

@@ -1,40 +1,32 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { OcrScanMap, OcrScanResult } from '@olmi/model';
+import { OcrScanResult } from '@olmi/model';
 import { SUDOKU_API } from '@olmi/common';
 import { OcrDoubtsComponent, OcrMapWrapper } from '../ocr-doubts/ocr-doubts.component';
 
-
 @Component({
   selector: 'ocr-image-map',
+  standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
-    OcrDoubtsComponent
+    OcrDoubtsComponent,
   ],
   templateUrl: './ocr-image-map.component.html',
   styleUrl: './ocr-image-map.component.scss',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OcrImageMapComponent {
   private readonly _dialogRef = inject(MatDialogRef<OcrImageMapComponent>);
   private readonly _interaction = inject(SUDOKU_API);
-  readonly data = <OcrScanResult>inject(MAT_DIALOG_DATA);
-  ocrMaps$: BehaviorSubject<OcrMapWrapper[]>;
-  valid$: BehaviorSubject<boolean>;
 
-  constructor() {
-    this.valid$ = new BehaviorSubject<boolean>(false);
-    this.ocrMaps$ = new BehaviorSubject<OcrMapWrapper[]>([]);
-  }
+  protected readonly data = inject<OcrScanResult>(MAT_DIALOG_DATA);
+  protected readonly ocrMaps = signal<OcrMapWrapper[]>([]);
+  protected readonly valid = signal<boolean>(false);
 
   async apply() {
-    // const maps = this.ocrMaps$.value;
+    // const maps = this.ocrMaps();
     // for (const m of maps) {
     //   await firstValueFrom(this._interaction.ocrMap(<OcrScanMap>m));
     // }
