@@ -1,0 +1,89 @@
+// Variabili di tema applicative — esposte come custom properties `--sdk-*`.
+// Default = tema chiaro (sotto `body`); il tema scuro è un override sotto
+// `body.theme-dark`. I componenti consumano sempre queste variabili e mai
+// colori hardcoded, così l'aggiunta di un nuovo tema è un singolo file.
+body {
+  --sdk-color-background: white;
+  --sdk-color-foreground: #111;
+  --sdk-color-off: #ddd;
+  --sdk-color-off-light: #eee;
+  --sdk-color-accent: rgb(255, 64, 129);
+  --sdk-color-accent-contrast: white;
+  --sdk-color-accent-contrast-40: rgba(255, 255, 255, 0.4);
+  --sdk-color-secondary: rgb(82 78 91);
+  --sdk-color-secondary-contrast: white;
+  --sdk-color-border: rgba(17, 17, 17, 0.1);
+  --sdk-color-hover: rgba(1, 1, 1, .1);
+
+  --sdk-color-success: green;
+  --sdk-color-success-contrast: white;
+  --sdk-color-warning: orange;
+  --sdk-color-warning-contrast: #111;
+  --sdk-color-error: red;
+  --sdk-color-error-contrast: white;
+
+  --sdk-disabled-opacity: 0.4;
+
+  --sdk-schemas-toolbar-height: 76px;
+  --sdk-menu-separator-size: 10px;
+
+  --sdk-picker-segment-fill: rgba(50, 50, 50, 0.92);
+  --sdk-picker-segment-fill-hover: rgba(255, 64, 129, 0.95);
+  --sdk-picker-segment-current-fill: rgba(255, 64, 129, 0.85);
+  --sdk-picker-segment-empty-fill: rgba(110, 50, 50, 0.92);
+  --sdk-picker-segment-empty-fill-hover: rgba(200, 60, 60, 0.95);
+  --sdk-picker-segment-dynamic-fill: rgba(80, 100, 50, 0.92);
+  --sdk-picker-segment-dynamic-fill-hover: rgba(150, 180, 70, 0.95);
+  --sdk-picker-segment-stroke: rgba(255, 255, 255, 0.18);
+  --sdk-picker-label-fill: white;
+  --sdk-picker-label-fill-hover: white;
+  --sdk-picker-dead-fill: rgba(20, 20, 20, 0.85);
+  --sdk-picker-dead-fill-hover: rgba(50, 50, 50, 0.85);
+  --sdk-picker-shadow-fill: rgba(0, 0, 0, 0.05);
+  --sdk-picker-preview-fill: white;
+
+  --sdk-board-color-background-board: rgba(1, 1, 1, .01);
+  --sdk-board-color-accent: rgb(255, 64, 129);
+  --sdk-board-color-accent-02: rgba(255, 64, 129, 0.2);
+  --sdk-board-color-accent-08: rgba(255, 64, 129, 0.8);
+  --sdk-board-color-background2: #ddd;
+  --sdk-board-color-error2: orangered;
+  --sdk-board-color-error2-transp: rgba(255, 69, 0, 0.4);
+  --sdk-board-color-background-contrast: #333;
+  --sdk-board-color-primary: #3f51b5;
+  --sdk-board-color-primary-contrast: rgba(98, 127, 255, 0.1);
+  --sdk-board-cell-opacity: 1;
+  --sdk-board-cell-border: #dddddd;
+
+  &.theme-dark {
+    --sdk-color-background: #333;
+    --sdk-color-foreground: white;
+    --sdk-color-off: #444;
+    --sdk-color-off-light: #ccc;
+    --sdk-color-accent: yellowgreen;
+    --sdk-color-accent-contrast: #333;
+    --sdk-color-accent-contrast-40: rgba(51, 51, 51, 0.4);
+    --sdk-color-secondary: #ff5252;
+    --sdk-color-secondary-contrast: #333;
+    --sdk-color-border: rgba(250, 250, 250, 0.2);
+    --sdk-color-hover: rgba(250, 250, 250, .1);
+
+    --sdk-picker-segment-fill: rgba(70, 70, 70, 0.92);
+    --sdk-picker-segment-fill-hover: rgba(154, 205, 50, 0.95);
+    --sdk-picker-segment-current-fill: rgba(154, 205, 50, 0.75);
+    --sdk-picker-segment-empty-fill: rgba(120, 60, 50, 0.92);
+    --sdk-picker-segment-empty-fill-hover: rgba(220, 90, 60, 0.95);
+    --sdk-picker-segment-dynamic-fill: rgba(90, 110, 60, 0.92);
+    --sdk-picker-segment-dynamic-fill-hover: rgba(180, 200, 80, 0.95);
+
+    --sdk-board-color-background-board: rgba(50, 50, 50, .9);
+    --sdk-board-color-accent: yellowgreen;
+    --sdk-board-color-accent-02: rgba(154, 205, 50, 0.2);
+    --sdk-board-color-accent-08: rgba(154, 205, 50, 0.8);
+    --sdk-board-color-background-contrast: whitesmoke;
+    --sdk-board-color-primary: rgba(181, 112, 63, 1);
+    --sdk-board-color-primary-contrast: rgba(181, 112, 63, 0.05);
+    --sdk-board-cell-border: rgba(221, 221, 221, 0.2);
+    --sdk-board-cell-opacity: 0.8;
+  }
+}

@@ -16,6 +16,7 @@
           [class.hovered]="seg.index === hovered"
           [class.empty]="seg.value === ''"
           [class.dynamic]="seg.value === '?'"
+          [class.current]="seg.current"
           [attr.d]="seg.path"></path>
   }
   <circle class="picker-dead-zone"
@@ -27,6 +28,7 @@
     <text class="picker-segment-label"
           [class.hovered]="seg.index === hovered"
           [class.empty]="seg.value === ''"
+          [class.forbidden]="seg.forbidden"
           [attr.x]="seg.labelX"
           [attr.y]="seg.labelY"
           text-anchor="middle"

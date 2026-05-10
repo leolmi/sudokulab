@@ -78,7 +78,7 @@
   transition: fill .5s ease-in-out;
   transform-box: fill-box;
   transform-origin: 50% 50%;
-  opacity: var(--board-cell-opacity);
+  opacity: var(--sdk-board-cell-opacity);
   &.fixed,
   &.dynamic {
     font-weight: bolder;
@@ -140,73 +140,60 @@
 
 
 .svg-interactive-board {
-  --board-color-background-board: rgba(1,1,1,.01);
-  --board-color-accent: rgb(255, 64, 129);
-  --board-color-accent-02: rgba(255, 64, 129, 0.2);
-  --board-color-accent-08: rgba(255, 64, 129, 0.8);
-  --board-color-background2: #ddd;
-  --board-color-error2: orangered;
-  --board-color-error2-transp: rgba(255, 69, 0, 0.4);
-  --board-color-background-contrast: #333;
-  --board-color-primary: #3f51b5;
-  --board-color-primary-contrast: rgba(98, 127, 255, 0.1);
-  --board-cell-opacity: 1;
-  --board-cell-border: #dddddd;
-
   .svg-board-background {
-    fill: var(--board-color-background-board);
+    fill: var(--sdk-board-color-background-board);
   }
   .svg-board-cell {
-    stroke: var(--board-cell-border);
+    stroke: var(--sdk-board-cell-border);
     &.svg-selection-cell {
-      stroke: var(--board-color-accent);
+      stroke: var(--sdk-board-color-accent);
     }
     //&.dynamic {
-    //  fill: var(--board-color-background2);
+    //  fill: var(--sdk-board-color-background2);
     //}
     &.error {
-      fill: var(--board-color-error2-transp);
+      fill: var(--sdk-board-color-error2-transp);
     }
   }
   .svg-board-coord-text {
     &.highlight {
-      fill: var(--board-color-accent);
+      fill: var(--sdk-board-color-accent);
       font-weight: bold;
     }
   }
   .svg-board-line {
-    stroke: var(--board-color-background-contrast);
+    stroke: var(--sdk-board-color-background-contrast);
     opacity: .5;
   }
   .svg-board-cell-text {
-    fill: var(--board-color-background-contrast);
+    fill: var(--sdk-board-color-background-contrast);
     &.error {
-      fill: var(--board-color-error2);
+      fill: var(--sdk-board-color-error2);
     }
     &.svg-pulse {
-      fill: var(--board-color-accent);
+      fill: var(--sdk-board-color-accent);
     }
   }
   .svg-board-coord-text {
-    fill: var(--board-color-background-contrast);
+    fill: var(--sdk-board-color-background-contrast);
     &:not(.highlight) {
       opacity: .3;
     }
   }
   .svg-board-cell-values-text {
-    fill: var(--board-color-accent);
+    fill: var(--sdk-board-color-accent);
 
     &.highlight-cell {
       fill: white;
     }
   }
   .svg-board-highlight-group {
-    stroke: var(--board-color-primary);
-    fill: var(--board-color-primary-contrast);
+    stroke: var(--sdk-board-color-primary);
+    fill: var(--sdk-board-color-primary-contrast);
   }
   &.pencil {
     .svg-board-line {
-      stroke: var(--board-color-accent);
+      stroke: var(--sdk-board-color-accent);
     }
   }
   &.values-mode-dots {
@@ -218,7 +205,7 @@
   g {
     &.highlight {
       .svg-board-cell {
-        fill: var(--board-color-accent-08);
+        fill: var(--sdk-board-color-accent-08);
       }
       .svg-board-cell-text {
         fill: white;
@@ -226,27 +213,9 @@
     }
     &.highlight-secondary {
       .svg-board-cell {
-        fill: var(--board-color-accent-02);
+        fill: var(--sdk-board-color-accent-02);
       }
     }
   }
 }
 
-::ng-deep {
-  .theme-dark {
-    .svg-interactive-board {
-      --board-color-background-board: rgba(50,50,50,.9);
-      --board-color-accent: yellowgreen;
-      --board-color-accent-02: rgba(154, 205, 50, 0.2);
-      --board-color-accent-08: rgba(154, 205, 50, 0.8);
-      --board-color-background2: #ddd;
-      --board-color-error2: orangered;
-      --board-color-error2-transp: rgba(255, 69, 0, 0.4);
-      --board-color-background-contrast: whitesmoke;
-      --board-color-primary: rgba(181, 112, 63, 1);
-      --board-color-primary-contrast: rgba(181, 112, 63, 0.05);
-      --board-cell-border: rgba(221, 221, 221, 0.2);
-      --board-cell-opacity: 0.8;
-    }
-  }
-}

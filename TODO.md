@@ -1,7 +1,11 @@
 ## DA FARE
-
+- [ ] verifiche su Observables di BoardManager;
+- [ ] manca refactoring su componenti:
+    - [ ] libs\components\schema-keeper\src\lib\schema-keeper-dialog;
+    - [ ] libs\components\schema-keeper\src\lib\schema-keeper-error-dialog;
 
 ## FATTI
+- [x] verifica tema su picker;
 - [x] **Fix loop infinito post-Signal refactor** (v3.0.20) — in `extendStatus(cs, ps)` ([schema-toolbar.helper.ts](libs/components/schema-toolbar/src/lib/schema-toolbar/schema-toolbar.helper.ts)) la lettura `cs()` + `cs.set(...)` veniva eseguita dentro un `effect()` di `SchemaToolbarComponent`, registrando `cs` come dipendenza dell'effect e ritriggerando il re-run su ogni `set` → loop infinito (l'app freezava al boot, prima che il browser potesse caricare anche il font). Risolto sostituendo con `cs.update(prev => …)`, che legge il valore precedente fuori dal tracking context. Drop concomitante di `LogicManager.completedSignal` (toSignal di un `Subject`, mai consumato).
 - [x] **Rifattorizzazione graduale a Signal** (5 fasi, v3.0.14 → v3.0.19) — eliminato `BehaviorSubject` e `| async` dai componenti, modernizzazione completa del client (Angular 21). Convenzioni in [documents/signals-conventions.md](documents/signals-conventions.md).
   - **Fase 0 — Fondamenta**: convenzioni e checklist per componente; `takeUntilDestroyed()` adottato come standard; nota in [CLAUDE.md](CLAUDE.md);

@@ -8,6 +8,8 @@ interface PickerSegment {
   path: string;
   labelX: number;
   labelY: number;
+  forbidden: boolean;
+  current: boolean;
 }
 
 @Component({
@@ -33,8 +35,23 @@ export class CellRadialPickerComponent {
   readonly centerY = input<number>(0);
   // raggio in pixel
   readonly radius = input<number>(100);
+  // valore attualmente nella cella ('' = cella vuota, niente da evidenziare)
+  readonly currentValue = input<string>('');
+  // numeri ammessi nella cella (riga/colonna/box). Usati con showAvailable per
+  // attenuare il testo dei segmenti vietati.
+  readonly available = input<string[] | null | undefined>([]);
+  // se true e available è valorizzato, le label dei segmenti numerici non
+  // in available sono attenuate (forbidden).
+  readonly showAvailable = input<boolean>(false);
 
-  readonly segments = computed<PickerSegment[]>(() => this._computeSegments(this.values() || []));
+  readonly segments = computed<PickerSegment[]>(() => {
+    return this._computeSegments(
+      this.values() || [],
+      this.showAvailable(),
+      this.available() || [],
+      this.currentValue(),
+    );
+  });
 
   readonly previewLabel = computed<string>(() => {
     const idx = this.hoveredIndex();
@@ -43,24 +60,32 @@ export class CellRadialPickerComponent {
     return this._labelOf(vals[idx]);
   });
 
-  private _computeSegments(values: string[]): PickerSegment[] {
+  private _computeSegments(values: string[], showAvail: boolean, avail: string[], current: string): PickerSegment[] {
     const n = values.length;
     if (n === 0) return [];
     const slice = (Math.PI * 2) / n;
     // primo segmento centrato sul nord (12 in punto)
     const start = -Math.PI / 2 - slice / 2;
     const labelR = (this.innerRadius + this.outerRadius) / 2;
+    const rOut = this.outerRadius;
     return values.map((value, i) => {
       const a0 = start + i * slice;
       const a1 = a0 + slice;
       const aMid = (a0 + a1) / 2;
+      // '' = rimozione, '?' = dynamic; non sono mai "forbidden"
+      const isNumber = !!value && value !== '?';
+      const isCurrent = !!current && value === current;
+      // il valore già presente non viene mai attenuato, anche se non è in available
+      const forbidden = !isCurrent && showAvail && isNumber && !avail.includes(value);
       return {
         index: i,
         value,
         label: this._labelOf(value),
-        path: this._slicePath(this.viewCenter, this.viewCenter, this.innerRadius, this.outerRadius, a0, a1),
+        path: this._slicePath(this.viewCenter, this.viewCenter, this.innerRadius, rOut, a0, a1),
         labelX: this.viewCenter + labelR * Math.cos(aMid),
         labelY: this.viewCenter + labelR * Math.sin(aMid),
+        forbidden,
+        current: isCurrent,
       };
     });
   }

@@ -149,6 +149,10 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly pickerHoveredIndex = signal<number>(-1);
   readonly pickerCenter = signal<{ x: number; y: number }>({ x: 0, y: 0 });
   readonly pickerRadius = signal<number>(PICKER_RADIUS_MAX_PX);
+  // valore attualmente nella cella sotto il picker (per evidenziare l'arco esterno)
+  readonly pickerCurrentValue = signal<string>('');
+  // numeri ammessi nella cella sotto il picker (per attenuare i forbidden)
+  readonly pickerAvailable = signal<string[]>([]);
   // pre-commit preview: id cella + valore previsto durante il drag nel picker
   readonly previewCellId = signal<string>('');
   readonly previewValue = signal<string>('');
@@ -467,6 +471,8 @@ export class BoardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pickerHoveredIndex.set(-1);
     this.pickerCenter.set({ x: this._pickerState.centerX, y: this._pickerState.centerY });
     this.pickerRadius.set(this._pickerState.radius);
+    this.pickerCurrentValue.set(cell.text || '');
+    this.pickerAvailable.set([...(cell.available || [])]);
     this.pickerOpen.set(true);
     this._logPicker('picker-open', {
       stillHasCapture: this._pickerHasCapture(),

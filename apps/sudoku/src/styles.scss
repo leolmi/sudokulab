@@ -1,7 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
-@use './theme-light';
-@use './theme-dark';
+@use './theme';
 
 html {
   scroll-behavior: smooth;
