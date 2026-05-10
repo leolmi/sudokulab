@@ -18,7 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { containsCaseInsensitive, Sudoku } from '@olmi/model';
 import { cloneDeep as _clone, get as _get, set as _set, sortBy as _sortBy } from 'lodash';
-import { AppUserOptions, SUDOKU_STORE } from '@olmi/common';
+import { AppUserOptions, I18nDirective, SUDOKU_STORE, TranslateService } from '@olmi/common';
 
 class FilterSortOptions {
   constructor(o?: Partial<FilterSortOptions>) {
@@ -45,6 +45,7 @@ class FilterSortOptions {
     MatButtonModule,
     MatInputModule,
     MatMenuModule,
+    I18nDirective,
   ],
   templateUrl: './schemas-toolbar.component.html',
   styleUrl: './schemas-toolbar.component.scss',
@@ -53,6 +54,7 @@ class FilterSortOptions {
 })
 export class SchemasToolbarComponent implements AfterViewInit {
   readonly store = inject(SUDOKU_STORE);
+  readonly tr = inject(TranslateService);
 
   readonly onlyPlaying = input<boolean | null | undefined>(false);
   readonly algorithms = input<string[] | null | undefined>([]);

@@ -1,4 +1,4 @@
-<h2 mat-dialog-title class="user-select-none">Keep Schema</h2>
+<h2 mat-dialog-title class="user-select-none" appI18n>Keep Schema</h2>
 <mat-dialog-content class="schema-keeper-content" [class.loading]="loading()">
   <input class="hidden file-resource" type="file" #fileResource (change)="onFileChange($event)">
   <input class="hidden file-resource" type="file" accept="image/*" #imageResource (change)="onImageChange($event)">
@@ -23,15 +23,16 @@
                   [disabled]="!!btn.disabled"
                   (click)="setMode(btn.mode)">
             <mat-icon>{{btn.icon}}</mat-icon>
-            <div class="chooser-button-title">{{btn.title}}</div>
+            <div class="chooser-button-title">{{ tr.t(btn.title) }}</div>
           </button>
         }
         <div class="drop-here-area flex-row flex-align-center-center">
-          <div class="label">drop here</div>
+          <div class="label" appI18n>drop here</div>
         </div>
       </div>
       <div class="keeper-chooser-label"
-           [class.hidden]="dragging()">Choose keeper mode or drag a json or image file here</div>
+           [class.hidden]="dragging()"
+           appI18n>Choose keeper mode or drag a json or image file here</div>
     }
     @case (KeeperMode.schema) {
       <div class="keeper-page page-keeper">
@@ -46,7 +47,7 @@
           <span class="text-postfix">/{{DEFAULT_TOTAL_RANK}}</span>
         </div>
         <mat-form-field class="full-width">
-          <mat-label>String of numbers</mat-label>
+          <mat-label appI18n>String of numbers</mat-label>
           <input matInput
                  autofocus
                  #textInput
@@ -69,7 +70,7 @@
           </div>
           <div class="rotation-controls flex-row flex-align-center-center">
             <button mat-icon-button
-                    matTooltip="Rotate 90° counter-clockwise"
+                    appI18nTooltip="Rotate 90° counter-clockwise"
                     (click)="rotateOrthogonal(-90)">
               <mat-icon>rotate_left</mat-icon>
             </button>
@@ -84,17 +85,22 @@
                      (valueChange)="setRotation($event)">
             </mat-slider>
             <button mat-icon-button
-                    matTooltip="Rotate 90° clockwise"
+                    appI18nTooltip="Rotate 90° clockwise"
                     (click)="rotateOrthogonal(90)">
               <mat-icon>rotate_right</mat-icon>
             </button>
             <button mat-icon-button
-                    matTooltip="Reset rotation"
+                    appI18nTooltip="Reset rotation"
                     [disabled]="totalRotation === 0"
                     (click)="resetRotation()">
               <mat-icon>restart_alt</mat-icon>
             </button>
           </div>
+        } @else {
+          <button type="button"
+                  class="image-pick-trigger"
+                  (click)="pickImage()"
+                  appI18n>Choose an image</button>
         }
       </div>
     }
@@ -102,14 +108,14 @@
 </mat-dialog-content>
 <mat-dialog-actions>
   @if (mode !== KeeperMode.chooser) {
-    <button mat-button (click)="setMode()">Back</button>
+    <button mat-button (click)="setMode()" appI18n>Back</button>
   }
   <div class="flex-1"></div>
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button mat-dialog-close appI18n>Cancel</button>
   @if (mode !== KeeperMode.chooser) {
     @if (isDebugMode() && mode !== KeeperMode.imagePreview) {
-      <button mat-button [disabled]="!valid()" (click)="testSolve()">Test solve</button>
+      <button mat-button [disabled]="!valid()" (click)="testSolve()" appI18n>Test solve</button>
     }
-    <button mat-button [disabled]="!valid()" (click)="load()">Load</button>
+    <button mat-button [disabled]="!valid()" (click)="load()" appI18n>Load</button>
   }
 </mat-dialog-actions>

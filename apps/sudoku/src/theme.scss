@@ -27,20 +27,20 @@ body {
   --sdk-schemas-toolbar-height: 76px;
   --sdk-menu-separator-size: 10px;
 
-  --sdk-picker-segment-fill: rgba(50, 50, 50, 0.92);
+  --sdk-picker-segment-fill: rgba(255, 255, 255, 0.92);
   --sdk-picker-segment-fill-hover: rgba(255, 64, 129, 0.95);
   --sdk-picker-segment-current-fill: rgba(255, 64, 129, 0.85);
-  --sdk-picker-segment-empty-fill: rgba(110, 50, 50, 0.92);
-  --sdk-picker-segment-empty-fill-hover: rgba(200, 60, 60, 0.95);
-  --sdk-picker-segment-dynamic-fill: rgba(80, 100, 50, 0.92);
-  --sdk-picker-segment-dynamic-fill-hover: rgba(150, 180, 70, 0.95);
-  --sdk-picker-segment-stroke: rgba(255, 255, 255, 0.18);
-  --sdk-picker-label-fill: white;
+  --sdk-picker-segment-empty-fill: rgba(255, 220, 220, 0.92);
+  --sdk-picker-segment-empty-fill-hover: rgba(220, 80, 80, 0.95);
+  --sdk-picker-segment-dynamic-fill: rgba(225, 240, 195, 0.92);
+  --sdk-picker-segment-dynamic-fill-hover: rgba(140, 180, 60, 0.95);
+  --sdk-picker-segment-stroke: rgba(0, 0, 0, 0.15);
+  --sdk-picker-label-fill: #222;
   --sdk-picker-label-fill-hover: white;
-  --sdk-picker-dead-fill: rgba(20, 20, 20, 0.85);
-  --sdk-picker-dead-fill-hover: rgba(50, 50, 50, 0.85);
+  --sdk-picker-dead-fill: rgba(255, 255, 255, 0.85);
+  --sdk-picker-dead-fill-hover: rgba(235, 235, 235, 0.85);
   --sdk-picker-shadow-fill: rgba(0, 0, 0, 0.05);
-  --sdk-picker-preview-fill: white;
+  --sdk-picker-preview-fill: #222;
 
   --sdk-board-color-background-board: rgba(1, 1, 1, .01);
   --sdk-board-color-accent: rgb(255, 64, 129);
@@ -75,6 +75,12 @@ body {
     --sdk-picker-segment-empty-fill-hover: rgba(220, 90, 60, 0.95);
     --sdk-picker-segment-dynamic-fill: rgba(90, 110, 60, 0.92);
     --sdk-picker-segment-dynamic-fill-hover: rgba(180, 200, 80, 0.95);
+    --sdk-picker-segment-stroke: rgba(255, 255, 255, 0.18);
+    --sdk-picker-label-fill: white;
+    --sdk-picker-label-fill-hover: white;
+    --sdk-picker-dead-fill: rgba(20, 20, 20, 0.85);
+    --sdk-picker-dead-fill-hover: rgba(50, 50, 50, 0.85);
+    --sdk-picker-preview-fill: white;
 
     --sdk-board-color-background-board: rgba(50, 50, 50, .9);
     --sdk-board-color-accent: yellowgreen;

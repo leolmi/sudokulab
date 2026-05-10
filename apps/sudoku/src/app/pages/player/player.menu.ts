@@ -208,7 +208,8 @@ export const NARROW = <MenuItem[]>[
   },
 ]
 
-export const calcStatusForMenu = (sdk: Sudoku|undefined, s: BoardStatus, stat: SudokuStat, filled: boolean): Partial<ButtonsStatus> => {
+export const calcStatusForMenu = (sdk: Sudoku|undefined, s: BoardStatus, stat: SudokuStat, filled: boolean,
+                                  t: (k: string, p?: Record<string, string|number>) => string): Partial<ButtonsStatus> => {
   return {
     hidden: {
       [CODE_SOLVE_TO_TRY_RULE]: !sdk?.info.useTryAlgorithm,
@@ -224,8 +225,8 @@ export const calcStatusForMenu = (sdk: Sudoku|undefined, s: BoardStatus, stat: S
       [CODE_COORD]: s.isCoord,
     },
     text: {
-      [CODE_VALUES_MODE]: `Values as ${s.valuesMode}`,
-      [CODE_NEXT_MODE]: `Input mode: ${s.nextMode}`,
+      [CODE_VALUES_MODE]: t('Values as {mode}', { mode: t(s.valuesMode) }),
+      [CODE_NEXT_MODE]: t('Input mode: {mode}', { mode: t(s.nextMode) }),
     }
   }
 }

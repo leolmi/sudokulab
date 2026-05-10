@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { I18nDirective, TranslateService } from '@olmi/common';
 
 export type SchemaKeeperErrorAction = 'close' | 'edit' | 'download';
 
@@ -20,32 +21,32 @@ export interface SchemaKeeperErrorData {
 
 const HUMAN_ERROR_LABELS: Record<string, { title: string; hint: string }> = {
   'not-unique': {
-    title: 'Lo schema ammette più di una soluzione',
-    hint: 'Uno schema valido deve avere esattamente una soluzione. Modifica i valori o aggiungi qualche cella fissa per vincolarlo.',
+    title: 'The schema has more than one solution',
+    hint: 'A valid schema must have exactly one solution. Modify the values or add some fixed cells to constrain it.',
   },
   'invalid': {
-    title: 'Lo schema è incoerente',
-    hint: 'Le regole base del sudoku risultano violate (es. valore duplicato in riga, colonna o box). Correggi i valori errati.',
+    title: 'The schema is inconsistent',
+    hint: 'The basic sudoku rules are violated (e.g. duplicate value in row, column or box). Correct the wrong values.',
   },
   'disagreement': {
-    title: 'Lo schema non può essere risolto dal motore corrente',
-    hint: 'Il brute-force conferma che c\'è una soluzione, ma il motore catalogato non la trova. Potrebbe essere un caso limite: contatta lo sviluppatore o scarica la stringa per investigare.',
+    title: 'The schema cannot be solved by the current engine',
+    hint: 'Brute-force confirms a solution exists, but the catalogued engine cannot find it. It may be an edge case: contact the developer or download the string to investigate.',
   },
   'engine-error': {
-    title: 'Errore interno durante il calcolo',
-    hint: 'Il motore ha generato un\'eccezione imprevista. Scarica la stringa e segnala il caso.',
+    title: 'Internal error during computation',
+    hint: 'The engine raised an unexpected exception. Download the string and report the case.',
   },
   'persist-error': {
-    title: 'Salvataggio del catalogo fallito',
-    hint: 'Il motore ha risolto lo schema ma non è riuscito a scriverlo sul DB. Riprova tra qualche istante.',
+    title: 'Catalog save failed',
+    hint: 'The engine solved the schema but failed to write it to the DB. Try again in a moment.',
   },
   'unknown-error': {
-    title: 'Errore non identificato',
-    hint: 'Il server ha risposto con un errore non riconosciuto. Scarica la stringa per diagnosticarla manualmente.',
+    title: 'Unidentified error',
+    hint: 'The server responded with an unrecognized error. Download the string to diagnose it manually.',
   },
   'client-error': {
-    title: 'Errore lato client',
-    hint: 'La richiesta non è partita correttamente (problema di rete o di configurazione).',
+    title: 'Client-side error',
+    hint: 'The request did not start correctly (network or configuration issue).',
   },
 };
 
@@ -55,36 +56,37 @@ const HUMAN_ERROR_LABELS: Record<string, { title: string; hint: string }> = {
   imports: [
     MatDialogModule,
     MatButtonModule,
-    MatIcon
-],
+    MatIcon,
+    I18nDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h2 mat-dialog-title>
       <mat-icon class="header-icon">error_outline</mat-icon>
-      {{ label.title }}
+      {{ tr.t(label.title) }}
     </h2>
     <mat-dialog-content>
       <div class="error-message">{{ data.error.message }}</div>
       @if (data.error.solutionCount && data.error.solutionCount >= 2) {
-        <div class="error-detail">Soluzioni distinte trovate: <strong>{{ data.error.solutionCount }}{{ data.error.solutionCount >= 2 ? '+' : '' }}</strong></div>
+        <div class="error-detail">{{ tr.t('Distinct solutions found:') }} <strong>{{ data.error.solutionCount }}{{ data.error.solutionCount >= 2 ? '+' : '' }}</strong></div>
       }
-      <div class="error-hint">{{ label.hint }}</div>
+      <div class="error-hint">{{ tr.t(label.hint) }}</div>
       <div class="error-values">
-        <div class="error-values-label">Valori dello schema:</div>
+        <div class="error-values-label" appI18n>Schema values:</div>
         <code class="error-values-string">{{ data.values }}</code>
       </div>
     </mat-dialog-content>
     <mat-dialog-actions class="flex-row flex-align-end-center flex-gap-8">
       <button mat-button [mat-dialog-close]="'download'">
         <mat-icon>download</mat-icon>
-        Scarica stringa
+        <span appI18n>Download string</span>
       </button>
       <button mat-button [mat-dialog-close]="'edit'">
         <mat-icon>edit</mat-icon>
-        Modifica schema
+        <span appI18n>Edit schema</span>
       </button>
-      <button mat-raised-button color="primary" [mat-dialog-close]="'close'">
-        Chiudi
+      <button mat-raised-button color="primary" [mat-dialog-close]="'close'" appI18n>
+        Close
       </button>
     </mat-dialog-actions>
   `,
@@ -132,6 +134,7 @@ const HUMAN_ERROR_LABELS: Record<string, { title: string; hint: string }> = {
 })
 export class SchemaKeeperErrorDialogComponent {
   readonly data: SchemaKeeperErrorData = inject(MAT_DIALOG_DATA);
+  readonly tr = inject(TranslateService);
   private readonly _ref = inject(MatDialogRef<SchemaKeeperErrorDialogComponent, SchemaKeeperErrorAction>);
 
   get label() {

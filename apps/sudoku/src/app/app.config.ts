@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -26,7 +26,8 @@ import {
   SUDOKU_STATE,
   SUDOKU_STORE,
   SudokuState,
-  SudokuStore
+  SudokuStore,
+  TranslateService
 } from '@olmi/common';
 import { printDocumentFactory } from './pages/print/print-document.factory';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -39,6 +40,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes),
     provideAnimations(),
     provideHttpClient(withInterceptors([serverBusyInterceptor])),
+    provideAppInitializer(() => inject(TranslateService).init()),
     { provide: SUDOKU_ENVIRONMENT, useValue: environment },
     { provide: SUDOKU_API, useFactory: () => new Interaction(environment) },
     { provide: SUDOKU_STORE, useClass: SudokuStore },

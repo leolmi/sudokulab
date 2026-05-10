@@ -6,15 +6,15 @@
     <div class="flex-col">
       <div class="schemalab-info-toolbar flex-row flex-align-start-center">
         @if ((sdk.info.fixedCount||0)>0) {
-          <div class="info-rounded info-fixed" matTooltip="Number of fixed numbers">{{sdk.info.fixedCount}}</div>
+          <div class="info-rounded info-fixed" appI18nTooltip="Number of fixed numbers">{{sdk.info.fixedCount}}</div>
         }
         @if (sdk.info.useTryAlgorithm) {
-          <div class="info-rounded info-t-type" matTooltip="Number of try-algorithm usage">T{{sdk.info.tryAlgorithmCount}}</div>
+          <div class="info-rounded info-t-type" appI18nTooltip="Number of try-algorithm usage">T{{sdk.info.tryAlgorithmCount}}</div>
         }
         @if (sdk.info.difficulty) {
           <div class="flex-1 flex-col">
             <div class="difficulty">
-              <div class="difficulty-text">{{sdk.info.difficulty||''}}</div>
+              <div class="difficulty-text">{{ tr.t(sdk.info.difficulty||'') }}</div>
             </div>
             <div class="difficulty-value flex-row flex-align-start-center">
               <span>{{sdk.info.difficultyValue||''}}</span>
@@ -27,14 +27,14 @@
           <div class="flex-1"></div>
         }
         <button mat-icon-button
-                matTooltip="uniq solution"
+                appI18nTooltip="Unique solution"
                 aria-label="uniq solution">
           <mat-icon>looks_one</mat-icon>
         </button>
         <button mat-icon-button
                 [matMenuTriggerFor]="menuDiff"
                 aria-label="SudokuLab algorithms"
-                [matTooltip]="sdk.info.algorithmCount+' solution algorithms'"
+                [matTooltip]="tr.t('{n} solution algorithms', { n: sdk.info.algorithmCount||0 })"
                 [matBadge]="sdk.info.algorithmCount+''"
                 [matBadgeDisabled]="!sdk.info.algorithmCount">
           <mat-icon>info</mat-icon>
@@ -44,7 +44,7 @@
             <button mat-menu-item
                     class="menu-item-alg"
                     (click)="openAlgorithmInfo(item.id)"
-                    [matTooltip]="'Apri la descrizione di ' + item.name"
+                    [matTooltip]="tr.t('Open description of {name}', { name: item.name })"
                     matTooltipPosition="left">
               <div class="flex-row flex-align-start-center">
                 <mat-icon>{{item.icon}}</mat-icon>

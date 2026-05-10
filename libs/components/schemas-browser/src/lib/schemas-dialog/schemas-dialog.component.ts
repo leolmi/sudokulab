@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { SchemasBrowserComponent, SchemasToolbarComponent } from '@olmi/schemas-browser';
 import { Algorithm, Sudoku } from '@olmi/model';
-import { SUDOKU_STORE } from '@olmi/common';
+import { I18nDirective, I18nMatTooltipDirective, SUDOKU_STORE, TranslateService } from '@olmi/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { getAlgorithms } from '@olmi/algorithms';
@@ -26,6 +26,8 @@ export class SchemasDialogArgs {
     MatBadge,
     SchemasToolbarComponent,
     MatTooltip,
+    I18nDirective,
+    I18nMatTooltipDirective,
   ],
   template: `
     <!-- HEADER -->
@@ -51,29 +53,29 @@ export class SchemasDialogArgs {
     <mat-dialog-actions>
       @if (store.isDownload()) {
         <button mat-icon-button
-                matTooltip="download all catalog"
+                appI18nTooltip="Download all catalog"
                 (click)="download()">
           <mat-icon>file_download</mat-icon>
         </button>
       }
       <button mat-icon-button
-              matTooltip="show only playing games"
+              appI18nTooltip="Show only playing games"
               (click)="togglePlaying()">
         <mat-icon>{{ playing()?'edit':'edit_off' }}</mat-icon>
       </button>
       <button mat-icon-button
-              matTooltip="Choose used algorithms filter"
+              appI18nTooltip="Choose used algorithms filter"
               [matBadge]="algCount()+''"
               [matBadgeHidden]="algCount()<1"
               [matMenuTriggerFor]="algmenu">
         <mat-icon>fact_check</mat-icon>
       </button>
       <div class="flex-1"></div>
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close appI18n>Cancel</button>
       <button mat-button
               [disabled]="!activeSchema()"
               (click)="select()"
-      >Load</button>
+              appI18n>Load</button>
       <!-- MENU POPUP DEGLI ALGORITMI -->
       <mat-menu #algmenu="matMenu">
         @let algs = algorithms();

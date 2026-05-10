@@ -24,7 +24,7 @@ import {
   SudokuStat,
   ValueOptions,
 } from '@olmi/model';
-import { AppUserOptions, SUDOKU_NOTIFIER, SudokuState } from '@olmi/common';
+import { AppUserOptions, SUDOKU_NOTIFIER, SudokuState, TranslateService } from '@olmi/common';
 import { clearCell } from '@olmi/logic';
 import { BoardCell, BoardChangeEvent, BoardStatus } from './board.model';
 import { buildSchemaBoard, getBoardCells, getSequence } from './board.helper';
@@ -46,6 +46,7 @@ import { handleBoardValue } from './board-component.helper';
 @Injectable()
 export class BoardManager {
   private readonly _notifier = inject(SUDOKU_NOTIFIER, { optional: true });
+  private readonly _tr = inject(TranslateService);
   private readonly _destroyRef = inject(DestroyRef);
 
   // sorgente di verità: WritableSignal privati
@@ -177,7 +178,7 @@ export class BoardManager {
         if (data.error) {
           this._notifier.notify(data.error, NotificationType.error);
         } else if (data.sudoku) {
-          this._notifier.notify('Schema solved successfully', NotificationType.success);
+          this._notifier.notify(this._tr.t('Schema solved successfully'), NotificationType.success);
         }
         break;
       default:

@@ -42,7 +42,7 @@ import {
   LogicExecutor,
   NotificationType,
 } from '@olmi/model';
-import { SUDOKU_NOTIFIER } from '@olmi/common';
+import { SUDOKU_NOTIFIER, TranslateService } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { CellRadialPickerComponent } from './cell-radial-picker.component';
 import { NgClass } from '@angular/common';
@@ -100,6 +100,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   readonly boardClipId = `sdk-board-clip-${++BoardComponent._idSeq}`;
 
   private readonly _notifier = inject(SUDOKU_NOTIFIER);
+  private readonly _tr = inject(TranslateService);
   private readonly _clipboard = inject(Clipboard);
   private readonly _element = inject(ElementRef);
 
@@ -622,7 +623,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   copySchemaToClipboard() {
     const status = this.manager.status();
     this._clipboard.copy(getCellsSchema(this.manager.cells(), { allowDynamic: !!status.isDynamic }));
-    this._notifier.notify('Schema copied to clipboard successfully', NotificationType.success);
+    this._notifier.notify(this._tr.t('Schema copied to clipboard successfully'), NotificationType.success);
   }
 
   private _move(code: string, mode?: BoardNextMode) {

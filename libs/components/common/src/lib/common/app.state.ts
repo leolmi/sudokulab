@@ -34,6 +34,7 @@ import {
 } from '@olmi/model';
 import { SUDOKU_PAGES, SudokuPageManifest } from './sudoku-page.manifest';
 import { AppUserOptions } from './user-options';
+import { TranslateService } from './translate.service';
 
 import { SUDOKU_API } from './interaction';
 
@@ -72,6 +73,7 @@ export class SudokuState {
   private readonly _manifests = inject(SUDOKU_PAGES);
   private readonly _layoutObs = inject(BreakpointObserver);
   private readonly _interaction = inject(SUDOKU_API);
+  private readonly _tr = inject(TranslateService);
 
   private readonly _info = signal<SudokulabInfo>(new SudokulabInfo());
   private readonly _manifest = signal<SudokuPageManifest|undefined>(this._manifests.find(m => m.default));
@@ -93,7 +95,7 @@ export class SudokuState {
   readonly title = computed<string>(() => {
     const m = this._manifest();
     const i = this._info();
-    return m ? `${m.title} ${i?.version || ''}` : '';
+    return m ? `${this._tr.t(m.title)} ${i?.version || ''}` : '';
   });
   readonly menu: Signal<MenuItem[]>;
 

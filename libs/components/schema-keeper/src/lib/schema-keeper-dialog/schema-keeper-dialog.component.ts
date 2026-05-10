@@ -31,7 +31,7 @@ import {
   Sudoku,
 } from '@olmi/model';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
-import { SUDOKU_API, SUDOKU_NOTIFIER } from '@olmi/common';
+import { I18nDirective, I18nMatTooltipDirective, SUDOKU_API, SUDOKU_NOTIFIER, TranslateService } from '@olmi/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -70,6 +70,8 @@ interface ChooserButton {
     MatSlider,
     MatSliderThumb,
     MatTooltip,
+    I18nDirective,
+    I18nMatTooltipDirective,
   ],
   templateUrl: './schema-keeper-dialog.component.html',
   styleUrl: './schema-keeper-dialog.component.scss',
@@ -80,6 +82,7 @@ export class SchemaKeeperDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<SchemaKeeperDialogComponent>);
   private readonly _interaction = inject(SUDOKU_API);
   private readonly _notifier = inject(SUDOKU_NOTIFIER);
+  readonly tr = inject(TranslateService);
   private readonly _data = inject<{ values?: string } | null>(MAT_DIALOG_DATA, { optional: true });
   protected readonly manager = inject(BoardManager);
 
@@ -176,6 +179,10 @@ export class SchemaKeeperDialogComponent {
 
   private _pickImage() {
     this.imageResource()?.nativeElement.click();
+  }
+
+  pickImage() {
+    this._pickImage();
   }
 
   onImageChange(e: Event) {
@@ -340,9 +347,9 @@ export class SchemaKeeperDialogComponent {
     const sol = getSolutionByStat(stat);
     console.log('RESULTS', res, '\n\tSTAT', stat, '\n\tSOLUTION', sol);
     if (sol) {
-      this._notifier.notify('solution found', NotificationType.success);
+      this._notifier.notify(this.tr.t('Solution found'), NotificationType.success);
     } else {
-      this._notifier.notify('No solution found', NotificationType.error);
+      this._notifier.notify(this.tr.t('No solution found'), NotificationType.error);
     }
   }
 

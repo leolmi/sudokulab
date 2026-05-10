@@ -8,11 +8,11 @@
       <schema-header [schema]="sudoku()"></schema-header>
       <div class="stat-monitor flex-col">
         @if (isEmpty()) {
-          <div class="empty-schema">Empty schema</div>
+          <div class="empty-schema" appI18n>Empty schema</div>
         } @else {
           @for (l of stat(); track l.description) {
             <div class="stat-line flex-row flex-align-start-center">
-              <div class="stat-line-desc">{{l.description}}</div>
+              <div class="stat-line-desc">{{ tr.t(l.description) }}</div>
               <div class="stat-line-value">{{l.value}}</div>
             </div>
           }

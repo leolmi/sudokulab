@@ -11,3 +11,5 @@ export * from './lib/common/sudoku-page.manifest';
 export * from './lib/common/server-busy.service';
 export * from './lib/common/server-busy.interceptor';
 export * from './lib/common/server-waiter.component';
+export * from './lib/common/translate.service';
+export * from './lib/common/i18n.directive';

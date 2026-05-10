@@ -9,6 +9,7 @@ import { isArray as _isArray, isNumber as _isNumber, keys as _keys } from 'lodas
 import { getAlgorithm } from '@olmi/algorithms';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olmi/algorithm-info';
+import { I18nMatTooltipDirective, TranslateService } from '@olmi/common';
 
 interface MapItem {
   id: string;
@@ -25,6 +26,7 @@ interface MapItem {
     MatButtonModule,
     MatMenuModule,
     MatBadgeModule,
+    I18nMatTooltipDirective,
   ],
   templateUrl: './schema-header.component.html',
   styleUrl: './schema-header.component.scss',
@@ -33,6 +35,7 @@ interface MapItem {
 })
 export class SchemaHeaderComponent {
   private readonly _dialog = inject(MatDialog);
+  readonly tr = inject(TranslateService);
 
   readonly schema = input<Sudoku | null | undefined>(undefined);
 

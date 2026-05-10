@@ -40,7 +40,7 @@
             @if (item.algorithmId) {
               <button mat-icon-button
                       class="alg-info-button"
-                      [matTooltip]="'Apri la descrizione di ' + item.groupTitle"
+                      [matTooltip]="tr.t('Open description of {name}', { name: item.groupTitle||'' })"
                       matTooltipPosition="right"
                       (click)="openAlgorithmInfo(item.algorithmId, $event)">
                 <mat-icon>open_in_new</mat-icon>

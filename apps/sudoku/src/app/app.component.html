@@ -4,15 +4,15 @@
          #menuTrigger="matMenuTrigger"
          [matMenuTriggerFor]="authorMenu"
          (click)="menuTrigger.openMenu()"
-         matTooltip="author info">
+         appI18nTooltip="author info">
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
       <span class="sub-title">{{state.title()}}</span>
     </div>
     @if (globalState.isRunning()) {
-      <mat-icon class="toolbar-state-icon icon-pulse" matTooltip="Generator is running">settings</mat-icon>
+      <mat-icon class="toolbar-state-icon icon-pulse" appI18nTooltip="Generator is running">settings</mat-icon>
     }
     @if (state.isDebugMode()) {
-      <mat-icon class="toolbar-state-icon sdk-color-accent" matTooltip="Debug mode active">bug_report</mat-icon>
+      <mat-icon class="toolbar-state-icon sdk-color-accent" appI18nTooltip="Debug mode active">bug_report</mat-icon>
     }
     <mat-menu #authorMenu="matMenu">
       @let currentPage = state.page();
@@ -22,7 +22,7 @@
                   [class.active]="page.route === currentPage"
                   (click)="state.navigateToPage(page)">
             <mat-icon>{{page.icon}}</mat-icon>
-            <span>{{page.title}}</span>
+            <span>{{tr.t(page.title)}}</span>
           </button>
         }
       }
@@ -56,14 +56,14 @@
             <button mat-icon-button
                     [matMenuTriggerFor]="pagesubmenu"
                     (click)="buildSubMenu(item)"
-                    [matTooltip]="item.text||''"
+                    [matTooltip]="tr.t(item.text||'')"
                     [matTooltipDisabled]="!item.text"
                     aria-label="sub menu">
               <mat-icon>{{item.icon}}</mat-icon>
             </button>
           } @else {
             <button mat-icon-button
-                    [matTooltip]="item.text||''"
+                    [matTooltip]="tr.t(item.text||'')"
                     [matTooltipDisabled]="!item.text"
                     [disabled]="item.disabled"
                     [class.active]="item.active"
@@ -74,6 +74,12 @@
           }
         }
       }
+      <button mat-icon-button
+              class="lang-toggle"
+              appI18nTooltip="Switch language"
+              (click)="toggleLang()">
+        <span class="lang-code">{{ tr.lang() }}</span>
+      </button>
       <!-- MENU POPUP DI PAGINA -->
       <mat-menu #pagesubmenu="matMenu">
         @for (mitem of pageSubMenu(); track $index) {
@@ -88,7 +94,7 @@
                       [ngClass]="'sdk-color-'+mitem.color"
                       (click)="state.handleMenuItem(mitem)">
                 <mat-icon>{{mitem.icon}}</mat-icon>
-                <span>{{mitem.text}}</span>
+                <span>{{tr.t(mitem.text||'')}}</span>
               </button>
             }
           }

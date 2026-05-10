@@ -97,6 +97,7 @@
   }
 
   .page-image-preview {
+    min-height: 400px;
     .image-preview-wrapper {
       width: 100%;
       height: 400px;
@@ -121,6 +122,23 @@
       .rotation-slider {
         flex: 1 1 auto;
         min-width: 0;
+      }
+    }
+    .image-pick-trigger {
+      margin: auto;
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.15s ease-out;
+
+      &:hover,
+      &:focus-visible {
+        opacity: 1;
+        outline: none;
       }
     }
   }

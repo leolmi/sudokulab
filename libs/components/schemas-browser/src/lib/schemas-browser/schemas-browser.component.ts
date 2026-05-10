@@ -14,7 +14,7 @@ import { findIndex } from 'lodash';
 import { BoardPreviewComponent } from '@olmi/board';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SUDOKU_STATE } from '@olmi/common';
+import { SUDOKU_STATE, TranslateService } from '@olmi/common';
 import { ItemTooltipPipe, UserPlayingPipe } from './pipes';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 
@@ -35,6 +35,7 @@ import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrollin
 })
 export class SchemasBrowserComponent {
   private readonly _state = inject(SUDOKU_STATE);
+  readonly tr = inject(TranslateService);
   private readonly _skipScrollTo = signal<boolean>(false);
 
   readonly schemas = input<Sudoku[] | null | undefined>([]);

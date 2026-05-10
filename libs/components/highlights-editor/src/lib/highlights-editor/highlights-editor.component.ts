@@ -5,6 +5,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { I18nDirective } from '@olmi/common';
 
 @Component({
   selector: 'highlights-editor',
@@ -15,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
     MatIconModule,
     MatButtonModule,
     MatInputModule,
+    I18nDirective,
   ],
   templateUrl: './highlights-editor.component.html',
   styleUrl: './highlights-editor.component.scss',

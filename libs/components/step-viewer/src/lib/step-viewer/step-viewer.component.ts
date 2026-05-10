@@ -15,6 +15,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olmi/algorithm-info';
+import { TranslateService } from '@olmi/common';
 
 @Component({
   selector: 'step-viewer',
@@ -30,6 +31,7 @@ import { ALGORITHM_INFO_DIALOG_CONFIG, AlgorithmInfoDialogComponent } from '@olm
 })
 export class StepViewerComponent {
   private readonly _dialog = inject(MatDialog);
+  readonly tr = inject(TranslateService);
 
   readonly sequence = input<AlgorithmResult[] | null | undefined>(undefined);
   readonly autoHeight = input<boolean>(false);

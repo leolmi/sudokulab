@@ -53,6 +53,21 @@
   margin-left: 4px;
 }
 
+.lang-toggle.mat-mdc-icon-button {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .lang-code {
+    line-height: 1;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+}
+
 .author-popup {
   >img {
     width: 40px

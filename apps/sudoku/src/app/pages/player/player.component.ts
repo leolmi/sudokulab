@@ -33,7 +33,7 @@ import {
   SchemaKeeperErrorAction,
   SchemaKeeperErrorDialogComponent,
 } from '@olmi/schema-keeper';
-import { AppUserOptions } from '@olmi/common';
+import { AppUserOptions, I18nDirective } from '@olmi/common';
 import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
@@ -63,6 +63,7 @@ const PLAYER_VISIBLE_STAT: any = {
     SchemaHeaderComponent,
     SchemaToolbarComponent,
     HighlightsEditorComponent,
+    I18nDirective,
   ],
   selector: 'sudoku-player',
   templateUrl: './player.component.html',
@@ -206,13 +207,16 @@ export class PlayerComponent extends PageBase {
       prevComplete = currComplete;
     });
 
-    // aggiorna lo stato del menu in base allo schema corrente
+    // aggiorna lo stato del menu in base allo schema corrente.
+    // `calcStatusForMenu` legge `tr.lang()` via `t`: lasciamo la chiamata in tracked
+    // così il menu si rigenera al cambio lingua; solo `updateStatus` resta in untracked.
     effect(() => {
       const sdk = this.manager.sudoku();
       const s = this.manager.status();
       const stat = this.manager.stat();
       const filled = this.store.isFilled();
-      untracked(() => this.state.updateStatus(calcStatusForMenu(sdk, s, stat, filled)));
+      const status = calcStatusForMenu(sdk, s, stat, filled, this.t);
+      untracked(() => this.state.updateStatus(status));
     });
   }
 
@@ -281,7 +285,7 @@ export class PlayerComponent extends PageBase {
     requestAnimationFrame(() => {
       this.fxPlaying.set(true);
       // toast di conferma (MatSnackBar già usato in app)
-      this.notifier.notify('Schema completato!', NotificationType.success, { duration: 2600 });
+      this.notifier.notify(this.t('Schema completed!'), NotificationType.success, { duration: 2600 });
       // cascata ~1.1s + bordo ~1.1s: spegni il flag a fine animazione
       setTimeout(() => this.fxPlaying.set(false), 1400);
     });
@@ -308,7 +312,7 @@ export class PlayerComponent extends PageBase {
             break;
           case 'download':
             this._clipboard.copy(values);
-            this.notifier.notify('Stringa schema copiata negli appunti');
+            this.notifier.notify(this.t('Schema string copied to clipboard'));
             break;
           case 'close':
           default:

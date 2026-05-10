@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { SUDOKU_API, SUDOKU_NOTIFIER, SUDOKU_STATE, SUDOKU_STORE } from '@olmi/common';
+import { SUDOKU_API, SUDOKU_NOTIFIER, SUDOKU_STATE, SUDOKU_STORE, TranslateService } from '@olmi/common';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 /**
@@ -25,6 +25,8 @@ export class PageBase {
   readonly state = inject(SUDOKU_STATE);
   readonly store = inject(SUDOKU_STORE);
   readonly interaction = inject(SUDOKU_API);
+  readonly tr = inject(TranslateService);
+  readonly t = this.tr.t;
 
   constructor() {
     this._destroyRef.onDestroy(() => {

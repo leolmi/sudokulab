@@ -1,18 +1,19 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { Sudoku } from '@olmi/model';
-import { AppUserOptions } from '@olmi/common';
+import { AppUserOptions, TranslateService } from '@olmi/common';
 
 @Pipe({
   name: 'itemTooltip',
-  standalone: true
+  standalone: true,
+  pure: false,
 })
 export class ItemTooltipPipe implements PipeTransform {
-  constructor() {}
+  private readonly _tr = inject(TranslateService);
 
   transform(sdk: Sudoku|undefined): string {
-    return sdk ?
-      `${sdk.info.fixedCount} ${sdk.info.difficulty||'unknown'} (${sdk.info.difficultyValue})${sdk.info.tryAlgorithmCount>0?` T${sdk.info.tryAlgorithmCount}`:''}`
-      : 'unknown';
+    if (!sdk) return this._tr.t('unknown');
+    const diff = this._tr.t(sdk.info.difficulty||'unknown');
+    return `${sdk.info.fixedCount} ${diff} (${sdk.info.difficultyValue})${sdk.info.tryAlgorithmCount>0?` T${sdk.info.tryAlgorithmCount}`:''}`;
   }
 }
 

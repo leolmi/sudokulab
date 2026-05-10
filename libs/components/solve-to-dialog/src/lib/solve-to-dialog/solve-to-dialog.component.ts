@@ -6,6 +6,7 @@ import { CdkFixedSizeVirtualScroll, CdkVirtualScrollViewport } from '@angular/cd
 import { isNumber as _isNumber } from 'lodash';
 import { getAlgorithm } from '@olmi/algorithms';
 import { MatIconModule } from '@angular/material/icon';
+import { I18nDirective, TranslateService } from '@olmi/common';
 
 export class SolveToDialogArgs {
   schema?: Sudoku;
@@ -31,6 +32,7 @@ class AlgorithmResultEx extends AlgorithmResult {
     MatButtonModule,
     CdkFixedSizeVirtualScroll,
     CdkVirtualScrollViewport,
+    I18nDirective,
   ],
   templateUrl: './solve-to-dialog.component.html',
   styleUrl: './solve-to-dialog.component.scss',
@@ -39,6 +41,7 @@ class AlgorithmResultEx extends AlgorithmResult {
 export class SolveToDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<SolveToDialogComponent>);
   private readonly _data = inject<SolveToDialogArgs>(MAT_DIALOG_DATA);
+  readonly tr = inject(TranslateService);
 
   protected readonly items = signal<AlgorithmResultEx[]>(
     ((<SudokuInfoEx>this._data.schema?.info)?.solution || []).map(r => new AlgorithmResultEx(r)),

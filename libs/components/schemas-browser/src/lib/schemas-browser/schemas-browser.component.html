@@ -14,7 +14,7 @@
     <sudoku-board-preview [schema]="sdk.values"></sudoku-board-preview>
     <div class="schema-info flex-col flex-1">
       <div class="title flex-1">{{sdk.name}} {{sdk.info.origin||''}}</div>
-      <div class="sub-title">{{sdk.info.fixedCount}} {{sdk.info.difficulty||'unknown'}} ({{sdk.info.difficultyValue||'?'}})</div>
+      <div class="sub-title">{{sdk.info.fixedCount}} {{ tr.t(sdk.info.difficulty||'unknown') }} ({{sdk.info.difficultyValue||'?'}})</div>
     </div>
     @if (sdk | userPlaying) {
       <mat-icon class="play-info">edit</mat-icon>

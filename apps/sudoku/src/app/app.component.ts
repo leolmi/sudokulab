@@ -9,7 +9,14 @@ import { MatIconButton } from '@angular/material/button';
 import { MenuItem, SUDOKU_AUTHOR_LINK } from '@olmi/model';
 import { SUDOKU_PAGE_PLAYER_LOGIC } from './pages';
 import { LayoutModule } from '@angular/cdk/layout';
-import { ServerWaiterComponent, SUDOKU_STATE, SUDOKU_STORE, SudokuState } from '@olmi/common';
+import {
+  I18nMatTooltipDirective,
+  ServerWaiterComponent,
+  SUDOKU_STATE,
+  SUDOKU_STORE,
+  SudokuState,
+  TranslateService,
+} from '@olmi/common';
 
 
 @Component({
@@ -23,6 +30,7 @@ import { ServerWaiterComponent, SUDOKU_STATE, SUDOKU_STORE, SudokuState } from '
     MatIcon,
     MatIconButton,
     ServerWaiterComponent,
+    I18nMatTooltipDirective,
   ],
   selector: 'app-root',
   templateUrl: '/app.component.html',
@@ -33,6 +41,7 @@ import { ServerWaiterComponent, SUDOKU_STATE, SUDOKU_STORE, SudokuState } from '
 export class AppComponent {
   readonly state = inject(SUDOKU_STATE);
   readonly store = inject(SUDOKU_STORE);
+  readonly tr = inject(TranslateService);
   readonly globalState = SudokuState;
 
   readonly pageSubMenu = signal<MenuItem[]>([]);
@@ -44,4 +53,5 @@ export class AppComponent {
 
   clickOnLogo = () => window.open(SUDOKU_AUTHOR_LINK, "_blank");
   buildSubMenu = (item: MenuItem) => this.pageSubMenu.set(item.subMenu || []);
+  toggleLang = () => this.tr.toggle();
 }
