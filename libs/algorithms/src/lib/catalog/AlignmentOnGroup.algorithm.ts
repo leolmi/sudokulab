@@ -2,7 +2,7 @@ import {
   Algorithm,
   AlgorithmOptions,
   AlgorithmResult,
-  AlgorithmType, cellCoord,
+  AlgorithmType,
   findCommonGroups,
   findGroup,
   getGroupCells, groupCoord,
@@ -33,8 +33,8 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
   name = 'Alignment on group';
   icon = 'padding';
   type = AlgorithmType.support;
-  title = `quando alcune celle all'interno di un gruppo sono le uniche a poter contenere un determinato valore e generano un allineamento che coinvolge altri gruppi, in questi secondi è possibile escludere quel valore da quelli possibili`;
-  description = 'Poco più complesso del precedente, anche questo non risolve un valore di una cella ma contribuisce con i precedenti';
+  title = 'alg.AlignmentOnGroup.title';
+  description = 'alg.AlignmentOnGroup.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }
@@ -42,7 +42,7 @@ export class AlignmentOnGroupAlgorithm extends Algorithm {
   apply = (cells: SudokuCell[]): AlgorithmResult =>
     applyAlgorithm(this, cells, (res) => {
       findGroup(cells, (gcells, g) => {
-        return onValuesMap(gcells, (v, ids, vm) => {
+        return onValuesMap(gcells, (v, ids) => {
           // se le celle che possono contenere il valore sviluppano un allineamento nel gruppo *g*
           // tutte le altre celle allineate nel gruppo *cg* possono escludere il valore
           return findCommonGroups(ids, (cgs: SudokuGroup[]) => {

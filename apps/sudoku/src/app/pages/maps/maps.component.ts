@@ -135,7 +135,7 @@ export class MapsComponent extends PageBase {
     };
     const ser = JSON.stringify(charMap);
     this._clipboard.copy(ser);
-    this.notifier.notify('Char map copied successfully', NotificationType.success);
+    this.notifier.notify(this.t('Char map copied successfully'), NotificationType.success);
   }
 
   over(cell: GridCell) {

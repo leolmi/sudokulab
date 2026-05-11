@@ -33,8 +33,8 @@ export class UniqueRectangleAlgorithm extends Algorithm {
   name = 'Unique Rectangle';
   icon = 'crop_square';
   type = AlgorithmType.support;
-  title = 'Sfrutta l\'unicità della soluzione: un rettangolo di 4 celle con la stessa coppia di candidati porterebbe a soluzione doppia, e quindi consente di escludere valori che farebbero configurare il "deadly pattern"';
-  description = 'Tecnica di uniqueness: applicabile solo quando lo schema è garantito a soluzione unica';
+  title = 'alg.UniqueRectangle.title';
+  description = 'alg.UniqueRectangle.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

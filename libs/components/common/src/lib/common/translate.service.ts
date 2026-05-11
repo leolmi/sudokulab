@@ -18,10 +18,22 @@ interface I18nUserOptions {
 /**
  * Servizio di traduzione minimale signal-first (zero dipendenze esterne).
  *
- * Convenzione: le stringhe nel codice sono nella lingua di default (`en`),
- * il dizionario JSON contiene la mappa `<EN-string> → <traduzione>` per
- * ogni lingua non-default. La chiave è il testo EN stesso (eventualmente
- * con segnaposti `{name}` sostituiti da `t(...)`).
+ * Sono supportati due stili di chiave, mescolabili nello stesso codice:
+ *
+ *  - **self-key (default)**: la stringa nel codice è la frase nella lingua di
+ *    default (`en`). Il dizionario JSON contiene la mappa `<EN-string> →
+ *    <traduzione>`. Ideale per label corte (`'Cancel'`, `'Solve'`...). Per la
+ *    lingua di default non serve alcuna entry: `t(key)` ritorna la chiave.
+ *
+ *  - **chiave simbolica**: la stringa nel codice è un identificatore
+ *    (`'alg.OneCellForValue.title'`). In questo caso servono entrambi i file
+ *    di risorsa: `en.json` mappa la chiave alla frase inglese, `it.json` alla
+ *    traduzione italiana. Conviene per frasi lunghe o che si ripetono in più
+ *    punti, per evitare collisioni di prefisso o drift quando il testo cambia.
+ *
+ * Convenzione: per la lingua di default il dict si cerca comunque, e si
+ * cade in fallback sulla chiave stessa se non c'è entry — così il modello
+ * self-key continua a funzionare senza popolare `en.json`.
  */
 @Injectable({ providedIn: 'root' })
 export class TranslateService {
@@ -44,27 +56,25 @@ export class TranslateService {
   }
 
   /**
-   * Da chiamare in `provideAppInitializer`: imposta la lingua iniziale e,
-   * se non è quella di default, fetcha il dizionario prima del bootstrap.
+   * Da chiamare in `provideAppInitializer`: imposta la lingua iniziale e
+   * fetcha il relativo dizionario prima del bootstrap.
    */
   async init(): Promise<void> {
     await this.setLang(TranslateService.resolveInitialLang());
   }
 
   async setLang(lang: AppLang): Promise<void> {
-    if (lang === DEFAULT_LANG) {
-      this._dict.set({});
-      this._lang.set(lang);
-      AppUserOptions.updateFeature(SUDOKU_USER_OPTIONS_FEATURE, <I18nUserOptions>{ lang });
-      return;
-    }
     let dict = this._cache[lang];
     if (!dict) {
       try {
         dict = await firstValueFrom(this._http.get<Dictionary<string>>(I18N_ASSET(lang)));
         this._cache[lang] = dict;
       } catch (err) {
-        console.error(...SDK_PREFIX, `failed to load i18n dict for "${lang}"`, err);
+        // per la lingua di default il dict è opzionale (modello self-key),
+        // quindi non logghiamo come errore se manca
+        if (lang !== DEFAULT_LANG) {
+          console.error(...SDK_PREFIX, `failed to load i18n dict for "${lang}"`, err);
+        }
         dict = {};
       }
     }
@@ -86,8 +96,11 @@ export class TranslateService {
    */
   t = (key: string, params?: Record<string, string | number>): string => {
     if (!key) return '';
-    const lang = this._lang();
-    const raw = lang === DEFAULT_LANG ? key : (this._dict()[key] ?? key);
+    // lookup sempre nel dict (anche per default lang), fallback alla chiave:
+    // così il modello self-key continua a funzionare senza popolare en.json,
+    // mentre le chiavi simboliche trovano sempre una traduzione.
+    this._lang();
+    const raw = this._dict()[key] ?? key;
     return params ? raw.replace(PARAM_RX, (_, name) => {
       const v = params[name];
       return v === undefined || v === null ? '' : String(v);

@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { getPageArea } from '@olmi/model';
 import { ComponentPortal, PortalModule } from '@angular/cdk/portal';
-import { PrintDocument, SUDOKU_PRINT_DOCUMENT } from '@olmi/common';
+import { I18nMatTooltipDirective, PrintDocument, SUDOKU_PRINT_DOCUMENT } from '@olmi/common';
 import { TEMPLATE_PAGE_ID, TemplateComponent, TEMPLATES } from '@olmi/templates';
 
 export type PageMode = 'page' | 'add';
@@ -20,6 +20,7 @@ export type PageMode = 'page' | 'add';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
+    I18nMatTooltipDirective,
   ],
 })
 export class PrintPageComponent {

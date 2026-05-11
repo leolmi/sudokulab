@@ -32,9 +32,8 @@ export class BugAlgorithm extends Algorithm {
   name = 'Bug';
   icon = 'bug_report';
   type = AlgorithmType.support;
-  title = `se esiste una sola cella tra quelle ancora da valorizzare che può ospitare 3 valori e tutte le altre solo 2 ed uno dei tre valori
-  è presente solo 2 volte in tutti i gruppi che intersecano la cella allora questo può essere escluso dai valori possibili`;
-  description = `Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate`;
+  title = 'alg.Bug.title';
+  description = 'alg.Bug.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

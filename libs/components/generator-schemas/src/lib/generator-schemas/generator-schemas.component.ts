@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
-import { MultiLogicManager, SUDOKU_STORE } from '@olmi/common';
+import { MultiLogicManager, SUDOKU_STORE, TranslateService } from '@olmi/common';
 import { BoardPreviewComponent } from '@olmi/board';
 import { Sudoku } from '@olmi/model';
 import { Router } from '@angular/router';
@@ -18,6 +18,7 @@ import { GeneratorSchemaPreviewComponent } from './generator-schema-preview.comp
 })
 export class GeneratorSchemasComponent {
   readonly store = inject(SUDOKU_STORE);
+  readonly tr = inject(TranslateService);
   private readonly _router = inject(Router);
 
   readonly clickOnSchema = output<Sudoku>();

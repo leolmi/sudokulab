@@ -12,13 +12,13 @@
       @for (l of lines(); track l.description) {
         <div class="stat-line flex-row flex-align-start-center"
              [class.evidence]="!!l.evidence">
-          <div class="stat-line-desc">{{l.description}}</div>
+          <div class="stat-line-desc">{{ tr.t(l.description) }}</div>
           <div class="stat-line-value">{{l.value}}</div>
         </div>
       }
       <div class="stat-line evidence flex-row flex-align-start-center">
-        <div class="stat-line-desc">Values to add</div>
-        <div class="stat-line-value">{{valuesToAdd()}}</div>
+        <div class="stat-line-desc" appI18n>Values to add</div>
+        <div class="stat-line-value">{{ tr.t(valuesToAdd()) }}</div>
       </div>
     </div>
     <generator-options

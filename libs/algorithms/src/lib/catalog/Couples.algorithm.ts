@@ -37,8 +37,8 @@ export class CouplesAlgorithm extends Algorithm {
   name = 'Couples over groups';
   icon = 'move_down';
   type = AlgorithmType.support;
-  title = `quando coppie di valori producono allineamenti su uno dei valori possono far si che sia possibile escludere un valore da celle eserne ai gruppi considerati`;
-  description = 'Abbastanza complesso non risolve un valore di una cella ma contribuisce con i precedenti';
+  title = 'alg.Couples.title';
+  description = 'alg.Couples.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

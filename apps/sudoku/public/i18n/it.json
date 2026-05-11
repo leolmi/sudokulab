@@ -125,5 +125,143 @@
   "Show only playing games": "Mostra solo le partite in corso",
   "Choose used algorithms filter": "Filtra per algoritmi usati",
   "Schema solved successfully": "Schema risolto correttamente",
-  "Schema copied to clipboard successfully": "Schema copiato negli appunti"
+  "Schema copied to clipboard successfully": "Schema copiato negli appunti",
+  "Schema pasted from clipboard successfully": "Schema incollato dagli appunti",
+
+  "Values to add": "Valori da aggiungere",
+  "Start generation": "Avvia generazione",
+  "Stop generation": "Ferma generazione",
+  "Generate a schema": "Genera uno schema",
+  "Lock value": "Blocca valore",
+  "Skip schema": "Salta schema",
+
+  "Total fixed numbers": "Totale valori fissi",
+  "Symmetry": "Simmetria",
+  "Difficulty (min)": "Difficoltà (min)",
+  "(max)": "(max)",
+  "undefined": "non definita",
+  "easy": "facile",
+  "medium": "medio",
+  "hard": "difficile",
+  "veryhard": "molto difficile",
+
+  "vertical": "verticale",
+  "horizontal": "orizzontale",
+  "doubleMedian": "doppia mediana",
+  "diagonalNWSE": "diagonale NO-SE",
+  "diagonalNESW": "diagonale NE-SO",
+  "doubleDiagonal": "doppia diagonale",
+  "central": "centrale",
+
+  "Allow try algorithm": "Consenti algoritmo try",
+  "One result for schema": "Un risultato per schema",
+
+  "Stop mode": "Modalità stop",
+  "manual": "manuale",
+  "after N base schemas": "dopo N schemi base",
+  "after N seconds": "dopo N secondi",
+  "builded base schemas": "schemi base costruiti",
+  "seconds": "secondi",
+
+  "Variants per base schema": "Varianti per schema base",
+  "auto": "auto",
+  "sequential": "sequenziale",
+  "random": "casuale",
+  "Max solve cycles": "Cicli max di risoluzione",
+  "Max fill cycles": "Cicli max di riempimento",
+
+  "Use this algorithms": "Usa questi algoritmi",
+  "All algorithms": "Tutti gli algoritmi",
+  "Number of parallel workers": "Numero di worker paralleli",
+  "the number of workers will be effective only after the page is reloaded": "il numero di worker sarà effettivo solo dopo il ricaricamento della pagina",
+
+  "Select algorithms": "Seleziona algoritmi",
+  "Select all": "Seleziona tutti",
+  "Clear": "Pulisci",
+  "Apply": "Applica",
+
+  "running ({generated}/{managed})...": "in esecuzione ({generated}/{managed})...",
+
+  "pages with": "pagine con",
+  "schemas, on template": "schemi, su template",
+  "clear content": "svuota contenuto",
+  "remove this page": "rimuovi questa pagina",
+  "Print document": "Stampa documento",
+  "Clear document": "Svuota documento",
+  "Available templates": "Template disponibili",
+
+  "resolutive": "risolutivo",
+  "contributive": "contributivo",
+  "Open the algorithm details page": "Apri la pagina di dettaglio dell'algoritmo",
+
+  "Unknown algorithm": "Algoritmo sconosciuto",
+  "Difficulty factor:": "Fattore di difficoltà:",
+  "Detail page not yet available for this algorithm.": "Pagina di dettaglio non ancora disponibile per questo algoritmo.",
+  "No information available.": "Nessuna informazione disponibile.",
+
+  "Char map": "Mappa caratteri",
+  "Char map copied successfully": "Mappa caratteri copiata con successo",
+  "Move left": "Sposta a sinistra",
+  "Move right": "Sposta a destra",
+  "Clear grid": "Svuota griglia",
+  "Copy map": "Copia mappa",
+
+  "Upload catalog": "Carica catalogo",
+  "Upload terminated": "Caricamento completato",
+
+  "Error while checking schema": "Errore durante la verifica dello schema",
+
+  "alg.OneCellForValue.title": "esiste una sola cella nel gruppo che possa ospitare quel determinato valore",
+  "alg.OneCellForValue.description": "Rappresenta l'approccio più basico e più immediato al quale è stato associato un punteggio minimo",
+
+  "alg.OneValueForCell.title": "esiste un solo valore possibile per la cella nel gruppo",
+  "alg.OneValueForCell.description": "Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un punteggio più alto rispetto al precedente",
+
+  "alg.Twins.title": "quando una coppia di celle all'interno di un gruppo può contenere la stessa coppia di valori questi possono essere esclusi da tutte le altre celle del gruppo e dagli altri gruppi che le contengono",
+  "alg.Twins.description": "Complesso poco più del precedente non risolve un valore di una cella ma contribuisce con i precedenti. Per questo ha un punteggio leggermente più alto del precedente",
+
+  "alg.AlignmentOnGroup.title": "quando alcune celle all'interno di un gruppo sono le uniche a poter contenere un determinato valore e generano un allineamento che coinvolge altri gruppi, in questi ultimi è possibile escludere quel valore da quelli possibili",
+  "alg.AlignmentOnGroup.description": "Poco più complesso del precedente, anche questo non risolve un valore di una cella ma contribuisce con i precedenti",
+
+  "alg.NakedTriple.title": "Tre celle nello stesso gruppo condividono esattamente 3 candidati complessivi: questi valori vengono esclusi dalle altre celle del gruppo",
+  "alg.NakedTriple.description": "Più complesso dei Twins: richiede di riconoscere tre celle (non necessariamente tutte con 3 candidati) la cui unione dei candidati è esattamente di 3 valori",
+
+  "alg.HiddenTriple.title": "Tre valori che in un gruppo possono stare solo in 3 specifiche celle: in quelle celle possono essere rimossi tutti gli altri candidati",
+  "alg.HiddenTriple.description": "Controparte \"hidden\" del Naked Triple: si ragiona sui valori anziché sulle celle",
+
+  "alg.NakedQuad.title": "Quattro celle nello stesso gruppo condividono esattamente 4 candidati complessivi: questi valori vengono esclusi dalle altre celle del gruppo",
+  "alg.NakedQuad.description": "Raro e difficile da individuare: quattro celle la cui unione dei candidati vale esattamente 4 valori",
+
+  "alg.HiddenQuad.title": "Quattro valori che in un gruppo possono stare solo in 4 specifiche celle: in quelle celle possono essere rimossi tutti gli altri candidati",
+  "alg.HiddenQuad.description": "Molto difficile da individuare manualmente: quattro valori confinati in quattro posizioni",
+
+  "alg.XWings.title": "Quando due righe (o due colonne) contengono solamente due posizioni possibili per un dato numero e quelle due posizioni si trovano nelle stesse due colonne (o due righe), si può eliminare quel numero da tutte le altre posizioni ancora possibili delle due colonne (o due righe).",
+  "alg.XWings.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate",
+
+  "alg.Couples.title": "quando coppie di valori producono allineamenti su uno dei valori può essere possibile escludere un valore da celle esterne ai gruppi considerati",
+  "alg.Couples.description": "Abbastanza complesso non risolve un valore di una cella ma contribuisce con i precedenti",
+
+  "alg.XYWings.title": "Quando due celle dette ali, entrambe con due valori possibili, condividono tali valori alternativamente con la terza cella detta pivot, il terzo valore condiviso solo dalle ali può essere escluso dalle celle vuote che \"vedono\" entrambe le ali",
+  "alg.XYWings.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate",
+
+  "alg.Swordfish.title": "Swordfish",
+  "alg.Swordfish.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate",
+
+  "alg.UniqueRectangle.title": "Sfrutta l'unicità della soluzione: un rettangolo di 4 celle con la stessa coppia di candidati porterebbe a soluzione doppia, e quindi consente di escludere valori che farebbero configurare il \"deadly pattern\"",
+  "alg.UniqueRectangle.description": "Tecnica di uniqueness: applicabile solo quando lo schema è garantito a soluzione unica",
+
+  "alg.SimpleColouring.title": "Costruisce catene di coppie coniugate per un valore e ne sfrutta la colorazione alternata per escludere candidati",
+  "alg.SimpleColouring.description": "Tecnica avanzata basata sulle coppie coniugate di un singolo valore. Efficace per evitare il ricorso al brute-force in molti schemi",
+
+  "alg.Jellyfish.title": "Jellyfish",
+  "alg.Jellyfish.description": "Estensione di Swordfish su 4 righe/colonne. Tecnica avanzata: contribuisce a rimuovere candidati dalle celle interessate",
+
+  "alg.TurbotFish.title": "Quando un valore ha coppie di posizioni in tre gruppi legati tra loro (due estremi + raccordo), è possibile escluderlo dalle celle esterne che vedono entrambe le estremità",
+  "alg.TurbotFish.description": "Discretamente complesso da capire ed applicare, anch'esso non risolve un valore di una cella ma contribuisce con i precedenti",
+
+  "alg.Bug.title": "se esiste una sola cella tra quelle ancora da valorizzare che può ospitare 3 valori e tutte le altre solo 2, ed uno dei tre valori è presente solo 2 volte in tutti i gruppi che intersecano la cella, allora questo può essere escluso dai valori possibili",
+  "alg.Bug.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate",
+
+  "alg.TryNumber.title": "se una determinata cella può ospitare N numeri, si divide la soluzione in N schemi, uno per ogni valore",
+  "alg.TryNumber.description": "Rappresenta l'applicazione del metodo \"brutal force\". Questo algoritmo sceglie la prima cella con il numero di valori possibili più basso. Ovviamente rappresenta la difficolta maggiore tra tutti gli algoritmi poiché nella pratica si traduce nell'andare per tentativi"
 }

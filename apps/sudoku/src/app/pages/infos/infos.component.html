@@ -87,14 +87,14 @@
               @if (hasInfoPage(alg.id)) {
                 <button mat-icon-button
                         class="alg-info-btn"
-                        matTooltip="Open the algorithm details page"
+                        appI18nTooltip="Open the algorithm details page"
                         (click)="openAlgorithmInfo(alg.id)"
-                        aria-label="Open the algorithm details page">
+                        [attr.aria-label]="tr.t('Open the algorithm details page')">
                   <mat-icon>open_in_new</mat-icon>
                 </button>
               }
             </div>
-            : <i>({{TYPEDESC[alg.type]}}) {{alg.title}}</i>.<br>{{alg.description}};
+            : <i>({{tr.t(TYPEDESC[alg.type])}}) {{ tr.t(alg.title) }}</i>.<br>{{ tr.t(alg.description) }};
           </li>
         }
       </ul>

@@ -15,6 +15,7 @@ import { Interaction, SUDOKU_API } from './interaction';
 import { saveAs } from 'file-saver';
 import { clearSchema, getSolution, solve } from '@olmi/logic';
 import { Notifier, SUDOKU_NOTIFIER } from './notifier';
+import { TranslateService } from './translate.service';
 
 /**
  * Catalogo schemi + stato di sincronizzazione con il server.
@@ -26,6 +27,7 @@ import { Notifier, SUDOKU_NOTIFIER } from './notifier';
 export class SudokuStore {
   private readonly _interaction: Interaction = inject(SUDOKU_API);
   private readonly _notifier: Notifier = inject(SUDOKU_NOTIFIER);
+  private readonly _tr: TranslateService = inject(TranslateService);
 
   private readonly _generated = signal<SudokuEx[]>([]);
   private readonly _catalog = signal<Sudoku[]>([]);
@@ -90,7 +92,7 @@ export class SudokuStore {
       // errori generici di rete (status 0, timeout, ecc.) ricadono nella
       // notifica fallback; gli errori strutturati vengono propagati
       if (!body?.code && httpStatus !== 0) {
-        this._notifier.notify(`error while check schema`, NotificationType.error);
+        this._notifier.notify(this._tr.t('Error while checking schema'), NotificationType.error);
       }
       throw {
         code: body.code || 'unknown-error',

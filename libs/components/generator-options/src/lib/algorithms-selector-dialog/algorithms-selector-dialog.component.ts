@@ -5,6 +5,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { Algorithm } from '@olmi/model';
+import { I18nDirective } from '@olmi/common';
 
 export interface AlgorithmsSelectorData {
   algorithms: Algorithm[];
@@ -22,21 +23,22 @@ export interface AlgorithmsSelectorData {
     MatDialogModule,
     MatCheckbox,
     MatButtonModule,
-    MatIcon
+    MatIcon,
+    I18nDirective,
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h2 mat-dialog-title class="flex-row flex-align-between-center">
-      <span>Select algorithms</span>
+      <span appI18n>Select algorithms</span>
       <span class="alg-counter">{{ selected.size }} / {{ algorithms.length }}</span>
     </h2>
     <mat-dialog-content>
       <div class="alg-actions flex-row flex-gap-8">
         <button mat-stroked-button (click)="selectAll()">
-          <mat-icon>done_all</mat-icon> Select all
+          <mat-icon>done_all</mat-icon> <span appI18n>Select all</span>
         </button>
         <button mat-stroked-button (click)="clearAll()">
-          <mat-icon>clear</mat-icon> Clear
+          <mat-icon>clear</mat-icon> <span appI18n>Clear</span>
         </button>
       </div>
       <div class="alg-list">
@@ -51,8 +53,8 @@ export interface AlgorithmsSelectorData {
       </div>
     </mat-dialog-content>
     <mat-dialog-actions class="flex-row flex-align-end-center flex-gap-8">
-      <button mat-button [mat-dialog-close]="undefined">Cancel</button>
-      <button mat-raised-button color="primary" (click)="confirm()">Apply</button>
+      <button mat-button [mat-dialog-close]="undefined" appI18n>Cancel</button>
+      <button mat-raised-button color="primary" (click)="confirm()" appI18n>Apply</button>
     </mat-dialog-actions>
   `,
   styles: [`

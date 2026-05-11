@@ -5,7 +5,7 @@
     <div class="header flex-row flex-align-start-center">
       @let size = gridSize();
       @if (size) {
-        <div class="title flex-1">Char map {{size}}x{{size}}</div>
+        <div class="title flex-1">{{ tr.t('Char map') }} {{size}}x{{size}}</div>
       }
       <input class="char-input"
              [maxLength]="1" type="text"

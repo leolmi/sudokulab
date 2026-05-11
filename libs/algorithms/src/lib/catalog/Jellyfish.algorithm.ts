@@ -18,8 +18,8 @@ export class JellyfishAlgorithm extends Algorithm {
   name = 'Jellyfish';
   icon = 'phishing';
   type = AlgorithmType.support;
-  title = 'Jellyfish';
-  description = `Estensione di Swordfish su 4 righe/colonne. Tecnica avanzata: contribuisce a rimuovere candidati dalle celle interessate`;
+  title = 'alg.Jellyfish.title';
+  description = 'alg.Jellyfish.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

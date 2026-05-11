@@ -27,11 +27,11 @@ export class ManagementComponent extends PageBase {
         this.working.set(true);
         try {
           const r = await this.interaction.updateCatalog();
-          this.notifier.notify('upload terminated', r ? NotificationType.success : NotificationType.error);
+          this.notifier.notify(this.t('Upload terminated'), r ? NotificationType.success : NotificationType.error);
           console.log('UPLOAD RESULT', r);
         } catch (err) {
           console.error('upload failed', err);
-          this.notifier.notify('upload terminated', NotificationType.error);
+          this.notifier.notify(this.t('Upload terminated'), NotificationType.error);
         } finally {
           this.working.set(false);
         }

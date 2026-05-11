@@ -7,7 +7,7 @@
           (click)="previewClick(sdk)"
           (dblclick)="openInPlayer(sdk)"
         ></sudoku-board-preview>
-        <div class="schema-details flex-1">{{sdk.info.fixedCount}}n {{sdk.info.difficulty}} ({{sdk.info.difficultyValue}})</div>
+        <div class="schema-details flex-1">{{sdk.info.fixedCount}}n {{ tr.t(sdk.info.difficulty) }} ({{sdk.info.difficultyValue}})</div>
       </div>
     </div>
   }

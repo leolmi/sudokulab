@@ -29,8 +29,8 @@ export class OneCellForValueAlgorithm extends Algorithm {
   name = 'One cell for value';
   icon = 'crop_free';
   type = AlgorithmType.solver;
-  title = 'esiste una sola cella nel gruppo che possa ospitare quel determinato valore';
-  description = 'Rappresenta l\'approccio più basico e più immediato al quale è stato associato un punteggio minimo';
+  title = 'alg.OneCellForValue.title';
+  description = 'alg.OneCellForValue.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

@@ -16,8 +16,8 @@ export class HiddenQuadAlgorithm extends Algorithm {
   name = 'Hidden Quad';
   icon = 'bookmark_border';
   type = AlgorithmType.support;
-  title = 'Quattro valori che in un gruppo possono stare solo in 4 specifiche celle: in quelle celle possono essere rimossi tutti gli altri candidati';
-  description = 'Molto difficile da individuare manualmente: quattro valori confinati in quattro posizioni';
+  title = 'alg.HiddenQuad.title';
+  description = 'alg.HiddenQuad.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

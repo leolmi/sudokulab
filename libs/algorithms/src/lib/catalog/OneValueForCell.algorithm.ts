@@ -20,8 +20,8 @@ export class OneValueForCellAlgorithm extends Algorithm {
   name = 'One value for cell';
   icon = 'center_focus_strong';
   type = AlgorithmType.solver;
-  title = 'esiste un solo valore possibile per la cella nel gruppo';
-  description = 'Non è sempre facile individuare queste situazioni e per questo si è attribuito a questo procedimento un punteggio più alto rispetto al precedente';
+  title = 'alg.OneValueForCell.title';
+  description = 'alg.OneValueForCell.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

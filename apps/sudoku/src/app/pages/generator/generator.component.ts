@@ -17,6 +17,7 @@ import { GeneratorSchemasComponent } from '@olmi/generator-schemas';
 import {
   AppUserOptions,
   GENERATOR_OPTIONS_FEATURE,
+  I18nDirective,
   SudokuState,
 } from '@olmi/common';
 import { omit as _omit } from 'lodash';
@@ -37,6 +38,7 @@ const GENERATOR_VISIBLE_STAT: any = {
     GeneratorSchemasComponent,
     MatProgressBar,
     SchemaToolbarComponent,
+    I18nDirective,
   ],
   selector: 'sudoku-generator',
   templateUrl: './generator.component.html',
@@ -126,7 +128,7 @@ export class GeneratorComponent extends PageBase {
 
   pasteSchema(values: string) {
     this.manager.load(values);
-    this.notifier.notify('Schema pasted from clipboard successfully', NotificationType.success);
+    this.notifier.notify(this.t('Schema pasted from clipboard successfully'), NotificationType.success);
   }
 
   clickOnGeneratedSchema(sdk: Sudoku) {

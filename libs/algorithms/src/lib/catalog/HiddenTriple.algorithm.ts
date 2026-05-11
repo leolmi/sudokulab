@@ -17,8 +17,8 @@ export class HiddenTripleAlgorithm extends Algorithm {
   name = 'Hidden Triple';
   icon = 'bookmark_border';
   type = AlgorithmType.support;
-  title = 'Tre valori che in un gruppo possono stare solo in 3 specifiche celle: in quelle celle possono essere rimossi tutti gli altri candidati';
-  description = 'Controparte "hidden" del Naked Triple: si ragiona sui valori anziché sulle celle';
+  title = 'alg.HiddenTriple.title';
+  description = 'alg.HiddenTriple.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

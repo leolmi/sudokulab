@@ -1,0 +1,55 @@
+{
+  "alg.OneCellForValue.title": "there is only one cell in the group that can host that specific value",
+  "alg.OneCellForValue.description": "Represents the most basic and immediate approach, to which the lowest score has been assigned",
+
+  "alg.OneValueForCell.title": "there is only one possible value for the cell in the group",
+  "alg.OneValueForCell.description": "Spotting these situations is not always easy, which is why a higher score has been assigned to this technique than to the previous one",
+
+  "alg.Twins.title": "when a pair of cells within a group can host the same pair of values, those values can be excluded from every other cell of the group and from the other groups that contain them",
+  "alg.Twins.description": "Slightly more complex than the previous one, it does not solve a cell's value but contributes alongside the previous techniques. For this reason its score is slightly higher than the previous one",
+
+  "alg.AlignmentOnGroup.title": "when a few cells within a group are the only ones that can host a given value and they generate an alignment that involves other groups, in those latter groups that value can be excluded from the candidates",
+  "alg.AlignmentOnGroup.description": "Slightly more complex than the previous one, this too does not solve a cell's value but contributes alongside the previous techniques",
+
+  "alg.NakedTriple.title": "Three cells in the same group share exactly 3 overall candidates: those values are excluded from the other cells of the group",
+  "alg.NakedTriple.description": "More complex than Twins: it requires spotting three cells (not necessarily all with 3 candidates) whose union of candidates totals exactly 3 values",
+
+  "alg.HiddenTriple.title": "Three values that in a group can only sit in 3 specific cells: in those cells every other candidate can be removed",
+  "alg.HiddenTriple.description": "The \"hidden\" counterpart of Naked Triple: the reasoning is on the values rather than on the cells",
+
+  "alg.NakedQuad.title": "Four cells in the same group share exactly 4 overall candidates: those values are excluded from the other cells of the group",
+  "alg.NakedQuad.description": "Rare and hard to spot: four cells whose union of candidates totals exactly 4 values",
+
+  "alg.HiddenQuad.title": "Four values that in a group can only sit in 4 specific cells: in those cells every other candidate can be removed",
+  "alg.HiddenQuad.description": "Very hard to spot manually: four values confined to four positions",
+
+  "alg.XWings.title": "When two rows (or two columns) contain only two possible positions for a given number and those two positions fall in the same two columns (or two rows), that number can be eliminated from every other still-possible position in those two columns (or two rows).",
+  "alg.XWings.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells",
+
+  "alg.Couples.title": "when pairs of values produce alignments on one of the values, it becomes possible to exclude a value from cells outside the considered groups",
+  "alg.Couples.description": "Fairly complex, it does not solve a cell's value but contributes alongside the previous techniques",
+
+  "alg.XYWings.title": "When two cells called wings, both with two possible values, share those values alternately with a third cell called pivot, the third value shared only by the wings can be excluded from the empty cells that \"see\" both wings",
+  "alg.XYWings.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells",
+
+  "alg.Swordfish.title": "Swordfish",
+  "alg.Swordfish.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells",
+
+  "alg.UniqueRectangle.title": "Exploits the uniqueness of the solution: a rectangle of 4 cells with the same pair of candidates would yield two solutions, so it allows excluding values that would form the \"deadly pattern\"",
+  "alg.UniqueRectangle.description": "Uniqueness technique: applicable only when the schema is guaranteed to have a unique solution",
+
+  "alg.SimpleColouring.title": "Builds chains of conjugate pairs for a value and exploits the alternating colouring to exclude candidates",
+  "alg.SimpleColouring.description": "Advanced technique based on conjugate pairs of a single value. Effective in many schemas to avoid resorting to brute-force",
+
+  "alg.Jellyfish.title": "Jellyfish",
+  "alg.Jellyfish.description": "Extension of Swordfish to 4 rows/columns. Advanced technique: it contributes to removing candidates from the involved cells",
+
+  "alg.TurbotFish.title": "When a value has pairs of positions in three linked groups (two endpoints + a connector), it can be excluded from the external cells that see both endpoints",
+  "alg.TurbotFish.description": "Fairly complex to understand and apply; it too does not solve a cell's value but contributes alongside the previous techniques",
+
+  "alg.Bug.title": "if among the cells still to be filled there is only one that can host 3 values and all the others only 2, and one of those three values appears only twice in all the groups intersecting the cell, then that value can be excluded from the candidates",
+  "alg.Bug.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells",
+
+  "alg.TryNumber.title": "if a given cell can host N numbers, the solution is split into N schemas, one for each value",
+  "alg.TryNumber.description": "Represents the application of the \"brute force\" method. This algorithm picks the first cell with the lowest number of possible values. Obviously it represents the highest difficulty among all algorithms since in practice it boils down to trial-and-error"
+}

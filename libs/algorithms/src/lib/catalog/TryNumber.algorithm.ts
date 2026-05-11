@@ -44,8 +44,8 @@ export class TryNumberAlgorithm extends Algorithm {
   name = 'Try number in cell';
   icon = 'generating_tokens';
   type = AlgorithmType.solver;
-  title = 'se una determinata cella può ospitare N numeri, si divide la soluzione in N schemi, uno per ogni valore';
-  description = 'Rappresenta l\'applicazione del metodo "brutal force". Questo algoritmo sceglie la prima cella con il numero di valori possibili più basso. Ovviamente rappresenta la difficolta maggiore tra tutti gli algoritmi poiché nella pratica si traduce nell\'andare per tentativi';
+  title = 'alg.TryNumber.title';
+  description = 'alg.TryNumber.description';
   options = <AlgorithmOptions>{}
 
   apply = (cells: SudokuCell[]): AlgorithmResult =>

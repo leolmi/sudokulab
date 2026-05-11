@@ -36,8 +36,8 @@ export class TurbotFishAlgorithm extends Algorithm {
   name = 'Turbot Fish';
   icon = 'share';
   type = AlgorithmType.support;
-  title = `Quando un valore ha coppie di posizioni in tre gruppi legati tra loro (due estremi + raccordo), è possibile escluderlo dalle celle esterne che vedono entrambe le estremità`;
-  description = `Discretamente complesso da capire ed applicare, anch'esso non risolve un valore di una cella ma contribuisce con i precedenti`;
+  title = 'alg.TurbotFish.title';
+  description = 'alg.TurbotFish.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

@@ -42,7 +42,7 @@ import { MatInput } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { getAlgorithms } from '@olmi/algorithms';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MultiLogicManager, SudokuState } from '@olmi/common';
+import { I18nDirective, MultiLogicManager, SudokuState, TranslateService } from '@olmi/common';
 import { BoardManager } from '@olmi/board';
 
 @Component({
@@ -59,6 +59,7 @@ import { BoardManager } from '@olmi/board';
     MatSlider,
     MatSliderThumb,
     MatCheckbox,
+    I18nDirective,
   ],
   templateUrl: './generator-options.component.html',
   styleUrl: './generator-options.component.scss',
@@ -81,6 +82,7 @@ export class GeneratorOptionsComponent {
   readonly algorithms: Algorithm[] = getAlgorithms();
 
   private readonly _manager = inject(BoardManager);
+  readonly tr = inject(TranslateService);
 
   readonly options = input<GeneratorOptions | null | undefined>(new GeneratorOptions());
 
@@ -109,7 +111,7 @@ export class GeneratorOptionsComponent {
     const usableIds = new Set(usable.map(a => a.id));
     const selected = (opt.useAlgorithms || []).filter(id => usableIds.has(id));
     if (selected.length === 0 || selected.length === usable.length) {
-      return 'All algorithms';
+      return this.tr.t('All algorithms');
     }
     return selected
       .map(id => this.algorithms.find(a => a.id === id)?.name || id)

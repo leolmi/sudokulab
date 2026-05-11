@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { BoardManager, BoardPreviewComponent } from '@olmi/board';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { SudokuState } from '@olmi/common';
+import { SudokuState, TranslateService } from '@olmi/common';
 import { GenerationStat } from '@olmi/model';
 
 @Component({
@@ -38,6 +38,7 @@ import { GenerationStat } from '@olmi/model';
 export class GeneratorSchemaPreviewComponent {
   readonly globalState = SudokuState;
   private readonly _manager = inject(BoardManager);
+  private readonly _tr = inject(TranslateService);
 
   readonly index = input<number>(0);
 
@@ -48,7 +49,10 @@ export class GeneratorSchemaPreviewComponent {
 
   protected readonly generationDesc = computed<string>(() => {
     const stat = this.slotStat();
-    return `running (${stat?.generatedSchemaCount || 0}/${stat?.managedSchemaCount || 0})...`;
+    return this._tr.t('running ({generated}/{managed})...', {
+      generated: stat?.generatedSchemaCount || 0,
+      managed: stat?.managedSchemaCount || 0,
+    });
   });
 
   protected readonly progress = computed<number>(() => {

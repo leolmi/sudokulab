@@ -34,11 +34,8 @@ export class XWingsAlgorithm extends Algorithm {
   name = 'X-Wings';
   icon = 'grid_view';
   type = AlgorithmType.support;
-  title = `Quando due righe (o due colonne) contengono solamente due posizioni possibili per un dato numero e
-  quelle due posizioni si trovano nelle stesse due colonne (o due righe), si può eliminare quel numero da tutte le altre
-  posizioni ancora possibili delle due colonne (o due righe).`;
-  description = `Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori
-  possibili dalle celle interessate`;
+  title = 'alg.XWings.title';
+  description = 'alg.XWings.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

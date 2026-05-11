@@ -31,8 +31,8 @@ export class TwinsAlgorithm extends Algorithm {
   name = 'Naked Pair (Twins)';
   icon = 'bookmarks';
   type = AlgorithmType.support;
-  title = 'quando una coppia di celle all\'interno di un gruppo può contenere la stessa coppia di valori questi possono essere esclusi da tutte le altre celle del gruppo e dagli altri gruppi che le contengono';
-  description = 'Complesso poco più del precedente non risolve un valore di una cella ma contribuisce con i precedenti. Per questo ha un punteggio leggermente più alto del precedente';
+  title = 'alg.Twins.title';
+  description = 'alg.Twins.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

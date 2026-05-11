@@ -28,10 +28,8 @@ export class XYWingsAlgorithm extends Algorithm {
   name = 'XY-Wings';
   icon = 'widgets';
   type = AlgorithmType.support;
-  title = `Quando due celle dette ali entrambe con due valori possibili condividono tali valori alternativamente
-  con la terza cella detta pivot, il terzo valore condiviso solo dalle ali può essere escluso dalle celle
-  vuote che "vedono le ali"`;
-  description = `Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate`;
+  title = 'alg.XYWings.title';
+  description = 'alg.XYWings.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

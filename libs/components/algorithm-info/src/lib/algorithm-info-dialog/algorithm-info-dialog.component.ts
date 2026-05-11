@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { getAlgorithm } from '@olmi/algorithms';
 import { Algorithm } from '@olmi/model';
 import { loadAlgorithmInfoPage } from '../algorithm-info-registry';
+import { TranslateService } from '@olmi/common';
 
 export interface AlgorithmInfoDialogData {
   algorithmId: string;
@@ -41,10 +42,10 @@ export interface AlgorithmInfoDialogData {
           <mat-icon class="alg-info-icon">{{ alg.icon }}</mat-icon>
           <div class="flex-col flex-1">
             <div class="alg-info-name">{{ alg.name }}</div>
-            <div class="alg-info-subtitle">{{ alg.title }}</div>
+            <div class="alg-info-subtitle">{{ tr.t(alg.title) }}</div>
           </div>
         } @else {
-          <div class="alg-info-name flex-1">Algoritmo sconosciuto ({{ data.algorithmId }})</div>
+          <div class="alg-info-name flex-1">{{ tr.t('Unknown algorithm') }} ({{ data.algorithmId }})</div>
         }
         <button mat-icon-button [mat-dialog-close]="null" aria-label="Close">
           <mat-icon>close</mat-icon>
@@ -62,17 +63,17 @@ export interface AlgorithmInfoDialogData {
         } @else {
           <div class="alg-info-fallback">
             @if (alg) {
-              <p class="alg-info-description">{{ alg.description }}</p>
+              <p class="alg-info-description">{{ tr.t(alg.description) }}</p>
               @if (alg.factor) {
                 <p class="alg-info-factor">
-                  <strong>Fattore di difficoltà:</strong> <code>{{ alg.factor }}</code>
+                  <strong>{{ tr.t('Difficulty factor:') }}</strong> <code>{{ alg.factor }}</code>
                 </p>
               }
               <p class="alg-info-missing">
-                <em>Pagina di dettaglio non ancora disponibile per questo algoritmo.</em>
+                <em>{{ tr.t('Detail page not yet available for this algorithm.') }}</em>
               </p>
             } @else {
-              <p>Nessuna informazione disponibile.</p>
+              <p>{{ tr.t('No information available.') }}</p>
             }
           </div>
         }
@@ -114,6 +115,7 @@ export interface AlgorithmInfoDialogData {
 })
 export class AlgorithmInfoDialogComponent {
   protected readonly data: AlgorithmInfoDialogData = inject(MAT_DIALOG_DATA);
+  protected readonly tr = inject(TranslateService);
 
   protected readonly algorithm: Algorithm | undefined = getAlgorithm(this.data.algorithmId);
   protected readonly loading = signal<boolean>(false);

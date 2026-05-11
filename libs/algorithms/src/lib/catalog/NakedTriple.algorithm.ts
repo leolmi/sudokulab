@@ -17,8 +17,8 @@ export class NakedTripleAlgorithm extends Algorithm {
   name = 'Naked Triple';
   icon = 'grid_3x3';
   type = AlgorithmType.support;
-  title = 'Tre celle nello stesso gruppo condividono esattamente 3 candidati complessivi: questi valori vengono esclusi dalle altre celle del gruppo';
-  description = 'Più complesso dei Twins: richiede di riconoscere tre celle (non necessariamente tutte con 3 candidati) la cui unione dei candidati è esattamente di 3 valori';
+  title = 'alg.NakedTriple.title';
+  description = 'alg.NakedTriple.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

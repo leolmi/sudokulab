@@ -11,12 +11,14 @@ import {
   AlgorithmInfoDialogComponent,
   hasAlgorithmInfoPage,
 } from '@olmi/algorithm-info';
+import { I18nMatTooltipDirective } from '@olmi/common';
 
 @Component({
   imports: [
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
+    MatTooltipModule,
+    I18nMatTooltipDirective,
 ],
   selector: 'sudoku-infos',
   templateUrl: './infos.component.html',
@@ -33,8 +35,8 @@ export class InfosComponent extends PageBase {
   constructor() {
     super();
     this.TYPEDESC = {
-      [AlgorithmType.solver]: 'risolutivo',
-      [AlgorithmType.support]: 'contributivo'
+      [AlgorithmType.solver]: 'resolutive',
+      [AlgorithmType.support]: 'contributive'
     }
     this.algorithms = getAlgorithms();
   }

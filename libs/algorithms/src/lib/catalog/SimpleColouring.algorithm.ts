@@ -34,8 +34,8 @@ export class SimpleColouringAlgorithm extends Algorithm {
   name = 'Simple Colouring';
   icon = 'palette';
   type = AlgorithmType.support;
-  title = 'Costruisce catene di coppie coniugate per un valore e ne sfrutta la colorazione alternata per escludere candidati';
-  description = 'Tecnica avanzata basata sulle coppie coniugate di un singolo valore. Efficace per evitare il ricorso al brute-force in molti schemi';
+  title = 'alg.SimpleColouring.title';
+  description = 'alg.SimpleColouring.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }

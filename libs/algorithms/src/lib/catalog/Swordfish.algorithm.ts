@@ -18,8 +18,8 @@ export class SwordfishAlgorithm extends Algorithm {
   name = 'Swordfish';
   icon = 'set_meal';
   type = AlgorithmType.support;
-  title = 'Swordfish';
-  description = `Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate`;
+  title = 'alg.Swordfish.title';
+  description = 'alg.Swordfish.description';
   options = <AlgorithmOptions>{
     checkAvailableOnStep: true
   }
