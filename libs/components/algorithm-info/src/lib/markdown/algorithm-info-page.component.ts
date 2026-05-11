@@ -66,7 +66,7 @@ import { AlgorithmMarkdownLoader } from './algorithm-markdown.loader';
           }
           @case ('board') {
             <div class="md-board flex-row flex-align-center-center">
-              <sudoku-board-preview [sample]="samples()[block.name] ?? null" [size]="420">
+              <sudoku-board-preview [sample]="samples()[block.name]" [size]="420">
               </sudoku-board-preview>
             </div>
           }

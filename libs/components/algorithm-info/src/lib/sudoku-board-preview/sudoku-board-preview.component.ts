@@ -63,7 +63,7 @@ export interface SudokuBoardPreviewSample {
 export class SudokuBoardPreviewComponent {
   private readonly _manager = inject(BoardManager);
 
-  readonly sample = input<SudokuBoardPreviewSample | null>(null);
+  readonly sample = input<SudokuBoardPreviewSample | null | undefined>(null);
 
   /** Lato in px del quadrato della board (default 360). */
   readonly size = input<number>(360);

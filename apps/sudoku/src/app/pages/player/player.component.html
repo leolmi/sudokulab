@@ -29,8 +29,7 @@
     <div class="schema-container flex-col">
       <schema-header class="narrow-visible" [schema]="sudoku()"></schema-header>
       <div class="board-fx-wrap"
-           [class.fx-playing]="fxPlaying()"
-           [class.fx-coord]="isCoord()">
+           [class.fx-playing]="fxPlaying()">
         <sudoku-board
           [logic]="logic"
           (pasteSchemaRequest)="pasteSchema($event)"

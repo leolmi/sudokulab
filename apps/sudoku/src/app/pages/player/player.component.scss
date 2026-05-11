@@ -50,21 +50,13 @@
   display: block;
   width: 100%;
 
-  // Percentuali calcolate sulla viewBox `-0.5 -0.5 91 91` (coord OFF): il
-  // riquadro 0..90 occupa quasi tutto l'SVG (0.5/91 ≈ 0.55% per lato) →
-  // inset praticamente nullo.
-  --fx-inset-top: 0;
-  --fx-inset-right: 0;
-  --fx-inset-bottom: 0;
-  --fx-inset-left: 0;
-  // Coord ON: viewBox `-5 -5 96 96`. Il riquadro 0..90 è shiftato a destra
-  // e in basso → inset asimmetrico (le coordinate stanno solo su due lati).
-  &.fx-coord {
-    --fx-inset-top: 5.208%;    // 5/96
-    --fx-inset-left: 5.208%;   // 5/96
-    --fx-inset-right: 1.042%;  // 1/96
-    --fx-inset-bottom: 1.042%; // 1/96
-  }
+  // ViewBox unica `-5 -5 100 100` (5 unità di margine per lato dal commit del
+  // radial-picker: a sinistra/in alto ospitano le coord, a destra/in basso
+  // l'ingombro del picker). Il riquadro 0..90 è centrato → inset uniforme.
+  --fx-inset-top: 5%;
+  --fx-inset-right: 5%;
+  --fx-inset-bottom: 5%;
+  --fx-inset-left: 5%;
 
   // Overlay 9x9 allineato al riquadro visibile della board. Fa solo da
   // superficie per l'animazione — pointer-events:none per non interferire.
@@ -79,6 +71,10 @@
     grid-template-rows: repeat(9, 1fr);
     pointer-events: none;
     opacity: 0;
+    // Match del border-radius dell'`<rect>` di contorno (rx/ry = 1.5 su un
+    // rect 90×90 → 1.5/90 ≈ 1.667% del lato dell'overlay).
+    border-radius: 1.667%;
+    overflow: hidden;
   }
   .fx-cell {
     background: var(--sdk-color-accent);

@@ -12,6 +12,10 @@
 
 .svg-interactive-board {
   width: 100%;
+  // block: evita lo spazio descender inline sotto l'SVG (default inline), che
+  // gonfierebbe l'altezza dell'host di ~1px e renderebbe non allineato il
+  // bordo inferiore di overlay percentuali ancorati al wrap (es. fx-cascade).
+  display: block;
   outline: none !important;
   font-family: Arial, monospace;
   touch-action: none;

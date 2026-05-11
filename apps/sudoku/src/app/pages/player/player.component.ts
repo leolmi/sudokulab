@@ -92,7 +92,6 @@ export class PlayerComponent extends PageBase {
     return s.hasErrors || s.percent >= 100;
   });
   readonly isEmpty = computed<boolean>(() => this.manager.stat().isEmpty);
-  readonly isCoord = computed<boolean>(() => this.manager.status().isCoord);
 
   readonly layout = computed<string>(() => this.state.layout().narrow ? 'column' : 'row');
 
