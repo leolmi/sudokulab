@@ -1,224 +1,57 @@
 <div class="sudokulab-page sudokulab-page-help page-padding">
   <div class="help-container flex-row flex-align-center-start">
     <div class="help-content">
-      <h1>When can a sudoku schema be considered <i>beautiful</i>?</h1>
-      <p>As a fan of this logic game, this was the question that made me want to dig deeper and build this application.</p>
-      <p>Online sudoku solvers are countless and writing one is relatively easy. The interesting parts, in my opinion,
-        are these:</p>
-      <ul>
-        <li>solving a schema while finding a way to evaluate its difficulty objectively;</li>
-        <li>indexing schemas, i.e. associating a unique identifier to every possible schema;</li>
-        <li>defining what a <i>beautiful</i> schema is;</li>
-        <li>building a generator that, based on options and a schema partially designed by the user, can produce
-          <i>"beautiful"</i> sudokus.</li>
-      </ul>
-      <p>To answer the original question, the first step was to build the player, and therefore a solver.</p>
+      <algorithm-info-page
+        key="Infos"
+        basePath="pages"
+        [slots]="slots()"
+        [params]="params()">
+      </algorithm-info-page>
 
+      <ng-template #algorithmsList>
+        <ul>
+          @for (alg of algorithms; track alg.id) {
+            <li>
+              <div class="alg-title flex-row flex-align-center-start">
+                <mat-icon>{{ alg.icon }}</mat-icon>
+                <div class="alg-name">{{ alg.name }}</div>
+                @if (hasInfoPage(alg.id)) {
+                  <button mat-icon-button
+                          class="alg-info-btn"
+                          appI18nTooltip="Open the algorithm details page"
+                          (click)="openAlgorithmInfo(alg.id)"
+                          [attr.aria-label]="tr.t('Open the algorithm details page')">
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                }
+              </div>
+              : <i>({{ tr.t(TYPEDESC[alg.type]) }}) {{ tr.t(alg.title) }}</i>.<br>{{ tr.t(alg.description) }};
+            </li>
+          }
+        </ul>
+      </ng-template>
 
-      <br><br>
-      <h1 id="help-player">Player</h1>
-      <div class="image-container">
-        <img class="help-image" src="assets/images/sudokulab-player.png" aria-label="sudokulab player">
-      </div>
-      <p>The player shows the current schema, which the user can solve using the keyboard (on desktop) or the on-screen
-        keypad (on mobile). Any schema from the sorted, filterable catalog can be opened.</p>
-      <p>The toolbar commands are:</p>
-      <ul class="toolbar-commands">
-        <li><mat-icon>playlist_play</mat-icon>: opens the <i>Solve</i> menu;
-          <ul>
-            <li><mat-icon>play_arrow</mat-icon>: solves the schema completely;</li>
-            <li><mat-icon>skip_next</mat-icon>: solves only the next step;</li>
-            <li><mat-icon>fast_forward</mat-icon>: opens a popup to pick the step the schema should be solved up to;</li>
-            <li><mat-icon>play_circle</mat-icon>: solves the schema until the <i>Try number</i> algorithm would be needed;</li>
-            <li><mat-icon>support</mat-icon>: shows the steps required to reach the next valuation, without revealing its value;</li>
-          </ul>
-        </li>
-        <li><mat-icon>border_clear</mat-icon>: removes every non-fixed value, restoring the schema to its initial state;</li>
-        <li><mat-icon>apps_outage</mat-icon>: opens the <i>schema keeper</i> tool (see further below) to import previously saved schemas or schemas typed as a string;</li>
-        <li><mat-icon>casino</mat-icon>: opens a random schema from the catalog;</li>
-        <li><mat-icon>grid_on</mat-icon>: opens the schema browser popup;</li>
-        <li><mat-icon>more_vert</mat-icon>: opens the player operations menu;
-          <ul>
-            <li><mat-icon>pin</mat-icon>: toggles how the cell candidates are rendered (numbers vs dots);</li>
-            <li><mat-icon>route</mat-icon>: toggles the cell-navigation mode;</li>
-            <li><mat-icon>delete_sweep</mat-icon>: clears every highlight on the grid;</li>
-            <li><mat-icon>file_download</mat-icon>: downloads the serialization of the current schema (json file);</li>
-            <li><mat-icon>apps</mat-icon>: shows or hides the candidates of each cell;</li>
-            <li><mat-icon>grid_4x4</mat-icon>: shows or hides the row and column labels;</li>
-            <li><mat-icon>light_mode</mat-icon> / <mat-icon>dark_mode</mat-icon>: switches between light and dark theme;</li>
-            <li><mat-icon>settings_backup_restore</mat-icon>: restores the initial settings.</li>
-          </ul>
-        </li>
-      </ul>
-      <p>On the side panels you'll find the schema statistics and the step-viewer (sequence of resolutive moves the
-        engine would apply); the right-hand panel hosts the highlights editor, useful while reasoning over a schema.</p>
-      <p evidence>All the catalog schemas have a <b>unique solution</b>.</p>
-      <p>The schemas list is sortable through the <b>sortBy</b> option, which can be:</p>
-      <ul>
-        <li>difficulty;</li>
-        <li>name;</li>
-        <li>number of fixed values.</li>
-      </ul>
-      <p>It is also possible to exclude from the list every schema whose resolution required the <i>Try number</i>
-        algorithm, i.e. the one that uses <i>brute force</i> to reach the goal.</p>
-      <p>Here, in my opinion, lies the foundation of the answer to the search for the most <i>beautiful</i> schema:</p>
-      <p evidence>The hardest schema that can be solved without ever falling back to <i>brute force</i> represents
-        the most interesting logical challenge — therefore, in fact, <b>the most beautiful schema</b>!
-        <br><span ndr>(personal opinion of the author)</span></p>
-
-
-      <br><br>
-      <h1 id="help-algorithms">Solving algorithms</h1>
-      <p>The first step toward building a sudoku solver was to design a resolution engine based on a set of classifiable
-        algorithms whose application contributes to the final evaluation, hence to a difficulty score.</p>
-
-      <p>{{algorithms.length}} algorithms have been identified so far, grouped in two families:</p>
-      <ul>
-        <li><b>resolutive</b>: they lead to the valuation of a cell;</li>
-        <li><b>contributive</b>: they help locate the cells to be valued by removing candidate values.</li>
-      </ul>
-      <p>The algorithms:</p>
-      <ul>
-        @for (alg of algorithms; track alg.id) {
-          <li>
-            <div class="alg-title flex-row flex-align-center-start">
-              <mat-icon>{{alg.icon}}</mat-icon>
-              <div class="alg-name">{{alg.name}}</div>
-              @if (hasInfoPage(alg.id)) {
-                <button mat-icon-button
-                        class="alg-info-btn"
-                        appI18nTooltip="Open the algorithm details page"
-                        (click)="openAlgorithmInfo(alg.id)"
-                        [attr.aria-label]="tr.t('Open the algorithm details page')">
-                  <mat-icon>open_in_new</mat-icon>
-                </button>
-              }
-            </div>
-            : <i>({{tr.t(TYPEDESC[alg.type])}}) {{ tr.t(alg.title) }}</i>.<br>{{ tr.t(alg.description) }};
-          </li>
-        }
-      </ul>
-      <p>The solver applies the algorithms above sequentially until the schema is solved, and each application
-        increments the schema score until it reaches a value that determines its difficulty.</p>
-      <p>Schemas are tagged with <b>TX</b> when their resolution required <i>Try Number</i> to be applied <i>X</i>
-        times.</p>
-      <p>So a <span class="schema-t">T3</span> schema is one where <i>brute-force</i> was used three times.</p>
-
-
-      <br><br>
-      <h1 id="help-generator">Schema generator</h1>
-      <div class="image-container">
-        <img class="help-image" src="assets/images/sudokulab-generator.png" aria-label="sudokulab generator" alt="sudokulab generator">
-      </div>
-      <p>Schema generation lets the user define their own geometry of fixed cells, by entering exact values or
-        markers [ ? ] that will be filled in by the resolution cycles.</p>
-      <p>The geometry can be entirely defined by the user, only partially defined, or fully delegated to the generator.
-        By specifying a number of fixed values higher than those entered, the procedure will add the missing ones
-        until the requested count is reached.</p>
-      <p>The toolbar commands are:</p>
-      <ul class="toolbar-commands">
-        <li><mat-icon>play_arrow</mat-icon>: starts the generation procedure;</li>
-        <li><mat-icon>stop</mat-icon>: stops the generation procedure;</li>
-        <li><mat-icon>redo</mat-icon>: skips to the next schema;</li>
-        <li><mat-icon>auto_fix_high</mat-icon>: generates a single schema according to the current options;</li>
-        <li><mat-icon>border_clear</mat-icon>: clears every value, restoring the schema to its initial state;</li>
-        <li><mat-icon>lock</mat-icon>: <i>lock value</i> — when active, the last valid value entered keeps being
-          inserted into every newly selected cell (handy to mark several markers/values quickly);</li>
-        <li><mat-icon>more_vert</mat-icon> (narrow layout): exposes the theme switcher
-          (<mat-icon>light_mode</mat-icon> / <mat-icon>dark_mode</mat-icon>) and the
-          <mat-icon>settings_backup_restore</mat-icon> command to restore the initial settings.</li>
-      </ul>
-      <p>Available options:</p>
-      <ul>
-        <li><b>Total fixed numbers</b>: target count of fixed cells in the resulting schemas;</li>
-        <li><b>Symmetry</b>: applied only when adding the dynamic fixed values (visible when the schema is multi-schema);</li>
-        <li><b>Difficulty range</b>: minimum and maximum difficulty for the generated schemas;</li>
-        <li><b>Allow try algorithm</b>: when off, schemas requiring <i>brute force</i> are discarded;</li>
-        <li><b>One result for schema</b>: only one valid result is kept per base schema;</li>
-        <li><b>Stop mode</b>: how the procedure terminates — after <i>N</i> base schemas, after a given number of
-          seconds, or manually;</li>
-        <li><b>Variants per base schema</b>: how many variants are produced per base schema;</li>
-        <li><b>Values mode</b>: the strategy used to value dynamic fixed cells. It can be <i>sequential</i>
-          (filling cells in order, respecting sudoku rules) or <i>random</i> (random valid values among the available
-          ones for each dynamic cell);</li>
-        <li><b>Max solve cycles</b>: hard limit on the number of resolution cycles per attempt;</li>
-        <li><b>Max fill cycles</b>: hard limit on the number of fill-in cycles applied to a schema;</li>
-        <li><b>Use these algorithms</b>: subset of algorithms allowed during the generation
-          (<mat-icon>tune</mat-icon> opens a dedicated picker);</li>
-        <li><b>Number of parallel workers</b>: how many web workers run in parallel during the generation
-          (changes are applied after a page reload).</li>
-      </ul>
-      <p>On the right side, the list of generated schemas is collected as the procedure produces them; clicking
-        a result opens it in the player.</p>
-
-
-      <br><br>
-      <h1 id="help-print">Printing schemas</h1>
-      <div class="image-container">
-        <img class="help-image" src="assets/images/sudokulab-print.png" aria-label="sudokulab print" alt="sudokulab print">
-      </div>
-      <p>This page lets you print pages with the rendering of schemas from the catalog. After choosing the layout
-        template, you can add pages and assign a schema to each slot simply by clicking an entry in the list on the
-        right while the target slot is selected.</p>
-      <p>The toolbar commands are:</p>
-      <ul class="toolbar-commands">
-        <li><mat-icon>print</mat-icon>: starts the print of the configured pages;</li>
-        <li><mat-icon>delete</mat-icon>: removes every page;</li>
-        <li><mat-icon>dashboard</mat-icon>: opens the menu of the available templates.</li>
-      </ul>
-
-
-      <br><br>
-      <h1 id="help-import">Schema import</h1>
-      <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sudokulab-keeper.png" aria-label="sudokulab import" alt="sudokulab import">
-      </div>
-      <p>The tool allows loading schemas previously downloaded as json files. This way schemas can be exchanged via
-        the export.</p>
-      <p>With the <i bold>String of numbers</i> option, the schema can be entered as the plain string that composes it.</p>
-      <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sudokulab-keeper-values.png" aria-label="sudokulab import" alt="sudokulab import">
-      </div>
-      <p>As an example, consider the following schema:</p>
-      <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sample_01.png" aria-label="sudokulab import sample" alt="sudokulab import sample">
-      </div>
-      <p>The corresponding string is built from the visible numbers, plus zeros for the empty cells, read like any
-        text — left to right, top to bottom:</p>
-      <p code>000780002004500703010000000720...</p>
-      <p>When importing a schema in the generator, markers can also be expressed using the <span code>x</span>
-        character.</p>
-      <p>Using the <i bold>Schema</i> button it is possible to enter the values directly into a dedicated grid:</p>
-      <div class="image-container">
-        <img class="help-image small-image" src="assets/images/sudokulab-keeper-schema.png" aria-label="sudokulab handle image" alt="sudokulab handle image">
-      </div>
-      <p>Image acquisition can also be started, from the dedicated dialog</p>
-      <div class="image-container">
-        <img class="help-image small-image" src="assets/images/take-picture.png" aria-label="sudokulab camera dialog" alt="sudokulab camera dialog">
-      </div>
-      <p>As you may have noticed, the user can rotate the schema and then launch the decoding phase.</p>
-      <p>If the decoding succeeds, the recognized schema is opened back in the previous "Check Schema" tool, so any
-        misinterpreted information can be reviewed or fixed.</p>
-      <br><br><br><br>
-      <div class="project-info">
-        <p class="logo-container"><span class="logo">Sudoku<span class="text-color-primary">Lab</span></span></p>
-        <p>is an open-source project by</p>
-        <address class="author">
-          <a class="author-name" [href]="mail">Leonardo Olmi</a>
-        </address>
-        <p class="help-line"></p>
-        <svg class="github-logo fill-foreground"
-             viewBox="0 0 1024 1024"
-             xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z"
-                transform="scale(64)"/>
-        </svg>
-        <a [href]="link" target="_blank">{{link}}</a>
-      </div>
-
+      <ng-template #projectInfo>
+        <div class="project-info">
+          <p class="logo-container">
+            <span class="logo">Sudoku<span class="text-color-primary">Lab</span></span>
+          </p>
+          <p>{{ tr.t('is an open-source project by') }}</p>
+          <address class="author">
+            <a class="author-name" [href]="mail">Leonardo Olmi</a>
+          </address>
+          <p class="help-line"></p>
+          <svg class="github-logo fill-foreground"
+               viewBox="0 0 1024 1024"
+               xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z"
+                  transform="scale(64)"/>
+          </svg>
+          <a [href]="link" target="_blank">{{ link }}</a>
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>
-

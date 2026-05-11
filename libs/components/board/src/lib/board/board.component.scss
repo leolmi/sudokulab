@@ -20,11 +20,13 @@
     opacity: .4;
   }
 
+  // selezione senza fuoco
   &:not(.focused) {
     .svg-board-cell {
       &.svg-selection-cell {
-        stroke-width: 1;
+        stroke-width: 2;
         transform: scale(.97);
+        stroke-dasharray: 3;
       }
     }
   }
@@ -58,9 +60,10 @@
   -webkit-user-select: none;
   user-select: none;
 
+  // selezione con fuoco
   &.svg-selection-cell {
-    stroke-width: 2;
-    transform: scale(.9);
+    stroke-width: 4;
+    transform: scale(.98);
     transform-origin: center;
     transform-box: border-box;
     pointer-events: none;

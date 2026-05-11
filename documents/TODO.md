@@ -1,5 +1,6 @@
 ## DA FARE
-- [ ] multilingua (ita - en);
+
+## DA DECIDERE SE FARE
 - [ ] player su soluzione: la toolbar dei valori si trasformerebbe in una toolbar di player con i
   comandi avanti, indietro per navigare negli step di risoluzione con il testo dei vari step;
 - [ ] player di highligths per animazioni. Nuove words:
@@ -33,6 +34,7 @@
 - [ ] gioco a tempo (nelle pause diventa "blurizzato")
 
 ## FATTI
+- [x] multilingua (ita - en);
 - [x] aggiornare l'help dell'applicazione;
 - [x] verifica tema su picker;
 - [x] **Refactor signal-first finale** (v3.0.26) — chiusura del debito residuo Fase 4 + ondata di pulizia trasversale:
