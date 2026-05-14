@@ -266,6 +266,7 @@ export class SchemaKeeperDialogComponent {
     if (!res) return this.setMode();
     if (res.values) {
       this.text.set(res.values);
+      this.manager.load(res.values);
       this.setMode(KeeperMode.schema);
     }
   }
