@@ -1,0 +1,55 @@
+.play-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--sdk-color-border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition: border-color .15s ease-in-out, background-color .15s ease-in-out, transform .12s ease-in-out;
+
+  &:hover {
+    border-color: var(--sdk-color-accent);
+    background-color: var(--sdk-color-hover);
+  }
+
+  &:active {
+    transform: scale(.995);
+  }
+
+  .play-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+
+    .play-card-icon {
+      color: var(--sdk-color-accent);
+      font-size: 22px;
+      line-height: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .play-card-title {
+      font-size: 1.05em;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+  }
+
+  .play-card-content {
+    font-size: 0.95em;
+    line-height: 1.4;
+    opacity: .85;
+
+    :first-child { margin-top: 0; }
+    :last-child  { margin-bottom: 0; }
+
+    strong { color: var(--sdk-color-accent); font-weight: 600; }
+    img { max-width: 100%; border-radius: 4px; }
+  }
+}

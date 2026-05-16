@@ -9,10 +9,14 @@
   </mat-form-field>
   <div class="highlights-toolbar flex-row flex-align-start-center">
     <div class="flex-1"></div>
-    <button mat-icon-button (click)="toggleLink()">
+    <button mat-icon-button
+            [matTooltip]="tr.t(active() ? 'Hide highlights on the board' : 'Show highlights on the board')"
+            (click)="toggleLink()">
       <mat-icon>{{active()?'visibility':'visibility_off'}}</mat-icon>
     </button>
-    <button mat-icon-button (click)="clear()">
+    <button mat-icon-button
+            [matTooltip]="tr.t('Clear highlights')"
+            (click)="clear()">
       <mat-icon>delete_sweep</mat-icon>
     </button>
   </div>

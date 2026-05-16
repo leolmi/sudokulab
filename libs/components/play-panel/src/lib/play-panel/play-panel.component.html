@@ -1,0 +1,41 @@
+<div class="play-panel">
+  <play-card
+    title="I nostri schemi"
+    icon="apps"
+    (clicked)="onRandom()">
+    <p>
+      Sono <strong>{{ schemasCount() }}</strong> schemi tutti a soluzione unica,
+      prova uno schema a scelta casuale!
+    </p>
+  </play-card>
+
+  <play-card
+    title="Prova a risolvere con un algoritmo"
+    icon="psychology"
+    [menuTriggerFor]="algMenu">
+    <p>
+      Prova a finire uno schema partendo dal passo che prevede l'utilizzo
+      di un determinato algoritmo a tua scelta.
+    </p>
+  </play-card>
+
+  <play-card
+    title="Schema difficile"
+    icon="local_fire_department"
+    (clicked)="onHard()">
+    <p>
+      Prova a risolvere uno tra gli schemi più difficili
+      (senza l'uso dell'algoritmo <em>try</em>).
+    </p>
+  </play-card>
+
+  <!-- popup elenco algoritmi, stile schemas-dialog -->
+  <mat-menu #algMenu="matMenu" class="play-panel-alg-menu">
+    @for (alg of algorithms; track alg.id) {
+      <button mat-menu-item (click)="onAlgorithmSelected(alg)">
+        <mat-icon>{{ alg.icon }}</mat-icon>
+        <span>{{ alg.name }}</span>
+      </button>
+    }
+  </mat-menu>
+</div>

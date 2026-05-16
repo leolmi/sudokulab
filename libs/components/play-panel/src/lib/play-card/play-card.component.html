@@ -1,0 +1,13 @@
+<button class="play-card" type="button"
+        [matMenuTriggerFor]="menuTriggerFor() || null"
+        (click)="handleClick()">
+  <div class="play-card-header">
+    @if (icon()) {
+      <span class="play-card-icon material-icons">{{ icon() }}</span>
+    }
+    <span class="play-card-title">{{ title() }}</span>
+  </div>
+  <div class="play-card-content">
+    <ng-content></ng-content>
+  </div>
+</button>

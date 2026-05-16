@@ -5,7 +5,8 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { I18nDirective } from '@olmi/common';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { I18nDirective, TranslateService } from '@olmi/common';
 
 @Component({
   selector: 'highlights-editor',
@@ -16,6 +17,7 @@ import { I18nDirective } from '@olmi/common';
     MatIconModule,
     MatButtonModule,
     MatInputModule,
+    MatTooltipModule,
     I18nDirective,
   ],
   templateUrl: './highlights-editor.component.html',
@@ -24,6 +26,7 @@ import { I18nDirective } from '@olmi/common';
 })
 export class HighlightsEditorComponent {
   private readonly _manager = inject(BoardManager);
+  readonly tr = inject(TranslateService);
 
   readonly text = signal<string>('');
   readonly active = signal<boolean>(true);

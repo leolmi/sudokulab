@@ -20,6 +20,57 @@
   padding: 0 16px;
 }
 
+// Banda laterale destra in wide / tab-control sotto board in narrow.
+// Il mat-tab-group deve riempire lo spazio della banda; in narrow va in
+// stack normale e il corpo cresce con il contenuto (dynamicHeight=true).
+//
+// Default Material: mat-tab-group = `display: block`, wrapper senza height
+// esplicita → in flex parent il body collassa. Forziamo display: flex sul
+// gruppo, flex:1 sul wrapper, height:100% sul body attivo.
+.side-tabs {
+  min-height: 0;
+
+  // `::ng-deep` perché gli elementi interni di mat-tab-group sono creati
+  // dal componente Material e non hanno l'attributo di scoping del player.
+  ::ng-deep .mat-mdc-tab-group {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  &.flex-1 ::ng-deep .mat-mdc-tab-group {
+    height: 100%;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  ::ng-deep .mat-mdc-tab-body.mat-mdc-tab-body-active {
+    height: 100%;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  play-panel,
+  step-viewer {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+.highlights-container {
+  min-height: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 .clear-button {
   position: absolute;
   bottom: 20px;

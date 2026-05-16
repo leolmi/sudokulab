@@ -31,6 +31,7 @@
       "@olmi/logic": ["libs/logic/src/index.ts"],
       "@olmi/model": ["libs/model/src/index.ts"],
       "@olmi/ocr-components": ["libs/components/ocr-components/src/index.ts"],
+      "@olmi/play-panel": ["libs/components/play-panel/src/index.ts"],
       "@olmi/schema-details": ["libs/components/schema-details/src/index.ts"],
       "@olmi/schema-header": ["libs/components/schema-header/src/index.ts"],
       "@olmi/schema-keeper": ["libs/components/schema-keeper/src/index.ts"],

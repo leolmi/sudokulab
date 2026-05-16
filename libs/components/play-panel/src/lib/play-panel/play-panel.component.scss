@@ -1,0 +1,10 @@
+.play-panel {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

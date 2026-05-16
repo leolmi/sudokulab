@@ -38,6 +38,9 @@ import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
 import { SolveToDialogComponent } from '@olmi/solve-to-dialog';
 import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { HighlightsEditorComponent } from '@olmi/highlights-editor';
+import { PlayAction, PlayPanelComponent } from '@olmi/play-panel';
+import { MatTabsModule } from '@angular/material/tabs';
+import { ConfirmDialogComponent, ConfirmDialogData } from './confirm-dialog.component';
 
 
 const PLAYER_VISIBLE_STAT: any = {
@@ -58,11 +61,13 @@ const PLAYER_VISIBLE_STAT: any = {
     MatMenuModule,
     MatDialogModule,
     MatProgressBar,
+    MatTabsModule,
     BoardComponent,
     StepViewerComponent,
     SchemaHeaderComponent,
     SchemaToolbarComponent,
     HighlightsEditorComponent,
+    PlayPanelComponent,
     I18nDirective,
   ],
   selector: 'sudoku-player',
@@ -85,6 +90,7 @@ export class PlayerComponent extends PageBase {
   // viste signal-derived dei segnali del manager
   readonly sudoku = computed<Sudoku>(() => this.manager.sudoku());
   readonly sequence = computed<AlgorithmResult[]>(() => this.manager.sequence());
+  readonly hasSequence = computed<boolean>(() => this.sequence().length > 0);
   readonly stat = computed<StatLine[]>(() =>
     getStatLines(this.manager.stat(), { visible: PLAYER_VISIBLE_STAT }));
   readonly isComplete = computed<boolean>(() => {
@@ -94,6 +100,11 @@ export class PlayerComponent extends PageBase {
   readonly isEmpty = computed<boolean>(() => this.manager.stat().isEmpty);
 
   readonly layout = computed<string>(() => this.state.layout().narrow ? 'column' : 'row');
+
+  // indice del tab attivo nella banda destra (wide) / sotto-board (narrow).
+  // 0 = "Let's play", 1 = "Step viewer". Auto-passa a 1 quando la sequence
+  // si popola; torna a 0 quando si svuota (e il tab step-viewer scompare).
+  readonly selectedTabIndex = signal<number>(0);
 
   /** 81 celle dell'overlay cascata — delay già pronto in ms per `[style.animation-delay]`. */
   readonly fxCells = Array.from({ length: 81 }, (_, i) => {
@@ -180,6 +191,20 @@ export class PlayerComponent extends PageBase {
       AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, s);
     });
 
+    // auto-select del tab "Step viewer" sul popolamento della sequence.
+    // Tracciamo solo le transizioni len-zero ↔ len-non-zero per non
+    // sovrascrivere la scelta dell'utente quando la sequence resta non vuota.
+    let prevHasSeq = false;
+    effect(() => {
+      const hasSeq = this.hasSequence();
+      if (hasSeq && !prevHasSeq) {
+        untracked(() => this.selectedTabIndex.set(1));
+      } else if (!hasSeq && prevHasSeq) {
+        untracked(() => this.selectedTabIndex.set(0));
+      }
+      prevHasSeq = hasSeq;
+    });
+
     // FX "schema completato": solo sulla transizione incompleto→completo, senza errori.
     // - lo stato iniziale (`isEmpty`) viene scartato, così uno schema caricato già
     //   completo non scatena l'effetto.
@@ -262,7 +287,7 @@ export class PlayerComponent extends PageBase {
     }
   }
 
-  private _openSchema(sdk?: Sudoku) {
+  private _openSchema(sdk?: Sudoku, goToStep?: number) {
     if (!sdk) return;
     this.store
       .getSudokuEx(sdk.values)
@@ -274,8 +299,71 @@ export class PlayerComponent extends PageBase {
           this.state.updateRoute(route);
           AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, { game: name });
           checkPlayerUrl(this._location, this._router, route);
+          // goToStep applicato dopo load: il worker accoda solve-to dopo il check.
+          if (goToStep && goToStep > 0) this.manager.goToStep(String(goToStep));
         }
       });
+  }
+
+  /**
+   * Handler delle azioni emesse dal play-panel.
+   * - `random`: schema casuale dal catalogo.
+   * - `hard`: schema casuale tra i 30 più difficili (esclusi quelli che usano TryNumber).
+   * - `with-algorithm`: schema casuale che utilizza l'algoritmo scelto, portato
+   *   fino allo step immediatamente precedente al suo primo utilizzo.
+   *
+   * Se lo schema attivo ha modifiche utente (valori o available custom), prima
+   * chiede conferma — così l'utente non perde inavvertitamente lo stato corrente.
+   */
+  onPlayAction(action: PlayAction) {
+    this._askIfDirty(() => {
+      switch (action.kind) {
+        case 'random': {
+          const sdk = this.store.getRandomSchema();
+          this._openSchema(sdk);
+          break;
+        }
+        case 'hard': {
+          const sdk = pickHardSchema(this.store.catalog());
+          this._openSchema(sdk);
+          break;
+        }
+        case 'with-algorithm': {
+          const picked = pickSchemaForAlgorithm(this.store.catalog(), action.algorithmId);
+          if (!picked) {
+            this.notifier.notify(this.t('No schema found for this algorithm'), NotificationType.warning);
+            return;
+          }
+          this._openSchema(picked.sdk, picked.preStep);
+          break;
+        }
+      }
+    });
+  }
+
+  /**
+   * `dirty` = lo schema attivo ha almeno un inserimento utente — sia esso
+   * un valore (`stat.userCount`) o un override degli available (`userValues.cv`).
+   * Schema vuoto (nessun fisso) viene considerato non-dirty.
+   */
+  private _isCurrentSchemaDirty(): boolean {
+    const stat = this.manager.stat();
+    if (stat.isEmpty) return false;
+    if (stat.userCount > 0) return true;
+    const cv = stat.userValues?.cv || {};
+    return Object.keys(cv).length > 0;
+  }
+
+  private _askIfDirty(then: () => void) {
+    if (!this._isCurrentSchemaDirty()) {
+      then();
+      return;
+    }
+    const data: ConfirmDialogData = {
+      title: 'Open a new schema?',
+      message: 'The current schema has unsaved progress. Open a new schema anyway?',
+    };
+    this.openDialog<boolean>(ConfirmDialogComponent, () => then(), { data });
   }
 
   private _playCompletionFx() {
@@ -332,4 +420,45 @@ export class PlayerComponent extends PageBase {
 
 const checkPlayerUrl = (location: Location, router: Router, route: string) => {
   if (!router.url.startsWith(route)) location.go(route);
+}
+
+const HARD_POOL_SIZE = 30;
+
+/**
+ * Sceglie a caso uno schema tra i `HARD_POOL_SIZE` più difficili che NON
+ * usano l'algoritmo TryNumber. Se nessuno schema ha la metadata necessaria
+ * ricade su un random globale.
+ */
+const pickHardSchema = (catalog: Sudoku[]): Sudoku | undefined => {
+  if (!catalog?.length) return undefined;
+  const pool = catalog
+    .filter(s => s?.info && !s.info.useTryAlgorithm && (s.info.difficultyValue || 0) > 0)
+    .sort((a, b) => (b.info?.difficultyValue || 0) - (a.info?.difficultyValue || 0))
+    .slice(0, HARD_POOL_SIZE);
+  if (!pool.length) return catalog[Math.floor(Math.random() * catalog.length)];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/**
+ * Sceglie a caso uno schema che impiega l'algoritmo indicato (controllando
+ * `info.difficultyMap`) e ritorna anche il numero di step da risolvere
+ * automaticamente — cioè l'indice del primo utilizzo dell'algoritmo —
+ * così da fermarsi al passo immediatamente precedente.
+ */
+const pickSchemaForAlgorithm = (
+  catalog: Sudoku[],
+  algorithmId: string,
+): { sdk: Sudoku; preStep: number } | undefined => {
+  if (!catalog?.length || !algorithmId) return undefined;
+  const candidates: { sdk: Sudoku; firstAt: number }[] = [];
+  for (const s of catalog) {
+    const map = s?.info?.difficultyMap || {};
+    const positions = map[algorithmId];
+    if (positions && positions.length > 0) {
+      candidates.push({ sdk: s, firstAt: positions[0] });
+    }
+  }
+  if (!candidates.length) return undefined;
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  return { sdk: pick.sdk, preStep: pick.firstAt };
 }
