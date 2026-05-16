@@ -1,4 +1,8 @@
 {
+  "play.random.body": "There are <strong>{count}</strong> schemas, all with unique solution. Try one at random!",
+  "play.algorithm.body": "Try to finish a schema starting from the step that requires using a specific algorithm of your choice.",
+  "play.hard.body": "Try to solve one of the hardest schemas (without using the <em>try</em> algorithm).",
+
   "alg.OneCellForValue.title": "there is only one cell in the group that can host that specific value",
   "alg.OneCellForValue.description": "Represents the most basic and immediate approach, to which the lowest score has been assigned",
 

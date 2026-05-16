@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 import { PlayCardComponent } from '../play-card/play-card.component';
-import { SUDOKU_STORE } from '@olmi/common';
+import { SUDOKU_STORE, TranslateService } from '@olmi/common';
 import { Algorithm } from '@olmi/model';
 import { getAlgorithms } from '@olmi/algorithms';
 import { MatMenuModule } from '@angular/material/menu';
@@ -17,6 +17,7 @@ import { PlayAction } from './play-panel.action';
 })
 export class PlayPanelComponent {
   readonly store = inject(SUDOKU_STORE);
+  readonly tr = inject(TranslateService);
 
   readonly schemasCount = computed<number>(() => this.store.catalog().length);
 

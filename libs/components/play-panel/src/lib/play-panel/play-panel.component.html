@@ -1,32 +1,23 @@
 <div class="play-panel">
   <play-card
-    title="I nostri schemi"
+    [title]="tr.t('Our schemas')"
     icon="apps"
     (clicked)="onRandom()">
-    <p>
-      Sono <strong>{{ schemasCount() }}</strong> schemi tutti a soluzione unica,
-      prova uno schema a scelta casuale!
-    </p>
+    <p [innerHTML]="tr.t('play.random.body', { count: schemasCount() })"></p>
   </play-card>
 
   <play-card
-    title="Prova a risolvere con un algoritmo"
+    [title]="tr.t('Try to solve with an algorithm')"
     icon="psychology"
     [menuTriggerFor]="algMenu">
-    <p>
-      Prova a finire uno schema partendo dal passo che prevede l'utilizzo
-      di un determinato algoritmo a tua scelta.
-    </p>
+    <p>{{ tr.t('play.algorithm.body') }}</p>
   </play-card>
 
   <play-card
-    title="Schema difficile"
+    [title]="tr.t('Hard schema')"
     icon="local_fire_department"
     (clicked)="onHard()">
-    <p>
-      Prova a risolvere uno tra gli schemi più difficili
-      (senza l'uso dell'algoritmo <em>try</em>).
-    </p>
+    <p [innerHTML]="tr.t('play.hard.body')"></p>
   </play-card>
 
   <!-- popup elenco algoritmi, stile schemas-dialog -->

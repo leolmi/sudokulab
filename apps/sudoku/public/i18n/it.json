@@ -218,6 +218,13 @@
 
   "Error while checking schema": "Errore durante la verifica dello schema",
 
+  "Our schemas": "I nostri schemi",
+  "Try to solve with an algorithm": "Prova a risolvere con un algoritmo",
+  "Hard schema": "Schema difficile",
+  "play.random.body": "Sono <strong>{count}</strong> schemi tutti a soluzione unica, prova uno schema a scelta casuale!",
+  "play.algorithm.body": "Prova a finire uno schema partendo dal passo che prevede l'utilizzo di un determinato algoritmo a tua scelta.",
+  "play.hard.body": "Prova a risolvere uno tra gli schemi più difficili (senza l'uso dell'algoritmo <em>try</em>).",
+
   "alg.OneCellForValue.title": "esiste una sola cella nel gruppo che possa ospitare quel determinato valore",
   "alg.OneCellForValue.description": "Rappresenta l'approccio più basico e più immediato al quale è stato associato un punteggio minimo",
 
