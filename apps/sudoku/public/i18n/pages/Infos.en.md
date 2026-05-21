@@ -16,7 +16,11 @@ To answer the original question, the first step was to build the player, and the
 
 ![sudokulab player](assets/images/sudokulab-player.png)
 
-The player shows the current schema, which the user can solve using the keyboard (on desktop) or the on-screen keypad (on mobile). Any schema from the sorted, filterable catalog can be opened.
+The player shows the current schema, which the user can solve using the keyboard (on desktop), the on-screen keypad (on mobile), or the picker by holding the mouse — or the finger, if touch is enabled — on the cell to be valued.
+
+![sudokulab picker](assets/images/sudokulab-picker.png)
+
+Any schema from the sorted and filterable catalog can be opened.
 
 The toolbar commands are:
 
@@ -32,7 +36,6 @@ The toolbar commands are:
   </li>
   <li><span class="material-icons">border_clear</span>: removes every non-fixed value, restoring the schema to its initial state;</li>
   <li><span class="material-icons">apps_outage</span>: opens the <em>schema keeper</em> tool (see further below) to import previously saved schemas or schemas typed as a string;</li>
-  <li><span class="material-icons">casino</span>: opens a random schema from the catalog;</li>
   <li><span class="material-icons">grid_on</span>: opens the schema browser popup;</li>
   <li><span class="material-icons">more_vert</span>: opens the player operations menu;
     <ul>
@@ -43,6 +46,7 @@ The toolbar commands are:
       <li><span class="material-icons">apps</span>: shows or hides the candidates of each cell;</li>
       <li><span class="material-icons">grid_4x4</span>: shows or hides the row and column labels;</li>
       <li><span class="material-icons">light_mode</span> / <span class="material-icons">dark_mode</span>: switches between light and dark theme;</li>
+      <li><span class="material-icons">translate</span>: switches to the other language;</li>
       <li><span class="material-icons">settings_backup_restore</span>: restores the initial settings.</li>
     </ul>
   </li>

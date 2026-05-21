@@ -16,7 +16,12 @@ Per rispondere alla domanda originale, il primo passo è stato costruire il play
 
 ![sudokulab player](assets/images/sudokulab-player.png)
 
-Il player mostra lo schema corrente, che l'utente può risolvere usando la tastiera (su desktop) o il tastierino a schermo (su mobile). È possibile aprire qualsiasi schema dal catalogo, ordinabile e filtrabile.
+Il player mostra lo schema corrente, che l'utente può risolvere usando la tastiera (su desktop), il tastierino a schermo (su mobile) oppure il picker mantenendo
+il mouse o il dito, se è attivo il touch, sulla cella da valorizzare.
+
+![sudokulab picker](assets/images/sudokulab-picker.png)
+
+È possibile aprire qualsiasi schema dal catalogo, ordinabile e filtrabile.
 
 I comandi della toolbar sono:
 
@@ -32,7 +37,6 @@ I comandi della toolbar sono:
   </li>
   <li><span class="material-icons">border_clear</span>: rimuove tutti i valori non fissi, riportando lo schema allo stato iniziale;</li>
   <li><span class="material-icons">apps_outage</span>: apre il tool <em>schema keeper</em> (vedi più avanti) per importare schemi precedentemente salvati o digitati come stringa;</li>
-  <li><span class="material-icons">casino</span>: apre uno schema casuale del catalogo;</li>
   <li><span class="material-icons">grid_on</span>: apre il popup di browse degli schemi;</li>
   <li><span class="material-icons">more_vert</span>: apre il menu operazioni del player;
     <ul>
@@ -43,6 +47,7 @@ I comandi della toolbar sono:
       <li><span class="material-icons">apps</span>: mostra o nasconde i candidati delle celle;</li>
       <li><span class="material-icons">grid_4x4</span>: mostra o nasconde le etichette di riga e colonna;</li>
       <li><span class="material-icons">light_mode</span> / <span class="material-icons">dark_mode</span>: passa tra tema chiaro e scuro;</li>
+      <li><span class="material-icons">translate</span>: passa all'altra lingua;</li>
       <li><span class="material-icons">settings_backup_restore</span>: ripristina le impostazioni iniziali.</li>
     </ul>
   </li>

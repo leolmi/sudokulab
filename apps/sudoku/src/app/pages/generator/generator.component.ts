@@ -13,6 +13,7 @@ import { SUDOKU_PAGE_GENERATOR_LOGIC } from './generator.logic';
 import { GeneratorOptionsComponent } from '@olmi/generator-options';
 import { GeneratorOptions, NotificationType, Sudoku, SudokuStat } from '@olmi/model';
 import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { GeneratorSchemasComponent } from '@olmi/generator-schemas';
 import {
   AppUserOptions,
@@ -37,6 +38,7 @@ const GENERATOR_VISIBLE_STAT: any = {
     GeneratorOptionsComponent,
     GeneratorSchemasComponent,
     MatProgressBar,
+    MatIconModule,
     SchemaToolbarComponent,
     I18nDirective,
   ],

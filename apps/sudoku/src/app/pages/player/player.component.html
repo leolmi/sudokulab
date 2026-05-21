@@ -35,6 +35,15 @@
             <div class="fx-cell" [style.animation-delay.ms]="cell.delay"></div>
           }
         </div>
+        @if (hasHighlights()) {
+          <button mat-mini-fab
+                  class="clear-highlights-fab"
+                  (click)="manager.setHighlights()"
+                  [attr.aria-label]="tr.t('Clear highlights')"
+                  [matTooltip]="tr.t('Clear highlights')">
+            <mat-icon>delete_sweep</mat-icon>
+          </button>
+        }
       </div>
       <schema-toolbar
         [showProgress]="true"

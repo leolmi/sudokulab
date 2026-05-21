@@ -36,7 +36,22 @@
     }
     @case (KeeperMode.schema) {
       <div class="keeper-page page-keeper">
-        <sudoku-board></sudoku-board>
+        <div class="board-anchor">
+          <sudoku-board></sudoku-board>
+          @if (manager.status().isLock && manager.lockedValue(); as lv) {
+            <div class="locked-value-banner">
+              <span class="label" appI18n>Fixed value</span>:
+              <span class="value">{{ (lv.value && lv.value !== '0') ? lv.value : tr.t('empty') }}</span>
+              <button type="button"
+                      class="banner-close"
+                      (click)="manager.options({ isLock: false })"
+                      [attr.aria-label]="tr.t('Clear fixed value')"
+                      [title]="tr.t('Clear fixed value')">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
         <schema-toolbar [template]="toolbarTemplate"></schema-toolbar>
       </div>
     }

@@ -40,6 +40,7 @@ import { SchemaToolbarComponent } from '@olmi/schema-toolbar';
 import { HighlightsEditorComponent } from '@olmi/highlights-editor';
 import { PlayAction, PlayPanelComponent } from '@olmi/play-panel';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from './confirm-dialog.component';
 
 
@@ -62,6 +63,7 @@ const PLAYER_VISIBLE_STAT: any = {
     MatDialogModule,
     MatProgressBar,
     MatTabsModule,
+    MatTooltipModule,
     BoardComponent,
     StepViewerComponent,
     SchemaHeaderComponent,
@@ -98,6 +100,18 @@ export class PlayerComponent extends PageBase {
     return s.hasErrors || s.percent >= 100;
   });
   readonly isEmpty = computed<boolean>(() => this.manager.stat().isEmpty);
+
+  // True se sulla board è attiva almeno un'evidenza (celle, valori, gruppi
+  // o paths). Pilota la visibilità del FAB di pulizia in sovraimpressione.
+  readonly hasHighlights = computed<boolean>(() => {
+    const h = this.manager.highlights();
+    if (!h) return false;
+    return Object.keys(h.cell || {}).length > 0
+      || Object.keys(h.secondaryCell || {}).length > 0
+      || Object.keys(h.cellValue || {}).length > 0
+      || (h.groups?.length || 0) > 0
+      || (h.paths?.length || 0) > 0;
+  });
 
   readonly layout = computed<string>(() => this.state.layout().narrow ? 'column' : 'row');
 

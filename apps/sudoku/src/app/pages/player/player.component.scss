@@ -82,6 +82,27 @@
   }
 }
 
+// FAB in sovraimpressione sulla board: appare solo quando `hasHighlights()`
+// è vero. Usa lo stesso stile floating del resto della UI (sfondo translucido
+// + drop-shadow) per dare la sensazione di un piano superiore alla board.
+.clear-highlights-fab {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 2;
+  opacity: .55;
+  transition: opacity ease-in-out .25s, transform ease-in-out .25s;
+  background: color-mix(in srgb, var(--sdk-color-accent) 92%, transparent);
+  color: var(--sdk-color-accent-contrast);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .25));
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 .separator {
   width: 24px;
 }

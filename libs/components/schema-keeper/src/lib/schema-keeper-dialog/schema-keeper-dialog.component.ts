@@ -131,6 +131,7 @@ export class SchemaKeeperDialogComponent {
       editMode: 'schema',
       isDynamic: false,
       nextMode: 'next-in-row',
+      isCoord: true,
     });
     if (this._presetValues) this.manager.load(this._presetValues);
 

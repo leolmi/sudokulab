@@ -140,6 +140,9 @@
   "Stop generation": "Ferma generazione",
   "Generate a schema": "Genera uno schema",
   "Lock value": "Blocca valore",
+  "Fixed value": "Valore fisso",
+  "Clear fixed value": "Rimuovi valore fisso",
+  "empty": "vuoto",
   "Skip schema": "Salta schema",
 
   "Total fixed numbers": "Totale valori fissi",

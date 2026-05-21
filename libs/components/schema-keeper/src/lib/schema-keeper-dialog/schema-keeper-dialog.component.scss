@@ -149,6 +149,81 @@
       filter: blur(2px);
     }
   }
+
+  // Wrapper relativo solo attorno alla board: riferimento per il
+  // posizionamento absolute del banner di "lock value", senza alterare
+  // l'altezza del container e quindi senza spostare la toolbar sottostante.
+  .board-anchor {
+    position: relative;
+  }
+
+  // Banner "lock value": piccolo ma evidente, segnala il valore lockato
+  // dalla toolbar (long-press su un tasto). È position:absolute così non
+  // occupa spazio in flow — galleggia a cavallo del bordo inferiore della
+  // board (mezzo dentro la zona di inset, mezzo sotto), centrato. Usa
+  // l'accent del tema per coerenza con "evidenza primaria = accent".
+  .locked-value-banner {
+    display: inline-flex;
+    align-items: center;
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    z-index: 2;
+    padding: 2px 4px 2px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--sdk-color-accent);
+    background: color-mix(in srgb, var(--sdk-color-background) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--sdk-color-accent) 50%, transparent);
+    border-radius: 999px;
+    width: fit-content;
+    user-select: none;
+    pointer-events: none;
+    text-align: center;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .18));
+
+    .label {
+      opacity: .85;
+    }
+    .value {
+      margin-left: 4px;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .banner-close {
+      pointer-events: auto;
+      cursor: pointer;
+      margin-left: 6px;
+      padding: 0;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: inherit;
+      opacity: .7;
+      transition: opacity .15s ease-out, background .15s ease-out;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
+      }
+
+      &:hover,
+      &:focus-visible {
+        opacity: 1;
+        background: color-mix(in srgb, var(--sdk-color-accent) 20%, transparent);
+        outline: none;
+      }
+    }
+  }
 }
 
 ::ng-deep {
