@@ -246,6 +246,9 @@ export class SudokuState {
       case SYSTEM_MENU_CODE.lightTheme:
         this._theme.set(THEME_LIGHT);
         break;
+      case SYSTEM_MENU_CODE.switchLanguage:
+        this._tr.toggle();
+        break;
       case SYSTEM_MENU_CODE.globalDebug:
         LocalContext.toggleLevel('debug');
         break;

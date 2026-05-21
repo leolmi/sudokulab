@@ -72,6 +72,7 @@ export const MAIN = <MenuItem[]>[
   },
   SYSTEM_MENU_ITEMS.lightTheme,
   SYSTEM_MENU_ITEMS.darkTheme,
+  SYSTEM_MENU_ITEMS.switchLanguage,
   SYSTEM_MENU_ITEMS.restoreSettings,
 ];
 
@@ -96,6 +97,7 @@ export const NARROW = <MenuItem[]>[
       },
       SYSTEM_MENU_ITEMS.lightTheme,
       SYSTEM_MENU_ITEMS.darkTheme,
+      SYSTEM_MENU_ITEMS.switchLanguage,
       SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   }

@@ -53,5 +53,4 @@ export class AppComponent {
 
   clickOnLogo = () => window.open(SUDOKU_AUTHOR_LINK, "_blank");
   buildSubMenu = (item: MenuItem) => this.pageSubMenu.set(item.subMenu || []);
-  toggleLang = () => this.tr.toggle();
 }

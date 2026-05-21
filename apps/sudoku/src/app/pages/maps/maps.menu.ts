@@ -38,6 +38,7 @@ export const MAIN = <MenuItem[]>[
   },
   SYSTEM_MENU_ITEMS.lightTheme,
   SYSTEM_MENU_ITEMS.darkTheme,
+  SYSTEM_MENU_ITEMS.switchLanguage,
 ]
 
 export const NARROW = <MenuItem[]>[]

@@ -74,12 +74,6 @@
           }
         }
       }
-      <button mat-icon-button
-              class="lang-toggle"
-              appI18nTooltip="Switch language"
-              (click)="toggleLang()">
-        <span class="lang-code">{{ tr.lang() }}</span>
-      </button>
       <!-- MENU POPUP DI PAGINA -->
       <mat-menu #pagesubmenu="matMenu">
         @for (mitem of pageSubMenu(); track $index) {

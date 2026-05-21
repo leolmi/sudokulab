@@ -1,4 +1,6 @@
 {
+  "Switch language": "Passa a Italiano",
+
   "play.random.body": "There are <strong>{count}</strong> schemas, all with unique solution. Try one at random!",
   "play.algorithm.body": "Try to finish a schema starting from the step that requires using a specific algorithm of your choice.",
   "play.hard.body": "Try to solve one of the hardest schemas (without using the <em>try</em> algorithm).",

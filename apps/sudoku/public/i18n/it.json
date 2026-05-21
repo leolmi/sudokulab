@@ -2,7 +2,7 @@
   "author info": "info autore",
   "Generator is running": "Generatore in esecuzione",
   "Debug mode active": "Modalità debug attiva",
-  "Switch language": "Cambia lingua",
+  "Switch language": "Switch to English",
   "Player": "Player",
   "Generator": "Generatore",
   "Print": "Stampa",
@@ -11,6 +11,7 @@
   "Maps": "Mappe",
   "Empty schema": "Schema vuoto",
   "Schema completed!": "Schema completato!",
+  "Let's play": "Giochiamo",
   "Schema string copied to clipboard": "Stringa schema copiata negli appunti",
 
   "Solve menu": "Menu risoluzione",

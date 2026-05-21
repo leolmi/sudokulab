@@ -106,13 +106,13 @@ const OPENSCHEMA = <MenuItem[]>[
     logic: 'private',
     property: 'keeper'
   },
-  {
-    code: 'player-schema-random',
-    icon: 'casino',
-    text: 'Open random schema',
-    logic: 'private',
-    property: 'random'
-  },
+  // {
+  //   code: 'player-schema-random',
+  //   icon: 'casino',
+  //   text: 'Open random schema',
+  //   logic: 'private',
+  //   property: 'random'
+  // },
   {
     code: CODE_SCHEMAS,
     icon: 'grid_on',
@@ -163,6 +163,7 @@ export const MAIN = <MenuItem[]>[
       },
       SYSTEM_MENU_ITEMS.lightTheme,
       SYSTEM_MENU_ITEMS.darkTheme,
+      SYSTEM_MENU_ITEMS.switchLanguage,
       SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   },
@@ -203,6 +204,7 @@ export const NARROW = <MenuItem[]>[
       },
       SYSTEM_MENU_ITEMS.lightTheme,
       SYSTEM_MENU_ITEMS.darkTheme,
+      SYSTEM_MENU_ITEMS.switchLanguage,
       SYSTEM_MENU_ITEMS.restoreSettings,
     ]
   },

@@ -131,6 +131,7 @@ export const SYSTEM_MENU_CODE: any = {
   restoreSettings: 'system-restore-settings',
   darkTheme: 'system-dark-theme',
   lightTheme: 'system-light-theme',
+  switchLanguage: 'system-switch-language',
   globalDebug: 'system-debug-mode',
   androidBottomBarBugFix: 'system-android-bbbf'
 }
@@ -146,6 +147,12 @@ export const SYSTEM_MENU_ITEMS: any = {
     code: SYSTEM_MENU_CODE.darkTheme,
     icon: 'dark_mode',
     text: 'Switch to dark theme',
+    logic: 'system',
+  },
+  switchLanguage: {
+    code: SYSTEM_MENU_CODE.switchLanguage,
+    icon: 'translate',
+    text: 'Switch language',
     logic: 'system',
   },
   restoreSettings: {
