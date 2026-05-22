@@ -424,15 +424,18 @@ mat-form-field {
 
 .layout-narrow {
   .mat-mdc-dialog-panel {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: unset !important;
+    &:not(.keep-size) {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: unset !important;
 
-    .mat-mdc-dialog-surface {
-      border-radius: 0 !important;
-    }
-    .mat-mdc-dialog-content {
-      max-height: unset !important;
+      .mat-mdc-dialog-surface {
+        border-radius: 0 !important;
+      }
+
+      .mat-mdc-dialog-content {
+        max-height: unset !important;
+      }
     }
   }
 }

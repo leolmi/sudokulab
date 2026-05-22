@@ -119,6 +119,11 @@ export class PlayerComponent extends PageBase {
   // 0 = "Let's play", 1 = "Step viewer". Auto-passa a 1 quando la sequence
   // si popola; torna a 0 quando si svuota (e il tab step-viewer scompare).
   readonly selectedTabIndex = signal<number>(0);
+  // richiesta esplicita di attivare il tab step-viewer al prossimo
+  // popolamento della sequence: serve per il caso solve-to / "Conosci gli
+  // algoritmi", in cui set diretto su selectedTabIndex verrebbe scartato
+  // (il tab non è ancora renderizzato → MatTabGroup clamp a 0 + emit).
+  private readonly _pendingStepViewer = signal<boolean>(false);
 
   /** 81 celle dell'overlay cascata — delay già pronto in ms per `[style.animation-delay]`. */
   readonly fxCells = Array.from({ length: 81 }, (_, i) => {
@@ -150,6 +155,9 @@ export class PlayerComponent extends PageBase {
       }), {
         editMode: 'play',
         isDynamic: false,
+        // nel player il lock dei valori è disabilitato per evitare scritture
+        // accidentali durante la risoluzione manuale
+        lockEnabled: false,
       });
 
     this._route.params
@@ -206,13 +214,19 @@ export class PlayerComponent extends PageBase {
     });
 
     // auto-select del tab "Step viewer" sul popolamento della sequence.
-    // Tracciamo solo le transizioni len-zero ↔ len-non-zero per non
-    // sovrascrivere la scelta dell'utente quando la sequence resta non vuota.
+    // - transizione 0↔N di hasSequence: bascula automaticamente tra i due tab
+    //   senza sovrascrivere la scelta dell'utente quando la sequence resta non vuota.
+    // - `_pendingStepViewer`: richiesta esplicita (solve-to, "Conosci gli algoritmi")
+    //   che forza il tab step-viewer al primo hasSequence=true successivo.
     let prevHasSeq = false;
     effect(() => {
       const hasSeq = this.hasSequence();
-      if (hasSeq && !prevHasSeq) {
-        untracked(() => this.selectedTabIndex.set(1));
+      const pending = this._pendingStepViewer();
+      if (hasSeq && (!prevHasSeq || pending)) {
+        untracked(() => {
+          this.selectedTabIndex.set(1);
+          if (pending) this._pendingStepViewer.set(false);
+        });
       } else if (!hasSeq && prevHasSeq) {
         untracked(() => this.selectedTabIndex.set(0));
       }
@@ -268,8 +282,12 @@ export class PlayerComponent extends PageBase {
       }
       case 'solve-to': {
         const schema = this.store.getSudoku(this._game());
-        this.openDialog<string>(SolveToDialogComponent, (step) =>
-          this.manager.goToStep(step), { data: { schema } });
+        this.openDialog<string>(SolveToDialogComponent, (step) => {
+          this.manager.goToStep(step);
+          // richiesta differita: l'effect consumerà il flag quando la sequence
+          // (asincrona via worker) sarà popolata e il tab sarà renderizzabile.
+          this._pendingStepViewer.set(true);
+        }, { data: { schema } });
         break;
       }
       case 'keeper': {
@@ -314,7 +332,14 @@ export class PlayerComponent extends PageBase {
           AppUserOptions.updateFeature(PLAYER_BOARD_USER_OPTIONS_FEATURE, { game: name });
           checkPlayerUrl(this._location, this._router, route);
           // goToStep applicato dopo load: il worker accoda solve-to dopo il check.
-          if (goToStep && goToStep > 0) this.manager.goToStep(String(goToStep));
+          if (goToStep && goToStep > 0) {
+            this.manager.goToStep(String(goToStep));
+            // richiesta differita: l'effect attiverà il tab step-viewer quando la
+            // sequence (asincrona via worker) sarà popolata. Set diretto su
+            // selectedTabIndex verrebbe scartato perché il tab non è ancora
+            // renderizzato (MatTabGroup clamp a 0 + emit selectedIndexChange).
+            this._pendingStepViewer.set(true);
+          }
         }
       });
   }
@@ -375,9 +400,10 @@ export class PlayerComponent extends PageBase {
     }
     const data: ConfirmDialogData = {
       title: 'Open a new schema?',
-      message: 'The current schema has unsaved progress. Open a new schema anyway?',
+      message:
+        'The current schema has unsaved progress. Open a new schema anyway?'
     };
-    this.openDialog<boolean>(ConfirmDialogComponent, () => then(), { data });
+    this.openDialog<boolean>(ConfirmDialogComponent, () => then(), { data, panelClass: ['keep-size'] });
   }
 
   private _playCompletionFx() {

@@ -143,9 +143,11 @@ export class SchemaToolbarComponent implements OnDestroy {
     if (event?.type === 'mousedown' && Date.now() - this._lastTouchEnd < SYNTH_MOUSE_GUARD_MS) return;
     const code = btn.code || '';
     if (!TB_VALUE_PREFIX.test(code)) return;
+    const status = this.manager.status();
+    // l'host può proibire del tutto il lock dei valori (es. player)
+    if (!status.lockEnabled) return;
     // in pencil mode il long-press resta abilitato solo per il bottone empty
-    const isPencil = this.manager.status().isPencil;
-    if (isPencil && code !== TB_VALUE_EMPTY) return;
+    if (status.isPencil && code !== TB_VALUE_EMPTY) return;
     if (this._pressTimer) return;
     this._longPressFired = false;
     this._activePressCode = code;

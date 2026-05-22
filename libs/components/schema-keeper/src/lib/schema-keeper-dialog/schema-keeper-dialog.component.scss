@@ -242,6 +242,10 @@
     .schema-keeper-content {
       width: unset;
 
+      .board-anchor {
+        margin-top: 20px;
+      }
+
       .keeper-page {
         &.page-chooser {
           --sdk-keeper-button-size: 50px !important;

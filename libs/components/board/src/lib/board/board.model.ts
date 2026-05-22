@@ -201,6 +201,7 @@ export class BoardStatus {
     this.isDynamic = !!s?.isDynamic;
     this.isCoord = !!s?.isCoord;
     this.isLock = !!s?.isLock;
+    this.lockEnabled = s?.lockEnabled ?? true;
     this.isNotify = !!s?.isNotify;
     this.isPasteEnabled = !!s?.isPasteEnabled;
 
@@ -223,6 +224,9 @@ export class BoardStatus {
   isCoord: boolean;
   // permette di inserire ripetutamente l'ultimo valore valido inserito
   isLock: boolean;
+  // se false la toolbar non permette di attivare il lock (long-press disabilitato);
+  // l'host può così proibire del tutto il lock dei valori (default true)
+  lockEnabled: boolean;
   // attiva la notifica dei cambiamenti
   isNotify: boolean;
   // attiva il supporto per la combinazione di tasti CRTL-V

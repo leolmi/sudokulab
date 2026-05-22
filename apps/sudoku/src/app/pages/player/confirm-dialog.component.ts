@@ -6,6 +6,7 @@ import { I18nDirective, TranslateService } from '@olmi/common';
 export interface ConfirmDialogData {
   title: string;
   message: string;
+  panelClass?: string | string[];
 }
 
 @Component({

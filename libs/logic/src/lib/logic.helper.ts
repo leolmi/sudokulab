@@ -19,7 +19,7 @@ import {
   UserValue,
   ValueOptions,
 } from '@olmi/model';
-import { keys as _keys, lowerCase as _lowerCase, uniq as _uniq } from 'lodash';
+import { keys as _keys, lowerCase as _lowerCase, uniq as _uniq, cloneDeep as _clone } from 'lodash';
 import { calcDifficulty } from './logic.difficulty';
 import { GeneratorContext } from './logic.model';
 
@@ -120,11 +120,20 @@ export const checkToStepItem = (work: SolveWork): void => {
   if (work.options.mode === 'to-step' && work.options.toStep > 0) {
     const scss = work.solutions.filter(s => s.status === 'success');
     if (scss.length === 1) {
-      while (scss[0].sequence.length > work.options.toStep) {
-        const deleted = scss[0].sequence.pop();
-        if (deleted?.value) clearCells(scss[0].cells, deleted.cells);
+      const sol = scss[0];
+      while (sol.sequence.length > work.options.toStep) {
+        sol.sequence.pop();
       }
-      applySudokuRules(scss[0].cells, { resetBefore: true });
+      // ripristina lo stato delle celle dallo snapshot dell'ultimo step rimasto:
+      // mantiene anche le riduzioni di candidati introdotte dagli algoritmi
+      // non-solver (Twins, X-Wing, Y-Wing, …) che `applySudokuRules` con
+      // `resetBefore` cancellerebbe ripartendo dai soli vincoli base.
+      const last = sol.sequence[sol.sequence.length - 1];
+      if (last?.cellsSnapshot?.length === sol.cells.length) {
+        sol.cells = _clone(last.cellsSnapshot);
+      } else {
+        applySudokuRules(sol.cells, { resetBefore: true });
+      }
     }
   }
 }
