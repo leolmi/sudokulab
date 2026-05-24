@@ -69,6 +69,42 @@ Qui, secondo me, sta la base della risposta alla ricerca dello schema più _bell
 
 <p class="evidence">Lo schema più difficile risolvibile senza mai ricorrere al <em>brute force</em> rappresenta la sfida logica più interessante — e quindi, di fatto, <strong>lo schema più bello</strong>!<br><span class="ndr">(opinione personale dell'autore)</span></p>
 
+## Evidenze  {#help-highlights}
+
+Le evidenze permettono di marcare visivamente celle, righe, colonne e gruppi 3x3 mentre si ragiona su uno schema. Il testo digitato nell'editor e lo stato del toggle di visibilità vengono persistiti su questo dispositivo, così si ritrovano intatti a ogni cambio pagina e reload del browser.
+
+![sudokulab highlights](assets/images/highlights.png)
+
+Ogni riga dell'editor descrive un'evidenza nella forma `prefisso[:colore] valore [valore ...]` — i due punti più il colore sono opzionali, così come la presenza di più valori sulla stessa riga.
+
+I prefissi disponibili sono:
+
+- **cell** — evidenza primaria sulle celle (sfondo a tinta piena);
+- **cell2** — evidenza secondaria sulle celle (sfondo a tinta tenue);
+- **value** — pulsazione sul valore della cella;
+- **row** — riga intera; il valore è la lettera A–I (riga) oppure il numero 1–9;
+- **col** — colonna intera; il valore è il numero 1–9;
+- **sqr** (o **grp**) — gruppo 3x3; il valore è il numero del gruppo 1–9, contati sinistra→destra e alto→basso.
+
+Le coordinate delle celle sono espresse come _lettera+numero_, dove la lettera (A–I) identifica la riga e il numero (1–9) la colonna; ad esempio `B4` è la cella in seconda riga, quarta colonna. I valori sulla stessa riga possono essere separati da virgola, spazio o qualunque carattere non alfanumerico — quindi `cell B4, C6` e `cell B4 C6` producono lo stesso risultato.
+
+Il colore è facoltativo e si scrive subito dopo i due punti del prefisso, in formato CSS: un nome (`red`, `green`, `orange`, ...) o un valore esadecimale (`#4064ff`). Senza colore viene usata la tinta _accent_ del tema corrente. Quando più valori compaiono sulla stessa riga, tutti ereditano il colore indicato.
+
+Per **cell** e **cell2** il colore viene applicato come sfondo con trasparenza opportuna; per **row**, **col** e **sqr** il colore puro viene usato come bordo, con un riempimento dello stesso colore a bassa opacità.
+
+Esempi:
+
+- `cell B4, C6` — due celle in evidenza primaria;
+- `cell:red A1 B2 C3` — tre celle rosse;
+- `cell:#4064ff D5` — una cella con colore esadecimale;
+- `cell2 G7` — cella in evidenza secondaria;
+- `value B4` — pulsazione sul valore in B4;
+- `row:green 5` — quinta riga in verde;
+- `col:orange 3` — terza colonna in arancione;
+- `sqr:red 5` — gruppo centrale in rosso.
+
+I pulsanti accanto all'editor permettono di accendere o spegnere le evidenze sulla board (<span class="material-icons">visibility</span> / <span class="material-icons">visibility_off</span>) e di svuotare il testo (<span class="material-icons">delete_sweep</span>).
+
 
 # Algoritmi di risoluzione {#help-algorithms}
 

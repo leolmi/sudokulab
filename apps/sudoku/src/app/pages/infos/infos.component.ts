@@ -2,10 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   TemplateRef,
   ViewEncapsulation,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 
 import { PageBase } from '../../model/page.base';
 import { MatIconModule } from '@angular/material/icon';
@@ -48,6 +51,8 @@ import { I18nMatTooltipDirective } from '@olmi/common';
   encapsulation: ViewEncapsulation.None,
 })
 export class InfosComponent extends PageBase {
+  private readonly _route = inject(ActivatedRoute);
+
   readonly algorithms: Algorithm[] = getAlgorithms();
   readonly TYPEDESC: Dictionary<string> = {
     [AlgorithmType.solver]: 'resolutive',
@@ -71,6 +76,44 @@ export class InfosComponent extends PageBase {
   protected readonly params = computed(() => ({
     algorithmsCount: this.algorithms.length,
   }));
+
+  constructor() {
+    super();
+    // Il markdown della pagina Infos viene caricato in modo asincrono e gli
+    // `id` delle sezioni (es. `help-highlights`) compaiono nel DOM solo a
+    // rendering avvenuto. Lo scroll al fragment è quindi gestito con un
+    // polling: ogni 100ms per ~6s cerca l'elemento target e — appena esiste —
+    // scrolla. Polling è più affidabile di `MutationObserver` perché copre
+    // anche il caso in cui l'elemento compaia in un boundary di Angular che
+    // non viene registrato come childList mutation diretta su body.
+    // Lettura iniziale dallo snapshot per coprire l'apertura della pagina da
+    // un'altra route con `Router.navigate([...], { fragment })`.
+    const initial = this._route.snapshot.fragment;
+    if (initial) this._scrollToFragmentWhenReady(initial);
+    this._route.fragment
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(fragment => {
+        if (fragment && fragment !== initial) this._scrollToFragmentWhenReady(fragment);
+      });
+  }
+
+  private _scrollToFragmentWhenReady(id: string) {
+    let attempts = 0;
+    const tick = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        // double-rAF: il layout è completato dopo il prossimo frame, evita
+        // scroll prematuri che andrebbero a una posizione poi spostata dal
+        // rendering successivo del markdown.
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() =>
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })));
+        return;
+      }
+      if (++attempts < 60) setTimeout(tick, 100);
+    };
+    tick();
+  }
 
   hasInfoPage(id: string): boolean {
     return hasAlgorithmInfoPage(id);

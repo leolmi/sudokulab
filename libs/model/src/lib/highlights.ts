@@ -3,6 +3,13 @@ import { SudokuGroup } from './sudoku-group';
 import { Dictionary } from './types';
 import { SudokuLabel } from './sudoku-label';
 
+/**
+ * Valore di una evidenziazione: `true` = stile/colore di default,
+ * `string` = colore custom (es. "red", "#4064ff") interpretato come colore puro,
+ * la trasparenza è applicata dal rendering.
+ */
+export type HighlightValue = boolean | string;
+
 export class Highlights {
   constructor(h?: Partial<Highlights>) {
     Object.assign(<any>this, h || {});
@@ -15,9 +22,9 @@ export class Highlights {
     this.label = h?.label;
   }
 
-  cell: Dictionary<boolean>;
-  secondaryCell: Dictionary<boolean>;
-  cellValue: Dictionary<string>;
+  cell: Dictionary<HighlightValue>;
+  secondaryCell: Dictionary<HighlightValue>;
+  cellValue: Dictionary<HighlightValue>;
   paths: Cell[][];
   groups: SudokuGroup[];
   label?: SudokuLabel;

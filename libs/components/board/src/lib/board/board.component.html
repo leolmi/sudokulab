@@ -41,8 +41,13 @@
     @let prevCellId = previewCellId();
     @let prevValue = previewValue();
     @for (cell of manager.cells(); track cell.id) {
-      <g [class.highlight]="(hl?.cell||{})[cell.id]"
-         [class.highlight-secondary]="(hl?.secondaryCell||{})[cell.id]">
+      @let cellHl = (hl?.cell||{})[cell.id];
+      @let cellHl2 = (hl?.secondaryCell||{})[cell.id];
+      @let valHl = (hl?.cellValue||{})[cell.id];
+      <g [class.highlight]="!!cellHl"
+         [class.highlight-secondary]="!!cellHl2"
+         [style.--cell-color]="hlColor(cellHl, cellHl2)"
+         [style.--value-color]="hlColor(valHl)">
         <rect class="svg-board-cell"
               vector-effect="non-scaling-stroke"
               stroke-width="1"
@@ -80,7 +85,7 @@
                 [class.fixed]="cell.isFixed"
                 [class.dynamic]="cell.isDynamic"
                 [class.error]="cell.error"
-                [class.svg-pulse]="(hl?.cellValue||{})[cell.id]"
+                [class.svg-pulse]="!!valHl"
                 [attr.x]="cell.textX"
                 [attr.y]="cell.textY"
           >{{cell.text}}</text>
@@ -89,7 +94,7 @@
           @for (vl of cell.getValues(status); track $index) {
             <text class="svg-board-cell-values-text"
                   [class.user-values]="cell.userValues.length>0"
-                  [class.highlight-cell]="(hl?.cell||{})[cell.id]"
+                  [class.highlight-cell]="!!cellHl"
                   text-anchor="start"
                   [attr.x]="cell.x+(GEOMETRY.values[vl+'']?.x||0)"
                   [attr.y]="cell.y+(GEOMETRY.values[vl+'']?.y||0)"
@@ -122,6 +127,8 @@
     <!-- GRUPPI EVIDENZIATI -->
     @for (group of hlgroups(); track group) {
       <rect class="svg-board-highlight-group"
+            [class.colored]="!!group.color"
+            [style.--group-stroke]="group.color || null"
             [attr.x]="group.x"
             [attr.y]="group.y"
             [attr.width]="group.width"

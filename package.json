@@ -1,6 +1,6 @@
 {
   "name": "@olmi/sudoku",
-  "version": "3.0.43",
+  "version": "3.0.44",
   "algorithmsVersion": "3.0",
   "license": "MIT",
   "scripts": {

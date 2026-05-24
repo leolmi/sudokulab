@@ -131,6 +131,17 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   readonly currentCellRow = computed(() => getColRow(this.manager.selection()?.row));
   readonly isFocused = computed(() => this.manager.focused());
 
+  /**
+   * Estrae il colore custom da una entry di highlight (`cell`/`secondaryCell`/
+   * `cellValue`): `true` indica "default", `string` indica un colore puro.
+   * Le entry primarie hanno precedenza sulle secondarie quando entrambe sono
+   * presenti sulla stessa cella.
+   */
+  protected hlColor(...values: any[]): string | null {
+    for (const v of values) if (typeof v === 'string' && v) return v;
+    return null;
+  }
+
   // stato del radial-picker (overlay HTML sopra la board)
   readonly pickerOpen = signal<boolean>(false);
   readonly pickerValues = signal<string[]>([]);

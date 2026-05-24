@@ -68,6 +68,42 @@ Here, in my opinion, lies the foundation of the answer to the search for the mos
 
 <p class="evidence">The hardest schema that can be solved without ever falling back to <em>brute force</em> represents the most interesting logical challenge — therefore, in fact, <strong>the most beautiful schema</strong>!<br><span class="ndr">(personal opinion of the author)</span></p>
 
+## Highlights  {#help-highlights}
+
+Highlights let you visually mark cells, rows, columns and 3x3 groups while reasoning over a schema. The text typed in the editor and the visibility-toggle state are persisted on this device, so they are restored intact across page changes and browser reloads.
+
+![sudokulab highlights](assets/images/highlights.png)
+
+Each line of the editor describes a highlight in the form `prefix[:color] value [value ...]` — the colon plus color are optional, as is the presence of multiple values on the same line.
+
+The available prefixes are:
+
+- **cell** — primary cell highlight (solid background tint);
+- **cell2** — secondary cell highlight (faint background tint);
+- **value** — pulse on the cell value;
+- **row** — whole row; value is the row letter (A–I) or the number 1–9;
+- **col** — whole column; value is the column number 1–9;
+- **sqr** (or **grp**) — 3x3 group; value is the group number 1–9, counted left→right and top→bottom.
+
+Cell coordinates are expressed as _letter+number_, where the letter (A–I) identifies the row and the number (1–9) the column; for example `B4` is the cell on the second row, fourth column. Values on the same line can be separated by comma, space, or any non-alphanumeric character — so `cell B4, C6` and `cell B4 C6` produce the same result.
+
+The color is optional and is written right after the colon of the prefix, in CSS format: a name (`red`, `green`, `orange`, ...) or a hex value (`#4064ff`). Without a color the current theme's _accent_ tint is used. When multiple values appear on the same line, they all inherit the specified color.
+
+For **cell** and **cell2** the color is applied as a translucent background; for **row**, **col** and **sqr** the pure color is used as the border, with a low-opacity fill of the same color.
+
+Examples:
+
+- `cell B4, C6` — two cells with primary highlight;
+- `cell:red A1 B2 C3` — three red cells;
+- `cell:#4064ff D5` — one cell with hex color;
+- `cell2 G7` — cell with secondary highlight;
+- `value B4` — pulse on the value at B4;
+- `row:green 5` — fifth row in green;
+- `col:orange 3` — third column in orange;
+- `sqr:red 5` — center 3x3 group in red.
+
+The buttons next to the editor let you toggle the highlights on the board on/off (<span class="material-icons">visibility</span> / <span class="material-icons">visibility_off</span>) and clear the text (<span class="material-icons">delete_sweep</span>).
+
 
 # Solving algorithms {#help-algorithms}
 

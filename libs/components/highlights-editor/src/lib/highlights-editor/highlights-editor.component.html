@@ -4,6 +4,7 @@
     <textarea [cdkTextareaAutosize]="false"
               [value]="text()"
               class="full-height font-family-monospace"
+              [class.hl-active]="active()"
               matInput
               spellcheck="false"
               autocorrect="off"
@@ -22,6 +23,12 @@
             [matTooltip]="tr.t('Clear highlights')"
             (click)="clear()">
       <mat-icon>delete_sweep</mat-icon>
+    </button>
+    <div class="separator"></div>
+    <button mat-icon-button
+            [matTooltip]="tr.t('Open highlights help')"
+            (click)="openHelp()">
+      <mat-icon>help</mat-icon>
     </button>
   </div>
 </div>

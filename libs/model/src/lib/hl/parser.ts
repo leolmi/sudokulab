@@ -3,60 +3,67 @@ import { Highlights } from '../highlights';
 import { parseCell, parseGroup, parsePath } from './parser.helper';
 import { GroupType } from '../consts';
 
+// Sintassi prefisso: `name` oppure `name:color` (con color senza whitespace),
+// seguito da whitespace prima del body. Il colore è "puro" (es. `red`,
+// `#4064ff`); la trasparenza è applicata in fase di rendering.
 const HLColumnParser: HLParser = {
   name: 'column',
-  rgx: /^col\s/g,
-  parse: (hl: Highlights, l: string) => parseGroup(hl, l, 'col', GroupType.column)
+  rgx: /^col(?::(\S+))?\s+/,
+  parse: (hl, body, color) => parseGroup(hl, body, GroupType.column, color)
 }
 const HLRowParser: HLParser = {
   name: 'row',
-  rgx: /^row\s/g,
-  parse: (hl: Highlights, l: string) => parseGroup(hl, l, 'row', GroupType.row)
+  rgx: /^row(?::(\S+))?\s+/,
+  parse: (hl, body, color) => parseGroup(hl, body, GroupType.row, color)
 }
 const HLSquareParser: HLParser = {
   name: 'square',
-  rgx: /^sqr\s|^grp\s/g,
-  parse: (hl: Highlights, l: string) => parseGroup(hl, l, 'sqr', GroupType.square)
+  rgx: /^(?:sqr|grp)(?::(\S+))?\s+/,
+  parse: (hl, body, color) => parseGroup(hl, body, GroupType.square, color)
 }
 const HLMainCellParser: HLParser = {
   name: 'main cell',
-  rgx: /^cell\s/g,
-  parse: (hl: Highlights, l: string) => parseCell(hl, l, 'cell', 'cell')
+  rgx: /^cell(?::(\S+))?\s+/,
+  parse: (hl, body, color) => parseCell(hl, body, 'cell', color)
 }
 const HLSecondaryCellParser: HLParser = {
   name: 'secondary cell',
-  rgx: /^cell2\s/g,
-  parse: (hl: Highlights, l: string) => parseCell(hl, l, 'cell2', 'secondaryCell')
+  rgx: /^cell2(?::(\S+))?\s+/,
+  parse: (hl, body, color) => parseCell(hl, body, 'secondaryCell', color)
 }
 const HLValueParser: HLParser = {
   name: 'value',
-  rgx: /^value\s/g,
-  parse: (hl: Highlights, l: string) => parseCell(hl, l, 'value', 'cellValue')
+  rgx: /^value(?::(\S+))?\s+/,
+  parse: (hl, body, color) => parseCell(hl, body, 'cellValue', color)
 }
 const HLPathParser: HLParser = {
   name: 'path',
-  rgx: /^path\s/g,
-  parse: (hl: Highlights, l: string) => parsePath(hl, l, 'path')
+  rgx: /^path\s+/,
+  parse: (hl, body) => parsePath(hl, body)
 }
 
 
 export const HLPARSERS: HLParser[] = [
+  // cell2 prima di cell per evitare ambiguità sull'ordine di scansione
+  HLSecondaryCellParser,
+  HLMainCellParser,
   HLColumnParser,
   HLRowParser,
   HLSquareParser,
-  HLMainCellParser,
-  HLSecondaryCellParser,
   HLValueParser,
   // HLPathParser
 ];
 
 
 export const parseHLLine = (hl: Highlights, l: string) => {
-  const parser = HLPARSERS.find(p => {
+  for (const p of HLPARSERS) {
     p.rgx.lastIndex = 0;
-    return p.rgx.test(l);
-  });
-  if (parser) parser.parse(hl, l);
+    const m = p.rgx.exec(l);
+    if (m) {
+      p.parse(hl, l.substring(m[0].length), m[1]);
+      return;
+    }
+  }
 }
 
 /**

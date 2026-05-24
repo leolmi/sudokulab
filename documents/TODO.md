@@ -1,4 +1,5 @@
 ## DA FARE
+- [ ] help per gli highlights
 
 ## DA DECIDERE SE FARE
 - [ ] player su soluzione: la toolbar dei valori si trasformerebbe in una toolbar di player con i

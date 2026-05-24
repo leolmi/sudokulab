@@ -1,0 +1,42 @@
+Highlights are a set of objects that mark areas or cells on the schema. They are triggered by specific keywords at the start of each line:
+
+// rows are identified by index or letter
+row B, 8
+
+// the primary cell, by coordinates
+cell B4
+
+// the secondary cells
+cell2 D5, E7
+
+// columns are identified by index
+col 4
+
+// areas or groups, by index (1-9)
+sqr 6
+
+
+
+
+
+
+
+
+
+
+Highlights are a set of objects that mark areas or cells on the schema. They are triggered by specific keywords at the start of each line:
+
+// rows are identified by index or letter
+row:green 6 I
+
+// areas or groups, by index (1-9)
+sqr:red 5
+sqr 3
+
+// the default primary cell, by coordinates
+cell A2
+// the cell variant, by coordinates
+cell:blue A6 G2 H5
+
+// the secondary cells
+cell2 D5, E7

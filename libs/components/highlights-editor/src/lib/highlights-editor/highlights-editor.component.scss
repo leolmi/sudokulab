@@ -24,6 +24,20 @@
     &:hover {
       opacity: 1;
     }
+
+    // Divider verticale tra gruppi di azioni (es. tra visibility/clear e help)
+    .separator {
+      width: 1px;
+      height: 20px;
+      margin: 0 10px;
+      background: var(--sdk-color-border, rgba(127, 127, 127, .3));
+    }
+  }
+
+  textarea {
+    &:not(.hl-active) {
+      opacity: .6;
+    }
   }
 }
 
