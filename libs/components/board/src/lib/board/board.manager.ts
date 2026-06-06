@@ -289,11 +289,24 @@ export class BoardManager {
   }
 
   options(o: Partial<BoardStatus>, fixed?: Partial<BoardStatus>) {
-    this._status.update(prev => ({ ...prev, ...o, ...fixed }));
+    this._status.update(prev => this._normalizeStatus({ ...prev, ...o, ...fixed }));
   }
 
   toggleOption(pn: string) {
-    this._status.update(prev => ({ ...prev, [pn]: !(<any>prev)[pn] }));
+    this._status.update(prev => this._normalizeStatus({ ...prev, [pn]: !(<any>prev)[pn] }));
+  }
+
+  /**
+   * Applica le invarianti sullo status prima di pubblicarlo.
+   * Invariante lock: il lock dei valori (`isLock`) non può restare attivo se
+   * l'host lo proibisce (`lockEnabled=false`, es. player). Questo neutralizza
+   * anche un `isLock:true` arrivato da opzioni persistite di una sessione
+   * precedente, evitando di restare bloccati in un contesto privo di un comando
+   * UI per disattivarlo.
+   */
+  private _normalizeStatus(s: Partial<BoardStatus>): BoardStatus {
+    if (s.lockEnabled === false && s.isLock) s.isLock = false;
+    return <BoardStatus>s;
   }
 
   private _handleBoardChangeEvent(e: BoardChangeEvent) {
