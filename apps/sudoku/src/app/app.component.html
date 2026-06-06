@@ -4,9 +4,10 @@
          #menuTrigger="matMenuTrigger"
          [matMenuTriggerFor]="authorMenu"
          (click)="menuTrigger.openMenu()"
-         appI18nTooltip="author info">
+         appI18nTooltip="main menu">
       <div class="logo-main">Sudoku<span class="logo-lab">Lab</span></div>
       <span class="sub-title">{{state.title()}}</span>
+      <mat-icon class="logo-icon">arrow_drop_down</mat-icon>
     </div>
     @if (globalState.isRunning()) {
       <mat-icon class="toolbar-state-icon icon-pulse" appI18nTooltip="Generator is running">settings</mat-icon>

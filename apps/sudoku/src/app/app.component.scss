@@ -29,6 +29,7 @@
 }
 
 .logo {
+  position: relative;
   font-weight: 100;
   font-size: 1.2em;
   user-select: none;
@@ -43,6 +44,11 @@
     margin-top: 4px;
   }
 
+  .logo-icon {
+    position: absolute;
+    right: 0;
+    bottom: -4px;
+  }
 }
 .github-logo-image {
   width: 40px;
