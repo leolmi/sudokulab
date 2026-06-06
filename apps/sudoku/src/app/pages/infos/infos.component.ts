@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
+  signal,
   TemplateRef,
   ViewEncapsulation,
   viewChild,
@@ -20,8 +22,12 @@ import {
   AlgorithmInfoDialogComponent,
   AlgorithmInfoPageComponent,
   hasAlgorithmInfoPage,
+  MdHeading,
 } from '@olmi/algorithm-info';
 import { I18nMatTooltipDirective } from '@olmi/common';
+
+/** Pixel di scroll oltre i quali compare il pulsante "torna su". */
+const BACK_TO_TOP_THRESHOLD = 300;
 
 /**
  * Pagina Infos: presentazione dell'applicazione + manuale d'uso.
@@ -77,6 +83,20 @@ export class InfosComponent extends PageBase {
     algorithmsCount: this.algorithms.length,
   }));
 
+  // Sommario della pagina: solo i titoli di primo livello (`#` → h2) del
+  // markdown, letti dal renderer figlio. Mostrato come riquadro sticky a
+  // sinistra sugli schermi larghi e come header in cima su quelli stretti.
+  private readonly _page = viewChild(AlgorithmInfoPageComponent);
+  protected readonly toc = computed<MdHeading[]>(() =>
+    (this._page()?.headings() ?? []).filter(h => h.level === 2));
+
+  // Pulsante "torna su": compare dopo aver scrollato oltre la soglia. È
+  // ulteriormente limitato alla sola modalità header (schermi stretti) via CSS,
+  // perché sugli schermi larghi il sommario sticky resta sempre visibile.
+  private readonly _scrollRoot = viewChild<ElementRef<HTMLElement>>('scrollRoot');
+  private readonly _scrolled = signal(false);
+  protected readonly showBackToTop = this._scrolled.asReadonly();
+
   constructor() {
     super();
     // Il markdown della pagina Infos viene caricato in modo asincrono e gli
@@ -97,10 +117,33 @@ export class InfosComponent extends PageBase {
       });
   }
 
+  /**
+   * Trova l'elemento di una sezione tramite la classe-ancora `md-anchor-<id>`.
+   * Non si usa `getElementById` perché il sanitizer Angular rimuove l'attributo
+   * `id` dagli elementi creati via `[innerHTML]` (vedi parser markdown).
+   */
+  private _findAnchor(id: string): Element | null {
+    return document.querySelector(`.md-anchor-${CSS.escape(id)}`);
+  }
+
+  /** Scroll alla sezione cliccata nel sommario (contenuto già renderizzato). */
+  protected scrollToSection(id: string, ev?: Event): void {
+    ev?.preventDefault();
+    this._findAnchor(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  protected onScroll(ev: Event): void {
+    this._scrolled.set((ev.target as HTMLElement).scrollTop > BACK_TO_TOP_THRESHOLD);
+  }
+
+  protected backToTop(): void {
+    this._scrollRoot()?.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   private _scrollToFragmentWhenReady(id: string) {
     let attempts = 0;
     const tick = () => {
-      const el = document.getElementById(id);
+      const el = this._findAnchor(id);
       if (el) {
         // double-rAF: il layout è completato dopo il prossimo frame, evita
         // scroll prematuri che andrebbero a una posizione poi spostata dal

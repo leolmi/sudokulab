@@ -18,7 +18,9 @@ To answer the original question, the first step was to build the player, and the
 
 The player shows the current schema, which the user can solve using the keyboard (on desktop), the on-screen keypad (on mobile), or the picker by holding the mouse — or the finger, if touch is enabled — on the cell to be valued.
 
-![sudokulab picker](assets/images/sudokulab-picker.png)
+<div class="image-container">
+  <img class="md-img small-image" src="assets/images/sudokulab-picker.png" alt="sudokulab picker">
+</div>
 
 Any schema from the sorted and filterable catalog can be opened.
 

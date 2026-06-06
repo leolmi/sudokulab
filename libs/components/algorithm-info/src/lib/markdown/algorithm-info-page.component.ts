@@ -16,7 +16,7 @@ import {
   SudokuBoardPreviewComponent,
   SudokuBoardPreviewSample,
 } from '../sudoku-board-preview/sudoku-board-preview.component';
-import { MdBlock, MdParams, parseMarkdown } from './markdown.parser';
+import { extractHeadings, MdBlock, MdHeading, MdParams, parseMarkdown } from './markdown.parser';
 import { AlgorithmMarkdownLoader } from './algorithm-markdown.loader';
 
 /**
@@ -164,6 +164,13 @@ export class AlgorithmInfoPageComponent {
 
   private readonly _md = signal<string>('');
   protected readonly blocks = computed<MdBlock[]>(() => parseMarkdown(this._md(), this.params()));
+
+  /**
+   * Titoli della pagina, esposti come dato grezzo: un consumer (es. la pagina
+   * Infos) può costruirci un sommario/navigazione. Vuoto finché il markdown
+   * non è caricato.
+   */
+  readonly headings = computed<MdHeading[]>(() => extractHeadings(this._md(), this.params()));
 
   constructor() {
     effect(async () => {

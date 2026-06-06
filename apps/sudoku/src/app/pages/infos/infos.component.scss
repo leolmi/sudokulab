@@ -9,11 +9,139 @@
     top: 0;
     left: 0;
     width: 100%;
+  }
+
+  // Gruppo sommario + contenuto. Default (schermi stretti): impilato in
+  // colonna, con il sommario come header in cima che scrolla con la pagina.
+  .help-layout {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1160px;        // 1080 di contenuto + 2×40 di padding
+    margin: 0 auto;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .help-content {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1080px;
+    min-width: 0;
+  }
+
+  // Riquadro del sommario (voci = titoli di primo livello della pagina).
+  .page-toc {
+    box-sizing: border-box;
+    border: 1px solid var(--sdk-color-border);
+    border-radius: 8px;
+    padding: 12px 8px;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 0;
+    }
+
+    .page-toc-link {
+      display: block;
+      padding: 7px 12px;
+      border-radius: 6px;
+      border-left: 2px solid transparent;
+      color: var(--sdk-color-foreground);
+      text-decoration: none;
+      font-size: .95em;
+      line-height: 1.35;
+      transition: color .15s, background-color .15s, border-color .15s;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--sdk-color-accent);
+        background-color: var(--sdk-color-hover);
+        border-left-color: var(--sdk-color-accent);
+      }
+    }
+  }
+
+  // Schermi larghi: sommario come riquadro sticky a sinistra (non scrolla con
+  // la pagina), contenuto a destra. La soglia è alta di proposito così da
+  // garantire spazio sufficiente ai lati perché il sommario sia usabile.
+  @media (min-width: 1500px) {
+    .help-layout {
+      flex-direction: row;
+      align-items: flex-start;   // evita che il sommario si stiri a tutta altezza
+      gap: 48px;
+      max-width: 1476px;         // 260 toc + 48 gap + 1080 contenuto + 2×44 padding
+      padding: 48px 44px;
+    }
+
+    .page-toc {
+      position: sticky;
+      top: 24px;
+      flex: 0 0 260px;
+      width: 260px;
+      align-self: flex-start;
+      max-height: calc(100vh - 96px);
+      overflow: auto;
+    }
 
     .help-content {
-      padding: 40px;
-      max-width: 1000px;
-      min-width: 200px;
+      flex: 1 1 auto;
+    }
+  }
+
+  // Pulsante flottante "torna su": in sovrimpressione in basso a destra, non
+  // scrolla con la pagina. È nascosto di default e attivato SOLO in modalità
+  // header (sommario in cima che scrolla con la pagina, vedi @media sotto);
+  // inoltre compare solo dopo aver scrollato (gestito dal componente). A riposo
+  // è volutamente poco appariscente (opacità ridotta); piena opacità su hover.
+  .back-to-top {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--sdk-color-accent-contrast);
+    background-color: var(--sdk-color-accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .22);
+    opacity: .4;
+    transition: opacity .2s ease;
+
+    .mat-icon {
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      line-height: 24px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      opacity: 1;
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  // Attivo solo quando il sommario è header che scrolla con la pagina (sotto la
+  // soglia del layout a colonne): complementare al `@media (min-width: 1500px)`.
+  @media (max-width: 1499.98px) {
+    .back-to-top {
+      display: flex;
     }
   }
 
@@ -176,8 +304,8 @@
 ::ng-deep {
   .layout-compact {
     .sudokulab-page-help {
-      .help-content {
-        padding: 40px 10px;
+      .help-layout {
+        padding: 24px 12px;
       }
     }
   }

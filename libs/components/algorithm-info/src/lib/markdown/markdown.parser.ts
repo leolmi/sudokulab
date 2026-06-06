@@ -34,6 +34,16 @@ export type MdBlock =
   | { kind: 'board'; name: string }
   | { kind: 'slot'; name: string };
 
+/** Voce di sommario estratta dai titoli del markdown. */
+export interface MdHeading {
+  /** Livello del tag generato: `2` = `#`, `3` = `##`, `4` = `###`. */
+  level: number;
+  /** Anchor id: esplicito via `{#id}` oppure slug derivato dal testo. */
+  id: string;
+  /** Testo del titolo ripulito dai marcatori inline (per il sommario). */
+  text: string;
+}
+
 const BOARD_RX = /^::board\[(\w+)\]\s*$/;
 const SLOT_RX = /^::slot\[([\w-]+)\]\s*$/;
 const HEADING_RX = /^(#{1,4})\s+(.+?)(?:\s*\{#([\w-]+)\})?\s*$/;
@@ -98,8 +108,13 @@ export function parseMarkdown(md: string, params?: MdParams): MdBlock[] {
       closeAllLists();
       // `#` → h2, `##` → h3, `###` → h4 (lascia h1 alla shell esterna)
       const level = Math.min(headingMatch[1].length + 1, 6);
-      const idAttr = headingMatch[3] ? ` id="${headingMatch[3]}"` : '';
-      buf.push(`<h${level}${idAttr}>${inlineFmt(headingMatch[2], params)}</h${level}>`);
+      // id esplicito `{#id}` se presente, altrimenti slug derivato dal testo.
+      // NB: il sanitizer di Angular su `[innerHTML]` rimuove l'attributo `id`
+      // (anti DOM-clobbering), quindi l'ancora è espressa come classe
+      // `md-anchor-<id>`, che il sanitizer preserva. Lo scroll alla sezione
+      // (deep-link e sommario) avviene via `querySelector('.md-anchor-<id>')`.
+      const id = headingMatch[3] || slugify(headingMatch[2]);
+      buf.push(`<h${level} class="md-anchor-${id}">${inlineFmt(headingMatch[2], params)}</h${level}>`);
       continue;
     }
 
@@ -154,6 +169,51 @@ export function parseMarkdown(md: string, params?: MdParams): MdBlock[] {
 
   flushHtml();
   return out;
+}
+
+/**
+ * Estrae l'elenco dei titoli del markdown (per costruire un sommario).
+ *
+ * Scansione line-based con la stessa `HEADING_RX` e la stessa regola di `id`
+ * di `parseMarkdown`, così gli anchor del sommario combaciano sempre con gli
+ * `id` realmente renderizzati nelle intestazioni.
+ */
+export function extractHeadings(md: string, params?: MdParams): MdHeading[] {
+  const out: MdHeading[] = [];
+  for (const line of md.split(/\r?\n/)) {
+    const m = HEADING_RX.exec(line);
+    if (!m) continue;
+    out.push({
+      level: Math.min(m[1].length + 1, 6),
+      id: m[3] || slugify(m[2]),
+      text: plainText(m[2], params),
+    });
+  }
+  return out;
+}
+
+/**
+ * Converte un testo in uno slug usabile come anchor id: rimuove i diacritici,
+ * porta in minuscolo e collassa ogni sequenza non alfanumerica in un trattino.
+ */
+function slugify(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(IMG_RX, '$1')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/** Testo semplice di un titolo: sostituisce i `{name}` e toglie i marcatori inline. */
+function plainText(s: string, params?: MdParams): string {
+  return substParams(s, params)
+    .replace(IMG_RX, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/[*_`]/g, '')
+    .trim();
 }
 
 /** Sostituisce i `{name}` con `params[name]` senza altre trasformazioni. */

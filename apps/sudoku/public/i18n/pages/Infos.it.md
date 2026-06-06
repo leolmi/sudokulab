@@ -19,7 +19,9 @@ Per rispondere alla domanda originale, il primo passo è stato costruire il play
 Il player mostra lo schema corrente, che l'utente può risolvere usando la tastiera (su desktop), il tastierino a schermo (su mobile) oppure il picker mantenendo
 il mouse o il dito, se è attivo il touch, sulla cella da valorizzare.
 
-![sudokulab picker](assets/images/sudokulab-picker.png)
+<div class="image-container">
+  <img class="md-img small-image" src="assets/images/sudokulab-picker.png" alt="sudokulab picker">
+</div>
 
 È possibile aprire qualsiasi schema dal catalogo, ordinabile e filtrabile.
 
