@@ -13,14 +13,15 @@ export * from './AlignmentOnGroup.algorithm';   // priority 3 (pointing / claimi
 export * from './Couples.algorithm';            // priority 9
 // fish
 export * from './XWings.algorithm';             // priority 8
-export * from './Swordfish.algorithm';          // priority 11
-export * from './Jellyfish.algorithm';          // priority 14
+export * from './Swordfish.algorithm';          // priority 12
+export * from './Jellyfish.algorithm';          // priority 15
 // wings & uniqueness
 export * from './XYWings.algorithm';            // priority 10
-export * from './UniqueRectangle.algorithm';    // priority 12
-export * from './SimpleColouring.algorithm';    // priority 13
-export * from './TurbotFish.algorithm';         // priority 15 (ex Chains)
+export * from './WWings.algorithm';             // priority 11
+export * from './UniqueRectangle.algorithm';    // priority 13
+export * from './SimpleColouring.algorithm';    // priority 14
+export * from './TurbotFish.algorithm';         // priority 16 (ex Chains)
 // endgame
-export * from './Bug.algorithm';                // priority 16
+export * from './Bug.algorithm';                // priority 17
 // brute force
 export * from './TryNumber.algorithm';          // priority 100 (brute force: tenuto volutamente distante)

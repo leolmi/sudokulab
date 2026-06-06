@@ -4,7 +4,7 @@ Gli algoritmi di risoluzione sono il cuore di SudokuLab: ciascuno rappresenta un
 
 Il catalogo vive in [libs/algorithms/src/lib/catalog](../libs/algorithms/src/lib/catalog) e ogni algoritmo si registra nel registro globale `ALGORITHMS[]` definito in [algorithms.common.ts](../libs/algorithms/src/lib/algorithms.common.ts).
 
-Versione corrente del catalogo: **`algorithmsVersion = 3.0`** (vedi `package.json`). Al bump di questa versione l'API ricalcola automaticamente tutti gli schemi del catalogo all'avvio (vedi [sudoku.service.ts](../apps/api/src/app/sudoku/sudoku.service.ts)).
+Versione corrente del catalogo: **`algorithmsVersion = 3.1`** (vedi `package.json`). Al bump di questa versione l'API ricalcola automaticamente tutti gli schemi del catalogo all'avvio (vedi [sudoku.service.ts](../apps/api/src/app/sudoku/sudoku.service.ts)).
 
 ---
 
@@ -54,7 +54,7 @@ La formula `factor` di ogni algoritmo viene valutata in uno scope con 5 variabil
 
 ---
 
-## Catalogo degli algoritmi (v3.0)
+## Catalogo degli algoritmi (v3.1)
 
 Ordine per priorità crescente (= ordine di tentativo del solver).
 
@@ -111,38 +111,43 @@ File: [XYWings.algorithm.ts](../libs/algorithms/src/lib/catalog/XYWings.algorith
 - **id**: `XYWings` · **type**: `support` · **factor**: `+180+(NEP*60)`
 - Pivot `[A,B]` + wings `[A,X]`, `[B,X]` → escludi X dalle celle che vedono entrambe le wings. Include anche il caso precedentemente chiamato "Y-Wings" (rimosso perché sottoinsieme).
 
-### 12. Swordfish — `priority 11` *(implementato)*
+### 12. W-Wing — `priority 11` *(nuovo)*
+File: [WWings.algorithm.ts](../libs/algorithms/src/lib/catalog/WWings.algorithm.ts)
+- **id**: `WWings` · **type**: `support` · **factor**: `+200+(NEP*70)`
+- Due celle bivalore con la **stessa coppia** `[A,B]` (le ali), raccordate da un **legame forte** (coppia coniugata) su uno dei due valori: una delle ali vale per forza l'altro valore → quel valore è escludibile dalle celle che vedono entrambe le ali. **Distinto** da `XYWings`: lì il raccordo è un pivot e le ali condividono valori diversi, qui le ali condividono l'intera coppia e il raccordo è un legame forte. È la tecnica indicata come "Y-Wing" in alcune riviste didattiche.
+
+### 13. Swordfish — `priority 12` *(implementato)*
 File: [Swordfish.algorithm.ts](../libs/algorithms/src/lib/catalog/Swordfish.algorithm.ts)
 - **id**: `Swordfish` · **type**: `support` · **factor**: `+240+(NEP*100)`
 - Generalizzazione di X-Wings a 3 righe/colonne.
 
-### 13. Unique Rectangle — `priority 12` *(nuovo)*
+### 14. Unique Rectangle — `priority 13` *(nuovo)*
 File: [UniqueRectangle.algorithm.ts](../libs/algorithms/src/lib/catalog/UniqueRectangle.algorithm.ts)
 - **id**: `UniqueRectangle` · **type**: `support` · **factor**: `+160+(NEP*40)`
 - Tipo 1 e tipo 2: sfrutta il vincolo di soluzione unica (deadly pattern).
 
-### 14. Simple Colouring — `priority 13` *(nuovo)*
+### 15. Simple Colouring — `priority 14` *(nuovo)*
 File: [SimpleColouring.algorithm.ts](../libs/algorithms/src/lib/catalog/SimpleColouring.algorithm.ts)
 - **id**: `SimpleColouring` · **type**: `support` · **factor**: `+280+(NEP*100)`
 - Catene di coppie coniugate per un singolo valore + eliminazioni Color Trap / Color Wrap.
 
-### 15. Jellyfish — `priority 14` *(nuovo)*
+### 16. Jellyfish — `priority 15` *(nuovo)*
 File: [Jellyfish.algorithm.ts](../libs/algorithms/src/lib/catalog/Jellyfish.algorithm.ts)
 - **id**: `Jellyfish` · **type**: `support` · **factor**: `+360+(NEP*160)`
 - Fish di taglia 4 (4 righe/colonne).
 
-### 16. Turbot Fish — `priority 15` *(ex Chains)*
+### 17. Turbot Fish — `priority 16` *(ex Chains)*
 File: [TurbotFish.algorithm.ts](../libs/algorithms/src/lib/catalog/TurbotFish.algorithm.ts)
 - **id**: `TurbotFish` · **type**: `support` · **factor**: `+200+(NEP*80)`
 - Struttura a 3 gruppi con raccordo. Include casi Skyscraper, Two-String Kite, Empty Rectangle.
 - Rinominato da `Chains` in v3.0 (il vecchio id non è più riconosciuto).
 
-### 17. BUG — `priority 16`
+### 18. BUG — `priority 17`
 File: [Bug.algorithm.ts](../libs/algorithms/src/lib/catalog/Bug.algorithm.ts)
 - **id**: `Bug` · **type**: `support` · **factor**: `+80+(NP*40)`
 - Tecnica endgame (BUG+1). Peso dinamico via `NP` (schema pieno).
 
-### 18. Try Number — `priority 100`
+### 19. Try Number — `priority 100`
 File: [TryNumber.algorithm.ts](../libs/algorithms/src/lib/catalog/TryNumber.algorithm.ts)
 - **id**: `TryNumber` · **type**: `solver` · **factor**: `+400+(4*NU*NEP)`
 - Brute force con euristica **MRV + Degree** (v3.0): a parità di candidati, preferisce la cella che vede più celle vuote.
@@ -155,6 +160,8 @@ File: [TryNumber.algorithm.ts](../libs/algorithms/src/lib/catalog/TryNumber.algo
 |-----------|--------|---------------|
 | `YWings` | Sotto-insieme di `XYWings` (partiva solo da coppie in righe/colonne, mai da box) | `XYWings` |
 | `Chains` | Nome fuorviante: implementava un pattern Turbot Fish a 3 gruppi | `TurbotFish` |
+
+> **Nota:** il nuovo `WWings` (W-Wing, v3.1) **non** reintroduce `YWings`. Il vecchio `YWings` era un sotto-insieme dell'XY-Wing (pivot + ali); il W-Wing è una tecnica diversa (due ali con la **stessa** coppia, raccordate da un **legame forte**). Vedi voce *W-Wing* nel catalogo sopra.
 
 Il ricalcolo automatico degli schemi in catalogo ([sudoku.service.ts](../apps/api/src/app/sudoku/sudoku.service.ts) → `checkAll()`) rimuove i vecchi id dalle `difficultyMap` dopo il bump di `algorithmsVersion`.
 

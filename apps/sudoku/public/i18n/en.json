@@ -38,6 +38,9 @@
   "alg.XYWings.title": "When two cells called wings, both with two possible values, share those values alternately with a third cell called pivot, the third value shared only by the wings can be excluded from the empty cells that \"see\" both wings",
   "alg.XYWings.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells",
 
+  "alg.WWings.title": "Two bi-value \"wing\" cells with the SAME pair of values, joined by a strong link (conjugate pair) on one of the two values: since that value must occupy one of the link's two ends, at least one wing takes the other value, which can therefore be excluded from the empty cells that see both wings",
+  "alg.WWings.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells. Not to be confused with the XY-Wing: here the two wings share the whole pair and the link is a strong link, not a pivot",
+
   "alg.Swordfish.title": "Swordfish",
   "alg.Swordfish.description": "Like other algorithms, it does not solve a specific value but contributes to excluding possible values from the involved cells",
 

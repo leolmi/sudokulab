@@ -12,20 +12,20 @@ Prova online: [sudokulab.herokuapp.com](https://sudokulab.herokuapp.com)
 
 ### Apps
 
-| App | Framework | Path | Ruolo |
-|-----|-----------|------|-------|
+| App      | Framework                          | Path                       | Ruolo                                               |
+|----------|------------------------------------|----------------------------|-----------------------------------------------------|
 | `sudoku` | Angular 19 (standalone components) | [apps/sudoku](apps/sudoku) | Client: player, generator, print, management, infos |
-| `api` | NestJS 11 + Mongoose | [apps/api](apps/api) | Server: catalogo schemi, validazione, OCR |
+| `api`    | NestJS 11 + Mongoose               | [apps/api](apps/api)       | Server: catalogo schemi, validazione, OCR           |
 
 ### Librerie condivise
 
-| Lib | Path | Contenuto |
-|-----|------|-----------|
-| `@olmi/model` | [libs/model](libs/model) | Tipi di dominio (Sudoku, SudokuCell, Algorithm, GeneratorOptions, Difficulty, PrintTemplate, Highlights…) e helper puri |
-| `@olmi/algorithms` | [libs/algorithms](libs/algorithms) | Catalogo di 18 algoritmi di risoluzione (v3.0) + registro e utilities di applicazione |
-| `@olmi/logic` | [libs/logic](libs/logic) | Solver, generator e calcolo della difficoltà; orchestrazione degli algoritmi |
-| `@olmi/components` | [libs/components](libs/components) | Componenti Angular riusabili (board, toolbar, step-viewer, OCR, generator-options…) |
-| `@olmi/templates` | [libs/templates](libs/templates) | Template di stampa (layout pagine A4 con puzzle multipli) |
+| Lib                | Path                               | Contenuto                                                                                                               |
+|--------------------|------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `@olmi/model`      | [libs/model](libs/model)           | Tipi di dominio (Sudoku, SudokuCell, Algorithm, GeneratorOptions, Difficulty, PrintTemplate, Highlights…) e helper puri |
+| `@olmi/algorithms` | [libs/algorithms](libs/algorithms) | Catalogo di 19 algoritmi di risoluzione (v3.1) + registro e utilities di applicazione                                   |
+| `@olmi/logic`      | [libs/logic](libs/logic)           | Solver, generator e calcolo della difficoltà; orchestrazione degli algoritmi                                            |
+| `@olmi/components` | [libs/components](libs/components) | Componenti Angular riusabili (board, toolbar, step-viewer, OCR, generator-options…)                                     |
+| `@olmi/templates`  | [libs/templates](libs/templates)   | Template di stampa (layout pagine A4 con puzzle multipli)                                                               |
 
 ### Flussi principali
 
@@ -46,15 +46,15 @@ Prova online: [sudokulab.herokuapp.com](https://sudokulab.herokuapp.com)
 
 Definita in [apps/api/src/app](apps/api/src/app). Principali endpoint:
 
-| Metodo | Path | Scopo |
-|--------|------|-------|
-| GET | `/info` | Informazioni applicative (versione, algoritmi) |
-| GET | `/sudoku/list` | Elenco degli schemi del catalogo |
-| POST | `/sudoku/check` | Verifica/risolve uno schema |
-| POST | `/sudoku/check-all` | Verifica massiva del catalogo |
-| POST | `/sudoku/convert` | Conversione di formato |
-| POST | `/sudoku/upload` | Importazione di uno schema (file) |
-| POST | `/ocr/scan` | Riconoscimento OCR di uno schema da immagine |
+| Metodo  | Path                | Scopo                                          |
+|---------|---------------------|------------------------------------------------|
+| GET     | `/info`             | Informazioni applicative (versione, algoritmi) |
+| GET     | `/sudoku/list`      | Elenco degli schemi del catalogo               |
+| POST    | `/sudoku/check`     | Verifica/risolve uno schema                    |
+| POST    | `/sudoku/check-all` | Verifica massiva del catalogo                  |
+| POST    | `/sudoku/convert`   | Conversione di formato                         |
+| POST    | `/sudoku/upload`    | Importazione di uno schema (file)              |
+| POST    | `/ocr/scan`         | Riconoscimento OCR di uno schema da immagine   |
 
 Persistenza Mongo tramite `DatabaseModule` ([apps/api/src/database](apps/api/src/database)); schema documento in [apps/api/src/model/sudoku.schema.ts](apps/api/src/model).
 
@@ -81,12 +81,12 @@ I tipi cardine vivono in [libs/model/src/lib](libs/model/src/lib):
 
 ## Comandi (Nx)
 
-| Comando | Effetto |
-|---------|---------|
+| Comando          | Effetto                                      |
+|------------------|----------------------------------------------|
 | `npm run client` | Serve il frontend Angular (porta default Nx) |
-| `npm run api` | Serve l'API NestJS |
-| `npm run build` | Build deploy (gulp) |
-| `npm start` | Avvia `dist/apps/api/main.js` |
+| `npm run api`    | Serve l'API NestJS                           |
+| `npm run build`  | Build deploy (gulp)                          |
+| `npm start`      | Avvia `dist/apps/api/main.js`                |
 
 Node richiesto: `20.18.1` (vedi `package.json > engines`).
 
@@ -94,7 +94,7 @@ Node richiesto: `20.18.1` (vedi `package.json > engines`).
 
 ## Documenti correlati
 
-- [documents/alghoritms.md](documents/alghoritms.md) — catalogo completo dei 18 algoritmi v3.0 (id, priorità, fattore, descrizione, tipo).
+- [documents/alghoritms.md](documents/alghoritms.md) — catalogo completo dei 19 algoritmi v3.1 (id, priorità, fattore, descrizione, tipo).
 - [documents/generator.md](documents/generator.md) — funzionamento del generatore (opzioni, simmetrie, workers, calcolo difficoltà).
 - [documents/printer.md](documents/printer.md) — tool di stampa (template, pagine A4, flusso di composizione).
 - [documents/player.md](documents/player.md) — player (interazione, step-viewer, hint, OCR import).

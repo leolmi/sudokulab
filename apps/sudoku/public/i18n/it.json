@@ -264,6 +264,9 @@
   "alg.XYWings.title": "Quando due celle dette ali, entrambe con due valori possibili, condividono tali valori alternativamente con la terza cella detta pivot, il terzo valore condiviso solo dalle ali può essere escluso dalle celle vuote che \"vedono\" entrambe le ali",
   "alg.XYWings.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate",
 
+  "alg.WWings.title": "Due celle \"ali\" bivalore con la STESSA coppia di valori, raccordate da un legame forte (coppia coniugata) su uno dei due valori: poiché quel valore occupa per forza uno dei due estremi del legame, almeno una delle ali assume l'altro valore, che può quindi essere escluso dalle celle vuote che vedono entrambe le ali",
+  "alg.WWings.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate. Da non confondere con l'XY-Wing: qui le due ali condividono l'intera coppia e il raccordo è un legame forte, non un pivot",
+
   "alg.Swordfish.title": "Swordfish",
   "alg.Swordfish.description": "Come altri algoritmi non risolve un valore specifico ma contribuisce nell'escludere valori possibili dalle celle interessate",
 

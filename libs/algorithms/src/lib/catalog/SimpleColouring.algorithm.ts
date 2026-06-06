@@ -29,7 +29,7 @@ export const SIMPLE_COLOURING_ALGORITHM = 'SimpleColouring';
  */
 export class SimpleColouringAlgorithm extends Algorithm {
   id = SIMPLE_COLOURING_ALGORITHM;
-  priority = 13;
+  priority = 14;
   factor = '+280+(NEP*100)';
   name = 'Simple Colouring';
   icon = 'palette';

@@ -15,6 +15,7 @@ import {
   TURBOTFISH_ALGORITHM,
   TWINS_ALGORITHM,
   UNIQUE_RECTANGLE_ALGORITHM,
+  WWINGS_ALGORITHM,
   XWINGS_ALGORITHM,
   XYWINGS_ALGORITHM,
 } from '@olmi/algorithms';
@@ -64,6 +65,9 @@ export const ALGORITHM_INFO_PAGES: Record<string, () => Promise<Type<unknown>>> 
   [XYWINGS_ALGORITHM]: () =>
     import('./catalog/xy-wings/xy-wings-info.component')
       .then(m => m.XYWingsInfoComponent),
+  [WWINGS_ALGORITHM]: () =>
+    import('./catalog/w-wing/w-wing-info.component')
+      .then(m => m.WWingsInfoComponent),
   [SWORDFISH_ALGORITHM]: () =>
     import('./catalog/swordfish/swordfish-info.component')
       .then(m => m.SwordfishInfoComponent),

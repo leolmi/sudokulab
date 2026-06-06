@@ -116,7 +116,7 @@ export class SudokuStore {
         const catalog = _clone(this._catalog());
         const csdk = catalog.find(s => s.values === sdk!.values);
         if (csdk) {
-          const sol = solve(csdk);
+          const sol = solve(csdk, { useTryAlgorithm: true });
           const solved = getSolution(sol);
           if (solved) {
             extendInfo(solved, csdk);

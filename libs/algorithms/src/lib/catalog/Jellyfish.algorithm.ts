@@ -13,7 +13,7 @@ export const JELLYFISH_ALGORITHM = 'Jellyfish';
  */
 export class JellyfishAlgorithm extends Algorithm {
   id = JELLYFISH_ALGORITHM;
-  priority = 14;
+  priority = 15;
   factor = '+360+(NEP*160)';
   name = 'Jellyfish';
   icon = 'phishing';

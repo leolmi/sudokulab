@@ -30,7 +30,7 @@ export const TURBOTFISH_ALGORITHM = 'TurbotFish';
  */
 export class TurbotFishAlgorithm extends Algorithm {
   id = TURBOTFISH_ALGORITHM;
-  priority = 15;
+  priority = 16;
   // più difficile da individuare quando restano molti candidati
   factor = '+200+(NEP*80)';
   name = 'Turbot Fish';

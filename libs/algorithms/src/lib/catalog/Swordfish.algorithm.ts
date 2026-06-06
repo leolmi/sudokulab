@@ -13,7 +13,7 @@ export const SWORDFISH_ALGORITHM = 'Swordfish';
  */
 export class SwordfishAlgorithm extends Algorithm {
   id = SWORDFISH_ALGORITHM;
-  priority = 11;
+  priority = 12;
   factor = '+240+(NEP*100)';
   name = 'Swordfish';
   icon = 'set_meal';
