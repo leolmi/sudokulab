@@ -58,7 +58,7 @@ Definita in [apps/api/src/app](apps/api/src/app). Principali endpoint:
 
 Persistenza Mongo tramite `DatabaseModule` ([apps/api/src/database](apps/api/src/database)); schema documento in [apps/api/src/model/sudoku.schema.ts](apps/api/src/model).
 
-Il modulo OCR ([apps/api/src/app/ocr](apps/api/src/app/ocr)) usa `opencv-wasm` per individuare la griglia e `jimp` per il pre-processing, poi legge le celle e restituisce la stringa dello schema (81 caratteri).
+Il modulo OCR ([apps/api/src/app/ocr](apps/api/src/app/ocr)) usa `opencv-wasm` per individuare il quadrilatero della griglia, poi raddrizzamento, normalizzazione delle celle e classificazione con una piccola CNN in TypeScript puro ([ocr-image.ts](libs/model/src/lib/ocr-image.ts), [ocr-digit-net.ts](libs/model/src/lib/ocr-digit-net.ts), pesi in `apps/sudoku/public/ocr/digits.bin`, codice condivisibile col client). Restituisce la stringa dello schema (81 caratteri) e le celle dubbie. Addestramento e valutazione: [tools/ocr-train](tools/ocr-train/README.md).
 
 ---
 

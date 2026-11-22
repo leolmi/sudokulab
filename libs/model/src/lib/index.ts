@@ -14,6 +14,8 @@ export * from './layout';
 export * from './logic';
 export * from './menu-item';
 export * from './notifier';
+export * from './ocr-digit-net';
+export * from './ocr-image';
 export * from './ocr-scan';
 export * from './options';
 export * from './pos';

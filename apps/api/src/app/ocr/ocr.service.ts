@@ -1,9 +1,7 @@
 import { ImgDto } from '../../model/img.dto';
-import { OcrOptions } from '../../model/ocr.options';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { OcrContext } from '../../model/ocr.model';
 import { OcrResult } from '../../model/ocr.result';
-import { preProcessImage, scanCells, splitImage } from './ocr.helper';
+import { scanImage } from './ocr.digit-scan';
 import { Semaphore, SemaphoreTimeoutError } from './semaphore';
 
 
@@ -19,7 +17,7 @@ export class OcrService {
   private readonly queueTimeoutMs =
     Number(process.env.SUDOKULAB_OCR_QUEUE_TIMEOUT_MS) || DEFAULT_QUEUE_TIMEOUT_MS;
 
-  async ocr(img: ImgDto, options?: OcrOptions): Promise<OcrResult> {
+  async ocr(img: ImgDto): Promise<OcrResult> {
     // attesa di uno slot tra i `concurrency` disponibili, con timeout di coda
     try {
       await this.sem.acquire(this.queueTimeoutMs);
@@ -51,21 +49,15 @@ export class OcrService {
     }
 
     try {
-      const context = new OcrContext({
-        options,
-        debug: !!process.env.SUDOKULAB_DEBUG,
-      });
       const data = img.data.replace(/^data:image\/.*;base64,/g, '');
-      context.raw = Buffer.from(data, 'base64');
-
-      // 1. grid detection + preprocessing immagine
-      await preProcessImage(context);
-
-      // 2. split in 81 celle
-      splitImage(context);
-
-      // 3. riconoscimento cifre con cell-reader custom
-      return await scanCells(context);
+      const { result, gridFound, times } = await scanImage(Buffer.from(data, 'base64'));
+      if (process.env.SUDOKULAB_DEBUG) {
+        const ms = (v: number) => `${v.toFixed(0)}ms`;
+        this.logger.debug(
+          `[ocr] grid=${gridFound} decode=${ms(times.decode)} detect=${ms(times.detect)} warp=${ms(times.warp)} net=${ms(times.net)} doubts=${result.doubts.length} values=${result.values}`
+        );
+      }
+      return result;
     } finally {
       this.sem.release();
     }

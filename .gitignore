@@ -63,5 +63,10 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+# OCR training (venv + dataset generati)
+tools/ocr-train/.venv
+tools/ocr-train/data
+__pycache__
+
 .nx/polygraph
 .nx/self-healing
